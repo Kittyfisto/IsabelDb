@@ -71,5 +71,22 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="values"></param>
 		void Put(IEnumerable<KeyValuePair<string, object>> values);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="values"></param>
+		void Put<T>(IEnumerable<KeyValuePair<string, T>> values);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="key"></param>
+		void Remove(string key);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		int Count();
 	}
 }

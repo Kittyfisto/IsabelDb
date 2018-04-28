@@ -13,12 +13,32 @@ namespace IsabelDb
 		private readonly SQLiteConnection _connection;
 		private readonly TypeModel _typeModel;
 		private readonly TypeStore _typeStore;
+		private readonly string _tableName;
 
-		public ObjectStore(SQLiteConnection connection, TypeModel typeModel, TypeStore typeStore)
+		public ObjectStore(SQLiteConnection connection,
+		                   TypeModel typeModel,
+		                   TypeStore typeStore,
+		                   string tableName)
 		{
 			_connection = connection;
 			_typeModel = typeModel;
 			_typeStore = typeStore;
+			_tableName = tableName;
+
+			CreateObjectTableIfNecessary();
+		}
+
+		private void CreateObjectTableIfNecessary()
+		{
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = string.Format("CREATE TABLE IF NOT EXISTS {0} (" +
+				                                    "key TEXT PRIMARY KEY NOT NULL," +
+				                                    "type INTEGER NOT NULL," +
+				                                    "value BLOB NOT NULL" +
+				                                    ")", _tableName);
+				command.ExecuteNonQuery();
+			}
 		}
 
 		public IEnumerable<KeyValuePair<string, object>> GetAll()
@@ -28,7 +48,7 @@ namespace IsabelDb
 
 		public IEnumerable<KeyValuePair<string, T>> GetAll<T>()
 		{
-			using (var command = CreateCommand("SELECT key, type, value FROM objects"))
+			using (var command = CreateCommand("SELECT key, type, value FROM {0}"))
 			{
 				return Get<T>(command);
 			}
@@ -36,7 +56,7 @@ namespace IsabelDb
 
 		public IEnumerable<KeyValuePair<string, T>> Get<T>(IEnumerable<string> keys)
 		{
-			using (var command = CreateCommand("SELECT type, value FROM objects WHERE key = @key"))
+			using (var command = CreateCommand("SELECT type, value FROM {0} WHERE key = @key"))
 			{
 				var keyParameter = command.Parameters.Add("@key", DbType.String);
 				var ret = new List<KeyValuePair<string, T>>();
@@ -73,7 +93,7 @@ namespace IsabelDb
 
 		public T Get<T>(string key)
 		{
-			using (var command = CreateCommand("SELECT type, value FROM objects WHERE key = @key"))
+			using (var command = CreateCommand("SELECT type, value FROM {0} WHERE key = @key"))
 			{
 				command.Parameters.AddWithValue("@key", key);
 				using (var reader = command.ExecuteReader())
@@ -91,28 +111,110 @@ namespace IsabelDb
 
 		public void Put(string key, object value)
 		{
-			var serializedValue = Serialize(value);
+			if (value == null)
+			{
+				Remove(key);
+			}
+			else
+			{
+				InsertOrReplace(key, value);
+			}
+		}
+
+		public void Put(IEnumerable<KeyValuePair<string, object>> values)
+		{
 			using (var transaction = BeginTransaction())
 			{
-				var typeId = _typeStore.GetOrCreateTypeId(value.GetType());
-
-				using (var command = _connection.CreateCommand())
+				using (var command = CreateCommand("INSERT OR REPLACE INTO {0} (key, type, value) VALUES" +
+				                                   "(@key, @typeId, @value)"))
 				{
-					command.CommandText = "INSERT OR REPLACE INTO objects (key, type, value) VALUES" +
-					                      "(@key, @typeId, @value)";
-					command.Parameters.AddWithValue("@key", key);
-					command.Parameters.AddWithValue("@typeId", typeId);
-					command.Parameters.AddWithValue("@value", serializedValue);
+					var keyParameter = command.Parameters.Add("@key", DbType.String);
+					var typeIdParameter = command.Parameters.Add("@typeId", DbType.Int32);
+					var valueParameter = command.Parameters.Add("@value", DbType.Binary);
 
+					foreach (var pair in values)
+					{
+						var value = pair.Value;
+						var type = value.GetType();
+						var typeId = _typeStore.GetOrCreateTypeId(type);
+
+						keyParameter.Value = pair.Key;
+						typeIdParameter.Value = typeId;
+						valueParameter.Value = Serialize(value);
+						command.ExecuteNonQuery();
+					}
+
+					transaction.Commit();
+				}
+			}
+		}
+
+		public void Put<T>(IEnumerable<KeyValuePair<string, T>> values)
+		{
+			using (var transaction = BeginTransaction())
+			{
+				using (var command = CreateCommand("INSERT OR REPLACE INTO {0} (key, type, value) VALUES" +
+				                                   "(@key, @typeId, @value)"))
+				{
+					var keyParameter = command.Parameters.Add("@key", DbType.String);
+					var typeIdParameter = command.Parameters.Add("@typeId", DbType.Int32);
+					var valueParameter = command.Parameters.Add("@value", DbType.Binary);
+
+					foreach (var pair in values)
+					{
+						var value = pair.Value;
+						var type = value.GetType();
+						var typeId = _typeStore.GetOrCreateTypeId(type);
+
+						keyParameter.Value = pair.Key;
+						typeIdParameter.Value = typeId;
+						valueParameter.Value = Serialize(value);
+						command.ExecuteNonQuery();
+					}
+
+					transaction.Commit();
+				}
+			}
+		}
+
+		public void Remove(string key)
+		{
+			using (var transaction = BeginTransaction())
+			{
+				using (var command = CreateCommand("DELETE FROM {0} WHERE key = @key"))
+				{
+					command.Parameters.AddWithValue("@key", key);
 					command.ExecuteNonQuery();
 					transaction.Commit();
 				}
 			}
 		}
 
-		public void Put(IEnumerable<KeyValuePair<string, object>> values)
+		public int Count()
 		{
-			throw new NotImplementedException();
+			using (var command = CreateCommand("SELECT COUNT(*) FROM {0}"))
+			{
+				var count = Convert.ToInt32(command.ExecuteScalar());
+				return count;
+			}
+		}
+
+		private void InsertOrReplace(string key, object value)
+		{
+			using (var transaction = BeginTransaction())
+			{
+				using (var command = CreateCommand("INSERT OR REPLACE INTO {0} (key, type, value) VALUES" +
+				                                   "(@key, @typeId, @value)"))
+				{
+					var typeId = _typeStore.GetOrCreateTypeId(value.GetType());
+					var serializedValue = Serialize(value);
+					command.Parameters.AddWithValue("@key", key);
+					command.Parameters.AddWithValue("@typeId", typeId);
+					command.Parameters.AddWithValue("@value", serializedValue);
+					command.ExecuteNonQuery();
+					transaction.Commit();
+				}
+			}
 		}
 
 		private IEnumerable<KeyValuePair<string, T>> Get<T>(SQLiteCommand command)
@@ -171,7 +273,7 @@ namespace IsabelDb
 		private SQLiteCommand CreateCommand(string text)
 		{
 			var command = _connection.CreateCommand();
-			command.CommandText = text;
+			command.CommandText = string.Format(text, _tableName);
 			return command;
 		}
 

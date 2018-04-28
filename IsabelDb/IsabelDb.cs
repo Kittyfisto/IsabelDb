@@ -91,10 +91,9 @@ namespace IsabelDb
 		{
 			get
 			{
-				ObjectStore store;
-				if (!_objectStores.TryGetValue(name, out store))
+				if (!_objectStores.TryGetValue(name, out var store))
 				{
-					store = new ObjectStore(_connection, _typeModel, _typeStore);
+					store = new ObjectStore(_connection, _typeModel, _typeStore, name);
 					_objectStores.Add(name, store);
 				}
 
@@ -104,22 +103,9 @@ namespace IsabelDb
 
 		private static void CreateTablesIfNecessary(SQLiteConnection connection)
 		{
-			bool hasObjectsTable = TableExists(connection, "objects");
 			bool hasTypesTable = TableExists(connection, "types");
-			if (hasObjectsTable && hasTypesTable)
+			if (hasTypesTable)
 				return;
-			if (hasTypesTable != hasObjectsTable)
-				throw new NotImplementedException("Incompatible db");
-
-			using (var command = connection.CreateCommand())
-			{
-				command.CommandText = "CREATE TABLE objects (" +
-									  "key TEXT PRIMARY KEY NOT NULL," +
-				                      "type INTEGER NOT NULL," +
-				                      "value BLOB NOT NULL"+
-				                      ")";
-				command.ExecuteNonQuery();
-			}
 
 			using (var command = connection.CreateCommand())
 			{
@@ -143,8 +129,6 @@ namespace IsabelDb
 
 		private static void EnsureTableSchema(SQLiteConnection connection)
 		{
-			if (!TableExists(connection, "objects"))
-				throw new NotImplementedException();
 			if (!TableExists(connection, "types"))
 				throw new NotImplementedException();
 		}

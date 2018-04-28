@@ -7,7 +7,7 @@ namespace IsabelDb.Test
 	{
 		private bool Equals(Person other)
 		{
-			return string.Equals(Name, other.Name);
+			return Id == other.Id && string.Equals(Name, other.Name);
 		}
 
 		public override bool Equals(object obj)
@@ -19,10 +19,16 @@ namespace IsabelDb.Test
 
 		public override int GetHashCode()
 		{
-			return (Name != null ? Name.GetHashCode() : 0);
+			unchecked
+			{
+				return (Id * 397) ^ (Name != null ? Name.GetHashCode() : 0);
+			}
 		}
 
 		[DataMember(Order = 1)]
+		public int Id { get; set; }
+
+		[DataMember(Order = 2)]
 		public string Name { get; set; }
 	}
 }
