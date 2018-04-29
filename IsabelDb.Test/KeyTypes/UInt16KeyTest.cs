@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using NUnit.Framework;
 
 namespace IsabelDb.Test.KeyTypes
@@ -8,9 +7,9 @@ namespace IsabelDb.Test.KeyTypes
 	public sealed class UInt16KeyTest
 		: AbstractIsabelDbKeyTest<ushort>
 	{
-		protected override UInt16 SomeKey => ushort.MinValue;
+		protected override ushort SomeKey => ushort.MinValue;
 
-		protected override UInt16 DifferentKey => ushort.MaxValue;
+		protected override ushort DifferentKey => ushort.MaxValue;
 
 		protected override IReadOnlyList<ushort> ManyKeys => new ushort[]
 		{

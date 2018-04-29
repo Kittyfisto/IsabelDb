@@ -10,6 +10,37 @@ namespace IsabelDb.Test
 	[TestFixture]
 	public sealed class IsabelDbTest
 	{
+		private static void PutAndGet<T>(IsabelDb db, T value1, T value2)
+		{
+			var store = db.GetDictionary<string, object>("SomeTable");
+
+			store.Put("foo", value1);
+			store.Put("bar", value2);
+
+			var persons = store.GetMany("foo", "bar");
+			persons.Should().HaveCount(expected: 2);
+			var actualValue1 = persons.ElementAt(index: 0);
+			actualValue1.Key.Should().Be("foo");
+			actualValue1.Value.Should().Be(value1);
+
+			var actualValue2 = persons.ElementAt(index: 1);
+			actualValue2.Key.Should().Be("bar");
+			actualValue2.Value.Should().Be(value2);
+		}
+
+		[Test]
+		[Description("Verifies that clearing an empty dictionary is allowed")]
+		public void TestClearEmpty()
+		{
+			using (var db = IsabelDb.CreateInMemory())
+			{
+				var people = db.GetDictionary<string, object>("People");
+				people.Count().Should().Be(expected: 0);
+				people.Clear();
+				people.Count().Should().Be(expected: 0);
+			}
+		}
+
 		[Test]
 		public void TestCreateInMemory()
 		{
@@ -17,12 +48,12 @@ namespace IsabelDb.Test
 		}
 
 		[Test]
-		public void TestOpenOrCreate1()
+		public void TestGet1()
 		{
 			using (var db = IsabelDb.CreateInMemory())
 			{
-				var store = db.GetDictionary<string, object>("SomeTable");
-				store.GetAll().Should().BeEmpty();
+				db.GetDictionary<string, object>("SomeTable").Put("foo", "bar");
+				db.GetDictionary<string, object>("SomeTable").Get("foo").Should().Be("bar");
 			}
 		}
 
@@ -36,11 +67,11 @@ namespace IsabelDb.Test
 				var b = db.GetDictionary<string, object>("a");
 				a.Should().NotBe(b);
 
-				a.Put("1", 42);
-				b.Put("1", 50);
+				a.Put("1", value: 42);
+				b.Put("1", value: 50);
 
-				a.Get("1").Should().Be(42);
-				b.Get("1").Should().Be(50);
+				a.Get("1").Should().Be(expected: 42);
+				b.Get("1").Should().Be(expected: 50);
 			}
 		}
 
@@ -57,117 +88,6 @@ namespace IsabelDb.Test
 		}
 
 		[Test]
-		[Description("Verifies that data from different tables doesn't interact with each other")]
-		public void TestPutMultipleTables()
-		{
-			using (var db = IsabelDb.CreateInMemory())
-			{
-				var customers = db.GetDictionary<string, object>("Customers");
-				customers.Put("1", "Simon");
-
-				var people = db.GetDictionary<string, object>("People");
-				people.Put("1", "Kitty");
-
-				customers.Get("1").Should().Be("Simon");
-				people.Get("1").Should().Be("Kitty");
-			}
-		}
-
-		[Test]
-		[Description("Verifies that data removed from one table doesn't interact with others")]
-		public void TestRemoveMultipleTables()
-		{
-			using (var db = IsabelDb.CreateInMemory())
-			{
-				var customers = db.GetDictionary<string, object>("Customers");
-				customers.Put("1", "Simon");
-
-				var people = db.GetDictionary<string, object>("People");
-				people.Put("1", "Kitty");
-
-				customers.Remove("1");
-				people.Get("1").Should().Be("Kitty");
-			}
-		}
-
-		[Test]
-		public void TestGet1()
-		{
-			using (var db = IsabelDb.CreateInMemory())
-			{
-				db.GetDictionary<string, object>("SomeTable").Put("foo", "bar");
-				db.GetDictionary<string, object>("SomeTable").Get("foo").Should().Be("bar");
-			}
-		}
-
-		[Test]
-		public void TestReplaceValue()
-		{
-			using (var db = IsabelDb.CreateInMemory())
-			{
-				var store = db.GetDictionary<string, object>("SomeTable");
-				store.Put("foo", 42);
-				store.Get("foo").Should().Be(42);
-
-				store.Put("foo", 50);
-				store.Get("foo").Should().Be(50);
-			}
-		}
-
-		[Test]
-		public void TestRemoveNonExistingKey()
-		{
-			using (var db = IsabelDb.CreateInMemory())
-			{
-				var store = db.GetDictionary<string, object>("SomeTable");
-				store.Get("42").Should().BeNull();
-
-				store.Put("42", null);
-				store.Get("42").Should().BeNull();
-			}
-		}
-
-		[Test]
-		public void TestRemoveNullKey()
-		{
-			using (var db = IsabelDb.CreateInMemory())
-			{
-				var values = db.GetDictionary<string, object>("Foo");
-				new Action(() => values.Remove(null)).Should().Throw<ArgumentNullException>();
-			}
-		}
-
-		[Test]
-		public void TestRemoveValue()
-		{
-			using (var db = IsabelDb.CreateInMemory())
-			{
-				var store = db.GetDictionary<string, object>("SomeTable");
-				store.Put("foo", 42);
-				store.Get("foo").Should().Be(42);
-
-				store.Put("foo", null);
-				store.Get("foo").Should().BeNull();
-			}
-		}
-
-		[Test]
-		[Description("Verifies that ONLY the value with the specified key is removed and none other")]
-		public void TestRemoveValue2()
-		{
-			using (var db = IsabelDb.CreateInMemory())
-			{
-				var store = db.GetDictionary<string, object>("SomeTable");
-				store.Put("a", 1);
-				store.Put("b", 2);
-				store.Remove("a");
-
-				store.Get("a").Should().BeNull();
-				store.Get("b").Should().Be(2);
-			}
-		}
-
-		[Test]
 		public void TestGetNone()
 		{
 			using (var db = IsabelDb.CreateInMemory())
@@ -178,12 +98,23 @@ namespace IsabelDb.Test
 		}
 
 		[Test]
-		public void TestPutNullKey()
+		public void TestOpenOrCreate1()
 		{
 			using (var db = IsabelDb.CreateInMemory())
 			{
-				var values = db.GetDictionary<string, object>("Foo");
-				new Action(() => values.Put(null, 42)).Should().Throw<ArgumentNullException>();
+				var store = db.GetDictionary<string, object>("SomeTable");
+				store.GetAll().Should().BeEmpty();
+			}
+		}
+
+		[Test]
+		public void TestPutGetCustomType()
+		{
+			using (var db = IsabelDb.CreateInMemory())
+			{
+				var value1 = new Person {Name = "Strelok"};
+				var value2 = new Person {Name = "The marked one"};
+				PutAndGet(db, value1, value2);
 			}
 		}
 
@@ -192,8 +123,8 @@ namespace IsabelDb.Test
 		{
 			using (var db = IsabelDb.CreateInMemory())
 			{
-				short value1 = short.MinValue;
-				short value2 = short.MaxValue;
+				var value1 = short.MinValue;
+				var value2 = short.MaxValue;
 				PutAndGet(db, value1, value2);
 			}
 		}
@@ -203,8 +134,8 @@ namespace IsabelDb.Test
 		{
 			using (var db = IsabelDb.CreateInMemory())
 			{
-				int value1 = int.MinValue;
-				int value2 = int.MaxValue;
+				var value1 = int.MinValue;
+				var value2 = int.MaxValue;
 				PutAndGet(db, value1, value2);
 			}
 		}
@@ -214,8 +145,8 @@ namespace IsabelDb.Test
 		{
 			using (var db = IsabelDb.CreateInMemory())
 			{
-				long value1 = long.MinValue;
-				long value2 = long.MaxValue;
+				var value1 = long.MinValue;
+				var value2 = long.MaxValue;
 				PutAndGet(db, value1, value2);
 			}
 		}
@@ -227,17 +158,6 @@ namespace IsabelDb.Test
 			{
 				var value1 = "Strelok";
 				var value2 = "The marked one";
-				PutAndGet(db, value1, value2);
-			}
-		}
-
-		[Test]
-		public void TestPutGetCustomType()
-		{
-			using (var db = IsabelDb.CreateInMemory())
-			{
-				var value1 = new Person {Name = "Strelok"};
-				var value2 = new Person {Name = "The marked one"};
 				PutAndGet(db, value1, value2);
 			}
 		}
@@ -261,14 +181,14 @@ namespace IsabelDb.Test
 				};
 
 				var table = db.GetDictionary<string, object>("Stuff");
-				table.PutMany(new []
+				table.PutMany(new[]
 				{
 					new KeyValuePair<string, object>("foo", address),
 					new KeyValuePair<string, object>("bar", steven)
 				});
 
 
-				table.Count().Should().Be(2);
+				table.Count().Should().Be(expected: 2);
 				table.Get("bar").Should().Be(steven);
 				table.Get("foo").Should().Be(address);
 			}
@@ -282,7 +202,7 @@ namespace IsabelDb.Test
 				const int count = 100000;
 				var persons = new List<KeyValuePair<string, Person>>();
 				var table = db.GetDictionary<string, Person>("Piggies");
-				for (int i = 0; i < count; ++i)
+				for (var i = 0; i < count; ++i)
 				{
 					var person = new Person
 					{
@@ -301,7 +221,7 @@ namespace IsabelDb.Test
 
 
 				table.Count().Should().Be(count);
-				for (int i = 0; i < count; ++i)
+				for (var i = 0; i < count; ++i)
 				{
 					var actualPerson = table.Get(i.ToString());
 					actualPerson.Should().Be(persons[i].Value);
@@ -310,34 +230,114 @@ namespace IsabelDb.Test
 		}
 
 		[Test]
-		[Description("Verifies that clearing an empty dictionary is allowed")]
-		public void TestClearEmpty()
+		[Description("Verifies that data from different tables doesn't interact with each other")]
+		public void TestPutMultipleTables()
 		{
 			using (var db = IsabelDb.CreateInMemory())
 			{
+				var customers = db.GetDictionary<string, object>("Customers");
+				customers.Put("1", "Simon");
+
 				var people = db.GetDictionary<string, object>("People");
-				people.Count().Should().Be(0);
-				people.Clear();
-				people.Count().Should().Be(0);
+				people.Put("1", "Kitty");
+
+				customers.Get("1").Should().Be("Simon");
+				people.Get("1").Should().Be("Kitty");
 			}
 		}
 
-		private static void PutAndGet<T>(IsabelDb db, T value1, T value2)
+		[Test]
+		public void TestPutNullKey()
 		{
-			var store = db.GetDictionary<string, object>("SomeTable");
+			using (var db = IsabelDb.CreateInMemory())
+			{
+				var values = db.GetDictionary<string, object>("Foo");
+				new Action(() => values.Put(key: null, value: 42)).Should().Throw<ArgumentNullException>();
+			}
+		}
 
-			store.Put("foo", value1);
-			store.Put("bar", value2);
+		[Test]
+		[Description("Verifies that data removed from one table doesn't interact with others")]
+		public void TestRemoveMultipleTables()
+		{
+			using (var db = IsabelDb.CreateInMemory())
+			{
+				var customers = db.GetDictionary<string, object>("Customers");
+				customers.Put("1", "Simon");
 
-			var persons = store.GetMany("foo", "bar");
-			persons.Should().HaveCount(2);
-			var actualValue1 = persons.ElementAt(0);
-			actualValue1.Key.Should().Be("foo");
-			actualValue1.Value.Should().Be(value1);
+				var people = db.GetDictionary<string, object>("People");
+				people.Put("1", "Kitty");
 
-			var actualValue2 = persons.ElementAt(1);
-			actualValue2.Key.Should().Be("bar");
-			actualValue2.Value.Should().Be(value2);
+				customers.Remove("1");
+				people.Get("1").Should().Be("Kitty");
+			}
+		}
+
+		[Test]
+		public void TestRemoveNonExistingKey()
+		{
+			using (var db = IsabelDb.CreateInMemory())
+			{
+				var store = db.GetDictionary<string, object>("SomeTable");
+				store.Get("42").Should().BeNull();
+
+				store.Put("42", value: null);
+				store.Get("42").Should().BeNull();
+			}
+		}
+
+		[Test]
+		public void TestRemoveNullKey()
+		{
+			using (var db = IsabelDb.CreateInMemory())
+			{
+				var values = db.GetDictionary<string, object>("Foo");
+				new Action(() => values.Remove(key: null)).Should().Throw<ArgumentNullException>();
+			}
+		}
+
+		[Test]
+		public void TestRemoveValue()
+		{
+			using (var db = IsabelDb.CreateInMemory())
+			{
+				var store = db.GetDictionary<string, object>("SomeTable");
+				store.Put("foo", value: 42);
+				store.Get("foo").Should().Be(expected: 42);
+
+				store.Put("foo", value: null);
+				store.Get("foo").Should().BeNull();
+			}
+		}
+
+		[Test]
+		[Description("Verifies that ONLY the value with the specified key is removed and none other")]
+		public void TestRemoveValue2()
+		{
+			using (var db = IsabelDb.CreateInMemory())
+			{
+				var store = db.GetDictionary<string, object>("SomeTable");
+				store.Put("a", value: 1);
+				store.Put("b", value: 2);
+				store.Remove("a");
+
+				store.Get("a").Should().BeNull();
+				store.Get("b").Should().Be(expected: 2);
+			}
+		}
+
+		[Test]
+		public void TestReplaceValue()
+		{
+			using (var db = IsabelDb.CreateInMemory())
+			{
+				var store = db.GetDictionary<string, object>("SomeTable");
+				store.Put("foo", value: 42);
+				store.Get("foo").Should().Be(expected: 42);
+
+				store.Put("foo", value: 50);
+				store.Get("foo").Should().Be(expected: 50);
+			}
 		}
 	}
 }

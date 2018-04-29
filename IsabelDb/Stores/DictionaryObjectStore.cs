@@ -14,29 +14,14 @@ namespace IsabelDb.Stores
 	{
 		private readonly SQLiteConnection _connection;
 
-		#region Queries
-
-		private readonly string _countQuery;
-		private readonly string _deleteAllQuery;
-		private readonly string _deleteQuery;
-		private readonly string _getAllQuery;
-		private readonly string _getManyQuery;
-		private readonly string _getQuery;
-		private readonly string _putQuery;
-
-		#endregion
+		private readonly ISQLiteSerializer<TKey> _keySerializer;
 
 		#region Table
 
 		private readonly string _table;
-		private readonly int _keyOrdinal;
-		private readonly int _keyTypeOrdinal;
-		private readonly int _valueOrdinal;
-		private readonly int _valueTypeOrdinal;
 
 		#endregion
 
-		private readonly ISQLiteSerializer<TKey> _keySerializer;
 		private readonly string _tableName;
 		private readonly ISQLiteSerializer<TValue> _valueSerializer;
 
@@ -50,29 +35,16 @@ namespace IsabelDb.Stores
 			_keySerializer = keySerializer;
 			_valueSerializer = valueSerializer;
 
-			CreateObjectTableIfNecessary(out _keyOrdinal,
-			                             out _keyTypeOrdinal,
-			                             out _valueOrdinal,
-			                             out _valueTypeOrdinal,
-			                             out _table);
+			CreateObjectTableIfNecessary(out _table);
 
-			_getAllQuery = CreateGetAll(_tableName, _keySerializer, _valueSerializer);
-			_getManyQuery = CreateGetMany(_tableName, _keySerializer, _valueSerializer);
-			_getQuery = CreateGet(_tableName, _keySerializer, _valueSerializer);
+			_getAllQuery = CreateGetAll(_tableName);
+			_getManyQuery = CreateGetMany(_tableName);
+			_getQuery = CreateGet(_tableName);
 			_countQuery = string.Format("SELECT COUNT(*) FROM {0}", _tableName);
 			_deleteAllQuery = string.Format("DELETE FROM {0}", _tableName);
 			_deleteQuery = string.Format("DELETE FROM {0} WHERE key = @key", _tableName);
-			_putQuery = PutQuery(_tableName, _keySerializer, _valueSerializer);
+			_putQuery = PutQuery(_tableName);
 		}
-
-		#region Overrides of Object
-
-		public override string ToString()
-		{
-			return _table;
-		}
-
-		#endregion
 
 		public IEnumerable<KeyValuePair<TKey, TValue>> GetAll()
 		{
@@ -95,7 +67,7 @@ namespace IsabelDb.Stores
 					{
 						while (reader.Read())
 						{
-							var value = ReadValue(reader);
+							var value = _valueSerializer.Deserialize(reader, valueOrdinal: 1);
 							ret.Add(new KeyValuePair<TKey, TValue>(key, value));
 						}
 					}
@@ -114,18 +86,14 @@ namespace IsabelDb.Stores
 		{
 			using (var command = CreateCommand(_getQuery))
 			{
-				command.Parameters.AddWithValue("@key", _keySerializer.Serialize(key, out var typeId));
-				if (_keySerializer.StorePerValueTypeInformation)
-				{
-					command.Parameters.AddWithValue("@keyType", typeId);
-				}
+				command.Parameters.AddWithValue("@key", _keySerializer.Serialize(key));
 
 				using (var reader = command.ExecuteReader())
 				{
 					if (!reader.Read())
 						return default(TValue);
 
-					return ReadValue(reader);
+					return _valueSerializer.Deserialize(reader, valueOrdinal: 1);
 				}
 			}
 		}
@@ -148,25 +116,12 @@ namespace IsabelDb.Stores
 				using (var command = CreateCommand(_putQuery))
 				{
 					var keyParameter = command.Parameters.Add("@key", _keySerializer.DatabaseType);
-					SQLiteParameter keyTypeIdParameter = null;
-					if (_keySerializer.StorePerValueTypeInformation)
-						keyTypeIdParameter = command.Parameters.Add("@keyType", DbType.Int32);
-
 					var valueParameter = command.Parameters.Add("@value", _valueSerializer.DatabaseType);
-					SQLiteParameter valueTypeIdParameter = null;
-					if (_valueSerializer.StorePerValueTypeInformation)
-						valueTypeIdParameter = command.Parameters.Add("@valueType", DbType.Int32);
 
 					foreach (var pair in values)
 					{
-						keyParameter.Value = _keySerializer.Serialize(pair.Key, out var keyTypeId);
-						if (_keySerializer.StorePerValueTypeInformation)
-							keyTypeIdParameter.Value = keyTypeId;
-
-						valueParameter.Value = _valueSerializer.Serialize(pair.Value, out var valueTypeId);
-						if (_valueSerializer.StorePerValueTypeInformation)
-							valueTypeIdParameter.Value = valueTypeId;
-
+						keyParameter.Value = _keySerializer.Serialize(pair.Key);
+						valueParameter.Value = _valueSerializer.Serialize(pair.Value);
 						command.ExecuteNonQuery();
 					}
 
@@ -184,12 +139,7 @@ namespace IsabelDb.Stores
 			{
 				using (var command = CreateCommand(_deleteQuery))
 				{
-					command.Parameters.AddWithValue("@key", _keySerializer.Serialize(key, out var typeId));
-					if (_keySerializer.StorePerValueTypeInformation)
-					{
-						command.Parameters.AddWithValue("@keyType", typeId);
-					}
-
+					command.Parameters.AddWithValue("@key", _keySerializer.Serialize(key));
 					command.ExecuteNonQuery();
 					transaction.Commit();
 				}
@@ -215,10 +165,14 @@ namespace IsabelDb.Stores
 
 		public Type ObjectType => typeof(TValue);
 
-		private TValue ReadValue(SQLiteDataReader reader)
+		#region Overrides of Object
+
+		public override string ToString()
 		{
-			return _valueSerializer.Deserialize(reader, _valueOrdinal, _valueTypeOrdinal);
+			return _table;
 		}
+
+		#endregion
 
 		private void InsertOrReplace(TKey key, TValue value)
 		{
@@ -226,19 +180,10 @@ namespace IsabelDb.Stores
 			{
 				using (var command = CreateCommand(_putQuery))
 				{
-					var serializedKey = _keySerializer.Serialize(key, out var keyTypeId);
+					var serializedKey = _keySerializer.Serialize(key);
 					command.Parameters.AddWithValue("@key", serializedKey);
-					if (_keySerializer.StorePerValueTypeInformation)
-					{
-						command.Parameters.AddWithValue("@keyType", keyTypeId);
-					}
-
-					var serializedValue = _valueSerializer.Serialize(value, out var valueTypeId);
+					var serializedValue = _valueSerializer.Serialize(value);
 					command.Parameters.AddWithValue("@value", serializedValue);
-					if (_valueSerializer.StorePerValueTypeInformation)
-					{
-						command.Parameters.AddWithValue("@valueType", valueTypeId);
-					}
 
 					command.ExecuteNonQuery();
 					transaction.Commit();
@@ -253,8 +198,8 @@ namespace IsabelDb.Stores
 				var ret = new List<KeyValuePair<TKey, TValue>>();
 				while (reader.Read())
 				{
-					var key = _keySerializer.Deserialize(reader, 0, _keyTypeOrdinal);
-					var value = _valueSerializer.Deserialize(reader, _valueOrdinal, _valueTypeOrdinal);
+					var key = _keySerializer.Deserialize(reader, valueOrdinal: 0);
+					var value = _valueSerializer.Deserialize(reader, valueOrdinal: 1);
 					ret.Add(new KeyValuePair<TKey, TValue>(key, value));
 				}
 
@@ -274,118 +219,50 @@ namespace IsabelDb.Stores
 			return _connection.BeginTransaction();
 		}
 
-		private void CreateObjectTableIfNecessary(out int keyOrdinal,
-		                                          out int keyTypeOrdinal,
-		                                          out int valueOrdinal,
-		                                          out int valueTypeOrdinal,
-		                                          out string table)
+		private void CreateObjectTableIfNecessary(out string table)
 		{
 			using (var command = _connection.CreateCommand())
 			{
 				var builder = new StringBuilder();
 				builder.AppendFormat("CREATE TABLE IF NOT EXISTS {0} (", _tableName);
 
-				keyOrdinal = 0;
 				builder.AppendFormat("key {0} PRIMARY KEY NOT NULL", GetAffinity(_keySerializer.DatabaseType));
-				if (_keySerializer.StorePerValueTypeInformation)
-				{
-					builder.Append(",keyType INTEGER NOT NULL");
-					keyTypeOrdinal = 1;
-					valueOrdinal = 2;
-				}
-				else
-				{
-					keyTypeOrdinal = -1;
-					valueOrdinal = 1;
-				}
-
 				builder.AppendFormat(",value {0} NOT NULL", GetAffinity(_valueSerializer.DatabaseType));
-				if (_valueSerializer.StorePerValueTypeInformation)
-				{
-					builder.Append(",valueType INTEGER NOT NULL");
-					valueTypeOrdinal = valueOrdinal + 1;
-				}
-				else
-				{
-					valueTypeOrdinal = -1;
-				}
-
 				builder.Append(")");
 				command.CommandText = table = builder.ToString();
 				command.ExecuteNonQuery();
 			}
 		}
 
-		private static string PutQuery(string tableName,
-		                                           ISQLiteSerializer keySerializer,
-		                                           ISQLiteSerializer valueSerializer)
+		private static string PutQuery(string tableName)
 		{
 			var builder = new StringBuilder();
 			builder.AppendFormat("INSERT OR REPLACE INTO {0} ", tableName);
-			builder.Append("(key");
-			if (keySerializer.StorePerValueTypeInformation)
-				builder.Append(", keyType");
-			builder.Append(", value");
-			if (valueSerializer.StorePerValueTypeInformation)
-				builder.Append(", valueType");
-			builder.Append(") VALUES (");
-			builder.Append("@key");
-			if (keySerializer.StorePerValueTypeInformation)
-				builder.Append(", @keyType");
-			builder.Append(", @value");
-			if (valueSerializer.StorePerValueTypeInformation)
-				builder.Append(", @valueType");
-			builder.Append(")");
+			builder.Append("(key, value) VALUES (@key, @value)");
 			return builder.ToString();
 		}
 
 		[Pure]
-		private static string CreateGet(string tableName,
-		                                ISQLiteSerializer<TKey> keySerializer,
-		                                ISQLiteSerializer<TValue> valueSerializer)
+		private static string CreateGet(string tableName)
 		{
 			var builder = new StringBuilder();
-			builder.Append("SELECT key");
-			if (keySerializer.StorePerValueTypeInformation)
-				builder.Append(", keyType");
-			builder.Append(", value");
-			if (valueSerializer.StorePerValueTypeInformation)
-				builder.Append(", valueType");
-			builder.AppendFormat(" FROM {0}", tableName);
-			builder.Append(" WHERE key = @key");
+			builder.AppendFormat("SELECT key, value FROM {0} WHERE key = @key", tableName);
 			return builder.ToString();
 		}
 
 		[Pure]
-		private static string CreateGetMany(string tableName,
-		                                    ISQLiteSerializer<TKey> keySerializer,
-		                                    ISQLiteSerializer<TValue> valueSerializer)
+		private static string CreateGetMany(string tableName)
 		{
 			var builder = new StringBuilder();
-			builder.Append("SELECT key");
-			if (keySerializer.StorePerValueTypeInformation)
-				builder.Append(", keyType");
-			builder.Append(", value");
-			if (valueSerializer.StorePerValueTypeInformation)
-				builder.Append(", valueType");
-			builder.AppendFormat(" FROM {0}", tableName);
-			builder.Append(" WHERE key = @key");
+			builder.AppendFormat("SELECT key, value FROM {0} WHERE key = @key", tableName);
 			return builder.ToString();
 		}
 
 		[Pure]
-		private static string CreateGetAll(string tableName,
-		                                   ISQLiteSerializer<TKey> keySerializer,
-		                                   ISQLiteSerializer<TValue> valueSerializer)
+		private static string CreateGetAll(string tableName)
 		{
 			var builder = new StringBuilder();
-			builder.Append("SELECT key");
-			if (keySerializer.StorePerValueTypeInformation)
-				builder.Append(", keyType");
-			builder.Append(", value");
-			if (valueSerializer.StorePerValueTypeInformation)
-				builder.Append(", valueType");
-			builder.AppendFormat(" FROM {0}", tableName);
+			builder.AppendFormat("SELECT key, value FROM {0}", tableName);
 			return builder.ToString();
 		}
 
@@ -410,5 +287,17 @@ namespace IsabelDb.Stores
 					throw new NotImplementedException(string.Format("Type '{0}' is not implemented", databaseType));
 			}
 		}
+
+		#region Queries
+
+		private readonly string _countQuery;
+		private readonly string _deleteAllQuery;
+		private readonly string _deleteQuery;
+		private readonly string _getAllQuery;
+		private readonly string _getManyQuery;
+		private readonly string _getQuery;
+		private readonly string _putQuery;
+
+		#endregion
 	}
 }

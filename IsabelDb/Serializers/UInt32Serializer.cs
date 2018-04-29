@@ -1,5 +1,4 @@
-﻿using System;
-using System.Data;
+﻿using System.Data;
 using System.Data.SQLite;
 
 namespace IsabelDb.Serializers
@@ -9,15 +8,12 @@ namespace IsabelDb.Serializers
 	{
 		public DbType DatabaseType => DbType.UInt32;
 
-		public bool StorePerValueTypeInformation => false;
-
-		public object Serialize(uint value, out int typeId)
+		public object Serialize(uint value)
 		{
-			typeId = -1;
-			return (long)value;
+			return (long) value;
 		}
 
-		public uint Deserialize(SQLiteDataReader reader, int valueOrdinal, int typeId)
+		public uint Deserialize(SQLiteDataReader reader, int valueOrdinal)
 		{
 			var rawValue = reader.GetInt64(valueOrdinal);
 			return unchecked((uint) rawValue);

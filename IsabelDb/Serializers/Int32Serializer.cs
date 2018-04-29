@@ -8,15 +8,12 @@ namespace IsabelDb.Serializers
 	{
 		public DbType DatabaseType => DbType.Int32;
 
-		public bool StorePerValueTypeInformation => false;
-
-		public object Serialize(int value, out int typeId)
+		public object Serialize(int value)
 		{
-			typeId = -1;
 			return value;
 		}
 
-		public int Deserialize(SQLiteDataReader reader, int valueOrdinal, int typeId)
+		public int Deserialize(SQLiteDataReader reader, int valueOrdinal)
 		{
 			return reader.GetInt32(valueOrdinal);
 		}

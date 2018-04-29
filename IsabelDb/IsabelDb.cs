@@ -33,7 +33,7 @@ namespace IsabelDb
 
 		/// <summary>
 		///     Returns an object store in which each object is identified by a key of the given type
-		///     <typeparamref name="TKey"/>.
+		///     <typeparamref name="TKey" />.
 		/// </summary>
 		/// <param name="name"></param>
 		/// <returns></returns>
@@ -121,7 +121,7 @@ namespace IsabelDb
 			var hasStoresTable = ObjectStores.DoesTableExist(connection);
 			if (hasTypesTable && hasStoresTable)
 				return;
-			if(hasTypesTable != hasStoresTable)
+			if (hasTypesTable != hasStoresTable)
 				throw new NotImplementedException("Something something incompatible");
 
 			CreateTables(connection);

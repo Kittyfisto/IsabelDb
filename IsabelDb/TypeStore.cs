@@ -11,9 +11,9 @@ namespace IsabelDb
 		private const string TableName = "isabel_types";
 
 		private readonly SQLiteConnection _connection;
+		private readonly Dictionary<int, Type> _idToTypes;
 		private readonly ITypeResolver _typeResolver;
 		private readonly Dictionary<Type, int> _typesToId;
-		private readonly Dictionary<int, Type> _idToTypes;
 		private int _nextId;
 
 		public TypeStore(SQLiteConnection connection,
@@ -24,13 +24,9 @@ namespace IsabelDb
 
 			ReadTypes(connection, typeResolver, out _typesToId, out _idToTypes);
 			if (_idToTypes.Count > 0)
-			{
 				_nextId = _idToTypes.Keys.Max() + 1;
-			}
 			else
-			{
 				_nextId = 1;
-			}
 		}
 
 		public Type GetTypeFromTypeId(int typeId)
@@ -73,9 +69,9 @@ namespace IsabelDb
 			using (var command = connection.CreateCommand())
 			{
 				command.CommandText = string.Format("CREATE TABLE {0} (" +
-				                      "id INTEGER NOT NULL," +
-				                      "typename TEXT NOT NULL" +
-				                      ")", TableName);
+				                                    "id INTEGER NOT NULL," +
+				                                    "typename TEXT NOT NULL" +
+				                                    ")", TableName);
 				command.ExecuteNonQuery();
 			}
 		}
@@ -95,8 +91,8 @@ namespace IsabelDb
 				{
 					while (reader.Read())
 					{
-						var typeName = reader.GetString(0);
-						var id = reader.GetInt32(1);
+						var typeName = reader.GetString(i: 0);
+						var id = reader.GetInt32(i: 1);
 
 						var type = typeResolver.Resolve(typeName);
 						typesToId.Add(type, id);

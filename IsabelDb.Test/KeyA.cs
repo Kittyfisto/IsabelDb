@@ -6,7 +6,7 @@ namespace IsabelDb.Test
 	public sealed class KeyA
 		: IPolymorphicCustomKey
 	{
-		[DataMember]
+		[DataMember(Order = 1)]
 		public string Value { get; set; }
 
 		#region Equality members

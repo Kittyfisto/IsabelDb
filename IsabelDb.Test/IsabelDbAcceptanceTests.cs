@@ -9,8 +9,6 @@ namespace IsabelDb.Test
 	[TestFixture]
 	public sealed class IsabelDbAcceptanceTests
 	{
-		private string _databaseName;
-
 		[SetUp]
 		public void Setup()
 		{
@@ -21,6 +19,25 @@ namespace IsabelDb.Test
 			Directory.CreateDirectory(dir);
 			if (File.Exists(_databaseName))
 				File.Delete(_databaseName);
+		}
+
+		private string _databaseName;
+
+		[Test]
+		public void TestGetDictionaryAfterReopen()
+		{
+			using (var db = IsabelDb.OpenOrCreate(_databaseName))
+			{
+				db.GetDictionary<string, object>("A").Put("Meaning", value: 9001);
+			}
+
+			using (var db = IsabelDb.OpenOrCreate(_databaseName))
+			{
+				db.GetDictionary<string, object>("a").Put("Meaning", value: 42);
+
+				db.GetDictionary<string, object>("A").Get("Meaning").Should().Be(expected: 9001);
+				db.GetDictionary<string, object>("a").Get("Meaning").Should().Be(expected: 42);
+			}
 		}
 
 		[Test]
@@ -46,58 +63,21 @@ namespace IsabelDb.Test
 		}
 
 		[Test]
-		public void TestGetDictionaryAfterReopen()
-		{
-			using (var db = IsabelDb.OpenOrCreate(_databaseName))
-			{
-				db.GetDictionary<string, object>("A").Put("Meaning", 9001);
-			}
-
-			using (var db = IsabelDb.OpenOrCreate(_databaseName))
-			{
-				db.GetDictionary<string, object>("a").Put("Meaning", 42);
-
-				db.GetDictionary<string, object>("A").Get("Meaning").Should().Be(9001);
-				db.GetDictionary<string, object>("a").Get("Meaning").Should().Be(42);
-			}
-		}
-
-		[Test]
 		public void TestOverwriteReopen()
 		{
 			using (var db = IsabelDb.OpenOrCreate(_databaseName))
 			{
 				var charts = db.GetDictionary<string, object>("Charts");
-				charts.Put("Bar", 2);
-				charts.Get("Bar").Should().Be(2);
-				charts.Put("Bar", 2.2);
-				charts.Get("Bar").Should().Be(2.2);
+				charts.Put("Bar", value: 2);
+				charts.Get("Bar").Should().Be(expected: 2);
+				charts.Put("Bar", value: 2.2);
+				charts.Get("Bar").Should().Be(expected: 2.2);
 			}
 
 			using (var db = IsabelDb.OpenOrCreate(_databaseName))
 			{
 				var charts = db.GetDictionary<string, object>("Charts");
-				charts.Get("Bar").Should().Be(2.2);
-			}
-		}
-
-		[Test]
-		[Description("Verifies that when data is removed, it remains removed in the next session")]
-		public void TestRemoveAfterReopen()
-		{
-			using (var db = IsabelDb.OpenOrCreate(_databaseName))
-			{
-				var charts = db.GetDictionary<string, object>("Charts");
-				charts.Put("Pie", 1.5);
-				charts.Get("Pie").Should().Be(1.5);
-				charts.Remove("Pie");
-				charts.Get("Pie").Should().BeNull();
-			}
-
-			using (var db = IsabelDb.OpenOrCreate(_databaseName))
-			{
-				var charts = db.GetDictionary<string, object>("Charts");
-				charts.Get("Pie").Should().BeNull();
+				charts.Get("Bar").Should().Be(expected: 2.2);
 			}
 		}
 
@@ -123,14 +103,34 @@ namespace IsabelDb.Test
 			using (var db = IsabelDb.Open(_databaseName))
 			{
 				var persons = db.GetDictionary<string, object>("SomeTable").GetMany("foo", "bar");
-				persons.Should().HaveCount(2);
-				var person = persons.ElementAt(0);
+				persons.Should().HaveCount(expected: 2);
+				var person = persons.ElementAt(index: 0);
 				person.Key.Should().Be("foo");
 				person.Value.Should().Be(strelok);
 
-				person = persons.ElementAt(1);
+				person = persons.ElementAt(index: 1);
 				person.Key.Should().Be("bar");
 				person.Value.Should().Be(markedOne);
+			}
+		}
+
+		[Test]
+		[Description("Verifies that when data is removed, it remains removed in the next session")]
+		public void TestRemoveAfterReopen()
+		{
+			using (var db = IsabelDb.OpenOrCreate(_databaseName))
+			{
+				var charts = db.GetDictionary<string, object>("Charts");
+				charts.Put("Pie", value: 1.5);
+				charts.Get("Pie").Should().Be(expected: 1.5);
+				charts.Remove("Pie");
+				charts.Get("Pie").Should().BeNull();
+			}
+
+			using (var db = IsabelDb.OpenOrCreate(_databaseName))
+			{
+				var charts = db.GetDictionary<string, object>("Charts");
+				charts.Get("Pie").Should().BeNull();
 			}
 		}
 	}

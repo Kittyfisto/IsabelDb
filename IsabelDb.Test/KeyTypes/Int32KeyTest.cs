@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using NUnit.Framework;
 
 namespace IsabelDb.Test.KeyTypes
 {
 	[TestFixture]
 	public sealed class Int32KeyTest
-		: AbstractIsabelDbKeyTest<Int32>
+		: AbstractIsabelDbKeyTest<int>
 	{
-		protected override Int32 SomeKey => int.MinValue;
+		protected override int SomeKey => int.MinValue;
 
-		protected override Int32 DifferentKey => int.MaxValue;
+		protected override int DifferentKey => int.MaxValue;
 
 		protected override IReadOnlyList<int> ManyKeys => new[] {int.MinValue, -1, 0, 1, int.MaxValue};
 	}

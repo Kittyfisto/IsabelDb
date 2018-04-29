@@ -1,5 +1,4 @@
-﻿using System;
-using System.Data;
+﻿using System.Data;
 using System.Data.SQLite;
 using System.Net;
 
@@ -10,15 +9,12 @@ namespace IsabelDb.Serializers
 	{
 		public DbType DatabaseType => DbType.Binary;
 
-		public bool StorePerValueTypeInformation => false;
-
-		public object Serialize(IPAddress value, out int typeId)
+		public object Serialize(IPAddress value)
 		{
-			typeId = -1;
 			return value.GetAddressBytes();
 		}
 
-		public IPAddress Deserialize(SQLiteDataReader reader, int valueOrdinal, int typeId)
+		public IPAddress Deserialize(SQLiteDataReader reader, int valueOrdinal)
 		{
 			var addressBytes = (byte[]) reader.GetValue(valueOrdinal);
 			return new IPAddress(addressBytes);

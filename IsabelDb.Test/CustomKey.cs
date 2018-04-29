@@ -16,8 +16,8 @@ namespace IsabelDb.Test
 		}
 
 		/// <summary>
-		/// This method is implemented to compare two keys within tests.
-		/// <see cref="object.Equals(object)"/> is NOT used by IsabelDb.
+		///     This method is implemented to compare two keys within tests.
+		///     <see cref="object.Equals(object)" /> is NOT used by IsabelDb.
 		/// </summary>
 		/// <param name="obj"></param>
 		/// <returns></returns>
@@ -29,8 +29,8 @@ namespace IsabelDb.Test
 		}
 
 		/// <summary>
-		/// This method is implemented to compare two keys within tests.
-		/// <see cref="object.GetHashCode()"/> is NOT used by IsabelDb.
+		///     This method is implemented to compare two keys within tests.
+		///     <see cref="object.GetHashCode()" /> is NOT used by IsabelDb.
 		/// </summary>
 		/// <returns></returns>
 		public override int GetHashCode()

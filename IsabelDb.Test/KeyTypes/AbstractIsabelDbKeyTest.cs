@@ -17,9 +17,25 @@ namespace IsabelDb.Test.KeyTypes
 		{
 			var keys = new HashSet<TKey>();
 			foreach (var key in ManyKeys)
-			{
 				if (!keys.Add(key))
 					Assert.Inconclusive("Don't provide duplicate keys!");
+		}
+
+		[Test]
+		public void TestGetKey()
+		{
+			using (var db = IsabelDb.CreateInMemory())
+			{
+				var values = db.GetDictionary<TKey, object>("Values");
+				values.Put(SomeKey, "Hello");
+				values.Put(DifferentKey, "World");
+
+				var allValues = values.GetAll();
+				allValues.Should().HaveCount(expected: 2);
+				allValues.ElementAt(index: 0).Key.Should().Be(SomeKey);
+				allValues.ElementAt(index: 0).Value.Should().Be("Hello");
+				allValues.ElementAt(index: 1).Key.Should().Be(DifferentKey);
+				allValues.ElementAt(index: 1).Value.Should().Be("World");
 			}
 		}
 
@@ -34,24 +50,16 @@ namespace IsabelDb.Test.KeyTypes
 		}
 
 		[Test]
-		public void TestPutManyKeys()
+		public void TestOverwriteValue()
 		{
 			using (var db = IsabelDb.CreateInMemory())
 			{
 				var values = db.GetDictionary<TKey, object>("Values");
-				int i = 0;
-				foreach (var key in ManyKeys)
-				{
-					values.Put(key, i);
-					++i;
-				}
+				values.Put(SomeKey, value: 42);
+				values.Get(SomeKey).Should().Be(expected: 42);
 
-				i = 0;
-				foreach (var key in ManyKeys)
-				{
-					values.Get(key).Should().Be(i);
-					++i;
-				}
+				values.Put(SomeKey, value: 9001);
+				values.Get(SomeKey).Should().Be(expected: 9001);
 			}
 		}
 
@@ -64,9 +72,31 @@ namespace IsabelDb.Test.KeyTypes
 				values.Put(SomeKey, "A");
 				values.Get(SomeKey).Should().Be("A");
 
-				values.Put(SomeKey, null);
+				values.Put(SomeKey, value: null);
 				values.Get(SomeKey).Should().BeNull();
 				values.GetAll().Should().BeEmpty();
+			}
+		}
+
+		[Test]
+		public void TestPutManyKeys()
+		{
+			using (var db = IsabelDb.CreateInMemory())
+			{
+				var values = db.GetDictionary<TKey, object>("Values");
+				var i = 0;
+				foreach (var key in ManyKeys)
+				{
+					values.Put(key, i);
+					++i;
+				}
+
+				i = 0;
+				foreach (var key in ManyKeys)
+				{
+					values.Get(key).Should().Be(i);
+					++i;
+				}
 			}
 		}
 
@@ -86,20 +116,6 @@ namespace IsabelDb.Test.KeyTypes
 		}
 
 		[Test]
-		public void TestOverwriteValue()
-		{
-			using (var db = IsabelDb.CreateInMemory())
-			{
-				var values = db.GetDictionary<TKey, object>("Values");
-				values.Put(SomeKey, 42);
-				values.Get(SomeKey).Should().Be(42);
-
-				values.Put(SomeKey, 9001);
-				values.Get(SomeKey).Should().Be(9001);
-			}
-		}
-
-		[Test]
 		public void TestStoreTwoValues()
 		{
 			using (var db = IsabelDb.CreateInMemory())
@@ -110,24 +126,6 @@ namespace IsabelDb.Test.KeyTypes
 
 				values.Get(SomeKey).Should().Be("Hello");
 				values.Get(DifferentKey).Should().Be("World");
-			}
-		}
-
-		[Test]
-		public void TestGetKey()
-		{
-			using (var db = IsabelDb.CreateInMemory())
-			{
-				var values = db.GetDictionary<TKey, object>("Values");
-				values.Put(SomeKey, "Hello");
-				values.Put(DifferentKey, "World");
-
-				var allValues = values.GetAll();
-				allValues.Should().HaveCount(2);
-				allValues.ElementAt(0).Key.Should().Be(SomeKey);
-				allValues.ElementAt(0).Value.Should().Be("Hello");
-				allValues.ElementAt(1).Key.Should().Be(DifferentKey);
-				allValues.ElementAt(1).Value.Should().Be("World");
 			}
 		}
 	}

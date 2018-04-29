@@ -6,6 +6,9 @@ namespace IsabelDb.Test
 	public sealed class KeyB
 		: IPolymorphicCustomKey
 	{
+		[DataMember(Order = 1)]
+		public string Value { get; set; }
+
 		#region Equality members
 
 		private bool Equals(KeyB other)
@@ -15,19 +18,16 @@ namespace IsabelDb.Test
 
 		public override bool Equals(object obj)
 		{
-			if (ReferenceEquals(null, obj)) return false;
+			if (ReferenceEquals(objA: null, objB: obj)) return false;
 			if (ReferenceEquals(this, obj)) return true;
 			return obj is KeyB && Equals((KeyB) obj);
 		}
 
 		public override int GetHashCode()
 		{
-			return (Value != null ? Value.GetHashCode() : 0);
+			return Value != null ? Value.GetHashCode() : 0;
 		}
 
 		#endregion
-
-		[DataMember]
-		public string Value { get; set; }
 	}
 }

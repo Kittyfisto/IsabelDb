@@ -67,6 +67,7 @@
     <Compile Include="KeyTypes\Int32KeyTest.cs" />
     <Compile Include="KeyTypes\Int64KeyTest.cs" />
     <Compile Include="KeyTypes\IpAddressKeyTest.cs" />
+    <Compile Include="KeyTypes\PolymorphicKeyTest.cs" />
     <Compile Include="KeyTypes\StringKeyTest.cs" />
     <Compile Include="KeyTypes\UInt16KeyTest.cs" />
     <Compile Include="KeyTypes\UInt32KeyTest.cs" />
