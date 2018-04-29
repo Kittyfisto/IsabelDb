@@ -55,6 +55,7 @@
   <ItemGroup>
     <Compile Include="Address.cs" />
     <Compile Include="AssemblySetup.cs" />
+    <Compile Include="IsabelDbAcceptanceTests.cs" />
     <Compile Include="IsabelDbTest.cs" />
     <Compile Include="Person.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

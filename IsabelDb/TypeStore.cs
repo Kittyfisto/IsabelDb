@@ -8,6 +8,8 @@ namespace IsabelDb
 {
 	internal sealed class TypeStore
 	{
+		private const string TableName = "isabel_types";
+
 		private readonly SQLiteConnection _connection;
 		private readonly ITypeResolver _typeResolver;
 		private readonly Dictionary<Type, int> _typesToId;
@@ -48,7 +50,7 @@ namespace IsabelDb
 
 				using (var command = _connection.CreateCommand())
 				{
-					command.CommandText = "INSERT INTO types (typename, id) VALUES (@typename, @id)";
+					command.CommandText = string.Format("INSERT INTO {0} (typename, id) VALUES (@typename, @id)", TableName);
 					var typename = command.Parameters.Add("@typename", DbType.String);
 					var idParameter = command.Parameters.Add("@id", DbType.Int32);
 
@@ -61,6 +63,23 @@ namespace IsabelDb
 			return id;
 		}
 
+		public static bool DoesTableExist(SQLiteConnection connection)
+		{
+			return IsabelDb.TableExists(connection, TableName);
+		}
+
+		public static void CreateTable(SQLiteConnection connection)
+		{
+			using (var command = connection.CreateCommand())
+			{
+				command.CommandText = string.Format("CREATE TABLE {0} (" +
+				                      "id INTEGER NOT NULL," +
+				                      "typename TEXT NOT NULL" +
+				                      ")", TableName);
+				command.ExecuteNonQuery();
+			}
+		}
+
 		private static void ReadTypes(SQLiteConnection connection,
 		                              ITypeResolver typeResolver,
 		                              out Dictionary<Type, int> typesToId,
@@ -71,7 +90,7 @@ namespace IsabelDb
 
 			using (var command = connection.CreateCommand())
 			{
-				command.CommandText = "SELECT typename, id FROM types";
+				command.CommandText = string.Format("SELECT typename, id FROM {0}", TableName);
 				using (var reader = command.ExecuteReader())
 				{
 					while (reader.Read())
