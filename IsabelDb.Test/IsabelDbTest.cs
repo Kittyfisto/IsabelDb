@@ -10,6 +10,16 @@ namespace IsabelDb.Test
 	[TestFixture]
 	public sealed class IsabelDbTest
 	{
+		public static IEnumerable<string> Keys => new[]
+		{
+			" ",
+			"	",
+			"Hello, World!",
+			"휘파람",
+			"العَرَبِيَّة",
+			"日本語"
+		};
+
 		[Test]
 		public void TestCreateInMemory()
 		{
@@ -21,8 +31,38 @@ namespace IsabelDb.Test
 		{
 			using (var db = IsabelDb.CreateInMemory())
 			{
-				var store = db.GetDictionary("SomeTable");
+				var store = db.GetDictionary<string, object>("SomeTable");
 				store.GetAll().Should().BeEmpty();
+			}
+		}
+
+		[Test]
+		[Description("Verifies that GetDictionary allows for names to be case sensitive")]
+		public void TestGetDictionaryCaseSensitiveNames()
+		{
+			using (var db = IsabelDb.CreateInMemory())
+			{
+				var a = db.GetDictionary<string, object>("A");
+				var b = db.GetDictionary<string, object>("a");
+				a.Should().NotBe(b);
+
+				a.Put("1", 42);
+				b.Put("1", 50);
+
+				a.Get("1").Should().Be(42);
+				b.Get("1").Should().Be(50);
+			}
+		}
+
+		[Test]
+		public void TestGetDictionaryDifferentTypes()
+		{
+			using (var db = IsabelDb.CreateInMemory())
+			{
+				var a = db.GetDictionary<string, string>("Names");
+				new Action(() => db.GetDictionary<string, int>("Names"))
+					.Should().Throw<ArgumentException>()
+					.WithMessage("The dictionary 'Names' has a value type of 'System.String': If your intent was to create a new dictionary, you have to pick a new name!");
 			}
 		}
 
@@ -32,10 +72,10 @@ namespace IsabelDb.Test
 		{
 			using (var db = IsabelDb.CreateInMemory())
 			{
-				var customers = db.GetDictionary("Customers");
+				var customers = db.GetDictionary<string, object>("Customers");
 				customers.Put("1", "Simon");
 
-				var people = db.GetDictionary("People");
+				var people = db.GetDictionary<string, object>("People");
 				people.Put("1", "Kitty");
 
 				customers.Get("1").Should().Be("Simon");
@@ -49,10 +89,10 @@ namespace IsabelDb.Test
 		{
 			using (var db = IsabelDb.CreateInMemory())
 			{
-				var customers = db.GetDictionary("Customers");
+				var customers = db.GetDictionary<string, object>("Customers");
 				customers.Put("1", "Simon");
 
-				var people = db.GetDictionary("People");
+				var people = db.GetDictionary<string, object>("People");
 				people.Put("1", "Kitty");
 
 				customers.Remove("1");
@@ -61,11 +101,32 @@ namespace IsabelDb.Test
 		}
 
 		[Test]
+		public void TestGet1()
+		{
+			using (var db = IsabelDb.CreateInMemory())
+			{
+				db.GetDictionary<string, object>("SomeTable").Put("foo", "bar");
+				db.GetDictionary<string, object>("SomeTable").Get("foo").Should().Be("bar");
+			}
+		}
+
+		[Test]
+		public void TestUnicodeKey([ValueSource(nameof(Keys))] string key)
+		{
+			using (var db = IsabelDb.CreateInMemory())
+			{
+				var dictionary = db.GetDictionary<string, object>("SomeTable");
+				dictionary.Put(key, 9001);
+				dictionary.Get(key).Should().Be(9001);
+			}
+		}
+
+		[Test]
 		public void TestReplaceValue()
 		{
 			using (var db = IsabelDb.CreateInMemory())
 			{
-				var store = db.GetDictionary("SomeTable");
+				var store = db.GetDictionary<string, object>("SomeTable");
 				store.Put("foo", 42);
 				store.Get("foo").Should().Be(42);
 
@@ -79,7 +140,7 @@ namespace IsabelDb.Test
 		{
 			using (var db = IsabelDb.CreateInMemory())
 			{
-				var store = db.GetDictionary("SomeTable");
+				var store = db.GetDictionary<string, object>("SomeTable");
 				store.Get("42").Should().BeNull();
 
 				store.Put("42", null);
@@ -88,11 +149,21 @@ namespace IsabelDb.Test
 		}
 
 		[Test]
+		public void TestRemoveNullKey()
+		{
+			using (var db = IsabelDb.CreateInMemory())
+			{
+				var values = db.GetDictionary<string, object>("Foo");
+				new Action(() => values.Remove(null)).Should().Throw<ArgumentNullException>();
+			}
+		}
+
+		[Test]
 		public void TestRemoveValue()
 		{
 			using (var db = IsabelDb.CreateInMemory())
 			{
-				var store = db.GetDictionary("SomeTable");
+				var store = db.GetDictionary<string, object>("SomeTable");
 				store.Put("foo", 42);
 				store.Get("foo").Should().Be(42);
 
@@ -102,12 +173,38 @@ namespace IsabelDb.Test
 		}
 
 		[Test]
+		[Description("Verifies that ONLY the value with the specified key is removed and none other")]
+		public void TestRemoveValue2()
+		{
+			using (var db = IsabelDb.CreateInMemory())
+			{
+				var store = db.GetDictionary<string, object>("SomeTable");
+				store.Put("a", 1);
+				store.Put("b", 2);
+				store.Remove("a");
+
+				store.Get("a").Should().BeNull();
+				store.Get("b").Should().Be(2);
+			}
+		}
+
+		[Test]
 		public void TestGetNone()
 		{
 			using (var db = IsabelDb.CreateInMemory())
 			{
-				db.GetDictionary("SomeTable").Get("foo").Should().BeNull();
-				db.GetDictionary("SomeTable").Get("foo", "bar").Should().BeEmpty();
+				db.GetDictionary<string, object>("SomeTable").Get("foo").Should().BeNull();
+				db.GetDictionary<string, object>("SomeTable").Get("foo", "bar").Should().BeEmpty();
+			}
+		}
+
+		[Test]
+		public void TestPutNullKey()
+		{
+			using (var db = IsabelDb.CreateInMemory())
+			{
+				var values = db.GetDictionary<string, object>("Foo");
+				new Action(() => values.Put(null, 42)).Should().Throw<ArgumentNullException>();
 			}
 		}
 
@@ -184,7 +281,7 @@ namespace IsabelDb.Test
 					Name = "Steven"
 				};
 
-				var table = db.GetDictionary("Stuff");
+				var table = db.GetDictionary<string, object>("Stuff");
 				table.Put(new []
 				{
 					new KeyValuePair<string, object>("foo", address),
@@ -205,7 +302,7 @@ namespace IsabelDb.Test
 			{
 				const int count = 10000;
 				var persons = new List<KeyValuePair<string, Person>>();
-				var table = db.GetDictionary<Person>("Piggies");
+				var table = db.GetDictionary<string, Person>("Piggies");
 				for (int i = 0; i < count; ++i)
 				{
 					var person = new Person
@@ -239,7 +336,7 @@ namespace IsabelDb.Test
 		{
 			using (var db = IsabelDb.CreateInMemory())
 			{
-				var people = db.GetDictionary("People");
+				var people = db.GetDictionary<string, object>("People");
 				people.Count().Should().Be(0);
 				people.Clear();
 				people.Count().Should().Be(0);
@@ -248,7 +345,7 @@ namespace IsabelDb.Test
 
 		private static void PutAndGet<T>(IsabelDb db, T value1, T value2)
 		{
-			var store = db.GetDictionary("SomeTable");
+			var store = db.GetDictionary<string, object>("SomeTable");
 
 			store.Put("foo", value1);
 			store.Put("bar", value2);

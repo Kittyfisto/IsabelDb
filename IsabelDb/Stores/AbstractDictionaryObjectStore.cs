@@ -5,20 +5,21 @@ using System.Data.SQLite;
 using System.IO;
 using ProtoBuf.Meta;
 
-namespace IsabelDb
+namespace IsabelDb.Stores
 {
-	internal sealed class DictionaryObjectStore<T>
-		: IDictionaryObjectStore<T>
+	internal abstract class AbstractDictionaryObjectStore<TKey, TValue>
+		: IDictionaryObjectStore<TKey, TValue>
+			, IInternalObjectStore
 	{
 		private readonly SQLiteConnection _connection;
 		private readonly TypeModel _typeModel;
 		private readonly TypeStore _typeStore;
 		private readonly string _tableName;
 
-		public DictionaryObjectStore(SQLiteConnection connection,
-		                   TypeModel typeModel,
-		                   TypeStore typeStore,
-		                   string tableName)
+		protected AbstractDictionaryObjectStore(SQLiteConnection connection,
+		                                        TypeModel typeModel,
+		                                        TypeStore typeStore,
+		                                        string tableName)
 		{
 			_connection = connection;
 			_typeModel = typeModel;
@@ -28,20 +29,27 @@ namespace IsabelDb
 			CreateObjectTableIfNecessary();
 		}
 
+		protected abstract object SerializeKey(TKey key);
+		protected abstract TKey DeserializeKey(SQLiteDataReader reader, int ordinal);
+		protected abstract DbType KeyDatabaseType { get; }
+		protected abstract string KeyColumnDefinition { get; }
+
 		private void CreateObjectTableIfNecessary()
 		{
 			using (var command = _connection.CreateCommand())
 			{
 				command.CommandText = string.Format("CREATE TABLE IF NOT EXISTS {0} (" +
-				                                    "key TEXT PRIMARY KEY NOT NULL," +
+				                                    "key {1}," +
 				                                    "type INTEGER NOT NULL," +
 				                                    "value BLOB NOT NULL" +
-				                                    ")", _tableName);
+				                                    ")",
+				                                    _tableName,
+				                                    KeyColumnDefinition);
 				command.ExecuteNonQuery();
 			}
 		}
 
-		public IEnumerable<KeyValuePair<string, T>> GetAll()
+		public IEnumerable<KeyValuePair<TKey, TValue>> GetAll()
 		{
 			using (var command = CreateCommand("SELECT key, type, value FROM {0}"))
 			{
@@ -49,12 +57,12 @@ namespace IsabelDb
 			}
 		}
 
-		public IEnumerable<KeyValuePair<string, T>> Get(IEnumerable<string> keys)
+		public IEnumerable<KeyValuePair<TKey, TValue>> Get(IEnumerable<TKey> keys)
 		{
 			using (var command = CreateCommand("SELECT type, value FROM {0} WHERE key = @key"))
 			{
 				var keyParameter = command.Parameters.Add("@key", DbType.String);
-				var ret = new List<KeyValuePair<string, T>>();
+				var ret = new List<KeyValuePair<TKey, TValue>>();
 				foreach (var key in keys)
 				{
 					keyParameter.Value = key;
@@ -62,7 +70,7 @@ namespace IsabelDb
 					{
 						if (TryReadValue(reader, out var value))
 						{
-							ret.Add(new KeyValuePair<string, T>(key, value));
+							ret.Add(new KeyValuePair<TKey, TValue>(key, value));
 						}
 					}
 				}
@@ -71,16 +79,16 @@ namespace IsabelDb
 			}
 		}
 
-		public IEnumerable<KeyValuePair<string, T>> Get(params string[] keys)
+		public IEnumerable<KeyValuePair<TKey, TValue>> Get(params TKey[] keys)
 		{
-			return Get((IEnumerable<string>) keys);
+			return Get((IEnumerable<TKey>) keys);
 		}
 
-		public T Get(string key)
+		public TValue Get(TKey key)
 		{
 			using (var command = CreateCommand("SELECT type, value FROM {0} WHERE key = @key"))
 			{
-				command.Parameters.AddWithValue("@key", key);
+				command.Parameters.AddWithValue("@key", SerializeKey(key));
 				using (var reader = command.ExecuteReader())
 				{
 					TryReadValue(reader, out var value);
@@ -89,8 +97,11 @@ namespace IsabelDb
 			}
 		}
 
-		public void Put(string key, T value)
+		public void Put(TKey key, TValue value)
 		{
+			if (key == null)
+				throw new ArgumentNullException(nameof(key));
+
 			if (value == null)
 			{
 				Remove(key);
@@ -101,14 +112,14 @@ namespace IsabelDb
 			}
 		}
 
-		public void Put(IEnumerable<KeyValuePair<string, T>> values)
+		public void Put(IEnumerable<KeyValuePair<TKey, TValue>> values)
 		{
 			using (var transaction = BeginTransaction())
 			{
 				using (var command = CreateCommand("INSERT OR REPLACE INTO {0} (key, type, value) VALUES" +
 				                                   "(@key, @typeId, @value)"))
 				{
-					var keyParameter = command.Parameters.Add("@key", DbType.String);
+					var keyParameter = command.Parameters.Add("@key", KeyDatabaseType);
 					var typeIdParameter = command.Parameters.Add("@typeId", DbType.Int32);
 					var valueParameter = command.Parameters.Add("@value", DbType.Binary);
 
@@ -118,7 +129,7 @@ namespace IsabelDb
 						var type = value.GetType();
 						var typeId = _typeStore.GetOrCreateTypeId(type);
 
-						keyParameter.Value = pair.Key;
+						keyParameter.Value = SerializeKey(pair.Key);
 						typeIdParameter.Value = typeId;
 						valueParameter.Value = Serialize(value);
 						command.ExecuteNonQuery();
@@ -129,8 +140,11 @@ namespace IsabelDb
 			}
 		}
 
-		public void Remove(string key)
+		public void Remove(TKey key)
 		{
+			if (key == null)
+				throw new ArgumentNullException(nameof(key));
+
 			using (var transaction = BeginTransaction())
 			{
 				using (var command = CreateCommand("DELETE FROM {0} WHERE key = @key"))
@@ -159,7 +173,7 @@ namespace IsabelDb
 			}
 		}
 
-		private void InsertOrReplace(string key, object value)
+		private void InsertOrReplace(TKey key, TValue value)
 		{
 			using (var transaction = BeginTransaction())
 			{
@@ -168,7 +182,7 @@ namespace IsabelDb
 				{
 					var typeId = _typeStore.GetOrCreateTypeId(value.GetType());
 					var serializedValue = Serialize(value);
-					command.Parameters.AddWithValue("@key", key);
+					command.Parameters.AddWithValue("@key", SerializeKey(key));
 					command.Parameters.AddWithValue("@typeId", typeId);
 					command.Parameters.AddWithValue("@value", serializedValue);
 					command.ExecuteNonQuery();
@@ -177,14 +191,14 @@ namespace IsabelDb
 			}
 		}
 
-		private IEnumerable<KeyValuePair<string, T>> Get(SQLiteCommand command)
+		private IEnumerable<KeyValuePair<TKey, TValue>> Get(SQLiteCommand command)
 		{
 			using (var reader = command.ExecuteReader())
 			{
-				var ret = new List<KeyValuePair<string, T>>();
+				var ret = new List<KeyValuePair<TKey, TValue>>();
 				while (reader.Read())
 				{
-					var key = reader.GetString(0);
+					var key = DeserializeKey(reader, 0);
 					var typeId = reader.GetInt32(1);
 					var type = _typeStore.GetTypeFromTypeId(typeId);
 					if (type != null)
@@ -192,9 +206,9 @@ namespace IsabelDb
 						var serializedValue = (byte[]) reader.GetValue(2);
 						var value = Deserialize(type, serializedValue);
 
-						if (value is T desiredValue)
+						if (value is TValue desiredValue)
 						{
-							ret.Add(new KeyValuePair<string, T>(key, desiredValue));
+							ret.Add(new KeyValuePair<TKey, TValue>(key, desiredValue));
 						}
 					}
 				}
@@ -202,11 +216,11 @@ namespace IsabelDb
 			}
 		}
 
-		private bool TryReadValue(SQLiteDataReader reader, out T value)
+		private bool TryReadValue(SQLiteDataReader reader, out TValue value)
 		{
 			if (!reader.Read())
 			{
-				value = default(T);
+				value = default(TValue);
 				return false;
 			}
 
@@ -214,19 +228,19 @@ namespace IsabelDb
 			var type = _typeStore.GetTypeFromTypeId(typeId);
 			if (type == null)
 			{
-				value = default(T);
+				value = default(TValue);
 				return false;
 			}
 
 			var serializedValue = (byte[]) reader.GetValue(1);
 			var deserializedValue = Deserialize(type, serializedValue);
-			if (!(deserializedValue is T))
+			if (!(deserializedValue is TValue))
 			{
-				value = default(T);
+				value = default(TValue);
 				return false;
 			}
 
-			value = (T) deserializedValue;
+			value = (TValue) deserializedValue;
 			return true;
 		}
 
@@ -242,7 +256,7 @@ namespace IsabelDb
 			return _connection.BeginTransaction();
 		}
 
-		private byte[] Serialize(object value)
+		private byte[] Serialize(TValue value)
 		{
 			using (var stream = new MemoryStream())
 			{
@@ -259,5 +273,7 @@ namespace IsabelDb
 				return value;
 			}
 		}
+
+		public Type ObjectType => typeof(TValue);
 	}
 }

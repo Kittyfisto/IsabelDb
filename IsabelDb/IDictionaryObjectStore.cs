@@ -6,49 +6,49 @@ namespace IsabelDb
 	///     Represents a persistent dictionary.
 	///     All operations are immediately backed by the underlying storage medium.
 	/// </summary>
-	public interface IDictionaryObjectStore<T>
+	public interface IDictionaryObjectStore<TKey, TValue>
 		: IObjectStore
 	{
 		/// <summary>
 		///     Finds all objects.
 		/// </summary>
 		/// <returns></returns>
-		IEnumerable<KeyValuePair<string, T>> GetAll();
+		IEnumerable<KeyValuePair<TKey, TValue>> GetAll();
 
 		/// <summary>
 		///     Finds all objects with the given keys and type.
 		/// </summary>
 		/// <param name="keys"></param>
 		/// <returns></returns>
-		IEnumerable<KeyValuePair<string, T>> Get(IEnumerable<string> keys);
+		IEnumerable<KeyValuePair<TKey, TValue>> Get(IEnumerable<TKey> keys);
 
 		/// <summary>
 		///     Finds all objects with the given keys and type.
 		/// </summary>
 		/// <param name="keys"></param>
 		/// <returns></returns>
-		IEnumerable<KeyValuePair<string, T>> Get(params string[] keys);
+		IEnumerable<KeyValuePair<TKey, TValue>> Get(params TKey[] keys);
 
 		/// <summary>
 		/// </summary>
 		/// <param name="key"></param>
 		/// <returns></returns>
-		T Get(string key);
+		TValue Get(TKey key);
 
 		/// <summary>
 		/// </summary>
 		/// <param name="key"></param>
 		/// <param name="value"></param>
-		void Put(string key, T value);
+		void Put(TKey key, TValue value);
 
 		/// <summary>
 		/// </summary>
 		/// <param name="values"></param>
-		void Put(IEnumerable<KeyValuePair<string, T>> values);
+		void Put(IEnumerable<KeyValuePair<TKey, TValue>> values);
 
 		/// <summary>
 		/// </summary>
 		/// <param name="key"></param>
-		void Remove(string key);
+		void Remove(TKey key);
 	}
 }

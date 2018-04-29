@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.SQLite;
 using System.IO;
 using ProtoBuf.Meta;
@@ -13,19 +12,16 @@ namespace IsabelDb
 		: IDisposable
 	{
 		private readonly SQLiteConnection _connection;
-		private readonly Dictionary<string, IObjectStore> _objectStores;
-		private readonly TypeModel _typeModel;
-		private readonly TypeStore _typeStore;
+		private readonly ObjectStores _objectStores;
 
 		private IsabelDb(SQLiteConnection connection)
 		{
 			_connection = connection;
-			_typeModel = TypeModel.Create();
-
-			_objectStores = new Dictionary<string, IObjectStore>();
+			TypeModel typeModel = TypeModel.Create();
 
 			var typeResolver = new TypeResolver();
-			_typeStore = new TypeStore(connection, typeResolver);
+			var typeStore = new TypeStore(connection, typeResolver);
+			_objectStores = new ObjectStores(connection, typeModel, typeStore);
 		}
 
 		/// <inheritdoc />
@@ -36,35 +32,14 @@ namespace IsabelDb
 		}
 
 		/// <summary>
-		///     Returns an object store in which each object is identified by a <see cref="string"/> key.
+		///     Returns an object store in which each object is identified by a key of the given type
+		///     <typeparamref name="TKey"/>.
 		/// </summary>
 		/// <param name="name"></param>
 		/// <returns></returns>
-		public IDictionaryObjectStore<T> GetDictionary<T>(string name)
+		public IDictionaryObjectStore<TKey, TValue> GetDictionary<TKey, TValue>(string name)
 		{
-			if (!_objectStores.TryGetValue(name, out var store))
-			{
-				store = new DictionaryObjectStore<T>(_connection, _typeModel, _typeStore, name);
-				_objectStores.Add(name, store);
-			}
-
-			return (IDictionaryObjectStore<T>) store;
-		}
-
-		/// <summary>
-		///     Returns an object store in which each object is identified by a <see cref="string"/> key.
-		/// </summary>
-		/// <param name="name"></param>
-		/// <returns></returns>
-		public IDictionaryObjectStore<object> GetDictionary(string name)
-		{
-			if (!_objectStores.TryGetValue(name, out var store))
-			{
-				store = new DictionaryObjectStore<object>(_connection, _typeModel, _typeStore, name);
-				_objectStores.Add(name, store);
-			}
-
-			return (IDictionaryObjectStore<object>) store;
+			return _objectStores.GetDictionary<TKey, TValue>(name);
 		}
 
 		/// <summary>
@@ -143,7 +118,7 @@ namespace IsabelDb
 		private static void CreateTablesIfNecessary(SQLiteConnection connection)
 		{
 			var hasTypesTable = TypeStore.DoesTableExist(connection);
-			var hasStoresTable = Stores.DoesTableExist(connection);
+			var hasStoresTable = ObjectStores.DoesTableExist(connection);
 			if (hasTypesTable && hasStoresTable)
 				return;
 			if(hasTypesTable != hasStoresTable)
@@ -155,7 +130,7 @@ namespace IsabelDb
 		private static void CreateTables(SQLiteConnection connection)
 		{
 			TypeStore.CreateTable(connection);
-			Stores.CreateTable(connection);
+			ObjectStores.CreateTable(connection);
 		}
 
 		internal static bool TableExists(SQLiteConnection connection, string tableName)
@@ -173,7 +148,7 @@ namespace IsabelDb
 		{
 			if (!TypeStore.DoesTableExist(connection))
 				throw new NotImplementedException();
-			if (!Stores.DoesTableExist(connection))
+			if (!ObjectStores.DoesTableExist(connection))
 				throw new NotImplementedException();
 		}
 
