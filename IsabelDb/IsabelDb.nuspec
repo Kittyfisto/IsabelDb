@@ -14,7 +14,8 @@
     <copyright>Copyright 2018</copyright>
     <tags>.NET KeyValue Store Object Database</tags>
     <dependencies>
-      <!--<dependency id="SampleDependency" version="1.0" />-->
+      <dependency id="protobuf-net" version="2.3.7" />
+      <dependency id="System.Data.SQLite.Core" version="1.0.108.0" />
     </dependencies>
   </metadata>
   <files>
