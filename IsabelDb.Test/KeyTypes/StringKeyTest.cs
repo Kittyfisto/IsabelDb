@@ -4,7 +4,7 @@ using NUnit.Framework;
 namespace IsabelDb.Test.KeyTypes
 {
 	[TestFixture]
-	public sealed class IsabelDbStringKeyTest
+	public sealed class StringKeyTest
 		: AbstractIsabelDbKeyTest<string>
 	{
 		protected override string SomeKey => "Foo";

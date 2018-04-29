@@ -5,7 +5,7 @@ using NUnit.Framework;
 namespace IsabelDb.Test.KeyTypes
 {
 	[TestFixture]
-	public sealed class IsabelDbInt32KeyTest
+	public sealed class Int32KeyTest
 		: AbstractIsabelDbKeyTest<Int32>
 	{
 		protected override Int32 SomeKey => int.MinValue;

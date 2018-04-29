@@ -54,23 +54,24 @@
     <Reference Include="System.Data" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Stores\AbstractDictionaryObjectStore.cs" />
+    <Compile Include="Serializers\GenericSerializer.cs" />
+    <Compile Include="Serializers\Int16Serializer.cs" />
+    <Compile Include="Serializers\Int32Serializer.cs" />
+    <Compile Include="Serializers\Int64Serializer.cs" />
+    <Compile Include="Serializers\IpAddressSerializer.cs" />
+    <Compile Include="Serializers\StringSerializer.cs" />
+    <Compile Include="Serializers\UInt16Serializer.cs" />
+    <Compile Include="Serializers\UInt32Serializer.cs" />
+    <Compile Include="Stores\DictionaryObjectStore.cs" />
     <Compile Include="IDictionaryObjectStore.cs" />
     <Compile Include="IInternalObjectStore.cs" />
     <Compile Include="IListStore.cs" />
     <Compile Include="IObjectStore.cs" />
     <Compile Include="IsabelDb.cs" />
     <Compile Include="ITypeResolver.cs" />
-    <Compile Include="Stores\GenericKeyObjectStore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ObjectStores.cs" />
-    <Compile Include="Stores\Int16KeyObjectStore.cs" />
-    <Compile Include="Stores\Int32KeyObjectStore.cs" />
-    <Compile Include="Stores\Int64KeyObjectStore.cs" />
-    <Compile Include="Stores\IpAddressKeyObjectStore.cs" />
-    <Compile Include="Stores\StringKeyObjectStore.cs" />
-    <Compile Include="Stores\UInt16KeyObjectStore.cs" />
-    <Compile Include="Stores\UInt32KeyObjectStore.cs" />
+    <Compile Include="Serializers\ISQLiteSerializer.cs" />
     <Compile Include="TypeMapper.cs" />
     <Compile Include="TypeResolver.cs" />
     <Compile Include="TypeStore.cs" />

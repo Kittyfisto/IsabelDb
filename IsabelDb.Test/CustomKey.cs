@@ -15,6 +15,12 @@ namespace IsabelDb.Test
 			return A == other.A && B == other.B && C == other.C && D == other.D;
 		}
 
+		/// <summary>
+		/// This method is implemented to compare two keys within tests.
+		/// <see cref="object.Equals(object)"/> is NOT used by IsabelDb.
+		/// </summary>
+		/// <param name="obj"></param>
+		/// <returns></returns>
 		public override bool Equals(object obj)
 		{
 			if (ReferenceEquals(objA: null, objB: obj)) return false;
@@ -22,6 +28,11 @@ namespace IsabelDb.Test
 			return obj is CustomKey && Equals((CustomKey) obj);
 		}
 
+		/// <summary>
+		/// This method is implemented to compare two keys within tests.
+		/// <see cref="object.GetHashCode()"/> is NOT used by IsabelDb.
+		/// </summary>
+		/// <returns></returns>
 		public override int GetHashCode()
 		{
 			unchecked

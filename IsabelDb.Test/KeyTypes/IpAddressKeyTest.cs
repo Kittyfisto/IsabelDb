@@ -5,7 +5,7 @@ using NUnit.Framework;
 namespace IsabelDb.Test.KeyTypes
 {
 	[TestFixture]
-	public sealed class IsabelDbIpAddressKeyTest
+	public sealed class IpAddressKeyTest
 		: AbstractIsabelDbKeyTest<IPAddress>
 	{
 		protected override IPAddress SomeKey => IPAddress.Loopback;

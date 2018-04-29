@@ -55,18 +55,21 @@
   <ItemGroup>
     <Compile Include="Address.cs" />
     <Compile Include="AssemblySetup.cs" />
+    <Compile Include="ICustomKey.cs" />
     <Compile Include="IsabelDbAcceptanceTests.cs" />
     <Compile Include="IsabelDbTest.cs" />
+    <Compile Include="KeyA.cs" />
+    <Compile Include="KeyB.cs" />
     <Compile Include="KeyTypes\AbstractIsabelDbKeyTest.cs" />
     <Compile Include="CustomKey.cs" />
-    <Compile Include="KeyTypes\IsabelDbCustomKeyTest.cs" />
-    <Compile Include="KeyTypes\IsabelDbInt16KeyTest.cs" />
-    <Compile Include="KeyTypes\IsabelDbInt32KeyTest.cs" />
-    <Compile Include="KeyTypes\IsabelDbInt64KeyTest.cs" />
-    <Compile Include="KeyTypes\IsabelDbIPAddressKeyTest.cs" />
-    <Compile Include="KeyTypes\IsabelDbStringKeyTest.cs" />
-    <Compile Include="KeyTypes\IsabelDbUInt16KeyTest.cs" />
-    <Compile Include="KeyTypes\IsabelDbUInt32KeyTest.cs" />
+    <Compile Include="KeyTypes\CustomKeyTest.cs" />
+    <Compile Include="KeyTypes\Int16KeyTest.cs" />
+    <Compile Include="KeyTypes\Int32KeyTest.cs" />
+    <Compile Include="KeyTypes\Int64KeyTest.cs" />
+    <Compile Include="KeyTypes\IpAddressKeyTest.cs" />
+    <Compile Include="KeyTypes\StringKeyTest.cs" />
+    <Compile Include="KeyTypes\UInt16KeyTest.cs" />
+    <Compile Include="KeyTypes\UInt32KeyTest.cs" />
     <Compile Include="Person.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

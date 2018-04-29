@@ -279,7 +279,7 @@ namespace IsabelDb.Test
 		{
 			using (var db = IsabelDb.CreateInMemory())
 			{
-				const int count = 10000;
+				const int count = 100000;
 				var persons = new List<KeyValuePair<string, Person>>();
 				var table = db.GetDictionary<string, Person>("Piggies");
 				for (int i = 0; i < count; ++i)

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Net;
+using IsabelDb.Serializers;
 using IsabelDb.Stores;
 using ProtoBuf.Meta;
 
@@ -15,10 +16,32 @@ namespace IsabelDb
 	{
 		private const string TableName = "isabel_stores";
 
-		private readonly Dictionary<string, IInternalObjectStore> _dictionaries;
+		/// <summary>
+		///     A list of serializers for .NET types which natively map to SQLite types
+		///     (int, string, etc...).
+		/// </summary>
+		private static readonly IReadOnlyDictionary<Type, ISQLiteSerializer> NativeSerializers;
+
 		private readonly SQLiteConnection _connection;
+
+		private readonly Dictionary<string, IInternalObjectStore> _dictionaries;
 		private readonly TypeModel _typeModel;
 		private readonly TypeStore _typeStore;
+
+		static ObjectStores()
+		{
+			var nativeSerializers = new Dictionary<Type, ISQLiteSerializer>
+			{
+				{typeof(ushort), new UInt16Serializer()},
+				{typeof(short), new Int16Serializer()},
+				{typeof(uint), new UInt32Serializer()},
+				{typeof(int), new Int32Serializer()},
+				{typeof(long), new Int64Serializer()},
+				{typeof(IPAddress), new IpAddressSerializer()},
+				{typeof(string), new StringSerializer()}
+			};
+			NativeSerializers = nativeSerializers;
+		}
 
 		public ObjectStores(SQLiteConnection connection,
 		                    TypeModel typeModel,
@@ -34,48 +57,36 @@ namespace IsabelDb
 		{
 			if (!_dictionaries.TryGetValue(name, out var store))
 			{
-				if (!TryRetrieveTableNameFor(name, out var tableName))
-				{
-					tableName = AddTable(name, typeof(TValue));
-				}
+				if (!TryRetrieveTableNameFor(name, out var tableName)) tableName = AddTable(name, typeof(TValue));
 				store = CreateObjectStore<TKey, TValue>(tableName);
 				_dictionaries.Add(name, store);
 			}
 
 			if (!(store is IDictionaryObjectStore<TKey, TValue> target))
-				throw new ArgumentException(string.Format("The dictionary '{0}' has a value type of '{1}': If your intent was to create a new dictionary, you have to pick a new name!",
-				                                          name,
-				                                          store.ObjectType.FullName));
+				throw new
+					ArgumentException(string.Format("The dictionary '{0}' has a value type of '{1}': If your intent was to create a new dictionary, you have to pick a new name!",
+					                                name,
+					                                store.ObjectType.FullName));
 
 			return target;
 		}
 
 		private IInternalObjectStore CreateObjectStore<TKey, TValue>(string tableName)
 		{
-			var keyType = typeof(TKey);
+			var keySerializer = GetSerializer<TKey>();
+			var valueSerializer = GetSerializer<TValue>();
+			return new DictionaryObjectStore<TKey, TValue>(_connection,
+			                                               tableName,
+			                                               keySerializer,
+			                                               valueSerializer);
+		}
 
-			if (keyType == typeof(string))
-				return new StringKeyObjectStore<TValue>(_connection, _typeModel, _typeStore, tableName);
+		private ISQLiteSerializer<T> GetSerializer<T>()
+		{
+			if (NativeSerializers.TryGetValue(typeof(T), out var serializer))
+				return (ISQLiteSerializer<T>) serializer;
 
-			if (keyType == typeof(Int16))
-				return new Int16KeyObjectStore<TValue>(_connection, _typeModel, _typeStore, tableName);
-
-			if (keyType == typeof(UInt16))
-				return new UInt16KeyObjectStore<TValue>(_connection, _typeModel, _typeStore, tableName);
-
-			if (keyType == typeof(Int32))
-				return new Int32KeyObjectStore<TValue>(_connection, _typeModel, _typeStore, tableName);
-
-			if (keyType == typeof(UInt32))
-				return new UInt32KeyObjectStore<TValue>(_connection, _typeModel, _typeStore, tableName);
-
-			if (keyType == typeof(Int64))
-				return new Int64KeyObjectStore<TValue>(_connection, _typeModel, _typeStore, tableName);
-
-			if (keyType == typeof(IPAddress))
-				return new IpAddressKeyObjectStore<TValue>(_connection, _typeModel, _typeStore, tableName);
-
-			return new GenericKeyObjectStore<TKey,TValue>(_connection, _typeModel, _typeStore, tableName);
+			return new GenericSerializer<T>(_typeModel, _typeStore);
 		}
 
 		public static bool DoesTableExist(SQLiteConnection connection)
@@ -89,7 +100,7 @@ namespace IsabelDb
 			{
 				command.CommandText = string.Format("CREATE TABLE {0} (" +
 				                                    "name STRING PRIMARY KEY NOT NULL," +
-													"tableName STRING UNIQUE NOT NULL," +
+				                                    "tableName STRING UNIQUE NOT NULL," +
 				                                    "typeId INTEGER NOT NULL" +
 				                                    ")", TableName);
 
