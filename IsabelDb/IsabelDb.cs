@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data.SQLite;
 using System.IO;
+using IsabelDb.Stores;
 using ProtoBuf.Meta;
 
 namespace IsabelDb
@@ -40,6 +41,16 @@ namespace IsabelDb
 		public IDictionaryObjectStore<TKey, TValue> GetDictionary<TKey, TValue>(string name)
 		{
 			return _objectStores.GetDictionary<TKey, TValue>(name);
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
+		public IBagObjectStore<T> GetBag<T>(string name)
+		{
+			return _objectStores.GetBag<T>(name);
 		}
 
 		/// <summary>

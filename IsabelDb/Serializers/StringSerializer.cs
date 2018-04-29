@@ -15,7 +15,13 @@ namespace IsabelDb.Serializers
 
 		public string Deserialize(SQLiteDataReader reader, int valueOrdinal)
 		{
-			return reader.GetString(valueOrdinal);
+			// Any sane person would expect that if a column is defined
+			// as STRING then reader.GetString() returns the string we stored.
+			// But obviously this would be WAY too easy to work with, so the sqlite
+			// team ensured that life remains spicy. If you call GetString() on a field
+			// which happens to store a numeric string value, such as "2" then GetString()
+			// obviously throws an InvalidCastException, because why wouldn't it.
+			return (string)reader.GetValue(valueOrdinal);
 		}
 	}
 }

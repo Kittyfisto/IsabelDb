@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using NUnit.Framework;
 
-namespace IsabelDb.Test.KeyTypes
+namespace IsabelDb.Test.DictionaryObjectStore
 {
 	[TestFixture]
 	public sealed class CustomKeyTest
-		: AbstractIsabelDbKeyTest<CustomKey>
+		: AbstractDictionaryObjectStoreTest<CustomKey>
 	{
 		protected override CustomKey SomeKey => new CustomKey {A = 1, B = 2, C = 3, D = 4};
 

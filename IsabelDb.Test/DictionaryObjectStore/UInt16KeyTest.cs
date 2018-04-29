@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using NUnit.Framework;
 
-namespace IsabelDb.Test.KeyTypes
+namespace IsabelDb.Test.DictionaryObjectStore
 {
 	[TestFixture]
 	public sealed class UInt16KeyTest
-		: AbstractIsabelDbKeyTest<ushort>
+		: AbstractDictionaryObjectStoreTest<ushort>
 	{
 		protected override ushort SomeKey => ushort.MinValue;
 

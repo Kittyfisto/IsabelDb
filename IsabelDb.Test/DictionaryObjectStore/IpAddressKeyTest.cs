@@ -2,11 +2,11 @@
 using System.Net;
 using NUnit.Framework;
 
-namespace IsabelDb.Test.KeyTypes
+namespace IsabelDb.Test.DictionaryObjectStore
 {
 	[TestFixture]
 	public sealed class IpAddressKeyTest
-		: AbstractIsabelDbKeyTest<IPAddress>
+		: AbstractDictionaryObjectStoreTest<IPAddress>
 	{
 		protected override IPAddress SomeKey => IPAddress.Loopback;
 

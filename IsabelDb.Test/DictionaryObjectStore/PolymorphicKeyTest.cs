@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 
-namespace IsabelDb.Test.KeyTypes
+namespace IsabelDb.Test.DictionaryObjectStore
 {
 	public sealed class PolymorphicKeyTest
-		: AbstractIsabelDbKeyTest<IPolymorphicCustomKey>
+		: AbstractDictionaryObjectStoreTest<IPolymorphicCustomKey>
 	{
 		protected override IPolymorphicCustomKey SomeKey => new KeyA {Value = "42"};
 

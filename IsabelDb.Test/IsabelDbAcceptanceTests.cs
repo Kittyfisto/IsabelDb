@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using FluentAssertions;
@@ -19,6 +21,8 @@ namespace IsabelDb.Test
 			Directory.CreateDirectory(dir);
 			if (File.Exists(_databaseName))
 				File.Delete(_databaseName);
+
+			Console.WriteLine("Filename: {0}", _databaseName);
 		}
 
 		private string _databaseName;
@@ -131,6 +135,47 @@ namespace IsabelDb.Test
 			{
 				var charts = db.GetDictionary<string, object>("Charts");
 				charts.Get("Pie").Should().BeNull();
+			}
+		}
+
+		[Test]
+		public void TestPutMany()
+		{
+			using (var db = IsabelDb.OpenOrCreate(_databaseName))
+			{
+				const int count = 100000;
+				var values = new List<KeyValuePair<string, Person>>();
+				var table = db.GetDictionary<string, Person>("Piggies");
+				for (var i = 0; i < count; ++i)
+				{
+					var person = new Person
+					{
+						Id = i,
+						Name = string.Format("Guinea Pig {0}", i)
+					};
+					values.Add(new KeyValuePair<string, Person>(person.Id.ToString(), person));
+				}
+
+				var stopwatch = Stopwatch.StartNew();
+				table.PutMany(values);
+				stopwatch.Stop();
+				Console.WriteLine("Writing {0} objects took {1}ms", count, stopwatch.ElapsedMilliseconds);
+
+
+				table.Count().Should().Be(count);
+
+				stopwatch.Restart();
+				var actualPersons = table.GetAll();
+				stopwatch.Stop();
+				Console.WriteLine("Reading {0} objects took {1}ms", count, stopwatch.ElapsedMilliseconds);
+
+				int n = 0;
+				foreach (var pair in actualPersons)
+				{
+					pair.Key.Should().Be(values[n].Key);
+					pair.Value.Should().Be(values[n].Value);
+					++n;
+				}
 			}
 		}
 	}

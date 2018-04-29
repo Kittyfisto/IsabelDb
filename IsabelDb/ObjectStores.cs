@@ -25,6 +25,7 @@ namespace IsabelDb
 		private readonly SQLiteConnection _connection;
 
 		private readonly Dictionary<string, IInternalObjectStore> _dictionaries;
+		private readonly Dictionary<string, IInternalObjectStore> _bags;
 		private readonly TypeModel _typeModel;
 		private readonly TypeStore _typeStore;
 
@@ -51,6 +52,7 @@ namespace IsabelDb
 			_typeModel = typeModel;
 			_typeStore = typeStore;
 			_dictionaries = new Dictionary<string, IInternalObjectStore>();
+			_bags = new Dictionary<string, IInternalObjectStore>();
 		}
 
 		public IDictionaryObjectStore<TKey, TValue> GetDictionary<TKey, TValue>(string name)
@@ -58,7 +60,7 @@ namespace IsabelDb
 			if (!_dictionaries.TryGetValue(name, out var store))
 			{
 				if (!TryRetrieveTableNameFor(name, out var tableName)) tableName = AddTable(name, typeof(TValue));
-				store = CreateObjectStore<TKey, TValue>(tableName);
+				store = CreateDictionary<TKey, TValue>(tableName);
 				_dictionaries.Add(name, store);
 			}
 
@@ -71,22 +73,24 @@ namespace IsabelDb
 			return target;
 		}
 
-		private IInternalObjectStore CreateObjectStore<TKey, TValue>(string tableName)
+		public IBagObjectStore<T> GetBag<T>(string name)
 		{
-			var keySerializer = GetSerializer<TKey>();
-			var valueSerializer = GetSerializer<TValue>();
-			return new DictionaryObjectStore<TKey, TValue>(_connection,
-			                                               tableName,
-			                                               keySerializer,
-			                                               valueSerializer);
-		}
+			if (!_dictionaries.TryGetValue(name, out var store))
+			{
+				if (!TryRetrieveTableNameFor(name, out var tableName))
+					tableName = AddTable(name, typeof(T));
 
-		private ISQLiteSerializer<T> GetSerializer<T>()
-		{
-			if (NativeSerializers.TryGetValue(typeof(T), out var serializer))
-				return (ISQLiteSerializer<T>) serializer;
+				store = CreateBag<T>(tableName);
+				_dictionaries.Add(name, store);
+			}
 
-			return new GenericSerializer<T>(_typeModel, _typeStore);
+			if (!(store is IBagObjectStore<T> target))
+				throw new
+					ArgumentException(string.Format("The bag '{0}' has a value type of '{1}': If your intent was to create a new dictionary, you have to pick a new name!",
+					                                name,
+					                                store.ObjectType.FullName));
+
+			return target;
 		}
 
 		public static bool DoesTableExist(SQLiteConnection connection)
@@ -106,6 +110,32 @@ namespace IsabelDb
 
 				command.ExecuteNonQuery();
 			}
+		}
+
+		private IInternalObjectStore CreateDictionary<TKey, TValue>(string tableName)
+		{
+			var keySerializer = GetSerializer<TKey>();
+			var valueSerializer = GetSerializer<TValue>();
+			return new DictionaryObjectStore<TKey, TValue>(_connection,
+			                                               tableName,
+			                                               keySerializer,
+			                                               valueSerializer);
+		}
+
+		private IInternalObjectStore CreateBag<T>(string tableName)
+		{
+			var serializer = GetSerializer<T>();
+			return new BagObjectStore<T>(_connection,
+			                             serializer,
+			                             tableName);
+		}
+
+		private ISQLiteSerializer<T> GetSerializer<T>()
+		{
+			if (NativeSerializers.TryGetValue(typeof(T), out var serializer))
+				return (ISQLiteSerializer<T>) serializer;
+
+			return new GenericSerializer<T>(_typeModel, _typeStore);
 		}
 
 		private bool TryRetrieveTableNameFor(string name, out string tableName)

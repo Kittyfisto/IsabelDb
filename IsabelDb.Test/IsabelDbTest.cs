@@ -195,41 +195,6 @@ namespace IsabelDb.Test
 		}
 
 		[Test]
-		public void TestPutMany2()
-		{
-			using (var db = IsabelDb.CreateInMemory())
-			{
-				const int count = 100000;
-				var persons = new List<KeyValuePair<string, Person>>();
-				var table = db.GetDictionary<string, Person>("Piggies");
-				for (var i = 0; i < count; ++i)
-				{
-					var person = new Person
-					{
-						Id = i,
-						Name = string.Format("Guinea Pig {0}", i)
-					};
-					persons.Add(new KeyValuePair<string, Person>(person.Id.ToString(), person));
-				}
-
-				var stopwatch = Stopwatch.StartNew();
-
-				table.PutMany(persons);
-
-				stopwatch.Stop();
-				Console.Write("Writing {0} objects took {1}ms", count, stopwatch.ElapsedMilliseconds);
-
-
-				table.Count().Should().Be(count);
-				for (var i = 0; i < count; ++i)
-				{
-					var actualPerson = table.Get(i.ToString());
-					actualPerson.Should().Be(persons[i].Value);
-				}
-			}
-		}
-
-		[Test]
 		[Description("Verifies that data from different tables doesn't interact with each other")]
 		public void TestPutMultipleTables()
 		{

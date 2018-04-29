@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using NUnit.Framework;
 
-namespace IsabelDb.Test.KeyTypes
+namespace IsabelDb.Test.DictionaryObjectStore
 {
 	[TestFixture]
 	public sealed class UInt32KeyTest
-		: AbstractIsabelDbKeyTest<uint>
+		: AbstractDictionaryObjectStoreTest<uint>
 	{
 		protected override uint SomeKey => 0;
 

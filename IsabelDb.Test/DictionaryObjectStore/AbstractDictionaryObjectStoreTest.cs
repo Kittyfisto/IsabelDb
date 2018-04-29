@@ -3,10 +3,10 @@ using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
 
-namespace IsabelDb.Test.KeyTypes
+namespace IsabelDb.Test.DictionaryObjectStore
 {
 	[TestFixture]
-	public abstract class AbstractIsabelDbKeyTest<TKey>
+	public abstract class AbstractDictionaryObjectStoreTest<TKey>
 	{
 		protected abstract TKey SomeKey { get; }
 		protected abstract TKey DifferentKey { get; }
@@ -96,6 +96,12 @@ namespace IsabelDb.Test.KeyTypes
 				{
 					values.Get(key).Should().Be(i);
 					++i;
+				}
+
+				var actual = values.GetAll().ToDictionary(x => x.Key, x => x.Value);
+				foreach (var key in ManyKeys)
+				{
+					actual.Should().ContainKey(key);
 				}
 			}
 		}
