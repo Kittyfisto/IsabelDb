@@ -58,9 +58,12 @@
     <Compile Include="IsabelDbAcceptanceTests.cs" />
     <Compile Include="IsabelDbTest.cs" />
     <Compile Include="KeyTypes\AbstractIsabelDbKeyTest.cs" />
+    <Compile Include="CustomKey.cs" />
+    <Compile Include="KeyTypes\IsabelDbCustomKeyTest.cs" />
     <Compile Include="KeyTypes\IsabelDbInt16KeyTest.cs" />
     <Compile Include="KeyTypes\IsabelDbInt32KeyTest.cs" />
     <Compile Include="KeyTypes\IsabelDbInt64KeyTest.cs" />
+    <Compile Include="KeyTypes\IsabelDbIPAddressKeyTest.cs" />
     <Compile Include="KeyTypes\IsabelDbStringKeyTest.cs" />
     <Compile Include="KeyTypes\IsabelDbUInt16KeyTest.cs" />
     <Compile Include="KeyTypes\IsabelDbUInt32KeyTest.cs" />

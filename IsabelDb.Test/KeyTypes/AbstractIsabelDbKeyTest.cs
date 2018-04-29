@@ -21,6 +21,36 @@ namespace IsabelDb.Test.KeyTypes
 		}
 
 		[Test]
+		public void TestOverwriteValueWithNull()
+		{
+			using (var db = IsabelDb.CreateInMemory())
+			{
+				var values = db.GetDictionary<TKey, object>("Values");
+				values.Put(SomeKey, "A");
+				values.Get(SomeKey).Should().Be("A");
+
+				values.Put(SomeKey, null);
+				values.Get(SomeKey).Should().BeNull();
+				values.GetAll().Should().BeEmpty();
+			}
+		}
+
+		[Test]
+		public void TestRemoveValue()
+		{
+			using (var db = IsabelDb.CreateInMemory())
+			{
+				var values = db.GetDictionary<TKey, object>("Values");
+				values.Put(SomeKey, "A");
+				values.Get(SomeKey).Should().Be("A");
+
+				values.Remove(SomeKey);
+				values.Get(SomeKey).Should().BeNull();
+				values.GetAll().Should().BeEmpty();
+			}
+		}
+
+		[Test]
 		public void TestOverwriteValue()
 		{
 			using (var db = IsabelDb.CreateInMemory())

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
+using System.Net;
 using IsabelDb.Stores;
 using ProtoBuf.Meta;
 
@@ -71,8 +72,10 @@ namespace IsabelDb
 			if (keyType == typeof(Int64))
 				return new Int64KeyObjectStore<TValue>(_connection, _typeModel, _typeStore, tableName);
 
-			throw new NotImplementedException();
-			//return new GenericKeyObjectStore<TKey,TValue>(_connection, _typeModel, _typeStore, tableName);
+			if (keyType == typeof(IPAddress))
+				return new IpAddressKeyObjectStore<TValue>(_connection, _typeModel, _typeStore, tableName);
+
+			return new GenericKeyObjectStore<TKey,TValue>(_connection, _typeModel, _typeStore, tableName);
 		}
 
 		public static bool DoesTableExist(SQLiteConnection connection)

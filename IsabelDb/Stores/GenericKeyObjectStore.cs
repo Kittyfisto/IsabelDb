@@ -27,15 +27,19 @@ namespace IsabelDb.Stores
 			using (var stream = new MemoryStream())
 			{
 				_typeModel.Serialize(stream, key);
-				return stream.ToArray();
+				//stream.Position = 0;
+				var serializedKey = stream.ToArray();
+				return serializedKey;
 			}
 		}
 
 		protected override TKey DeserializeKey(SQLiteDataReader reader, int ordinal)
 		{
-			using (var stream = new MemoryStream((byte[])reader.GetValue(ordinal)))
+			var serializedKey = (byte[]) reader.GetValue(ordinal);
+			using (var stream = new MemoryStream(serializedKey))
 			{
-				return (TKey) _typeModel.Deserialize(stream, null, _keyType);
+				var key = (TKey) _typeModel.Deserialize(stream, null, _keyType);
+				return key;
 			}
 		}
 

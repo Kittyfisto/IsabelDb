@@ -149,7 +149,7 @@ namespace IsabelDb.Stores
 			{
 				using (var command = CreateCommand("DELETE FROM {0} WHERE key = @key"))
 				{
-					command.Parameters.AddWithValue("@key", key);
+					command.Parameters.AddWithValue("@key", SerializeKey(key));
 					command.ExecuteNonQuery();
 					transaction.Commit();
 				}

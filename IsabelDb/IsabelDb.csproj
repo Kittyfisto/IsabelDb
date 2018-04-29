@@ -67,6 +67,7 @@
     <Compile Include="Stores\Int16KeyObjectStore.cs" />
     <Compile Include="Stores\Int32KeyObjectStore.cs" />
     <Compile Include="Stores\Int64KeyObjectStore.cs" />
+    <Compile Include="Stores\IpAddressKeyObjectStore.cs" />
     <Compile Include="Stores\StringKeyObjectStore.cs" />
     <Compile Include="Stores\UInt16KeyObjectStore.cs" />
     <Compile Include="Stores\UInt32KeyObjectStore.cs" />
