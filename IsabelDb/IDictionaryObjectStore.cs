@@ -10,6 +10,12 @@ namespace IsabelDb
 		: IObjectStore
 	{
 		/// <summary>
+		/// </summary>
+		/// <param name="key"></param>
+		/// <returns></returns>
+		TValue Get(TKey key);
+
+		/// <summary>
 		///     Finds all objects.
 		/// </summary>
 		/// <returns></returns>
@@ -20,20 +26,14 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="keys"></param>
 		/// <returns></returns>
-		IEnumerable<KeyValuePair<TKey, TValue>> Get(IEnumerable<TKey> keys);
+		IEnumerable<KeyValuePair<TKey, TValue>> GetMany(IEnumerable<TKey> keys);
 
 		/// <summary>
 		///     Finds all objects with the given keys and type.
 		/// </summary>
 		/// <param name="keys"></param>
 		/// <returns></returns>
-		IEnumerable<KeyValuePair<TKey, TValue>> Get(params TKey[] keys);
-
-		/// <summary>
-		/// </summary>
-		/// <param name="key"></param>
-		/// <returns></returns>
-		TValue Get(TKey key);
+		IEnumerable<KeyValuePair<TKey, TValue>> GetMany(params TKey[] keys);
 
 		/// <summary>
 		/// </summary>
@@ -44,7 +44,7 @@ namespace IsabelDb
 		/// <summary>
 		/// </summary>
 		/// <param name="values"></param>
-		void Put(IEnumerable<KeyValuePair<TKey, TValue>> values);
+		void PutMany(IEnumerable<KeyValuePair<TKey, TValue>> values);
 
 		/// <summary>
 		/// </summary>

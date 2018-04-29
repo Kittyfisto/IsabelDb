@@ -57,7 +57,7 @@ namespace IsabelDb.Stores
 			}
 		}
 
-		public IEnumerable<KeyValuePair<TKey, TValue>> Get(IEnumerable<TKey> keys)
+		public IEnumerable<KeyValuePair<TKey, TValue>> GetMany(IEnumerable<TKey> keys)
 		{
 			using (var command = CreateCommand("SELECT type, value FROM {0} WHERE key = @key"))
 			{
@@ -79,9 +79,9 @@ namespace IsabelDb.Stores
 			}
 		}
 
-		public IEnumerable<KeyValuePair<TKey, TValue>> Get(params TKey[] keys)
+		public IEnumerable<KeyValuePair<TKey, TValue>> GetMany(params TKey[] keys)
 		{
-			return Get((IEnumerable<TKey>) keys);
+			return GetMany((IEnumerable<TKey>) keys);
 		}
 
 		public TValue Get(TKey key)
@@ -112,7 +112,7 @@ namespace IsabelDb.Stores
 			}
 		}
 
-		public void Put(IEnumerable<KeyValuePair<TKey, TValue>> values)
+		public void PutMany(IEnumerable<KeyValuePair<TKey, TValue>> values)
 		{
 			using (var transaction = BeginTransaction())
 			{

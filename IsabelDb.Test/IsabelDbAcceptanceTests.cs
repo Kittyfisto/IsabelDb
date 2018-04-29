@@ -122,7 +122,7 @@ namespace IsabelDb.Test
 
 			using (var db = IsabelDb.Open(_databaseName))
 			{
-				var persons = db.GetDictionary<string, object>("SomeTable").Get("foo", "bar");
+				var persons = db.GetDictionary<string, object>("SomeTable").GetMany("foo", "bar");
 				persons.Should().HaveCount(2);
 				var person = persons.ElementAt(0);
 				person.Key.Should().Be("foo");

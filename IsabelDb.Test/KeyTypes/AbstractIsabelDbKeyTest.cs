@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
 
@@ -9,6 +10,18 @@ namespace IsabelDb.Test.KeyTypes
 	{
 		protected abstract TKey SomeKey { get; }
 		protected abstract TKey DifferentKey { get; }
+		protected abstract IReadOnlyList<TKey> ManyKeys { get; }
+
+		[OneTimeSetUp]
+		public void OneTimeSetUp()
+		{
+			var keys = new HashSet<TKey>();
+			foreach (var key in ManyKeys)
+			{
+				if (!keys.Add(key))
+					Assert.Inconclusive("Don't provide duplicate keys!");
+			}
+		}
 
 		[Test]
 		public void TestGetNonExistantKey()
@@ -17,6 +30,28 @@ namespace IsabelDb.Test.KeyTypes
 			{
 				var values = db.GetDictionary<TKey, object>("Values");
 				values.Get(SomeKey).Should().BeNull();
+			}
+		}
+
+		[Test]
+		public void TestPutManyKeys()
+		{
+			using (var db = IsabelDb.CreateInMemory())
+			{
+				var values = db.GetDictionary<TKey, object>("Values");
+				int i = 0;
+				foreach (var key in ManyKeys)
+				{
+					values.Put(key, i);
+					++i;
+				}
+
+				i = 0;
+				foreach (var key in ManyKeys)
+				{
+					values.Get(key).Should().Be(i);
+					++i;
+				}
 			}
 		}
 

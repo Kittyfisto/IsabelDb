@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using NUnit.Framework;
 
 namespace IsabelDb.Test.KeyTypes
@@ -10,5 +11,7 @@ namespace IsabelDb.Test.KeyTypes
 		protected override Int64 SomeKey => Int64.MinValue;
 
 		protected override Int64 DifferentKey => Int64.MaxValue;
+
+		protected override IReadOnlyList<long> ManyKeys => new long[] {long.MinValue, -1, 0, 1, long.MaxValue};
 	}
 }

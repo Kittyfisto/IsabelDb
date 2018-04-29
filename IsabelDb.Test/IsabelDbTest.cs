@@ -10,16 +10,6 @@ namespace IsabelDb.Test
 	[TestFixture]
 	public sealed class IsabelDbTest
 	{
-		public static IEnumerable<string> Keys => new[]
-		{
-			" ",
-			"	",
-			"Hello, World!",
-			"휘파람",
-			"العَرَبِيَّة",
-			"日本語"
-		};
-
 		[Test]
 		public void TestCreateInMemory()
 		{
@@ -111,17 +101,6 @@ namespace IsabelDb.Test
 		}
 
 		[Test]
-		public void TestUnicodeKey([ValueSource(nameof(Keys))] string key)
-		{
-			using (var db = IsabelDb.CreateInMemory())
-			{
-				var dictionary = db.GetDictionary<string, object>("SomeTable");
-				dictionary.Put(key, 9001);
-				dictionary.Get(key).Should().Be(9001);
-			}
-		}
-
-		[Test]
 		public void TestReplaceValue()
 		{
 			using (var db = IsabelDb.CreateInMemory())
@@ -194,7 +173,7 @@ namespace IsabelDb.Test
 			using (var db = IsabelDb.CreateInMemory())
 			{
 				db.GetDictionary<string, object>("SomeTable").Get("foo").Should().BeNull();
-				db.GetDictionary<string, object>("SomeTable").Get("foo", "bar").Should().BeEmpty();
+				db.GetDictionary<string, object>("SomeTable").GetMany("foo", "bar").Should().BeEmpty();
 			}
 		}
 
@@ -282,7 +261,7 @@ namespace IsabelDb.Test
 				};
 
 				var table = db.GetDictionary<string, object>("Stuff");
-				table.Put(new []
+				table.PutMany(new []
 				{
 					new KeyValuePair<string, object>("foo", address),
 					new KeyValuePair<string, object>("bar", steven)
@@ -315,7 +294,7 @@ namespace IsabelDb.Test
 
 				var stopwatch = Stopwatch.StartNew();
 
-				table.Put(persons);
+				table.PutMany(persons);
 
 				stopwatch.Stop();
 				Console.Write("Writing {0} objects took {1}ms", count, stopwatch.ElapsedMilliseconds);
@@ -350,7 +329,7 @@ namespace IsabelDb.Test
 			store.Put("foo", value1);
 			store.Put("bar", value2);
 
-			var persons = store.Get("foo", "bar");
+			var persons = store.GetMany("foo", "bar");
 			persons.Should().HaveCount(2);
 			var actualValue1 = persons.ElementAt(0);
 			actualValue1.Key.Should().Be("foo");
