@@ -15,13 +15,12 @@ namespace IsabelDb
 		private readonly SQLiteConnection _connection;
 		private readonly ObjectStores _objectStores;
 
-		private IsabelDb(SQLiteConnection connection)
+		private IsabelDb(SQLiteConnection connection, ITypeResolver typeResolver)
 		{
 			_connection = connection;
 			TypeModel typeModel = TypeModel.Create();
 
-			var typeResolver = new TypeResolver();
-			var typeStore = new TypeStore(connection, typeResolver);
+			var typeStore = new TypeStore(connection, typeResolver ?? new TypeResolver());
 			_objectStores = new ObjectStores(connection, typeModel, typeStore);
 		}
 
@@ -59,15 +58,16 @@ namespace IsabelDb
 		/// <remarks>
 		///     This is probably only useful for tests.
 		/// </remarks>
+		/// <param name="typeResolver"></param>
 		/// <returns></returns>
-		public static IsabelDb CreateInMemory()
+		public static IsabelDb CreateInMemory(ITypeResolver typeResolver = null)
 		{
 			var connection = new SQLiteConnection("Data Source=:memory:");
 			try
 			{
 				connection.Open();
 				CreateTables(connection);
-				return new IsabelDb(connection);
+				return new IsabelDb(connection, typeResolver);
 			}
 			catch (Exception)
 			{
@@ -80,8 +80,9 @@ namespace IsabelDb
 		///     Opens an existing or creates a new database at the given file path.
 		/// </summary>
 		/// <param name="databasePath"></param>
+		/// <param name="typeResolver"></param>
 		/// <returns></returns>
-		public static IsabelDb OpenOrCreate(string databasePath)
+		public static IsabelDb OpenOrCreate(string databasePath, ITypeResolver typeResolver = null)
 		{
 			if (!File.Exists(databasePath)) SQLiteConnection.CreateFile(databasePath);
 
@@ -91,7 +92,7 @@ namespace IsabelDb
 			{
 				connection.Open();
 				CreateTablesIfNecessary(connection);
-				return new IsabelDb(connection);
+				return new IsabelDb(connection, typeResolver);
 			}
 			catch (Exception)
 			{
@@ -104,9 +105,10 @@ namespace IsabelDb
 		///     Opens an existing database at the given path.
 		/// </summary>
 		/// <param name="databaseFilePath"></param>
+		/// <param name="typeResolver"></param>
 		/// <returns></returns>
 		/// <exception cref="FileNotFoundException"></exception>
-		public static IsabelDb Open(string databaseFilePath)
+		public static IsabelDb Open(string databaseFilePath, ITypeResolver typeResolver = null)
 		{
 			if (!File.Exists(databaseFilePath))
 				throw new FileNotFoundException("Unable to open the given database", databaseFilePath);
@@ -117,7 +119,7 @@ namespace IsabelDb
 			{
 				connection.Open();
 				EnsureTableSchema(connection);
-				return new IsabelDb(connection);
+				return new IsabelDb(connection, typeResolver);
 			}
 			catch (Exception)
 			{

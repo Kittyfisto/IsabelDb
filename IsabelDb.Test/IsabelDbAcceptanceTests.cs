@@ -178,5 +178,97 @@ namespace IsabelDb.Test
 				}
 			}
 		}
+
+		[Test]
+		[Defect("https://github.com/Kittyfisto/IsabelDb/issues/1")]
+		[Description("Verifies that collections skip un-deserializable values")]
+		public void TestUnresolvableValueType()
+		{
+			var resolver = new TypeRegistry();
+			resolver.Register<object>();
+			resolver.Register<CustomKey>();
+			using (var db = IsabelDb.OpenOrCreate(_databaseName, resolver))
+			{
+				var values = db.GetDictionary<int, object>("Foo");
+				values.Put(0, 42);
+				values.Put(1, new CustomKey { A = 42 });
+				values.Put(2, "Hello, World!");
+			}
+
+			using (var db = IsabelDb.Open(_databaseName, resolver))
+			{
+				var values = db.GetDictionary<int, object>("Foo");
+				var allValues = values.GetAll();
+				allValues.Count().Should().Be(3, "because we're still able to resolve all types");
+			}
+
+			resolver = new TypeRegistry();
+			using (var db = IsabelDb.Open(_databaseName, resolver))
+			{
+				var values = db.GetDictionary<int, object>("Foo");
+				var allValues = values.GetAll();
+				allValues.Count().Should().Be(2, "because we're no longer able to resolve CustomKey");
+				allValues.ElementAt(0).Key.Should().Be(0);
+				allValues.ElementAt(0).Value.Should().Be(42);
+				allValues.ElementAt(1).Key.Should().Be(2);
+				allValues.ElementAt(1).Value.Should().Be("Hello, World!");
+			}
+		}
+
+		[Test]
+		[Description("Verifies that the database refuses to ")]
+		public void TestUnresolvableBagType()
+		{
+			var resolver = new TypeRegistry();
+			resolver.Register<CustomKey>();
+			using (var db = IsabelDb.OpenOrCreate(_databaseName, resolver))
+			{
+				var bag = db.GetBag<CustomKey>("Keys");
+				bag.Put(new CustomKey { A = 1 });
+				bag.Put(new CustomKey { B = 2 });
+			}
+
+			using (var db = IsabelDb.Open(_databaseName, resolver))
+			{
+				var bag = db.GetBag<CustomKey>("Keys");
+				var values = bag.GetAll();
+				values.Should().BeEquivalentTo(new CustomKey { A = 1 }, new CustomKey { B = 2 });
+			}
+
+			using (var db = IsabelDb.Open(_databaseName, new TypeRegistry()))
+			{
+				new Action(() => db.GetBag<CustomKey>("Keys"))
+					.Should().Throw<TypeResolveException>()
+					.WithMessage("A collection named 'Keys' already exists but it's value type could not be resolved: If your intent is to re-use this existing collection, then you need to investigate why the type resolver could not resolve it's type. If your intent is to create a new collection, then you need to pick a different name");
+			}
+		}
+
+		[Test]
+		[Defect("https://github.com/Kittyfisto/IsabelDb/issues/1")]
+		[Description("")]
+		public void TestUnresolvableDictionaryValueType()
+		{
+			var resolver = new TypeRegistry();
+			resolver.Register<CustomKey>();
+			using (var db = IsabelDb.OpenOrCreate(_databaseName, resolver))
+			{
+				var dictionary = db.GetDictionary<int, CustomKey>("MoreKeys");
+				dictionary.Put(1, new CustomKey { C = 2 });
+				dictionary.Put(2, new CustomKey { D = -2 });
+			}
+
+			using (var db = IsabelDb.Open(_databaseName, resolver))
+			{
+				var dictionary = db.GetDictionary<int, CustomKey>("MoreKeys");
+				dictionary.GetAll().Count().Should().Be(2);
+			}
+
+			using (var db = IsabelDb.Open(_databaseName, new TypeRegistry()))
+			{
+				new Action(() => db.GetDictionary<int, CustomKey>("MoreKeys"))
+					.Should().Throw<TypeResolveException>()
+					.WithMessage("A collection named 'MoreKeys' already exists but it's value type could not be resolved: If your intent is to re-use this existing collection, then you need to investigate why the type resolver could not resolve it's type. If your intent is to create a new collection, then you need to pick a different name");
+			}
+		}
 	}
 }

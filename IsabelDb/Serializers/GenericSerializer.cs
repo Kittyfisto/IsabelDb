@@ -36,7 +36,7 @@ namespace IsabelDb.Serializers
 			}
 		}
 
-		public T Deserialize(SQLiteDataReader reader, int valueOrdinal)
+		public bool TryDeserialize(SQLiteDataReader reader, int valueOrdinal, out T value)
 		{
 			var serializedValue = (byte[]) reader.GetValue(valueOrdinal);
 			using (var stream = new MemoryStream(serializedValue))
@@ -44,8 +44,14 @@ namespace IsabelDb.Serializers
 			{
 				var typeId = tmp.ReadInt32();
 				var type = _typeStore.GetTypeFromTypeId(typeId);
-				var value = _typeModel.Deserialize(stream, value: null, type: type);
-				return (T) value;
+				if (type == null)
+				{
+					value = default(T);
+					return false;
+				}
+
+				value = (T)_typeModel.Deserialize(stream, value: null, type: type);
+				return true;
 			}
 		}
 	}

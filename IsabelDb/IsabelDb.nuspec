@@ -17,6 +17,7 @@
     <dependencies>
       <dependency id="protobuf-net" version="2.3.7" />
       <dependency id="System.Data.SQLite.Core" version="1.0.108.0" />
+      <dependency id="log4net" version="2.0.8" />
     </dependencies>
   </metadata>
   <files>

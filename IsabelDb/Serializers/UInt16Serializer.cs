@@ -13,10 +13,11 @@ namespace IsabelDb.Serializers
 			return (int) value;
 		}
 
-		public ushort Deserialize(SQLiteDataReader reader, int valueOrdinal)
+		public bool TryDeserialize(SQLiteDataReader reader, int valueOrdinal, out ushort value)
 		{
 			var rawValue = reader.GetInt32(valueOrdinal);
-			return unchecked((ushort) rawValue);
+			value = unchecked((ushort) rawValue);
+			return true;
 		}
 	}
 }

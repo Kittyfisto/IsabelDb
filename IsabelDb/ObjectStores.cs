@@ -59,7 +59,17 @@ namespace IsabelDb
 		{
 			if (!_dictionaries.TryGetValue(name, out var store))
 			{
-				if (!TryRetrieveTableNameFor(name, out var tableName)) tableName = AddTable(name, typeof(TValue));
+				if (TryRetrieveTableNameFor(name, out var tableName, out var keyType, out var valueType))
+				{
+					EnsureTypeSafety(name,
+						typeof(TKey), typeof(TValue),
+						keyType, valueType);
+				}
+				else
+				{
+					tableName = AddTable(name, typeof(TKey), typeof(TValue));
+				}
+
 				store = CreateDictionary<TKey, TValue>(tableName);
 				_dictionaries.Add(name, store);
 			}
@@ -75,13 +85,19 @@ namespace IsabelDb
 
 		public IBagObjectStore<T> GetBag<T>(string name)
 		{
-			if (!_dictionaries.TryGetValue(name, out var store))
+			if (!_bags.TryGetValue(name, out var store))
 			{
-				if (!TryRetrieveTableNameFor(name, out var tableName))
-					tableName = AddTable(name, typeof(T));
+				if (TryRetrieveTableNameFor(name, out var tableName, out var unused, out var valueType))
+				{
+					EnsureTypeSafety(name, null, typeof(T), null, valueType);
+				}
+				else
+				{
+					tableName = AddTable(name, null, typeof(T));
+				}
 
 				store = CreateBag<T>(tableName);
-				_dictionaries.Add(name, store);
+				_bags.Add(name, store);
 			}
 
 			if (!(store is IBagObjectStore<T> target))
@@ -105,11 +121,40 @@ namespace IsabelDb
 				command.CommandText = string.Format("CREATE TABLE {0} (" +
 				                                    "name STRING PRIMARY KEY NOT NULL," +
 				                                    "tableName STRING UNIQUE NOT NULL," +
-				                                    "typeId INTEGER NOT NULL" +
+				                                    "keyType INTEGER," +
+				                                    "valueType INTEGER NOT NULL" +
 				                                    ")", TableName);
 
 				command.ExecuteNonQuery();
 			}
+		}
+
+		private void EnsureTypeSafety(string collectionName,
+		                              Type expectedKeyType, Type expectedValueType,
+		                              Type actualKeyType, Type actualValueType)
+		{
+			if (expectedKeyType != null)
+			{
+				if (actualKeyType == null)
+					throw new TypeResolveException(string.Format("The key type of the dictionary '{0}' could not be resolved",
+						collectionName));
+
+				if (expectedKeyType != actualKeyType)
+					throw new TypeMismatchException(string.Format("The dictionary '{0}' has been stored to use keys of type '{1}' which does not match the requested key '{2}'!",
+						collectionName,
+						actualKeyType,
+						expectedKeyType));
+			}
+
+			if (actualValueType == null)
+				throw new TypeResolveException(string.Format("A collection named '{0}' already exists but it's value type could not be resolved: If your intent is to re-use this existing collection, then you need to investigate why the type resolver could not resolve it's type. If your intent is to create a new collection, then you need to pick a different name",
+						collectionName));
+
+			if (expectedValueType != actualValueType)
+				throw new TypeMismatchException(string.Format("The collection '{0}' has been stored to use values of type '{1}' which does not match the requested key '{2}'!",
+						collectionName,
+						actualValueType,
+						expectedValueType));
 		}
 
 		private IInternalObjectStore CreateDictionary<TKey, TValue>(string tableName)
@@ -138,31 +183,52 @@ namespace IsabelDb
 			return new GenericSerializer<T>(_typeModel, _typeStore);
 		}
 
-		private bool TryRetrieveTableNameFor(string name, out string tableName)
+		private bool TryRetrieveTableNameFor(string name, out string tableName,
+			out Type keyType,
+			out Type valueType)
 		{
 			using (var command = _connection.CreateCommand())
 			{
-				command.CommandText = string.Format("SELECT tableName FROM {0} WHERE name = @name LIMIT 0,1", TableName);
+				command.CommandText = string.Format("SELECT tableName, keyType, valueType FROM {0} WHERE name = @name LIMIT 0,1", TableName);
 				command.Parameters.AddWithValue("@name", name);
-				tableName = command.ExecuteScalar() as string;
-				return tableName != null;
+				using (var reader = command.ExecuteReader())
+				{
+					if (!reader.Read())
+					{
+						tableName = null;
+						keyType = null;
+						valueType = null;
+						return false;
+					}
+
+					tableName = reader.GetString(0);
+					if (!reader.IsDBNull(1))
+						keyType = _typeStore.GetTypeFromTypeId(reader.GetInt32(1));
+					else
+						keyType = null;
+
+					valueType = _typeStore.GetTypeFromTypeId(reader.GetInt32(2));
+					return true;
+				}
 			}
 		}
 
-		private string AddTable(string name, Type type)
+		private string AddTable(string name, Type keyType, Type valueType)
 		{
 			using (var command = _connection.CreateCommand())
 			{
-				command.CommandText = string.Format("INSERT INTO {0} (name, tableName, typeId)" +
-				                                    "VALUES (@name, @tableName, @typeId)", TableName);
+				command.CommandText = string.Format("INSERT INTO {0} (name, tableName, keyType, valueType)" +
+				                                    "VALUES (@name, @tableName, @keyType, @valueType)", TableName);
 
-				var typeId = _typeStore.GetOrCreateTypeId(type);
+				var keyTypeId = keyType != null ? (int?)_typeStore.GetOrCreateTypeId(keyType) : null;
+				var valueTypeId = _typeStore.GetOrCreateTypeId(valueType);
 
 				var tableName = CreateTableNameFor(name);
 
 				command.Parameters.AddWithValue("@name", name);
 				command.Parameters.AddWithValue("@tableName", tableName);
-				command.Parameters.AddWithValue("@typeId", typeId);
+				command.Parameters.AddWithValue("@keyType", keyTypeId);
+				command.Parameters.AddWithValue("@valueType", valueTypeId);
 
 				command.ExecuteNonQuery();
 

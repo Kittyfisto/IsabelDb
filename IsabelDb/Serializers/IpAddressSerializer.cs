@@ -14,10 +14,11 @@ namespace IsabelDb.Serializers
 			return value.GetAddressBytes();
 		}
 
-		public IPAddress Deserialize(SQLiteDataReader reader, int valueOrdinal)
+		public bool TryDeserialize(SQLiteDataReader reader, int valueOrdinal, out IPAddress value)
 		{
 			var addressBytes = (byte[]) reader.GetValue(valueOrdinal);
-			return new IPAddress(addressBytes);
+			value = new IPAddress(addressBytes);
+			return true;
 		}
 	}
 }

@@ -33,7 +33,7 @@ namespace IsabelDb.Stores
 
 		#region Implementation of IInternalObjectStore
 
-		public Type ObjectType => throw new NotImplementedException();
+		public Type ObjectType => typeof(T);
 
 		#endregion
 
@@ -64,8 +64,14 @@ namespace IsabelDb.Stores
 				{
 					while (reader.Read())
 					{
-						var value = _serializer.Deserialize(reader, 0);
-						ret.Add(value);
+						if (_serializer.TryDeserialize(reader, 0, out var value))
+						{
+							ret.Add(value);
+						}
+						else
+						{
+							
+						}
 					}
 				}
 				return ret;

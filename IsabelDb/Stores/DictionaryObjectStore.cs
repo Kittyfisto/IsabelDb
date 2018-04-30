@@ -53,9 +53,21 @@ namespace IsabelDb.Stores
 				var ret = new List<KeyValuePair<TKey, TValue>>();
 				while (reader.Read())
 				{
-					var key = _keySerializer.Deserialize(reader, valueOrdinal: 0);
-					var value = _valueSerializer.Deserialize(reader, valueOrdinal: 1);
-					ret.Add(new KeyValuePair<TKey, TValue>(key, value));
+					if (_keySerializer.TryDeserialize(reader, 0, out var key))
+					{
+						if (_valueSerializer.TryDeserialize(reader, 1, out var value))
+						{
+							ret.Add(new KeyValuePair<TKey, TValue>(key, value));
+						}
+						else
+						{
+							// TODO: Log error / warning
+						}
+					}
+					else
+					{
+						// TODO: Log error / warning
+					}
 				}
 
 				return ret;
@@ -75,8 +87,14 @@ namespace IsabelDb.Stores
 					{
 						while (reader.Read())
 						{
-							var value = _valueSerializer.Deserialize(reader, valueOrdinal: 1);
-							ret.Add(new KeyValuePair<TKey, TValue>(key, value));
+							if (_valueSerializer.TryDeserialize(reader, 1, out var value))
+							{
+								ret.Add(new KeyValuePair<TKey, TValue>(key, value));
+							}
+							else
+							{
+								// TODO: Log error / warning
+							}
 						}
 					}
 				}
@@ -101,7 +119,8 @@ namespace IsabelDb.Stores
 					if (!reader.Read())
 						return default(TValue);
 
-					return _valueSerializer.Deserialize(reader, valueOrdinal: 1);
+					_valueSerializer.TryDeserialize(reader, 1, out var value);
+					return value;
 				}
 			}
 		}

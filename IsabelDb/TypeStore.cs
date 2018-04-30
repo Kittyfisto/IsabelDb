@@ -1,13 +1,17 @@
-﻿using System;
+﻿using log4net;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
 using System.Linq;
+using System.Reflection;
 
 namespace IsabelDb
 {
 	internal sealed class TypeStore
 	{
+		private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+
 		private const string TableName = "isabel_types";
 
 		private readonly SQLiteConnection _connection;
@@ -40,6 +44,10 @@ namespace IsabelDb
 			int id;
 			if (!_typesToId.TryGetValue(type, out id))
 			{
+				var typeName = _typeResolver.GetName(type);
+				if (typeName == null)
+					return -1;
+
 				id = ++_nextId;
 				_idToTypes.Add(id, type);
 				_typesToId.Add(type, id);
@@ -50,7 +58,7 @@ namespace IsabelDb
 					var typename = command.Parameters.Add("@typename", DbType.String);
 					var idParameter = command.Parameters.Add("@id", DbType.Int32);
 
-					typename.Value = _typeResolver.GetName(type);
+					typename.Value = typeName;
 					idParameter.Value = id;
 					command.ExecuteNonQuery();
 				}
@@ -94,11 +102,37 @@ namespace IsabelDb
 						var typeName = reader.GetString(i: 0);
 						var id = reader.GetInt32(i: 1);
 
-						var type = typeResolver.Resolve(typeName);
-						typesToId.Add(type, id);
-						idToTypes.Add(id, type);
+						TryResolveType(typeResolver, typeName, id,
+							typesToId,
+							idToTypes);
 					}
 				}
+			}
+		}
+
+		private static void TryResolveType(ITypeResolver typeResolver,
+			string typeName,
+			int id,
+			Dictionary<Type, int> typesToId,
+			Dictionary<int, Type> idToTypes
+			)
+		{
+			try
+			{
+				var type = typeResolver.Resolve(typeName);
+				if (type != null)
+				{
+					typesToId.Add(type, id);
+					idToTypes.Add(id, type);
+				}
+				else
+				{
+					Log.ErrorFormat("Unable to resolve '{0}' to a .NET type! Values of this type will not be readable", typeName);
+				}
+			}
+			catch(Exception e)
+			{
+				Log.ErrorFormat("Unable to resolve '{0}' to a .NET type! Values of this type will not be readable: {0}", typeName, e);
 			}
 		}
 	}

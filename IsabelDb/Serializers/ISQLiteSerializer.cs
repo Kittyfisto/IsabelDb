@@ -30,7 +30,8 @@ namespace IsabelDb.Serializers
 		/// </summary>
 		/// <param name="reader"></param>
 		/// <param name="valueOrdinal">The ordinal of the column where the value is stored</param>
+		/// <param name="value"></param>
 		/// <returns></returns>
-		T Deserialize(SQLiteDataReader reader, int valueOrdinal);
+		bool TryDeserialize(SQLiteDataReader reader, int valueOrdinal, out T value);
 	}
 }
