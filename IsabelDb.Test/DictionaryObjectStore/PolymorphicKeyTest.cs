@@ -1,10 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace IsabelDb.Test.DictionaryObjectStore
 {
 	public sealed class PolymorphicKeyTest
 		: AbstractDictionaryObjectStoreTest<IPolymorphicCustomKey>
 	{
+		protected override IEnumerable<Type> CustomTypes => new []{typeof(KeyA), typeof(KeyB)};
+
 		protected override IPolymorphicCustomKey SomeKey => new KeyA {Value = "42"};
 
 		protected override IPolymorphicCustomKey DifferentKey => new KeyB {Value = "9001"};

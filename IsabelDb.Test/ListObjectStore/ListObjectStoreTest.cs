@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
@@ -7,10 +8,12 @@ namespace IsabelDb.Test.ListObjectStore
 {
 	public sealed class ListObjectStoreTest
 	{
+		private static IEnumerable<Type> NoCustomTypes => new Type[0];
+
 		[Test]
 		public void TestClearEmpty()
 		{
-			using (var db = IsabelDb.CreateInMemory())
+			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
 			{
 				var bag = db.GetBag<string>("foo");
 				new Action(() => bag.Clear()).Should().NotThrow();
@@ -20,7 +23,7 @@ namespace IsabelDb.Test.ListObjectStore
 		[Test]
 		public void TestClearOne()
 		{
-			using (var db = IsabelDb.CreateInMemory())
+			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
 			{
 				var bag = db.GetBag<string>("foo");
 				bag.Put("Hello, World!");
@@ -35,7 +38,7 @@ namespace IsabelDb.Test.ListObjectStore
 		[Test]
 		public void TestClearMany()
 		{
-			using (var db = IsabelDb.CreateInMemory())
+			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
 			{
 				var bag = db.GetBag<int>("foo");
 				bag.PutMany(Enumerable.Range(0, 1000));
@@ -50,7 +53,7 @@ namespace IsabelDb.Test.ListObjectStore
 		[Test]
 		public void TestPutSameValue()
 		{
-			using (var db = IsabelDb.CreateInMemory())
+			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
 			{
 				var bag = db.GetBag<int>("my favourite numbers");
 				bag.Put(42);
@@ -64,7 +67,7 @@ namespace IsabelDb.Test.ListObjectStore
 		[Test]
 		public void TestPutManyValues()
 		{
-			using (var db = IsabelDb.CreateInMemory())
+			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
 			{
 				var bag = db.GetBag<int>("foo");
 				bag.PutMany(1, 2, 3, 4);

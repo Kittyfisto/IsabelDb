@@ -81,9 +81,13 @@
   <ItemGroup>
     <Compile Include="Address.cs" />
     <Compile Include="AssemblySetup.cs" />
+    <Compile Include="DataContractNoNameNoNamespace.cs" />
     <Compile Include="DefectAttribute.cs" />
+    <Compile Include="ExplicitNameAndNamespace.cs" />
+    <Compile Include="ExplicitNameNoNamespace.cs" />
+    <Compile Include="ExplicitNamespaceNoName.cs" />
     <Compile Include="ICustomKey.cs" />
-    <Compile Include="IsabelDbAcceptanceTests.cs" />
+    <Compile Include="IsabelDbFileTests.cs" />
     <Compile Include="IsabelDbTest.cs" />
     <Compile Include="KeyA.cs" />
     <Compile Include="KeyB.cs" />

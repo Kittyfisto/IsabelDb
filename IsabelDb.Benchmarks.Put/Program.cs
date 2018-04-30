@@ -21,7 +21,7 @@ namespace IsabelDb.Benchmarks.Put
 				const string filename = "Put.isdb";
 				if (File.Exists(filename))
 					File.Delete(filename);
-				_database = IsabelDb.OpenOrCreate(filename);
+				_database = IsabelDb.OpenOrCreate(filename, new []{typeof(Book)});
 				_books = _database.GetDictionary<int, Book>("Books");
 				_book = new Book
 				{

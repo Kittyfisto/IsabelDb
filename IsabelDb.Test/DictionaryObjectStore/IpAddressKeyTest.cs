@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using NUnit.Framework;
 
@@ -8,6 +9,8 @@ namespace IsabelDb.Test.DictionaryObjectStore
 	public sealed class IpAddressKeyTest
 		: AbstractDictionaryObjectStoreTest<IPAddress>
 	{
+		protected override IEnumerable<Type> CustomTypes => new Type[0];
+
 		protected override IPAddress SomeKey => IPAddress.Loopback;
 
 		protected override IPAddress DifferentKey => IPAddress.IPv6Loopback;

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using NUnit.Framework;
 
 namespace IsabelDb.Test.DictionaryObjectStore
@@ -7,6 +8,8 @@ namespace IsabelDb.Test.DictionaryObjectStore
 	public sealed class CustomKeyTest
 		: AbstractDictionaryObjectStoreTest<CustomKey>
 	{
+		protected override IEnumerable<Type> CustomTypes => new []{typeof(CustomKey)};
+
 		protected override CustomKey SomeKey => new CustomKey {A = 1, B = 2, C = 3, D = 4};
 
 		protected override CustomKey DifferentKey =>

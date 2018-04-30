@@ -9,9 +9,29 @@ namespace IsabelDb.Test
 	[TestFixture]
 	public sealed class IsabelDbTest
 	{
-		private static void PutAndGet<T>(IsabelDb db, T value1, T value2)
+		private static IEnumerable<Type> NoCustomTypes => new Type[0];
+
+		private static void PutAndGetObjectTable<T>(IsabelDb db, T value1, T value2)
 		{
-			var store = db.GetDictionary<string, object>("SomeTable");
+			var store = db.GetDictionary<string, object>("ObjectTable");
+
+			store.Put("foo", value1);
+			store.Put("bar", value2);
+
+			var persons = store.GetMany("foo", "bar");
+			persons.Should().HaveCount(expected: 2);
+			var actualValue1 = persons.ElementAt(index: 0);
+			actualValue1.Key.Should().Be("foo");
+			actualValue1.Value.Should().Be(value1);
+
+			var actualValue2 = persons.ElementAt(index: 1);
+			actualValue2.Key.Should().Be("bar");
+			actualValue2.Value.Should().Be(value2);
+		}
+
+		private static void PutAndGetValueTable<T>(IsabelDb db, T value1, T value2)
+		{
+			var store = db.GetDictionary<string, T>("ValueTable");
 
 			store.Put("foo", value1);
 			store.Put("bar", value2);
@@ -31,7 +51,7 @@ namespace IsabelDb.Test
 		[Description("Verifies that clearing an empty dictionary is allowed")]
 		public void TestClearEmpty()
 		{
-			using (var db = IsabelDb.CreateInMemory())
+			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
 			{
 				var people = db.GetDictionary<string, object>("People");
 				people.Count().Should().Be(expected: 0);
@@ -43,13 +63,85 @@ namespace IsabelDb.Test
 		[Test]
 		public void TestCreateInMemory()
 		{
-			IsabelDb.CreateInMemory();
+			IsabelDb.CreateInMemory(NoCustomTypes);
+		}
+
+		[Test]
+		[Description("Verifies that creating a collection for a non-registered custom type is not allowed")]
+		public void TestGetCollectionNonRegisteredType1()
+		{
+			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
+			{
+					new Action(() => db.GetDictionary<string, CustomKey>("SomeTable"))
+					.Should().Throw<ArgumentException>()
+					.WithMessage("The type 'IsabelDb.Test.CustomKey' has not been registered when the database was created and thus may not be used as the value type in a collection");
+			}
+		}
+
+		[Test]
+		[Description("Verifies that creating a collection for a non-registered custom type is not allowed")]
+		public void TestGetCollectionNonRegisteredType2()
+		{
+			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
+			{
+				new Action(() => db.GetDictionary<CustomKey, string>("SomeTable"))
+					.Should().Throw<ArgumentException>()
+					.WithMessage("The type 'IsabelDb.Test.CustomKey' has not been registered when the database was created and thus may not be used as the key type in a collection");
+			}
+		}
+
+		[Test]
+		[Description("Verifies that creating a collection for a non-registered custom type is not allowed")]
+		public void TestGetCollectionNonRegisteredType3()
+		{
+			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
+			{
+				new Action(() => db.GetBag<CustomKey>("SomeTable"))
+					.Should().Throw<ArgumentException>()
+					.WithMessage("The type 'IsabelDb.Test.CustomKey' has not been registered when the database was created and thus may not be used as the value type in a collection");
+			}
+		}
+
+		[Test]
+		[Description("Verifies that putting an object of a non-registered type in a collection is not allowed")]
+		public void TestGetPutRegistered1()
+		{
+			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
+			{
+				var values = db.GetDictionary<string, object>("SomeTable");
+				new Action(() => values.Put("Foo", new CustomKey()))
+					.Should().Throw<ArgumentException>();
+			}
+		}
+
+		[Test]
+		[Description("Verifies that putting an object of a non-registered type in a collection is not allowed")]
+		public void TestGetPutRegistered2()
+		{
+			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
+			{
+				var values = db.GetDictionary<object, string>("SomeTable");
+				new Action(() => values.Put(new CustomKey(), "Foo"))
+					.Should().Throw<ArgumentException>();
+			}
+		}
+
+		[Test]
+		[Description("Verifies that putting an object of a non-registered type in a collection is not allowed")]
+		public void TestGetPutRegistered3()
+		{
+			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
+			{
+				var values = db.GetBag<object>("SomeTable");
+				new Action(() => values.Put(new CustomKey()))
+					.Should().Throw<ArgumentException>();
+			}
 		}
 
 		[Test]
 		public void TestGet1()
 		{
-			using (var db = IsabelDb.CreateInMemory())
+			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
 			{
 				db.GetDictionary<string, object>("SomeTable").Put("foo", "bar");
 				db.GetDictionary<string, object>("SomeTable").Get("foo").Should().Be("bar");
@@ -60,7 +152,7 @@ namespace IsabelDb.Test
 		[Description("Verifies that GetDictionary allows for names to be case sensitive")]
 		public void TestGetDictionaryCaseSensitiveNames()
 		{
-			using (var db = IsabelDb.CreateInMemory())
+			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
 			{
 				var a = db.GetDictionary<string, object>("A");
 				var b = db.GetDictionary<string, object>("a");
@@ -77,7 +169,7 @@ namespace IsabelDb.Test
 		[Test]
 		public void TestGetDictionaryDifferentTypes()
 		{
-			using (var db = IsabelDb.CreateInMemory())
+			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
 			{
 				var a = db.GetDictionary<string, string>("Names");
 				new Action(() => db.GetDictionary<string, int>("Names"))
@@ -89,7 +181,7 @@ namespace IsabelDb.Test
 		[Test]
 		public void TestGetNone()
 		{
-			using (var db = IsabelDb.CreateInMemory())
+			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
 			{
 				db.GetDictionary<string, object>("SomeTable").Get("foo").Should().BeNull();
 				db.GetDictionary<string, object>("SomeTable").GetMany("foo", "bar").Should().BeEmpty();
@@ -99,7 +191,7 @@ namespace IsabelDb.Test
 		[Test]
 		public void TestOpenOrCreate1()
 		{
-			using (var db = IsabelDb.CreateInMemory())
+			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
 			{
 				var store = db.GetDictionary<string, object>("SomeTable");
 				store.GetAll().Should().BeEmpty();
@@ -109,62 +201,91 @@ namespace IsabelDb.Test
 		[Test]
 		public void TestPutGetCustomType()
 		{
-			using (var db = IsabelDb.CreateInMemory())
+			using (var db = IsabelDb.CreateInMemory(new []{typeof(Person)}))
 			{
 				var value1 = new Person {Name = "Strelok"};
 				var value2 = new Person {Name = "The marked one"};
-				PutAndGet(db, value1, value2);
+				PutAndGetObjectTable(db, value1, value2);
+				PutAndGetValueTable(db, value1, value2);
 			}
 		}
 
 		[Test]
 		public void TestPutGetInt16()
 		{
-			using (var db = IsabelDb.CreateInMemory())
+			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
 			{
 				var value1 = short.MinValue;
 				var value2 = short.MaxValue;
-				PutAndGet(db, value1, value2);
+				PutAndGetObjectTable(db, value1, value2);
+				PutAndGetValueTable(db, value1, value2);
 			}
 		}
 
 		[Test]
 		public void TestPutGetInt32()
 		{
-			using (var db = IsabelDb.CreateInMemory())
+			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
 			{
 				var value1 = int.MinValue;
 				var value2 = int.MaxValue;
-				PutAndGet(db, value1, value2);
+				PutAndGetObjectTable(db, value1, value2);
+				PutAndGetValueTable(db, value1, value2);
 			}
 		}
 
 		[Test]
 		public void TestPutGetInt64()
 		{
-			using (var db = IsabelDb.CreateInMemory())
+			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
 			{
 				var value1 = long.MinValue;
 				var value2 = long.MaxValue;
-				PutAndGet(db, value1, value2);
+				PutAndGetObjectTable(db, value1, value2);
+				PutAndGetValueTable(db, value1, value2);
 			}
 		}
 
 		[Test]
 		public void TestPutGetString()
 		{
-			using (var db = IsabelDb.CreateInMemory())
+			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
 			{
 				var value1 = "Strelok";
 				var value2 = "The marked one";
-				PutAndGet(db, value1, value2);
+				PutAndGetObjectTable(db, value1, value2);
+				PutAndGetValueTable(db, value1, value2);
+			}
+		}
+
+		[Test]
+		public void TestPutGetFloat()
+		{
+			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
+			{
+				var value1 = (float)Math.PI;
+				var value2 = (float)Math.E;
+				PutAndGetObjectTable(db, value1, value2);
+				PutAndGetValueTable(db, value1, value2);
+			}
+		}
+
+		[Test]
+		public void TestPutGetDouble()
+		{
+			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
+			{
+				var value1 = Math.PI;
+				var value2 = Math.E;
+				PutAndGetObjectTable(db, value1, value2);
+				PutAndGetValueTable(db, value1, value2);
 			}
 		}
 
 		[Test]
 		public void TestPutMany1()
 		{
-			using (var db = IsabelDb.CreateInMemory())
+			using (var db = IsabelDb.CreateInMemory(new []{typeof(Address), typeof(Person)}))
 			{
 				var address = new Address
 				{
@@ -197,7 +318,7 @@ namespace IsabelDb.Test
 		[Description("Verifies that data from different tables doesn't interact with each other")]
 		public void TestPutMultipleTables()
 		{
-			using (var db = IsabelDb.CreateInMemory())
+			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
 			{
 				var customers = db.GetDictionary<string, object>("Customers");
 				customers.Put("1", "Simon");
@@ -213,7 +334,7 @@ namespace IsabelDb.Test
 		[Test]
 		public void TestPutNullKey()
 		{
-			using (var db = IsabelDb.CreateInMemory())
+			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
 			{
 				var values = db.GetDictionary<string, object>("Foo");
 				new Action(() => values.Put(key: null, value: 42)).Should().Throw<ArgumentNullException>();
@@ -224,7 +345,7 @@ namespace IsabelDb.Test
 		[Description("Verifies that data removed from one table doesn't interact with others")]
 		public void TestRemoveMultipleTables()
 		{
-			using (var db = IsabelDb.CreateInMemory())
+			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
 			{
 				var customers = db.GetDictionary<string, object>("Customers");
 				customers.Put("1", "Simon");
@@ -240,7 +361,7 @@ namespace IsabelDb.Test
 		[Test]
 		public void TestRemoveNonExistingKey()
 		{
-			using (var db = IsabelDb.CreateInMemory())
+			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
 			{
 				var store = db.GetDictionary<string, object>("SomeTable");
 				store.Get("42").Should().BeNull();
@@ -253,7 +374,7 @@ namespace IsabelDb.Test
 		[Test]
 		public void TestRemoveNullKey()
 		{
-			using (var db = IsabelDb.CreateInMemory())
+			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
 			{
 				var values = db.GetDictionary<string, object>("Foo");
 				new Action(() => values.Remove(key: null)).Should().Throw<ArgumentNullException>();
@@ -263,7 +384,7 @@ namespace IsabelDb.Test
 		[Test]
 		public void TestRemoveValue()
 		{
-			using (var db = IsabelDb.CreateInMemory())
+			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
 			{
 				var store = db.GetDictionary<string, object>("SomeTable");
 				store.Put("foo", value: 42);
@@ -278,7 +399,7 @@ namespace IsabelDb.Test
 		[Description("Verifies that ONLY the value with the specified key is removed and none other")]
 		public void TestRemoveValue2()
 		{
-			using (var db = IsabelDb.CreateInMemory())
+			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
 			{
 				var store = db.GetDictionary<string, object>("SomeTable");
 				store.Put("a", value: 1);
@@ -293,7 +414,7 @@ namespace IsabelDb.Test
 		[Test]
 		public void TestReplaceValue()
 		{
-			using (var db = IsabelDb.CreateInMemory())
+			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
 			{
 				var store = db.GetDictionary<string, object>("SomeTable");
 				store.Put("foo", value: 42);

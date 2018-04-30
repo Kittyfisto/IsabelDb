@@ -18,7 +18,7 @@ namespace IsabelDb.Benchmark
 			var filePath = CreateDatabaseName(databasePath, "isdb");
 			if (File.Exists(filePath))
 				File.Delete(filePath);
-			_isabel = new TestBench<IsabelDb>(IsabelDb.OpenOrCreate(filePath),
+			_isabel = new TestBench<IsabelDb>(IsabelDb.OpenOrCreate(filePath, new []{typeof(Customer)}),
 			                                    filePath);
 
 			var liteDatabase = CreateDatabaseName(databasePath, "ldb");

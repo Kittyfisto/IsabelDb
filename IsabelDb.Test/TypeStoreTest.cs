@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using System;
+using FluentAssertions;
 using NUnit.Framework;
 using System.Data.SQLite;
 
@@ -18,7 +19,7 @@ namespace IsabelDb.Test
 
 			TypeStore.CreateTable(_connection);
 
-			_typeResolver = new TypeRegistry();
+			_typeResolver = new TypeRegistry(new Type[0]);
 		}
 
 		[Test]
@@ -33,7 +34,7 @@ namespace IsabelDb.Test
 			var customKeyId = store.GetOrCreateTypeId(typeof(CustomKey));
 			var polymorphicKeyId = store.GetOrCreateTypeId(typeof(IPolymorphicCustomKey));
 
-			_typeResolver = new TypeRegistry();
+			_typeResolver = new TypeRegistry(new Type[0]);
 			_typeResolver.Register<IPolymorphicCustomKey>();
 			store = new TypeStore(_connection, _typeResolver);
 			store.GetTypeFromTypeId(customKeyId).Should().BeNull("because the type couldn't be resolved anymore");

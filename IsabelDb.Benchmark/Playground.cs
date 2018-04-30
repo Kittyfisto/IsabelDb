@@ -42,7 +42,7 @@ namespace IsabelDb.Benchmark
 			if (File.Exists(fname))
 				File.Delete(fname);
 
-			using (var db = IsabelDb.OpenOrCreate(fname))
+			using (var db = IsabelDb.OpenOrCreate(fname, new Type[0]))
 			{
 				var stuff = db.GetDictionary<int, int>("stuff");
 				var sw = Stopwatch.StartNew();

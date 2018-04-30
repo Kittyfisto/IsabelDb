@@ -61,6 +61,8 @@
     <Compile Include="Exceptions\TypeMismatchException.cs" />
     <Compile Include="Exceptions\TypeResolveException.cs" />
     <Compile Include="IBagObjectStore.cs" />
+    <Compile Include="Serializers\DoubleSerializer.cs" />
+    <Compile Include="Serializers\SingleSerializer.cs" />
     <Compile Include="Serializers\GenericSerializer.cs" />
     <Compile Include="Serializers\Int16Serializer.cs" />
     <Compile Include="Serializers\Int32Serializer.cs" />
@@ -75,15 +77,12 @@
     <Compile Include="IListStore.cs" />
     <Compile Include="IObjectStore.cs" />
     <Compile Include="IsabelDb.cs" />
-    <Compile Include="ITypeResolver.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ObjectStores.cs" />
     <Compile Include="Serializers\ISQLiteSerializer.cs" />
     <Compile Include="Stores\BagObjectStore.cs" />
     <Compile Include="SQLiteHelper.cs" />
-    <Compile Include="TypeMapper.cs" />
     <Compile Include="TypeRegistry.cs" />
-    <Compile Include="TypeResolver.cs" />
     <Compile Include="TypeStore.cs" />
     <Compile Include="TypeSystem.cs" />
   </ItemGroup>

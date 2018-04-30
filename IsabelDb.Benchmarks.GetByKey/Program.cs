@@ -27,7 +27,7 @@ namespace IsabelDb.Benchmarks.GetByKey
 				const string filename = "GetByKey.isdb";
 				if (File.Exists(filename))
 					File.Delete(filename);
-				_database = IsabelDb.OpenOrCreate(filename);
+				_database = IsabelDb.OpenOrCreate(filename, new []{typeof(Book)});
 				_intKeyDictionary = _database.GetDictionary<int, Book>("BooksByInt");
 				_longKeyDictionary = _database.GetDictionary<long, Book>("BooksByLong");
 				_stringKeyDictionary = _database.GetDictionary<string, Book>("BooksByString");

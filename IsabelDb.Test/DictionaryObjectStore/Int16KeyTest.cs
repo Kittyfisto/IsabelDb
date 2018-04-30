@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using NUnit.Framework;
 
 namespace IsabelDb.Test.DictionaryObjectStore
@@ -7,6 +8,8 @@ namespace IsabelDb.Test.DictionaryObjectStore
 	public sealed class Int16KeyTest
 		: AbstractDictionaryObjectStoreTest<short>
 	{
+		protected override IEnumerable<Type> CustomTypes => new Type[0];
+
 		protected override short SomeKey => short.MinValue;
 
 		protected override short DifferentKey => short.MaxValue;

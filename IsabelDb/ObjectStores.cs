@@ -28,6 +28,7 @@ namespace IsabelDb
 		private readonly Dictionary<string, IInternalObjectStore> _bags;
 		private readonly TypeModel _typeModel;
 		private readonly TypeStore _typeStore;
+		private readonly TypeRegistry _typeRegistry;
 
 		static ObjectStores()
 		{
@@ -39,18 +40,21 @@ namespace IsabelDb
 				{typeof(int), new Int32Serializer()},
 				{typeof(long), new Int64Serializer()},
 				{typeof(IPAddress), new IpAddressSerializer()},
-				{typeof(string), new StringSerializer()}
+				{typeof(string), new StringSerializer()},
+				{typeof(float), new SingleSerializer()},
+				{typeof(double), new DoubleSerializer()}
 			};
 			NativeSerializers = nativeSerializers;
 		}
 
 		public ObjectStores(SQLiteConnection connection,
 		                    TypeModel typeModel,
-		                    TypeStore typeStore)
+		                    TypeRegistry typeRegistry)
 		{
 			_connection = connection;
 			_typeModel = typeModel;
-			_typeStore = typeStore;
+			_typeRegistry = typeRegistry;
+			_typeStore = new TypeStore(connection, typeRegistry);;
 			_dictionaries = new Dictionary<string, IInternalObjectStore>();
 			_bags = new Dictionary<string, IInternalObjectStore>();
 		}
@@ -67,6 +71,14 @@ namespace IsabelDb
 				}
 				else
 				{
+					if (!_typeRegistry.IsRegistered(typeof(TKey)))
+						throw new ArgumentException(string.Format("The type '{0}' has not been registered when the database was created and thus may not be used as the key type in a collection",
+						                                          typeof(TKey).FullName));
+
+					if (!_typeRegistry.IsRegistered(typeof(TValue)))
+						throw new ArgumentException(string.Format("The type '{0}' has not been registered when the database was created and thus may not be used as the value type in a collection",
+						                                          typeof(TValue).FullName));
+
 					tableName = AddTable(name, typeof(TKey), typeof(TValue));
 				}
 
@@ -93,6 +105,10 @@ namespace IsabelDb
 				}
 				else
 				{
+					if (!_typeRegistry.IsRegistered(typeof(T)))
+						throw new ArgumentException(string.Format("The type '{0}' has not been registered when the database was created and thus may not be used as the value type in a collection",
+						                                          typeof(T).FullName));
+
 					tableName = AddTable(name, null, typeof(T));
 				}
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.SQLite;
 using System.IO;
 using ProtoBuf.Meta;
@@ -14,13 +15,13 @@ namespace IsabelDb
 		private readonly SQLiteConnection _connection;
 		private readonly ObjectStores _objectStores;
 
-		private IsabelDb(SQLiteConnection connection, ITypeResolver typeResolver)
+		private IsabelDb(SQLiteConnection connection, IEnumerable<Type> supportedTypes)
 		{
 			_connection = connection;
-			TypeModel typeModel = TypeModel.Create();
+			var typeModel = CompileTypeModel(supportedTypes);
 
-			var typeStore = new TypeStore(connection, typeResolver ?? new TypeResolver());
-			_objectStores = new ObjectStores(connection, typeModel, typeStore);
+			var typeRegistry = new TypeRegistry(supportedTypes);
+			_objectStores = new ObjectStores(connection, typeModel, typeRegistry);
 		}
 
 		/// <inheritdoc />
@@ -28,6 +29,13 @@ namespace IsabelDb
 		{
 			_connection.Close();
 			_connection.Dispose();
+		}
+
+		private static TypeModel CompileTypeModel(IEnumerable<Type> supportedTypes)
+		{
+			var typeModel = TypeModel.Create();
+			foreach (var type in supportedTypes) typeModel.Add(type, applyDefaultBehaviour: true);
+			return typeModel.Compile();
 		}
 
 		/// <summary>
@@ -42,7 +50,6 @@ namespace IsabelDb
 		}
 
 		/// <summary>
-		/// 
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
@@ -57,16 +64,16 @@ namespace IsabelDb
 		/// <remarks>
 		///     This is probably only useful for tests.
 		/// </remarks>
-		/// <param name="typeResolver"></param>
+		/// <param name="supportedTypes">The list of custom types which are to be stored in / retrieved from the database</param>
 		/// <returns></returns>
-		public static IsabelDb CreateInMemory(ITypeResolver typeResolver = null)
+		public static IsabelDb CreateInMemory(IEnumerable<Type> supportedTypes)
 		{
 			var connection = new SQLiteConnection("Data Source=:memory:");
 			try
 			{
 				connection.Open();
 				CreateTables(connection);
-				return new IsabelDb(connection, typeResolver);
+				return new IsabelDb(connection, supportedTypes);
 			}
 			catch (Exception)
 			{
@@ -79,9 +86,9 @@ namespace IsabelDb
 		///     Opens an existing or creates a new database at the given file path.
 		/// </summary>
 		/// <param name="databasePath"></param>
-		/// <param name="typeResolver"></param>
+		/// <param name="supportedTypes">The list of custom types which are to be stored in / retrieved from the database</param>
 		/// <returns></returns>
-		public static IsabelDb OpenOrCreate(string databasePath, ITypeResolver typeResolver = null)
+		public static IsabelDb OpenOrCreate(string databasePath, IEnumerable<Type> supportedTypes)
 		{
 			if (!File.Exists(databasePath)) SQLiteConnection.CreateFile(databasePath);
 
@@ -91,7 +98,7 @@ namespace IsabelDb
 			{
 				connection.Open();
 				CreateTablesIfNecessary(connection);
-				return new IsabelDb(connection, typeResolver);
+				return new IsabelDb(connection, supportedTypes);
 			}
 			catch (Exception)
 			{
@@ -104,10 +111,10 @@ namespace IsabelDb
 		///     Opens an existing database at the given path.
 		/// </summary>
 		/// <param name="databaseFilePath"></param>
-		/// <param name="typeResolver"></param>
+		/// <param name="supportedTypes">The list of custom types which are to be stored in / retrieved from the database</param>
 		/// <returns></returns>
 		/// <exception cref="FileNotFoundException"></exception>
-		public static IsabelDb Open(string databaseFilePath, ITypeResolver typeResolver = null)
+		public static IsabelDb Open(string databaseFilePath, IEnumerable<Type> supportedTypes)
 		{
 			if (!File.Exists(databaseFilePath))
 				throw new FileNotFoundException("Unable to open the given database", databaseFilePath);
@@ -118,7 +125,7 @@ namespace IsabelDb
 			{
 				connection.Open();
 				EnsureTableSchema(connection);
-				return new IsabelDb(connection, typeResolver);
+				return new IsabelDb(connection, supportedTypes);
 			}
 			catch (Exception)
 			{

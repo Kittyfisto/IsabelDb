@@ -8,8 +8,13 @@ using NUnit.Framework;
 
 namespace IsabelDb.Test
 {
+	/// <summary>
+	///     This class shall contain those tests which require the database to be stored on disk
+	///     (as to in-memory). These tests are mostly concerned with reopening an existing database
+	///     and then verifying that everything works as expected.
+	/// </summary>
 	[TestFixture]
-	public sealed class IsabelDbAcceptanceTests
+	public sealed class IsabelDbFileTests
 	{
 		[SetUp]
 		public void Setup()
@@ -25,17 +30,19 @@ namespace IsabelDb.Test
 			Console.WriteLine("Filename: {0}", _databaseName);
 		}
 
+		private static IEnumerable<Type> NoCustomTypes => new Type[0];
+
 		private string _databaseName;
 
 		[Test]
 		public void TestGetDictionaryAfterReopen()
 		{
-			using (var db = IsabelDb.OpenOrCreate(_databaseName))
+			using (var db = IsabelDb.OpenOrCreate(_databaseName, NoCustomTypes))
 			{
 				db.GetDictionary<string, object>("A").Put("Meaning", value: 9001);
 			}
 
-			using (var db = IsabelDb.OpenOrCreate(_databaseName))
+			using (var db = IsabelDb.OpenOrCreate(_databaseName, NoCustomTypes))
 			{
 				db.GetDictionary<string, object>("a").Put("Meaning", value: 42);
 
@@ -47,7 +54,7 @@ namespace IsabelDb.Test
 		[Test]
 		public void TestOpen1()
 		{
-			new Action(() => IsabelDb.Open(_databaseName))
+			new Action(() => IsabelDb.Open(_databaseName, NoCustomTypes))
 				.Should()
 				.Throw<FileNotFoundException>();
 		}
@@ -55,12 +62,12 @@ namespace IsabelDb.Test
 		[Test]
 		public void TestOpenOrCreate2()
 		{
-			using (var db = IsabelDb.OpenOrCreate(_databaseName))
+			using (var db = IsabelDb.OpenOrCreate(_databaseName, NoCustomTypes))
 			{
 				db.GetDictionary<string, object>("SomeTable").Put("a", "b");
 			}
 
-			using (var db = IsabelDb.OpenOrCreate(_databaseName))
+			using (var db = IsabelDb.OpenOrCreate(_databaseName, NoCustomTypes))
 			{
 				db.GetDictionary<string, object>("SomeTable").Get("a").Should().Be("b");
 			}
@@ -69,7 +76,7 @@ namespace IsabelDb.Test
 		[Test]
 		public void TestOverwriteReopen()
 		{
-			using (var db = IsabelDb.OpenOrCreate(_databaseName))
+			using (var db = IsabelDb.OpenOrCreate(_databaseName, NoCustomTypes))
 			{
 				var charts = db.GetDictionary<string, object>("Charts");
 				charts.Put("Bar", value: 2);
@@ -78,7 +85,7 @@ namespace IsabelDb.Test
 				charts.Get("Bar").Should().Be(expected: 2.2);
 			}
 
-			using (var db = IsabelDb.OpenOrCreate(_databaseName))
+			using (var db = IsabelDb.OpenOrCreate(_databaseName, NoCustomTypes))
 			{
 				var charts = db.GetDictionary<string, object>("Charts");
 				charts.Get("Bar").Should().Be(expected: 2.2);
@@ -91,7 +98,7 @@ namespace IsabelDb.Test
 			var strelok = new Person {Name = "Strelok"};
 			var markedOne = new Person {Name = "The marked one"};
 
-			using (var db = IsabelDb.OpenOrCreate(_databaseName))
+			using (var db = IsabelDb.OpenOrCreate(_databaseName, new[] {typeof(Person), typeof(Address)}))
 			{
 				db.GetDictionary<string, object>("SomeTable").Put("foo", strelok);
 				db.GetDictionary<string, object>("SomeTable").Put("bar", markedOne);
@@ -104,7 +111,7 @@ namespace IsabelDb.Test
 				});
 			}
 
-			using (var db = IsabelDb.Open(_databaseName))
+			using (var db = IsabelDb.Open(_databaseName, new[] {typeof(Person), typeof(Address)}))
 			{
 				var persons = db.GetDictionary<string, object>("SomeTable").GetMany("foo", "bar");
 				persons.Should().HaveCount(expected: 2);
@@ -119,29 +126,9 @@ namespace IsabelDb.Test
 		}
 
 		[Test]
-		[Description("Verifies that when data is removed, it remains removed in the next session")]
-		public void TestRemoveAfterReopen()
-		{
-			using (var db = IsabelDb.OpenOrCreate(_databaseName))
-			{
-				var charts = db.GetDictionary<string, object>("Charts");
-				charts.Put("Pie", value: 1.5);
-				charts.Get("Pie").Should().Be(expected: 1.5);
-				charts.Remove("Pie");
-				charts.Get("Pie").Should().BeNull();
-			}
-
-			using (var db = IsabelDb.OpenOrCreate(_databaseName))
-			{
-				var charts = db.GetDictionary<string, object>("Charts");
-				charts.Get("Pie").Should().BeNull();
-			}
-		}
-
-		[Test]
 		public void TestPutMany()
 		{
-			using (var db = IsabelDb.OpenOrCreate(_databaseName))
+			using (var db = IsabelDb.OpenOrCreate(_databaseName, new[] {typeof(Person)}))
 			{
 				const int count = 100000;
 				var values = new List<KeyValuePair<string, Person>>();
@@ -169,7 +156,7 @@ namespace IsabelDb.Test
 				stopwatch.Stop();
 				Console.WriteLine("Reading {0} objects took {1}ms", count, stopwatch.ElapsedMilliseconds);
 
-				int n = 0;
+				var n = 0;
 				foreach (var pair in actualPersons)
 				{
 					pair.Key.Should().Be(values[n].Key);
@@ -180,38 +167,22 @@ namespace IsabelDb.Test
 		}
 
 		[Test]
-		[Defect("https://github.com/Kittyfisto/IsabelDb/issues/1")]
-		[Description("Verifies that collections skip un-deserializable values")]
-		public void TestUnresolvableValueType()
+		[Description("Verifies that when data is removed, it remains removed in the next session")]
+		public void TestRemoveAfterReopen()
 		{
-			var resolver = new TypeRegistry();
-			resolver.Register<object>();
-			resolver.Register<CustomKey>();
-			using (var db = IsabelDb.OpenOrCreate(_databaseName, resolver))
+			using (var db = IsabelDb.OpenOrCreate(_databaseName, NoCustomTypes))
 			{
-				var values = db.GetDictionary<int, object>("Foo");
-				values.Put(0, 42);
-				values.Put(1, new CustomKey { A = 42 });
-				values.Put(2, "Hello, World!");
+				var charts = db.GetDictionary<string, object>("Charts");
+				charts.Put("Pie", value: 1.5);
+				charts.Get("Pie").Should().Be(expected: 1.5);
+				charts.Remove("Pie");
+				charts.Get("Pie").Should().BeNull();
 			}
 
-			using (var db = IsabelDb.Open(_databaseName, resolver))
+			using (var db = IsabelDb.OpenOrCreate(_databaseName, NoCustomTypes))
 			{
-				var values = db.GetDictionary<int, object>("Foo");
-				var allValues = values.GetAll();
-				allValues.Count().Should().Be(3, "because we're still able to resolve all types");
-			}
-
-			resolver = new TypeRegistry();
-			using (var db = IsabelDb.Open(_databaseName, resolver))
-			{
-				var values = db.GetDictionary<int, object>("Foo");
-				var allValues = values.GetAll();
-				allValues.Count().Should().Be(2, "because we're no longer able to resolve CustomKey");
-				allValues.ElementAt(0).Key.Should().Be(0);
-				allValues.ElementAt(0).Value.Should().Be(42);
-				allValues.ElementAt(1).Key.Should().Be(2);
-				allValues.ElementAt(1).Value.Should().Be("Hello, World!");
+				var charts = db.GetDictionary<string, object>("Charts");
+				charts.Get("Pie").Should().BeNull();
 			}
 		}
 
@@ -219,23 +190,21 @@ namespace IsabelDb.Test
 		[Description("Verifies that the database refuses to ")]
 		public void TestUnresolvableBagType()
 		{
-			var resolver = new TypeRegistry();
-			resolver.Register<CustomKey>();
-			using (var db = IsabelDb.OpenOrCreate(_databaseName, resolver))
+			using (var db = IsabelDb.OpenOrCreate(_databaseName, new[] {typeof(CustomKey)}))
 			{
 				var bag = db.GetBag<CustomKey>("Keys");
-				bag.Put(new CustomKey { A = 1 });
-				bag.Put(new CustomKey { B = 2 });
+				bag.Put(new CustomKey {A = 1});
+				bag.Put(new CustomKey {B = 2});
 			}
 
-			using (var db = IsabelDb.Open(_databaseName, resolver))
+			using (var db = IsabelDb.Open(_databaseName, new[] {typeof(CustomKey)}))
 			{
 				var bag = db.GetBag<CustomKey>("Keys");
 				var values = bag.GetAll();
-				values.Should().BeEquivalentTo(new CustomKey { A = 1 }, new CustomKey { B = 2 });
+				values.Should().BeEquivalentTo(new CustomKey {A = 1}, new CustomKey {B = 2});
 			}
 
-			using (var db = IsabelDb.Open(_databaseName, new TypeRegistry()))
+			using (var db = IsabelDb.Open(_databaseName, NoCustomTypes))
 			{
 				new Action(() => db.GetBag<CustomKey>("Keys"))
 					.Should().Throw<TypeResolveException>()
@@ -248,26 +217,56 @@ namespace IsabelDb.Test
 		[Description("")]
 		public void TestUnresolvableDictionaryValueType()
 		{
-			var resolver = new TypeRegistry();
-			resolver.Register<CustomKey>();
-			using (var db = IsabelDb.OpenOrCreate(_databaseName, resolver))
+			using (var db = IsabelDb.OpenOrCreate(_databaseName, new[] {typeof(CustomKey)}))
 			{
 				var dictionary = db.GetDictionary<int, CustomKey>("MoreKeys");
-				dictionary.Put(1, new CustomKey { C = 2 });
-				dictionary.Put(2, new CustomKey { D = -2 });
+				dictionary.Put(key: 1, value: new CustomKey {C = 2});
+				dictionary.Put(key: 2, value: new CustomKey {D = -2});
 			}
 
-			using (var db = IsabelDb.Open(_databaseName, resolver))
+			using (var db = IsabelDb.Open(_databaseName, new[] {typeof(CustomKey)}))
 			{
 				var dictionary = db.GetDictionary<int, CustomKey>("MoreKeys");
-				dictionary.GetAll().Count().Should().Be(2);
+				dictionary.GetAll().Count().Should().Be(expected: 2);
 			}
 
-			using (var db = IsabelDb.Open(_databaseName, new TypeRegistry()))
+			using (var db = IsabelDb.Open(_databaseName, NoCustomTypes))
 			{
 				new Action(() => db.GetDictionary<int, CustomKey>("MoreKeys"))
 					.Should().Throw<TypeResolveException>()
 					.WithMessage("A collection named 'MoreKeys' already exists but it's value type could not be resolved: If your intent is to re-use this existing collection, then you need to investigate why the type resolver could not resolve it's type. If your intent is to create a new collection, then you need to pick a different name");
+			}
+		}
+
+		[Test]
+		[Defect("https://github.com/Kittyfisto/IsabelDb/issues/1")]
+		[Description("Verifies that collections skip un-deserializable values")]
+		public void TestUnresolvableValueType()
+		{
+			using (var db = IsabelDb.OpenOrCreate(_databaseName, new[] {typeof(CustomKey)}))
+			{
+				var values = db.GetDictionary<int, object>("Foo");
+				values.Put(key: 0, value: 42);
+				values.Put(key: 1, value: new CustomKey {A = 42});
+				values.Put(key: 2, value: "Hello, World!");
+			}
+
+			using (var db = IsabelDb.Open(_databaseName, new[] {typeof(CustomKey)}))
+			{
+				var values = db.GetDictionary<int, object>("Foo");
+				var allValues = values.GetAll();
+				allValues.Count().Should().Be(expected: 3, because: "because we're still able to resolve all types");
+			}
+
+			using (var db = IsabelDb.Open(_databaseName, NoCustomTypes))
+			{
+				var values = db.GetDictionary<int, object>("Foo");
+				var allValues = values.GetAll();
+				allValues.Count().Should().Be(expected: 2, because: "because we're no longer able to resolve CustomKey");
+				allValues.ElementAt(index: 0).Key.Should().Be(expected: 0);
+				allValues.ElementAt(index: 0).Value.Should().Be(expected: 42);
+				allValues.ElementAt(index: 1).Key.Should().Be(expected: 2);
+				allValues.ElementAt(index: 1).Value.Should().Be("Hello, World!");
 			}
 		}
 	}

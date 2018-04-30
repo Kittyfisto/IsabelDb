@@ -16,17 +16,17 @@ namespace IsabelDb
 
 		private readonly SQLiteConnection _connection;
 		private readonly Dictionary<int, Type> _idToTypes;
-		private readonly ITypeResolver _typeResolver;
+		private readonly TypeRegistry _typeRegistry;
 		private readonly Dictionary<Type, int> _typesToId;
 		private int _nextId;
 
 		public TypeStore(SQLiteConnection connection,
-		                 ITypeResolver typeResolver)
+		                 TypeRegistry typeRegistry)
 		{
 			_connection = connection;
-			_typeResolver = typeResolver;
+			_typeRegistry = typeRegistry;
 
-			ReadTypes(connection, typeResolver, out _typesToId, out _idToTypes);
+			ReadTypes(connection, typeRegistry, out _typesToId, out _idToTypes);
 			if (_idToTypes.Count > 0)
 				_nextId = _idToTypes.Keys.Max() + 1;
 			else
@@ -44,7 +44,7 @@ namespace IsabelDb
 			int id;
 			if (!_typesToId.TryGetValue(type, out id))
 			{
-				var typeName = _typeResolver.GetName(type);
+				var typeName = _typeRegistry.GetName(type);
 				if (typeName == null)
 					return -1;
 
@@ -85,7 +85,7 @@ namespace IsabelDb
 		}
 
 		private static void ReadTypes(SQLiteConnection connection,
-		                              ITypeResolver typeResolver,
+		                              TypeRegistry typeRegistry,
 		                              out Dictionary<Type, int> typesToId,
 		                              out Dictionary<int, Type> idToTypes)
 		{
@@ -102,7 +102,7 @@ namespace IsabelDb
 						var typeName = reader.GetString(i: 0);
 						var id = reader.GetInt32(i: 1);
 
-						TryResolveType(typeResolver, typeName, id,
+						TryResolveType(typeRegistry, typeName, id,
 							typesToId,
 							idToTypes);
 					}
@@ -110,7 +110,7 @@ namespace IsabelDb
 			}
 		}
 
-		private static void TryResolveType(ITypeResolver typeResolver,
+		private static void TryResolveType(TypeRegistry typeRegistry,
 			string typeName,
 			int id,
 			Dictionary<Type, int> typesToId,
@@ -119,7 +119,7 @@ namespace IsabelDb
 		{
 			try
 			{
-				var type = typeResolver.Resolve(typeName);
+				var type = typeRegistry.Resolve(typeName);
 				if (type != null)
 				{
 					typesToId.Add(type, id);
