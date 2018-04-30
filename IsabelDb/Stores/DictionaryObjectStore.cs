@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
+using System.Diagnostics;
 using System.Text;
 using IsabelDb.Serializers;
 
@@ -9,7 +10,8 @@ namespace IsabelDb.Stores
 {
 	internal sealed class DictionaryObjectStore<TKey, TValue>
 		: IDictionaryObjectStore<TKey, TValue>
-			, IInternalObjectStore
+		, IInternalObjectStore
+
 	{
 		private readonly SQLiteConnection _connection;
 

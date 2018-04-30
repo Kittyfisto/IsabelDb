@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Data.SQLite;
 using System.IO;
-using IsabelDb.Stores;
 using ProtoBuf.Meta;
 
 namespace IsabelDb
@@ -169,6 +168,7 @@ namespace IsabelDb
 		{
 			var builder = new SQLiteConnectionStringBuilder();
 			builder.DataSource = databaseIsdb;
+			builder.JournalMode = SQLiteJournalModeEnum.Wal;
 			var connectionString = builder.ToString();
 			return connectionString;
 		}

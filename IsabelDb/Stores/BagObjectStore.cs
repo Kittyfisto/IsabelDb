@@ -7,7 +7,7 @@ namespace IsabelDb.Stores
 {
 	internal sealed class BagObjectStore<T>
 		: IBagObjectStore<T>
-			, IInternalObjectStore
+		, IInternalObjectStore
 	{
 		private readonly SQLiteConnection _connection;
 		private readonly string _put;

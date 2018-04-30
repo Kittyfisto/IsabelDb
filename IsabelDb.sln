@@ -14,6 +14,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsabelDb.Benchmark", "IsabelDb.Benchmark\IsabelDb.Benchmark.csproj", "{21393821-D777-49C3-9AFC-57D1E0344446}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Benchmarks", "Benchmarks", "{86F31708-E1CB-4EA8-8181-ABC291DE30D5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsabelDb.Benchmarks.GetByKey", "IsabelDb.Benchmarks.GetByKey\IsabelDb.Benchmarks.GetByKey.csproj", "{804D2442-D8BE-4C06-ADE6-6005A968EC06}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsabelDb.Benchmarks.Put", "IsabelDb.Benchmarks.Put\IsabelDb.Benchmarks.Put.csproj", "{BE338954-2004-4CA4-B44E-A4039ED9768D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsabelDb.Benchmarks.Serializer", "IsabelDb.Benchmarks.Serializer\IsabelDb.Benchmarks.Serializer.csproj", "{8F6C8A44-9725-4FC3-BF29-0B456E68E8CA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{0097BD80-9714-46AD-B1BC-86F6FDB56642}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,9 +42,28 @@ Global
 		{21393821-D777-49C3-9AFC-57D1E0344446}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{21393821-D777-49C3-9AFC-57D1E0344446}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{21393821-D777-49C3-9AFC-57D1E0344446}.Release|Any CPU.Build.0 = Release|Any CPU
+		{804D2442-D8BE-4C06-ADE6-6005A968EC06}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{804D2442-D8BE-4C06-ADE6-6005A968EC06}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{804D2442-D8BE-4C06-ADE6-6005A968EC06}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{804D2442-D8BE-4C06-ADE6-6005A968EC06}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE338954-2004-4CA4-B44E-A4039ED9768D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE338954-2004-4CA4-B44E-A4039ED9768D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE338954-2004-4CA4-B44E-A4039ED9768D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE338954-2004-4CA4-B44E-A4039ED9768D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F6C8A44-9725-4FC3-BF29-0B456E68E8CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F6C8A44-9725-4FC3-BF29-0B456E68E8CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F6C8A44-9725-4FC3-BF29-0B456E68E8CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F6C8A44-9725-4FC3-BF29-0B456E68E8CA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F8083C11-96DE-481C-8255-22652642FF13} = {0097BD80-9714-46AD-B1BC-86F6FDB56642}
+		{21393821-D777-49C3-9AFC-57D1E0344446} = {86F31708-E1CB-4EA8-8181-ABC291DE30D5}
+		{804D2442-D8BE-4C06-ADE6-6005A968EC06} = {86F31708-E1CB-4EA8-8181-ABC291DE30D5}
+		{BE338954-2004-4CA4-B44E-A4039ED9768D} = {86F31708-E1CB-4EA8-8181-ABC291DE30D5}
+		{8F6C8A44-9725-4FC3-BF29-0B456E68E8CA} = {86F31708-E1CB-4EA8-8181-ABC291DE30D5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1D8FD4EC-9BE0-45B8-BFBF-7EB3C33D9749}

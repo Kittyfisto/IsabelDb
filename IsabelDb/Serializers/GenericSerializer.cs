@@ -1,5 +1,7 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
 using System.Data.SQLite;
+using System.Diagnostics;
 using System.IO;
 using ProtoBuf.Meta;
 
@@ -19,6 +21,32 @@ namespace IsabelDb.Serializers
 			var type = typeof(T);
 			if (type.IsSealed)
 				_typeId = typeStore.GetOrCreateTypeId(type);
+
+			// We want to perform the warum now so that we don't hit
+			// an extreme outlier when actually serializing the value
+			// for the first time!
+			Warmup();
+		}
+
+		/// <summary>
+		/// Warms-up the <see cref="TypeModel"/> to serialize values of the given type.
+		/// </summary>
+		private void Warmup()
+		{
+			var type = typeof(T);
+			if (type.IsValueType)
+			{
+				Roundtrip(default(T));
+			}
+			else if (!type.IsAbstract && type != typeof(object))
+			{
+				Roundtrip(Activator.CreateInstance<T>());
+			}
+		}
+
+		private void Roundtrip(T value)
+		{
+			TryDeserialize((byte[]) Serialize(value), out var unused);
 		}
 
 		public DbType DatabaseType => DbType.Binary;
@@ -31,7 +59,9 @@ namespace IsabelDb.Serializers
 			using (var writer = new BinaryWriter(stream))
 			{
 				writer.Write(typeId);
+				var sw = Stopwatch.StartNew();
 				_typeModel.Serialize(stream, value);
+				var elapsed = sw.ElapsedMilliseconds;
 				return stream.ToArray();
 			}
 		}
@@ -39,6 +69,11 @@ namespace IsabelDb.Serializers
 		public bool TryDeserialize(SQLiteDataReader reader, int valueOrdinal, out T value)
 		{
 			var serializedValue = (byte[]) reader.GetValue(valueOrdinal);
+			return TryDeserialize(serializedValue, out value);
+		}
+
+		private bool TryDeserialize(byte[] serializedValue, out T value)
+		{
 			using (var stream = new MemoryStream(serializedValue))
 			using (var tmp = new BinaryReader(stream))
 			{
@@ -50,7 +85,7 @@ namespace IsabelDb.Serializers
 					return false;
 				}
 
-				value = (T)_typeModel.Deserialize(stream, value: null, type: type);
+				value = (T) _typeModel.Deserialize(stream, value: null, type: type);
 				return true;
 			}
 		}

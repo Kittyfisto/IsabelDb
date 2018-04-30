@@ -1,19 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using LiteDB;
 using NUnit.Framework;
+using ProtoBuf.Meta;
 
 namespace IsabelDb.Benchmark
 {
 	public class Foo
 	{
-		public Foo()
-		{
-			//throw new NullReferenceException();
-		}
-
 		public string Stuff { get; set; }
 
 		#region Overrides of Object
@@ -29,6 +26,36 @@ namespace IsabelDb.Benchmark
 	[TestFixture]
 	public sealed class Playground
 	{
+		[Test]
+		public void TestWrite()
+		{
+			var sw = Stopwatch.StartNew();
+			File.WriteAllText(@"G:\foo.txt", "Hello, World!");
+			sw.Stop();
+			Console.WriteLine("Write: {0}ms", sw.ElapsedMilliseconds);
+		}
+
+		[Test]
+		public void Foo()
+		{
+			var fname = "foo.isdb";
+			if (File.Exists(fname))
+				File.Delete(fname);
+
+			using (var db = IsabelDb.OpenOrCreate(fname))
+			{
+				var stuff = db.GetDictionary<int, int>("stuff");
+				var sw = Stopwatch.StartNew();
+				const int count = 100;
+				for (int i = 0; i < count; ++i)
+				{
+					stuff.Put(i, 2);
+				}
+				sw.Stop();
+				Console.WriteLine("Avg: {0}ms", sw.ElapsedMilliseconds / count);
+			}
+		}
+
 		[Test]
 		public void Test()
 		{
