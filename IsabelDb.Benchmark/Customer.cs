@@ -16,5 +16,10 @@ namespace IsabelDb.Benchmark
 
 		[DataMember(Order = 4)]
 		public bool IsActive { get; set; }
+
+		public override string ToString()
+		{
+			return string.Format("Name: {0}", Name);
+		}
 	}
 }
