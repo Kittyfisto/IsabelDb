@@ -89,6 +89,7 @@
     <Compile Include="ICustomKey.cs" />
     <Compile Include="IsabelDbFileTests.cs" />
     <Compile Include="IsabelDbTest.cs" />
+    <Compile Include="IssueAttribute.cs" />
     <Compile Include="KeyA.cs" />
     <Compile Include="KeyB.cs" />
     <Compile Include="DictionaryObjectStore\AbstractDictionaryObjectStoreTest.cs" />

@@ -34,6 +34,8 @@ namespace IsabelDb
 		{
 			var nativeSerializers = new Dictionary<Type, ISQLiteSerializer>
 			{
+				{typeof(byte), new ByteSerializer()},
+				{typeof(sbyte), new SByteSerializer()},
 				{typeof(ushort), new UInt16Serializer()},
 				{typeof(short), new Int16Serializer()},
 				{typeof(uint), new UInt32Serializer()},
@@ -42,19 +44,25 @@ namespace IsabelDb
 				{typeof(IPAddress), new IpAddressSerializer()},
 				{typeof(string), new StringSerializer()},
 				{typeof(float), new SingleSerializer()},
-				{typeof(double), new DoubleSerializer()}
+				{typeof(double), new DoubleSerializer()},
+				{typeof(byte[]), new ByteArraySerializer()}
 			};
 			NativeSerializers = nativeSerializers;
 		}
 
 		public ObjectStores(SQLiteConnection connection,
-		                    TypeModel typeModel,
-		                    TypeRegistry typeRegistry)
+		                    IReadOnlyList<Type> supportedTypes)
 		{
 			_connection = connection;
-			_typeModel = typeModel;
-			_typeRegistry = typeRegistry;
-			_typeStore = new TypeStore(connection, typeRegistry);;
+			_typeModel = CompileTypeModel(supportedTypes);
+
+			_typeRegistry = new TypeRegistry(supportedTypes);
+			foreach (var type in NativeSerializers.Keys)
+			{
+				_typeRegistry.Register(type);
+			}
+
+			_typeStore = new TypeStore(connection, _typeRegistry);
 			_dictionaries = new Dictionary<string, IInternalObjectStore>();
 			_bags = new Dictionary<string, IInternalObjectStore>();
 		}
@@ -143,6 +151,13 @@ namespace IsabelDb
 
 				command.ExecuteNonQuery();
 			}
+		}
+
+		private static TypeModel CompileTypeModel(IEnumerable<Type> supportedTypes)
+		{
+			var typeModel = TypeModel.Create();
+			foreach (var type in supportedTypes) typeModel.Add(type, applyDefaultBehaviour: true);
+			return typeModel.Compile();
 		}
 
 		private void EnsureTypeSafety(string collectionName,

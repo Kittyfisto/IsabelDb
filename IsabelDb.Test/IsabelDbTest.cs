@@ -283,6 +283,78 @@ namespace IsabelDb.Test
 		}
 
 		[Test]
+		public void TestPutGetByte()
+		{
+			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
+			{
+				byte value1 = byte.MinValue;
+				byte value2 = byte.MaxValue;
+				PutAndGetObjectTable(db, value1, value2);
+				PutAndGetValueTable(db, value1, value2);
+			}
+		}
+
+		[Test]
+		public void TestPutGetSByte()
+		{
+			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
+			{
+				sbyte value1 = sbyte.MinValue;
+				sbyte value2 = sbyte.MaxValue;
+				PutAndGetObjectTable(db, value1, value2);
+				PutAndGetValueTable(db, value1, value2);
+			}
+		}
+
+		[Test]
+		public void TestPutGetByteArray1()
+		{
+			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
+			{
+				var value1 = new byte[]{0};
+				var value2 = new byte[]{0, 255, 128, 42, 1};
+				var store = db.GetDictionary<string, object>("ObjectTable");
+
+				store.Put("foo", value1);
+				store.Put("bar", value2);
+
+				var persons = store.GetMany("foo", "bar");
+				persons.Should().HaveCount(expected: 2);
+				var actualValue1 = persons.ElementAt(index: 0);
+				actualValue1.Key.Should().Be("foo");
+				((byte[])actualValue1.Value).Should().Equal(value1);
+
+				var actualValue2 = persons.ElementAt(index: 1);
+				actualValue2.Key.Should().Be("bar");
+				((byte[])actualValue2.Value).Should().Equal(value2);
+			}
+		}
+
+		[Test]
+		public void TestPutGetByteArray2()
+		{
+			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
+			{
+				var value1 = new byte[]{0};
+				var value2 = new byte[]{0, 255, 128, 42, 1};
+				var store = db.GetDictionary<string, byte[]>("ObjectTable");
+
+				store.Put("foo", value1);
+				store.Put("bar", value2);
+
+				var persons = store.GetMany("foo", "bar");
+				persons.Should().HaveCount(expected: 2);
+				var actualValue1 = persons.ElementAt(index: 0);
+				actualValue1.Key.Should().Be("foo");
+				actualValue1.Value.Should().Equal(value1);
+
+				var actualValue2 = persons.ElementAt(index: 1);
+				actualValue2.Key.Should().Be("bar");
+				actualValue2.Value.Should().Equal(value2);
+			}
+		}
+
+		[Test]
 		public void TestPutMany1()
 		{
 			using (var db = IsabelDb.CreateInMemory(new []{typeof(Address), typeof(Person)}))

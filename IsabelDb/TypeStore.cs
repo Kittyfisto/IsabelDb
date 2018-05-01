@@ -27,6 +27,7 @@ namespace IsabelDb
 			_typeRegistry = typeRegistry;
 
 			ReadTypes(connection, typeRegistry, out _typesToId, out _idToTypes);
+
 			if (_idToTypes.Count > 0)
 				_nextId = _idToTypes.Keys.Max() + 1;
 			else

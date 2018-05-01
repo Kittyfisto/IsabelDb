@@ -25,18 +25,8 @@ namespace IsabelDb
 			_typesByName = new Dictionary<string, Type>();
 			_namesByType = new Dictionary<Type, string>();
 
-			Register<object>();
-			Register<string>();
-			Register<ushort>();
-			Register<short>();
-			Register<uint>();
-			Register<int>();
-			Register<long>();
-			Register<float>();
-			Register<double>();
-			Register<IPAddress>();
-
-			foreach (var type in supportedTypes) Register(type);
+			foreach(var type in supportedTypes)
+				Register(type);
 		}
 
 		/// <summary>

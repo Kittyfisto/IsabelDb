@@ -3,14 +3,14 @@
 namespace IsabelDb.Test
 {
 	/// <summary>
-	/// This attribute is sed to to show that a unit test is related to a defect
+	/// This attribute is sed to to show that a unit test is related to an issue
 	/// on github.
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Method)]
-	public sealed class DefectAttribute
+	public sealed class IssueAttribute
 		: Attribute
 	{
-		public DefectAttribute(string defectUri)
+		public IssueAttribute(string issueUri)
 		{ }
 	}
 }

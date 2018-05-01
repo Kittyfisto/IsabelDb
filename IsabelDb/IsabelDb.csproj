@@ -61,7 +61,10 @@
     <Compile Include="Exceptions\TypeMismatchException.cs" />
     <Compile Include="Exceptions\TypeResolveException.cs" />
     <Compile Include="IBagObjectStore.cs" />
+    <Compile Include="Serializers\ByteArraySerializer.cs" />
+    <Compile Include="Serializers\ByteSerializer.cs" />
     <Compile Include="Serializers\DoubleSerializer.cs" />
+    <Compile Include="Serializers\SByteSerializer.cs" />
     <Compile Include="Serializers\SingleSerializer.cs" />
     <Compile Include="Serializers\GenericSerializer.cs" />
     <Compile Include="Serializers\Int16Serializer.cs" />

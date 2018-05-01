@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.IO;
+using System.Linq;
 using ProtoBuf.Meta;
 
 namespace IsabelDb
@@ -18,10 +19,8 @@ namespace IsabelDb
 		private IsabelDb(SQLiteConnection connection, IEnumerable<Type> supportedTypes)
 		{
 			_connection = connection;
-			var typeModel = CompileTypeModel(supportedTypes);
-
-			var typeRegistry = new TypeRegistry(supportedTypes);
-			_objectStores = new ObjectStores(connection, typeModel, typeRegistry);
+			
+			_objectStores = new ObjectStores(connection, supportedTypes.ToList());
 		}
 
 		/// <inheritdoc />
@@ -29,13 +28,6 @@ namespace IsabelDb
 		{
 			_connection.Close();
 			_connection.Dispose();
-		}
-
-		private static TypeModel CompileTypeModel(IEnumerable<Type> supportedTypes)
-		{
-			var typeModel = TypeModel.Create();
-			foreach (var type in supportedTypes) typeModel.Add(type, applyDefaultBehaviour: true);
-			return typeModel.Compile();
 		}
 
 		/// <summary>

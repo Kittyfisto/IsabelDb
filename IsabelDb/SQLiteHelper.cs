@@ -12,6 +12,8 @@ namespace IsabelDb
 				case DbType.String:
 					return "STRING";
 
+				case DbType.Byte:
+				case DbType.SByte:
 				case DbType.UInt16:
 				case DbType.Int16:
 				case DbType.Int32:
