@@ -14,8 +14,8 @@
 		/// </summary>
 		/// <remarks>
 		///     TODO: Do we really need this method? There is an outstanding problem in which
-		///           we have an inconsistency between Count() and GetAll().Count() when some
-		///           types fail to be resolved.
+		///     we have an inconsistency between Count() and GetAll().Count() when some
+		///     types fail to be resolved.
 		/// </remarks>
 		int Count();
 	}

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using System.Net;
 using System.Runtime.Serialization;
 
 namespace IsabelDb
@@ -25,9 +24,11 @@ namespace IsabelDb
 			_typesByName = new Dictionary<string, Type>();
 			_namesByType = new Dictionary<Type, string>();
 
-			foreach(var type in supportedTypes)
+			foreach (var type in supportedTypes)
 				Register(type);
 		}
+
+		public IEnumerable<Type> RegisteredTypes => _registeredTypes;
 
 		/// <summary>
 		///     Registers the given type with this resolver.
@@ -55,14 +56,9 @@ namespace IsabelDb
 					Register(baseType);
 
 				var interfaces = type.GetInterfaces();
-				foreach (var @interface in interfaces)
-				{
-					Register(@interface);
-				}
+				foreach (var @interface in interfaces) Register(@interface);
 			}
 		}
-
-		public IEnumerable<Type> RegisteredTypes => _registeredTypes;
 
 		public string GetName(Type type)
 		{

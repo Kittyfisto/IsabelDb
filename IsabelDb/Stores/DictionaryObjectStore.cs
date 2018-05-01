@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
-using System.Diagnostics;
 using System.Text;
 using IsabelDb.Serializers;
 
@@ -10,7 +9,7 @@ namespace IsabelDb.Stores
 {
 	internal sealed class DictionaryObjectStore<TKey, TValue>
 		: IDictionaryObjectStore<TKey, TValue>
-		, IInternalObjectStore
+			, IInternalObjectStore
 
 	{
 		private readonly SQLiteConnection _connection;
@@ -54,23 +53,9 @@ namespace IsabelDb.Stores
 			{
 				var ret = new List<KeyValuePair<TKey, TValue>>();
 				while (reader.Read())
-				{
-					if (_keySerializer.TryDeserialize(reader, 0, out var key))
-					{
-						if (_valueSerializer.TryDeserialize(reader, 1, out var value))
-						{
+					if (_keySerializer.TryDeserialize(reader, valueOrdinal: 0, value: out var key))
+						if (_valueSerializer.TryDeserialize(reader, valueOrdinal: 1, value: out var value))
 							ret.Add(new KeyValuePair<TKey, TValue>(key, value));
-						}
-						else
-						{
-							// TODO: Log error / warning
-						}
-					}
-					else
-					{
-						// TODO: Log error / warning
-					}
-				}
 
 				return ret;
 			}
@@ -88,16 +73,10 @@ namespace IsabelDb.Stores
 					using (var reader = command.ExecuteReader())
 					{
 						while (reader.Read())
-						{
-							if (_valueSerializer.TryDeserialize(reader, 1, out var value))
+							if (_valueSerializer.TryDeserialize(reader, valueOrdinal: 1, value: out var value))
 							{
 								ret.Add(new KeyValuePair<TKey, TValue>(key, value));
 							}
-							else
-							{
-								// TODO: Log error / warning
-							}
-						}
 					}
 				}
 
@@ -121,7 +100,7 @@ namespace IsabelDb.Stores
 					if (!reader.Read())
 						return default(TValue);
 
-					_valueSerializer.TryDeserialize(reader, 1, out var value);
+					_valueSerializer.TryDeserialize(reader, valueOrdinal: 1, value: out var value);
 					return value;
 				}
 			}

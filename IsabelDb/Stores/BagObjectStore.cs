@@ -7,15 +7,15 @@ namespace IsabelDb.Stores
 {
 	internal sealed class BagObjectStore<T>
 		: IBagObjectStore<T>
-		, IInternalObjectStore
+			, IInternalObjectStore
 	{
+		private readonly string _clear;
 		private readonly SQLiteConnection _connection;
+		private readonly string _count;
+		private readonly string _getAll;
 		private readonly string _put;
 		private readonly ISQLiteSerializer<T> _serializer;
 		private readonly string _table;
-		private readonly string _count;
-		private readonly string _getAll;
-		private readonly string _clear;
 
 		public BagObjectStore(SQLiteConnection connection,
 		                      ISQLiteSerializer<T> serializer,
@@ -53,6 +53,22 @@ namespace IsabelDb.Stores
 			return command;
 		}
 
+		private static void CreateTableIfNecessary(SQLiteConnection connection,
+		                                           ISQLiteSerializer serializer,
+		                                           string tableName,
+		                                           out string table)
+		{
+			using (var command = connection.CreateCommand())
+			{
+				command.CommandText = table =
+					string.Format("CREATE TABLE IF NOT EXISTS {0} (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, value {1} NOT NULL)",
+					              tableName,
+					              SQLiteHelper.GetAffinity(serializer.DatabaseType));
+
+				command.ExecuteNonQuery();
+			}
+		}
+
 		#region Implementation of IListObjectStore<T>
 
 		public IEnumerable<T> GetAll()
@@ -63,17 +79,12 @@ namespace IsabelDb.Stores
 				using (var reader = command.ExecuteReader())
 				{
 					while (reader.Read())
-					{
-						if (_serializer.TryDeserialize(reader, 0, out var value))
+						if (_serializer.TryDeserialize(reader, valueOrdinal: 0, value: out var value))
 						{
 							ret.Add(value);
 						}
-						else
-						{
-							
-						}
-					}
 				}
+
 				return ret;
 			}
 		}
@@ -126,21 +137,5 @@ namespace IsabelDb.Stores
 		}
 
 		#endregion
-
-		private static void CreateTableIfNecessary(SQLiteConnection connection,
-		                                           ISQLiteSerializer serializer,
-		                                           string tableName,
-		                                           out string table)
-		{
-			using (var command = connection.CreateCommand())
-			{
-				command.CommandText = table =
-					string.Format("CREATE TABLE IF NOT EXISTS {0} (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, value {1} NOT NULL)",
-					              tableName,
-					              SQLiteHelper.GetAffinity(serializer.DatabaseType));
-
-				command.ExecuteNonQuery();
-			}
-		}
 	}
 }

@@ -21,7 +21,7 @@ namespace IsabelDb.Serializers
 			// team ensured that life remains spicy. If you call GetString() on a field
 			// which happens to store a numeric string value, such as "2" then GetString()
 			// obviously throws an InvalidCastException, because why wouldn't it.
-			value = (string)reader.GetValue(valueOrdinal);
+			value = (string) reader.GetValue(valueOrdinal);
 			return true;
 		}
 	}

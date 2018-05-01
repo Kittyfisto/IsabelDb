@@ -30,7 +30,8 @@ namespace IsabelDb.Serializers
 			var type = value.GetType();
 			var typeId = _typeId ?? _typeStore.GetOrCreateTypeId(type);
 			if (typeId == -1)
-				throw new ArgumentException(string.Format("The type '{0}' has not been registered and thus cannot be stored", type.FullName));
+				throw new ArgumentException(string.Format("The type '{0}' has not been registered and thus cannot be stored",
+				                                          type.FullName));
 
 			using (var stream = new MemoryStream())
 			using (var writer = new BinaryWriter(stream))

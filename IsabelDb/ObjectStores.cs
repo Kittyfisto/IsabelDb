@@ -22,13 +22,14 @@ namespace IsabelDb
 		/// </summary>
 		private static readonly IReadOnlyDictionary<Type, ISQLiteSerializer> NativeSerializers;
 
+		private readonly Dictionary<string, IInternalObjectStore> _bags;
+
 		private readonly SQLiteConnection _connection;
 
 		private readonly Dictionary<string, IInternalObjectStore> _dictionaries;
-		private readonly Dictionary<string, IInternalObjectStore> _bags;
 		private readonly TypeModel _typeModel;
-		private readonly TypeStore _typeStore;
 		private readonly TypeRegistry _typeRegistry;
+		private readonly TypeStore _typeStore;
 
 		static ObjectStores()
 		{
@@ -57,10 +58,7 @@ namespace IsabelDb
 			_typeModel = CompileTypeModel(supportedTypes);
 
 			_typeRegistry = new TypeRegistry(supportedTypes);
-			foreach (var type in NativeSerializers.Keys)
-			{
-				_typeRegistry.Register(type);
-			}
+			foreach (var type in NativeSerializers.Keys) _typeRegistry.Register(type);
 
 			_typeStore = new TypeStore(connection, _typeRegistry);
 			_dictionaries = new Dictionary<string, IInternalObjectStore>();
@@ -74,18 +72,20 @@ namespace IsabelDb
 				if (TryRetrieveTableNameFor(name, out var tableName, out var keyType, out var valueType))
 				{
 					EnsureTypeSafety(name,
-						typeof(TKey), typeof(TValue),
-						keyType, valueType);
+					                 typeof(TKey), typeof(TValue),
+					                 keyType, valueType);
 				}
 				else
 				{
 					if (!_typeRegistry.IsRegistered(typeof(TKey)))
-						throw new ArgumentException(string.Format("The type '{0}' has not been registered when the database was created and thus may not be used as the key type in a collection",
-						                                          typeof(TKey).FullName));
+						throw new
+							ArgumentException(string.Format("The type '{0}' has not been registered when the database was created and thus may not be used as the key type in a collection",
+							                                typeof(TKey).FullName));
 
 					if (!_typeRegistry.IsRegistered(typeof(TValue)))
-						throw new ArgumentException(string.Format("The type '{0}' has not been registered when the database was created and thus may not be used as the value type in a collection",
-						                                          typeof(TValue).FullName));
+						throw new
+							ArgumentException(string.Format("The type '{0}' has not been registered when the database was created and thus may not be used as the value type in a collection",
+							                                typeof(TValue).FullName));
 
 					tableName = AddTable(name, typeof(TKey), typeof(TValue));
 				}
@@ -109,15 +109,17 @@ namespace IsabelDb
 			{
 				if (TryRetrieveTableNameFor(name, out var tableName, out var unused, out var valueType))
 				{
-					EnsureTypeSafety(name, null, typeof(T), null, valueType);
+					EnsureTypeSafety(name, expectedKeyType: null, expectedValueType: typeof(T), actualKeyType: null,
+					                 actualValueType: valueType);
 				}
 				else
 				{
 					if (!_typeRegistry.IsRegistered(typeof(T)))
-						throw new ArgumentException(string.Format("The type '{0}' has not been registered when the database was created and thus may not be used as the value type in a collection",
-						                                          typeof(T).FullName));
+						throw new
+							ArgumentException(string.Format("The type '{0}' has not been registered when the database was created and thus may not be used as the value type in a collection",
+							                                typeof(T).FullName));
 
-					tableName = AddTable(name, null, typeof(T));
+					tableName = AddTable(name, keyType: null, valueType: typeof(T));
 				}
 
 				store = CreateBag<T>(tableName);
@@ -161,31 +163,36 @@ namespace IsabelDb
 		}
 
 		private void EnsureTypeSafety(string collectionName,
-		                              Type expectedKeyType, Type expectedValueType,
-		                              Type actualKeyType, Type actualValueType)
+		                              Type expectedKeyType,
+		                              Type expectedValueType,
+		                              Type actualKeyType,
+		                              Type actualValueType)
 		{
 			if (expectedKeyType != null)
 			{
 				if (actualKeyType == null)
 					throw new TypeResolveException(string.Format("The key type of the dictionary '{0}' could not be resolved",
-						collectionName));
+					                                             collectionName));
 
 				if (expectedKeyType != actualKeyType)
-					throw new TypeMismatchException(string.Format("The dictionary '{0}' has been stored to use keys of type '{1}' which does not match the requested key '{2}'!",
-						collectionName,
-						actualKeyType,
-						expectedKeyType));
+					throw new
+						TypeMismatchException(string.Format("The dictionary '{0}' has been stored to use keys of type '{1}' which does not match the requested key '{2}'!",
+						                                    collectionName,
+						                                    actualKeyType,
+						                                    expectedKeyType));
 			}
 
 			if (actualValueType == null)
-				throw new TypeResolveException(string.Format("A collection named '{0}' already exists but it's value type could not be resolved: If your intent is to re-use this existing collection, then you need to investigate why the type resolver could not resolve it's type. If your intent is to create a new collection, then you need to pick a different name",
-						collectionName));
+				throw new
+					TypeResolveException(string.Format("A collection named '{0}' already exists but it's value type could not be resolved: If your intent is to re-use this existing collection, then you need to investigate why the type resolver could not resolve it's type. If your intent is to create a new collection, then you need to pick a different name",
+					                                   collectionName));
 
 			if (expectedValueType != actualValueType)
-				throw new TypeMismatchException(string.Format("The collection '{0}' has been stored to use values of type '{1}' which does not match the requested key '{2}'!",
-						collectionName,
-						actualValueType,
-						expectedValueType));
+				throw new
+					TypeMismatchException(string.Format("The collection '{0}' has been stored to use values of type '{1}' which does not match the requested key '{2}'!",
+					                                    collectionName,
+					                                    actualValueType,
+					                                    expectedValueType));
 		}
 
 		private IInternalObjectStore CreateDictionary<TKey, TValue>(string tableName)
@@ -214,13 +221,15 @@ namespace IsabelDb
 			return new GenericSerializer<T>(_typeModel, _typeStore);
 		}
 
-		private bool TryRetrieveTableNameFor(string name, out string tableName,
-			out Type keyType,
-			out Type valueType)
+		private bool TryRetrieveTableNameFor(string name,
+		                                     out string tableName,
+		                                     out Type keyType,
+		                                     out Type valueType)
 		{
 			using (var command = _connection.CreateCommand())
 			{
-				command.CommandText = string.Format("SELECT tableName, keyType, valueType FROM {0} WHERE name = @name LIMIT 0,1", TableName);
+				command.CommandText = string.Format("SELECT tableName, keyType, valueType FROM {0} WHERE name = @name LIMIT 0,1",
+				                                    TableName);
 				command.Parameters.AddWithValue("@name", name);
 				using (var reader = command.ExecuteReader())
 				{
@@ -232,13 +241,13 @@ namespace IsabelDb
 						return false;
 					}
 
-					tableName = reader.GetString(0);
-					if (!reader.IsDBNull(1))
-						keyType = _typeStore.GetTypeFromTypeId(reader.GetInt32(1));
+					tableName = reader.GetString(i: 0);
+					if (!reader.IsDBNull(i: 1))
+						keyType = _typeStore.GetTypeFromTypeId(reader.GetInt32(i: 1));
 					else
 						keyType = null;
 
-					valueType = _typeStore.GetTypeFromTypeId(reader.GetInt32(2));
+					valueType = _typeStore.GetTypeFromTypeId(reader.GetInt32(i: 2));
 					return true;
 				}
 			}
@@ -251,7 +260,7 @@ namespace IsabelDb
 				command.CommandText = string.Format("INSERT INTO {0} (name, tableName, keyType, valueType)" +
 				                                    "VALUES (@name, @tableName, @keyType, @valueType)", TableName);
 
-				var keyTypeId = keyType != null ? (int?)_typeStore.GetOrCreateTypeId(keyType) : null;
+				var keyTypeId = keyType != null ? (int?) _typeStore.GetOrCreateTypeId(keyType) : null;
 				var valueTypeId = _typeStore.GetOrCreateTypeId(valueType);
 
 				var tableName = CreateTableNameFor(name);

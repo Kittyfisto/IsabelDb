@@ -1,18 +1,17 @@
-﻿using log4net;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
 using System.Linq;
 using System.Reflection;
+using log4net;
 
 namespace IsabelDb
 {
 	internal sealed class TypeStore
 	{
-		private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
-
 		private const string TableName = "isabel_types";
+		private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
 		private readonly SQLiteConnection _connection;
 		private readonly Dictionary<int, Type> _idToTypes;
@@ -104,19 +103,19 @@ namespace IsabelDb
 						var id = reader.GetInt32(i: 1);
 
 						TryResolveType(typeRegistry, typeName, id,
-							typesToId,
-							idToTypes);
+						               typesToId,
+						               idToTypes);
 					}
 				}
 			}
 		}
 
 		private static void TryResolveType(TypeRegistry typeRegistry,
-			string typeName,
-			int id,
-			Dictionary<Type, int> typesToId,
-			Dictionary<int, Type> idToTypes
-			)
+		                                   string typeName,
+		                                   int id,
+		                                   Dictionary<Type, int> typesToId,
+		                                   Dictionary<int, Type> idToTypes
+		)
 		{
 			try
 			{
@@ -131,9 +130,10 @@ namespace IsabelDb
 					Log.ErrorFormat("Unable to resolve '{0}' to a .NET type! Values of this type will not be readable", typeName);
 				}
 			}
-			catch(Exception e)
+			catch (Exception e)
 			{
-				Log.ErrorFormat("Unable to resolve '{0}' to a .NET type! Values of this type will not be readable: {0}", typeName, e);
+				Log.ErrorFormat("Unable to resolve '{0}' to a .NET type! Values of this type will not be readable: {0}", typeName,
+				                e);
 			}
 		}
 	}

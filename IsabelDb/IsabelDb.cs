@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Data.SQLite;
 using System.IO;
 using System.Linq;
-using ProtoBuf.Meta;
 
 namespace IsabelDb
 {
@@ -19,7 +18,7 @@ namespace IsabelDb
 		private IsabelDb(SQLiteConnection connection, IEnumerable<Type> supportedTypes)
 		{
 			_connection = connection;
-			
+
 			_objectStores = new ObjectStores(connection, supportedTypes.ToList());
 		}
 
