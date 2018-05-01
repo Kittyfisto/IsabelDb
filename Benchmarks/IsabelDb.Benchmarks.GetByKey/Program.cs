@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Attributes.Columns;
 using BenchmarkDotNet.Running;
 using IsabelDb.Benchmark.Entities;
 

@@ -15,6 +15,8 @@ namespace IsabelDb.Benchmarks.Put
 			private readonly IDictionaryObjectStore<int, Book> _books;
 			private readonly Book _book;
 			private readonly IDictionaryObjectStore<int, int> _primes;
+			private readonly IDictionaryObjectStore<string, byte[]> _files;
+			private readonly byte[] _blob;
 
 			public BenchmarkPut()
 			{
@@ -29,6 +31,17 @@ namespace IsabelDb.Benchmarks.Put
 					Author = "Stanislaw Lem"
 				};
 				_primes = _database.GetDictionary<int, int>("Primes");
+				_files = _database.GetDictionary<string, byte[]>("Files");
+
+				var random = new Random();
+				_blob = new byte[2 * 1024 * 1024];
+				random.NextBytes(_blob);
+			}
+
+			[Benchmark]
+			public void PutBlob()
+			{
+				_files.Put(@"c:\foo", _blob);
 			}
 
 			[Benchmark]
