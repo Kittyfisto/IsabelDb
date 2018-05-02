@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data.SQLite;
 using System.IO;
+using IsabelDb.TypeModel;
 
 namespace IsabelDb
 {
@@ -55,23 +56,6 @@ namespace IsabelDb
 				}
 
 				return _protobufSerializer.Deserialize(stream, null, type);
-			}
-		}
-
-		public static bool DoesTableExist(SQLiteConnection connection)
-		{
-			return IsabelDb.TableExists(connection, TypeModel.TypeTableName);
-		}
-
-		public static void CreateTable(SQLiteConnection connection)
-		{
-			using (var command = connection.CreateCommand())
-			{
-				command.CommandText = string.Format("CREATE TABLE {0} (" +
-				                                    "id INTEGER NOT NULL," +
-				                                    "typename TEXT NOT NULL" +
-				                                    ")", TypeModel.TypeTableName);
-				command.ExecuteNonQuery();
 			}
 		}
 	}

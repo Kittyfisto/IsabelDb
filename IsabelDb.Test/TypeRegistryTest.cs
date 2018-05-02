@@ -1,5 +1,6 @@
 ﻿using System;
 using FluentAssertions;
+using IsabelDb.TypeModel;
 using NUnit.Framework;
 
 namespace IsabelDb.Test
@@ -13,6 +14,7 @@ namespace IsabelDb.Test
 			var resolver = new TypeRegistry(new Type[0]);
 			resolver.Register(typeof(KeyA));
 			resolver.IsRegistered(typeof(KeyA)).Should().BeTrue();
+			resolver.Register(typeof(IPolymorphicCustomKey));
 			resolver.IsRegistered(typeof(IPolymorphicCustomKey)).Should().BeTrue();
 		}
 
@@ -37,7 +39,7 @@ namespace IsabelDb.Test
 		{
 			var resolver = new TypeRegistry(new []{typeof(DataContractNoNameNoNamespace)});
 			resolver.GetName(typeof(DataContractNoNameNoNamespace))
-				.Should().Be(typeof(DataContractNoNameNoNamespace).AssemblyQualifiedName);
+				.Should().Be(typeof(DataContractNoNameNoNamespace).FullName);
 		}
 
 		[Test]

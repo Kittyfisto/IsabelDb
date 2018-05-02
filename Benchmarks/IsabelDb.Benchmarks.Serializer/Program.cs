@@ -10,13 +10,13 @@ namespace IsabelDb.Benchmarks.Serializer
 		public class Serializer
 		{
 			private readonly RuntimeTypeModel _runtimeTypeModel;
-			private readonly TypeModel _compiledTypeModel;
+			private readonly ProtoBuf.Meta.TypeModel _compiledTypeModel;
 
 			public Serializer()
 			{
-				_runtimeTypeModel = TypeModel.Create();
+				_runtimeTypeModel = ProtoBuf.Meta.TypeModel.Create();
 
-				var typeModel = TypeModel.Create();
+				var typeModel = ProtoBuf.Meta.TypeModel.Create();
 				_compiledTypeModel = typeModel.Compile();
 			}
 

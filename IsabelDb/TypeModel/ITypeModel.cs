@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace IsabelDb
+namespace IsabelDb.TypeModel
 {
 	internal interface ITypeModel
 	{

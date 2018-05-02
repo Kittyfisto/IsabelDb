@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace IsabelDb
+namespace IsabelDb.TypeModel
 {
 	internal sealed class CompiledTypeModel
 		: ITypeModel

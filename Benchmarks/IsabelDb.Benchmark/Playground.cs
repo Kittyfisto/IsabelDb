@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using LiteDB;
 using NUnit.Framework;
-using ProtoBuf.Meta;
 
 namespace IsabelDb.Benchmark
 {
