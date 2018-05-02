@@ -86,6 +86,9 @@
     <Compile Include="Entities\Animal.cs" />
     <Compile Include="Entities\Dog.cs" />
     <Compile Include="Entities\Message.cs" />
+    <Compile Include="Entities\V1\Plane.cs" />
+    <Compile Include="Entities\V1\Thing.cs" />
+    <Compile Include="Entities\V2\Plane.cs" />
     <Compile Include="ExplicitNameAndNamespace.cs" />
     <Compile Include="ExplicitNameNoNamespace.cs" />
     <Compile Include="ExplicitNamespaceNoName.cs" />
@@ -106,11 +109,13 @@
     <Compile Include="DictionaryObjectStore\StringKeyTest.cs" />
     <Compile Include="DictionaryObjectStore\UInt16KeyTest.cs" />
     <Compile Include="DictionaryObjectStore\UInt32KeyTest.cs" />
-    <Compile Include="ListObjectStore\ListObjectStoreTest.cs" />
+    <Compile Include="ListObjectStore\BagMessageTest.cs" />
+    <Compile Include="ListObjectStore\BagObjectStoreTest.cs" />
+    <Compile Include="RequriedBehaviourAttribute.cs" />
     <Compile Include="Person.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TypeRegistryTest.cs" />
-    <Compile Include="TypeModelTest.cs" />
+    <Compile Include="ProtobufTypeModelTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -132,6 +137,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

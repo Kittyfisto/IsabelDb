@@ -56,6 +56,11 @@ namespace IsabelDb.TypeModel
 			}
 		}
 
+		public TypeDescription GetDescription(Type type)
+		{
+			return _types[type];
+		}
+
 		public string GetName(Type type)
 		{
 			_types.TryGetValue(type, out var description);

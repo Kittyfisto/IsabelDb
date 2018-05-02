@@ -6,7 +6,8 @@ using NUnit.Framework;
 
 namespace IsabelDb.Test.ListObjectStore
 {
-	public sealed class ListObjectStoreTest
+	[TestFixture]
+	public sealed class BagObjectStoreTest
 	{
 		private static IEnumerable<Type> NoCustomTypes => new Type[0];
 

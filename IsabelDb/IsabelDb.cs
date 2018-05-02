@@ -127,7 +127,7 @@ namespace IsabelDb
 
 		private static void CreateTablesIfNecessary(SQLiteConnection connection)
 		{
-			var hasTypesTable = TypeModel.TypeModel.DoesTableExist(connection);
+			var hasTypesTable = TypeModel.ProtobufTypeModel.DoesTableExist(connection);
 			var hasStoresTable = ObjectStores.DoesTableExist(connection);
 			if (hasTypesTable && hasStoresTable)
 				return;
@@ -139,7 +139,7 @@ namespace IsabelDb
 
 		private static void CreateTables(SQLiteConnection connection)
 		{
-			TypeModel.TypeModel.CreateTable(connection);
+			TypeModel.ProtobufTypeModel.CreateTable(connection);
 			ObjectStores.CreateTable(connection);
 		}
 
@@ -156,7 +156,7 @@ namespace IsabelDb
 
 		private static void EnsureTableSchema(SQLiteConnection connection)
 		{
-			if (!TypeModel.TypeModel.DoesTableExist(connection))
+			if (!TypeModel.ProtobufTypeModel.DoesTableExist(connection))
 				throw new NotImplementedException();
 			if (!ObjectStores.DoesTableExist(connection))
 				throw new NotImplementedException();

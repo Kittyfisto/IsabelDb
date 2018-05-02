@@ -8,7 +8,7 @@ using FluentAssertions;
 namespace IsabelDb.Test
 {
 	[TestFixture]
-	public sealed class TypeModelTest
+	public sealed class ProtobufTypeModelTest
 	{
 		private SQLiteConnection _connection;
 
@@ -18,26 +18,38 @@ namespace IsabelDb.Test
 			_connection = new SQLiteConnection("Data Source=:memory:");
 			_connection.Open();
 
-			TypeModel.TypeModel.CreateTable(_connection);
+			TypeModel.ProtobufTypeModel.CreateTable(_connection);
 		}
 
 		[Test]
 		[Description("Verifies that if we create a type model for an unserializable type, then an exception is thrown and the database is NOT modified")]
 		public void TestRegisterUnsupportedSetup()
 		{
-			TypeModel.TypeModel.ReadTypes(_connection).Should().BeEmpty();
+			TypeModel.ProtobufTypeModel.ReadTypes(_connection).Should().BeEmpty();
 
-			new Action(() => TypeModel.TypeModel.Create(_connection, new[] {typeof(Thread)}))
+			new Action(() => TypeModel.ProtobufTypeModel.Create(_connection, new[] {typeof(Thread)}))
 				.Should().Throw<ArgumentException>("because the Thread type simply cannot be serialized");
 
-			TypeModel.TypeModel.ReadTypes(_connection).Should().BeEmpty();
+			TypeModel.ProtobufTypeModel.ReadTypes(_connection).Should().BeEmpty();
+		}
+
+		[Test]
+		[Description("")]
+		[RequriedBehaviour]
+		public void TestChangeBaseClass()
+		{
+			TypeModel.ProtobufTypeModel.Create(_connection, new[] {typeof(Entities.V1.Plane), typeof(Entities.V1.Thing)});
+
+			new Action(() => TypeModel.ProtobufTypeModel.Create(_connection,
+			                                            new[] {typeof(Entities.V2.Plane)}))
+				.Should().Throw<BreakingChangeException>("because V2.Plane has changed its base class from Thing to object and changing base classes is a breaking change");
 		}
 
 		[Test]
 		[Description("Verifies that the type model is aware of types which are natively supported by protobuf, even if they aren't specified explicitly")]
 		public void TestBuiltIntTypes()
 		{
-			var typeModel = TypeModel.TypeModel.Create(_connection, new Type[0]);
+			var typeModel = TypeModel.ProtobufTypeModel.Create(_connection, new Type[0]);
 			var expectedTypes = new[]
 			{
 				typeof(string),
@@ -64,7 +76,7 @@ namespace IsabelDb.Test
 		[Test]
 		public void TestRegisterCustomType()
 		{
-			var typeModel = TypeModel.TypeModel.Create(_connection, new []{typeof(IPolymorphicCustomKey)});
+			var typeModel = TypeModel.ProtobufTypeModel.Create(_connection, new []{typeof(IPolymorphicCustomKey)});
 			typeModel.IsRegistered(typeof(IPolymorphicCustomKey)).Should().BeTrue();
 			var id = typeModel.GetTypeId(typeof(IPolymorphicCustomKey));
 			typeModel.GetType(id).Should().Be<IPolymorphicCustomKey>();
@@ -75,14 +87,16 @@ namespace IsabelDb.Test
 		[Description("Verifies that the type store tolerates that types cannot be resolved anymore")]
 		public void TestUnavailableType()
 		{
-			var typeModel = TypeModel.TypeModel.Create(_connection, new []{typeof(CustomKey), typeof(IPolymorphicCustomKey)});
+			var typeModel = TypeModel.ProtobufTypeModel.Create(_connection, new []{typeof(CustomKey), typeof(IPolymorphicCustomKey)});
 			var customKeyId = typeModel.GetTypeId(typeof(CustomKey));
 			var polymorphicKeyId = typeModel.GetTypeId(typeof(IPolymorphicCustomKey));
 
-			typeModel = TypeModel.TypeModel.Create(_connection, new []{typeof(IPolymorphicCustomKey)});
+			typeModel = TypeModel.ProtobufTypeModel.Create(_connection, new []{typeof(IPolymorphicCustomKey)});
 			typeModel.GetType(customKeyId).Should().BeNull("because the type couldn't be resolved anymore");
 			typeModel.GetType(polymorphicKeyId).Should().Be<IPolymorphicCustomKey>(
 				"because types which can be resolved should still be presented");
 		}
 	}
+
+	
 }
