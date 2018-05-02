@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
+using IsabelDb.Test.Entities;
 using NUnit.Framework;
 
 namespace IsabelDb.Test
@@ -494,6 +495,32 @@ namespace IsabelDb.Test
 
 				store.Put("foo", value: 50);
 				store.Get("foo").Should().Be(expected: 50);
+			}
+		}
+
+		[Test]
+		public void TestPutGetPolymorphicGraph()
+		{
+			var types = new[]
+			{
+				typeof(Message),
+				typeof(Animal),
+				typeof(Dog)
+			};
+			using (var db = IsabelDb.CreateInMemory(types))
+			{
+				var messages = db.GetDictionary<int, Message>("Messages");
+				messages.Put(1, new Message
+				{
+					Value = new Dog
+					{
+						Name = "Goofy"
+					}
+				});
+
+				var message = messages.Get(1);
+				message.Value.Should().BeOfType<Dog>();
+				((Dog) message.Value).Name.Should().Be("Goofy");
 			}
 		}
 	}

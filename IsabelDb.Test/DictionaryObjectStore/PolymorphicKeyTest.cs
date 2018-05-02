@@ -6,7 +6,12 @@ namespace IsabelDb.Test.DictionaryObjectStore
 	public sealed class PolymorphicKeyTest
 		: AbstractDictionaryObjectStoreTest<IPolymorphicCustomKey>
 	{
-		protected override IEnumerable<Type> CustomTypes => new []{typeof(KeyA), typeof(KeyB)};
+		protected override IEnumerable<Type> CustomTypes => new []
+		{
+			typeof(KeyA),
+			typeof(KeyB),
+			typeof(IPolymorphicCustomKey)
+		};
 
 		protected override IPolymorphicCustomKey SomeKey => new KeyA {Value = "42"};
 

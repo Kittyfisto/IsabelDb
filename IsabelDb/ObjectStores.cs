@@ -4,7 +4,6 @@ using System.Data.SQLite;
 using System.Net;
 using IsabelDb.Serializers;
 using IsabelDb.Stores;
-using ProtoBuf.Meta;
 
 namespace IsabelDb
 {
@@ -27,9 +26,8 @@ namespace IsabelDb
 		private readonly SQLiteConnection _connection;
 
 		private readonly Dictionary<string, IInternalObjectStore> _dictionaries;
-		private readonly TypeModel _typeModel;
-		private readonly TypeRegistry _typeRegistry;
-		private readonly TypeStore _typeStore;
+		private readonly Serializer _serializer;
+		private readonly CompiledTypeModel _typeModel;
 
 		static ObjectStores()
 		{
@@ -55,12 +53,9 @@ namespace IsabelDb
 		                    IReadOnlyList<Type> supportedTypes)
 		{
 			_connection = connection;
-			_typeModel = CompileTypeModel(supportedTypes);
 
-			_typeRegistry = new TypeRegistry(supportedTypes);
-			foreach (var type in NativeSerializers.Keys) _typeRegistry.Register(type);
-
-			_typeStore = new TypeStore(connection, _typeRegistry);
+			_typeModel = TypeModel.Create(connection, supportedTypes);
+			_serializer = new Serializer(_typeModel);
 			_dictionaries = new Dictionary<string, IInternalObjectStore>();
 			_bags = new Dictionary<string, IInternalObjectStore>();
 		}
@@ -77,12 +72,12 @@ namespace IsabelDb
 				}
 				else
 				{
-					if (!_typeRegistry.IsRegistered(typeof(TKey)))
+					if (!_typeModel.IsRegistered(typeof(TKey)))
 						throw new
 							ArgumentException(string.Format("The type '{0}' has not been registered when the database was created and thus may not be used as the key type in a collection",
 							                                typeof(TKey).FullName));
 
-					if (!_typeRegistry.IsRegistered(typeof(TValue)))
+					if (!_typeModel.IsRegistered(typeof(TValue)))
 						throw new
 							ArgumentException(string.Format("The type '{0}' has not been registered when the database was created and thus may not be used as the value type in a collection",
 							                                typeof(TValue).FullName));
@@ -114,7 +109,7 @@ namespace IsabelDb
 				}
 				else
 				{
-					if (!_typeRegistry.IsRegistered(typeof(T)))
+					if (!_typeModel.IsRegistered(typeof(T)))
 						throw new
 							ArgumentException(string.Format("The type '{0}' has not been registered when the database was created and thus may not be used as the value type in a collection",
 							                                typeof(T).FullName));
@@ -155,10 +150,13 @@ namespace IsabelDb
 			}
 		}
 
-		private static TypeModel CompileTypeModel(IEnumerable<Type> supportedTypes)
+		private static ProtoBuf.Meta.TypeModel CompileTypeModel(IEnumerable<Type> supportedTypes)
 		{
-			var typeModel = TypeModel.Create();
-			foreach (var type in supportedTypes) typeModel.Add(type, applyDefaultBehaviour: true);
+			var typeModel = ProtoBuf.Meta.TypeModel.Create();
+			foreach (var type in supportedTypes)
+			{
+				typeModel.Add(type, applyDefaultBehaviour: true);
+			}
 			return typeModel.Compile();
 		}
 
@@ -218,7 +216,7 @@ namespace IsabelDb
 			if (NativeSerializers.TryGetValue(typeof(T), out var serializer))
 				return (ISQLiteSerializer<T>) serializer;
 
-			return new GenericSerializer<T>(_typeModel, _typeStore);
+			return new GenericSerializer<T>(_serializer);
 		}
 
 		private bool TryRetrieveTableNameFor(string name,
@@ -243,11 +241,11 @@ namespace IsabelDb
 
 					tableName = reader.GetString(i: 0);
 					if (!reader.IsDBNull(i: 1))
-						keyType = _typeStore.GetTypeFromTypeId(reader.GetInt32(i: 1));
+						keyType = _typeModel.GetType(reader.GetInt32(i: 1));
 					else
 						keyType = null;
 
-					valueType = _typeStore.GetTypeFromTypeId(reader.GetInt32(i: 2));
+					valueType = _typeModel.GetType(reader.GetInt32(i: 2));
 					return true;
 				}
 			}
@@ -260,8 +258,8 @@ namespace IsabelDb
 				command.CommandText = string.Format("INSERT INTO {0} (name, tableName, keyType, valueType)" +
 				                                    "VALUES (@name, @tableName, @keyType, @valueType)", TableName);
 
-				var keyTypeId = keyType != null ? (int?) _typeStore.GetOrCreateTypeId(keyType) : null;
-				var valueTypeId = _typeStore.GetOrCreateTypeId(valueType);
+				var keyTypeId = keyType != null ? (int?) _typeModel.GetTypeId(keyType) : null;
+				var valueTypeId = _typeModel.GetTypeId(valueType);
 
 				var tableName = CreateTableNameFor(name);
 

@@ -12,7 +12,6 @@ namespace IsabelDb
 	internal sealed class TypeRegistry
 	{
 		private readonly Dictionary<Type, string> _namesByType;
-		private readonly HashSet<Type> _registeredTypes;
 		private readonly Dictionary<string, Type> _typesByName;
 
 		/// <summary>
@@ -20,7 +19,6 @@ namespace IsabelDb
 		/// <param name="supportedTypes"></param>
 		public TypeRegistry(IEnumerable<Type> supportedTypes)
 		{
-			_registeredTypes = new HashSet<Type>();
 			_typesByName = new Dictionary<string, Type>();
 			_namesByType = new Dictionary<Type, string>();
 
@@ -28,7 +26,7 @@ namespace IsabelDb
 				Register(type);
 		}
 
-		public IEnumerable<Type> RegisteredTypes => _registeredTypes;
+		public IEnumerable<Type> RegisteredTypes => _namesByType.Keys;
 
 		/// <summary>
 		///     Registers the given type with this resolver.
@@ -45,7 +43,7 @@ namespace IsabelDb
 		/// <param name="type"></param>
 		public void Register(Type type)
 		{
-			if (_registeredTypes.Add(type))
+			if (!_namesByType.ContainsKey(type))
 			{
 				var name = ExtractTypename(type);
 				_typesByName.Add(name, type);
@@ -75,7 +73,7 @@ namespace IsabelDb
 		[Pure]
 		public bool IsRegistered(Type type)
 		{
-			return _registeredTypes.Contains(type);
+			return _namesByType.ContainsKey(type);
 		}
 
 		[Pure]

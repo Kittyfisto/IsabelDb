@@ -83,6 +83,9 @@
     <Compile Include="AssemblySetup.cs" />
     <Compile Include="DataContractNoNameNoNamespace.cs" />
     <Compile Include="DefectAttribute.cs" />
+    <Compile Include="Entities\Animal.cs" />
+    <Compile Include="Entities\Dog.cs" />
+    <Compile Include="Entities\Message.cs" />
     <Compile Include="ExplicitNameAndNamespace.cs" />
     <Compile Include="ExplicitNameNoNamespace.cs" />
     <Compile Include="ExplicitNamespaceNoName.cs" />
@@ -107,7 +110,7 @@
     <Compile Include="Person.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TypeRegistryTest.cs" />
-    <Compile Include="TypeStoreTest.cs" />
+    <Compile Include="TypeModelTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

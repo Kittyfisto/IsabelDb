@@ -127,7 +127,7 @@ namespace IsabelDb
 
 		private static void CreateTablesIfNecessary(SQLiteConnection connection)
 		{
-			var hasTypesTable = TypeStore.DoesTableExist(connection);
+			var hasTypesTable = Serializer.DoesTableExist(connection);
 			var hasStoresTable = ObjectStores.DoesTableExist(connection);
 			if (hasTypesTable && hasStoresTable)
 				return;
@@ -139,7 +139,7 @@ namespace IsabelDb
 
 		private static void CreateTables(SQLiteConnection connection)
 		{
-			TypeStore.CreateTable(connection);
+			Serializer.CreateTable(connection);
 			ObjectStores.CreateTable(connection);
 		}
 
@@ -156,7 +156,7 @@ namespace IsabelDb
 
 		private static void EnsureTableSchema(SQLiteConnection connection)
 		{
-			if (!TypeStore.DoesTableExist(connection))
+			if (!Serializer.DoesTableExist(connection))
 				throw new NotImplementedException();
 			if (!ObjectStores.DoesTableExist(connection))
 				throw new NotImplementedException();
