@@ -85,6 +85,12 @@ namespace IsabelDb.Test.TypeModels
 			actualDescription.FullTypeName.Should().Be(description.FullTypeName, reason);
 			actualDescription.Type.Should().Be(description.Type, reason);
 			actualDescription.TypeId.Should().Be(description.TypeId, reason);
+			actualDescription.Members.Should().HaveCount(description.Members.Count, reason);
+			for (int i = 0; i < actualDescription.Members.Count; ++i)
+			{
+				actualDescription.Members[i].Name.Should().Be(description.Members[i].Name);
+				actualDescription.Members[i].MemberId.Should().Be(description.Members[i].MemberId);
+			}
 
 			const string reason2 = "because the deserialized type model should still be able to resolve types by their name / id";
 			actualModel.GetTypeName(type).Should().Be(description.FullTypeName, reason2);
@@ -182,6 +188,38 @@ namespace IsabelDb.Test.TypeModels
 			description.Members.Should().HaveCount(1);
 			description.Members[0].Name.Should().Be("IsVisible");
 			description.Members[0].TypeDescription.FullTypeName.Should().Be("System.Boolean");
+			description.Members[0].MemberId.Should().BeGreaterThan(0);
+		}
+
+		[Test]
+		public void TestTwoFields()
+		{
+			var model = TypeModel.Create(new[] { typeof(Point) });
+			var description = model.GetTypeDescription(typeof(Point));
+			description.Members.Should().HaveCount(2);
+			description.Members[0].Name.Should().Be("X");
+			description.Members[0].TypeDescription.FullTypeName.Should().Be("System.Double");
+			description.Members[0].MemberId.Should().BeGreaterThan(0);
+
+			description.Members[1].Name.Should().Be("Y");
+			description.Members[1].TypeDescription.FullTypeName.Should().Be("System.Double");
+			description.Members[1].MemberId.Should().BeGreaterThan(0);
+			description.Members[1].MemberId.Should().NotBe(description.Members[0].MemberId);
+		}
+
+		[Test]
+		public void TestFieldsAndInheritance()
+		{
+			var model = TypeModel.Create(new[] { typeof(Dog) });
+			var dogDescription = model.GetTypeDescription(typeof(Dog));
+			dogDescription.Members.Should().HaveCount(2, "because Dog declares one property and one field");
+			dogDescription.Members[0].Name.Should().Be(nameof(Dog.EyeColor));
+			dogDescription.Members[1].Name.Should().Be(nameof(Dog.FurColor));
+
+			var animalDescription = dogDescription.BaseType;
+			animalDescription.Members.Should().HaveCount(2, "because Animal declares two properties");
+			animalDescription.Members[0].Name.Should().Be(nameof(Animal.Name));
+			animalDescription.Members[1].Name.Should().Be(nameof(Animal.Age));
 		}
 
 		[Test]

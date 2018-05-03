@@ -9,7 +9,7 @@ namespace IsabelDb.TypeModels
 {
 	internal sealed class TypeDescription
 	{
-		private readonly IReadOnlyList<MemberDescription> _members;
+		private readonly List<MemberDescription> _members;
 		public readonly TypeDescription BaseType;
 		public readonly string FullTypeName;
 		public readonly string Name;
@@ -30,7 +30,7 @@ namespace IsabelDb.TypeModels
 			TypeId = typeId;
 
 			BaseType = baseType;
-			_members = members;
+			_members = members.ToList();
 		}
 
 		private TypeDescription(Type type,
@@ -52,6 +52,11 @@ namespace IsabelDb.TypeModels
 		}
 
 		public IReadOnlyList<MemberDescription> Members => _members;
+
+		public void Add(MemberDescription memberDescription)
+		{
+			_members.Add(memberDescription);
+		}
 
 		#region Overrides of Object
 
@@ -95,6 +100,27 @@ namespace IsabelDb.TypeModels
 			                           members);
 		}
 
+		public void ThrowIfIncompatibleTo(TypeDescription otherDescription)
+		{
+			var otherBaseType = otherDescription.BaseType;
+			if (BaseType == null && otherBaseType != null)
+				throw new BreakingChangeException();
+			if (BaseType != null && otherBaseType == null)
+				throw new BreakingChangeException();
+
+			if (BaseType != null && otherBaseType != null)
+			{
+				if (!AreSameType(BaseType, otherBaseType))
+					throw new
+						BreakingChangeException(string.Format("The base class of the type '{0}' has been changed from '{1}' to '{2}': This is a breaking change!",
+						                                      FullTypeName,
+						                                      BaseType.FullTypeName,
+						                                      otherBaseType.FullTypeName));
+
+				BaseType.ThrowIfIncompatibleTo(otherDescription.BaseType);
+			}
+		}
+
 		private static void ExtractTypename(Type type, out string @namespace, out string name)
 		{
 			var dataContractAttributes = type.GetCustomAttribute(typeof(DataContractAttribute), inherit: false);
@@ -128,27 +154,6 @@ namespace IsabelDb.TypeModels
 			}
 		}
 
-		public void ThrowIfIncompatibleTo(TypeDescription otherDescription)
-		{
-			var otherBaseType = otherDescription.BaseType;
-			if (BaseType == null && otherBaseType != null)
-				throw new BreakingChangeException();
-			if (BaseType != null && otherBaseType == null)
-				throw new BreakingChangeException();
-
-			if (BaseType != null && otherBaseType != null)
-			{
-				if (!AreSameType(BaseType, otherBaseType))
-					throw new
-						BreakingChangeException(string.Format("The base class of the type '{0}' has been changed from '{1}' to '{2}': This is a breaking change!",
-						                                      FullTypeName,
-						                                      BaseType.FullTypeName,
-						                                      otherBaseType.FullTypeName));
-
-				BaseType.ThrowIfIncompatibleTo(otherDescription.BaseType);
-			}
-		}
-
 		[Pure]
 		private static bool AreSameType(TypeDescription type, TypeDescription otherType)
 		{
@@ -157,14 +162,14 @@ namespace IsabelDb.TypeModels
 
 		public static IReadOnlyList<FieldInfo> FindSerializableFields(Type type)
 		{
-			return type.GetFields(BindingFlags.Instance | BindingFlags.Public)
+			return type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
 			           .Where(HasDataMemberAttribute)
 			           .ToList();
 		}
 
 		public static IReadOnlyList<PropertyInfo> FindSerializableProperties(Type type)
 		{
-			return type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
+			return type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
 			           .Where(HasDataMemberAttribute)
 			           .ToList();
 		}

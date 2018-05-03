@@ -6,5 +6,10 @@ namespace IsabelDb.Test.Entities
 	public class Dog
 		: Animal
 	{
+		[DataMember]
+		public string EyeColor;
+
+		[DataMember]
+		public string FurColor { get; set; }
 	}
 }

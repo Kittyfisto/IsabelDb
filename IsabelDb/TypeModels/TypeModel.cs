@@ -24,8 +24,8 @@ namespace IsabelDb.TypeModels
 	internal sealed class TypeModel
 		: IEnumerable<Type>
 	{
-		public const string TypeTableName = "isabel_types";
-		public const string FieldTableName = "isabel_fields";
+		private const string TypeTableName = "isabel_types";
+		private const string MemberTableName = "isabel_members";
 
 		private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -61,11 +61,6 @@ namespace IsabelDb.TypeModels
 			_idToTypes = new Dictionary<int, Type>();
 			_typesToId = new Dictionary<Type, int>();
 			_nextId = 1;
-		}
-
-		private TypeModel(Dictionary<Type, TypeDescription> types)
-		{
-			_typeDescriptions = types;
 		}
 
 		public IEnumerable<Type> Keys => _typeDescriptions.Keys;
@@ -117,6 +112,15 @@ namespace IsabelDb.TypeModels
 			return _typeDescriptions[type];
 		}
 
+		public TypeDescription GetTypeDescription(int typeId)
+		{
+			var type = GetType(typeId);
+			if (type == null)
+				return null;
+
+			return _typeDescriptions[type];
+		}
+
 		/// <summary>
 		/// </summary>
 		/// <param name="connection"></param>
@@ -144,12 +148,180 @@ namespace IsabelDb.TypeModels
 				}
 			}
 
+			using (var command = connection.CreateCommand())
+			{
+				command.CommandText = string.Format("SELECT declaringTypeId, name, memberId, memberTypeId FROM {0}", MemberTableName);
+				using (var reader = command.ExecuteReader())
+				{
+					while (reader.Read())
+					{
+						var declaringTypeId = reader.GetInt32(0);
+						var name = reader.GetString(1);
+						var memberId = reader.GetInt32(2);
+						var memberTypeId = reader.GetInt32(3);
+
+						var declaringType = model.GetTypeDescription(declaringTypeId);
+						if (declaringType != null)
+						{
+							var memberType = model.GetTypeDescription(memberTypeId);
+							var memberDescription = MemberDescription.Create(name,
+							                                                 memberType,
+							                                                 memberId);
+							declaringType.Add(memberDescription);
+						}
+					}
+				}
+			}
+
 			return model;
+		}
+
+		public TypeDescription AddType(Type type)
+		{
+			if (!_typeDescriptions.TryGetValue(type, out var typeDescription))
+			{
+				var baseTypeDescription = AddBaseTypeOf(type);
+
+				var fields = TypeDescription.FindSerializableFields(type);
+				var properties = TypeDescription.FindSerializableProperties(type);
+				var members = CreateMemberDescriptions(fields, properties, baseTypeDescription);
+
+				if (type.IsArray && type.GetArrayRank() == 1)
+				{
+					AddType(type.GetElementType());
+				}
+
+				var id = _nextId;
+				++_nextId;
+				typeDescription = TypeDescription.Create(type, id, baseTypeDescription, members);
+				_typeDescriptions.Add(type, typeDescription);
+				_typesToId.Add(type, id);
+				_idToTypes.Add(id, type);
+			}
+
+			return typeDescription;
 		}
 
 		public void Add(List<Type> allTypes)
 		{
 			foreach (var type in allTypes) AddType(type);
+		}
+
+		public static TypeModel Create(IEnumerable<Type> supportedTypes)
+		{
+			var model = new TypeModel();
+			foreach (var type in supportedTypes) model.AddType(type);
+			return model;
+		}
+
+		public void Write(SQLiteConnection connection)
+		{
+			using (var transaction = connection.BeginTransaction())
+			{
+				using (var command = connection.CreateCommand())
+				{
+					command.CommandText =
+						string.Format("INSERT OR REPLACE INTO {0} (id, typename, baseId) VALUES (@id, @typename, @baseId)", TypeTableName);
+					var idParameter = command.Parameters.Add("@id", DbType.Int32);
+					var typename = command.Parameters.Add("@typename", DbType.String);
+					var baseIdParameter = command.Parameters.Add("@baseId", DbType.Int32);
+
+					foreach (var pair in _typeDescriptions)
+					{
+						var type = pair.Key;
+						var typeDescription = pair.Value;
+						var typeName = pair.Value.FullTypeName;
+						var typeId = _typesToId[type];
+						var baseTypeId = GetBaseTypeId(typeDescription);
+
+						typename.Value = typeName;
+						idParameter.Value = typeId;
+						baseIdParameter.Value = baseTypeId;
+						command.ExecuteNonQuery();
+					}
+				}
+
+				using (var command = connection.CreateCommand())
+				{
+					command.CommandText = string.Format("INSERT OR IGNORE INTO {0} (declaringTypeId, memberId, name, memberTypeId)" +
+					                                    "VALUES (@declaringTypeId, @memberId, @name, @memberTypeId)",
+					                                    MemberTableName);
+
+					var declaringTypeIdParameter = command.Parameters.Add("@declaringTypeId", DbType.Int32);
+					var memberIdParameter = command.Parameters.Add("@memberId", DbType.Int32);
+					var name = command.Parameters.Add("@name", DbType.String);
+					var typeIdParameter = command.Parameters.Add("@memberTypeId", DbType.Int32);
+
+					foreach (var description in _typeDescriptions.Values)
+					{
+						foreach (var memberDescription in description.Members)
+						{
+							declaringTypeIdParameter.Value = description.TypeId;
+							memberIdParameter.Value = memberDescription.MemberId;
+							name.Value = memberDescription.Name;
+							typeIdParameter.Value = memberDescription.TypeDescription.TypeId;
+
+							command.ExecuteNonQuery();
+						}
+					}
+				}
+
+				transaction.Commit();
+			}
+		}
+
+		[Pure]
+		public static bool IsBuiltIn(Type type)
+		{
+			if (type.IsArray)
+				return true;
+			if (BuiltInProtobufTypes.Contains(type))
+				return true;
+
+			return false;
+		}
+
+		public static bool IsWellKnown(Type type)
+		{
+			if (type == typeof(object))
+				return true;
+			if (type == typeof(IPAddress))
+				return true;
+			if (type == typeof(ValueType))
+				return true;
+
+			return IsBuiltIn(type);
+		}
+
+		public static bool DoesTableExist(SQLiteConnection connection)
+		{
+			return IsabelDb.TableExists(connection, TypeTableName);
+		}
+
+		public static void CreateTable(SQLiteConnection connection)
+		{
+			using (var command = connection.CreateCommand())
+			{
+				command.CommandText = string.Format("CREATE TABLE {0} (" +
+				                                    "id INTEGER PRIMARY KEY NOT NULL," +
+				                                    "typename TEXT NOT NULL," +
+				                                    "baseId INTEGER" +
+				                                    ")", TypeTableName);
+				command.ExecuteNonQuery();
+			}
+			using (var command = connection.CreateCommand())
+			{
+				command.CommandText = string.Format("CREATE TABLE {0} (" +
+				                                    "declaringTypeId INTEGER NOT NULL," +
+				                                    "memberId INTEGER NOT NULL," +
+				                                    "name TEXT NOT NULL," +
+				                                    "memberTypeId INTEGER NOT NULL," +
+				                                    "UNIQUE(declaringTypeId, memberId)," +
+				                                    "FOREIGN KEY(declaringTypeId) REFERENCES {1}(id)," +
+				                                    "FOREIGN KEY(memberTypeId) REFERENCES {1}(id)" +
+				                                    ")", MemberTableName, TypeTableName);
+				command.ExecuteNonQuery();
+			}
 		}
 
 		private void TryAddType(int id, string typeName, int? baseId, TypeResolver typeResolver)
@@ -179,83 +351,45 @@ namespace IsabelDb.TypeModels
 			}
 		}
 
-		public static TypeModel Create(IEnumerable<Type> supportedTypes)
-		{
-			var model = new TypeModel();
-			foreach (var type in supportedTypes) model.AddType(type);
-			return model;
-		}
-
-		public void Write(SQLiteConnection connection)
-		{
-			using (var transaction = connection.BeginTransaction())
-			using (var command = connection.CreateCommand())
-			{
-				command.CommandText =
-					string.Format("INSERT OR REPLACE INTO {0} (id, typename, baseId) VALUES (@id, @typename, @baseId)", TypeTableName);
-				var idParameter = command.Parameters.Add("@id", DbType.Int32);
-				var typename = command.Parameters.Add("@typename", DbType.String);
-				var baseIdParameter = command.Parameters.Add("@baseId", DbType.Int32);
-
-				foreach (var pair in _typeDescriptions)
-				{
-					var type = pair.Key;
-					var typeDescription = pair.Value;
-					var typeName = pair.Value.FullTypeName;
-					var typeId = _typesToId[type];
-					var baseTypeId = GetBaseTypeId(typeDescription);
-
-					typename.Value = typeName;
-					idParameter.Value = typeId;
-					baseIdParameter.Value = baseTypeId;
-					command.ExecuteNonQuery();
-				}
-
-				transaction.Commit();
-			}
-		}
-
-		public TypeDescription AddType(Type type)
-		{
-			if (!_typeDescriptions.TryGetValue(type, out var typeDescription))
-			{
-				var baseTypeDescription = AddBaseTypeOf(type);
-
-				var fields = TypeDescription.FindSerializableFields(type);
-				var properties = TypeDescription.FindSerializableProperties(type);
-				var members = CreateMemberDescriptions(fields, properties);
-
-				if (type.IsArray && type.GetArrayRank() == 1)
-				{
-					AddType(type.GetElementType());
-				}
-
-				var id = _nextId;
-				++_nextId;
-				typeDescription = TypeDescription.Create(type, id, baseTypeDescription, members);
-				_typeDescriptions.Add(type, typeDescription);
-				_typesToId.Add(type, id);
-				_idToTypes.Add(id, type);
-			}
-
-			return typeDescription;
-		}
-
 		private IReadOnlyList<MemberDescription> CreateMemberDescriptions(IReadOnlyList<FieldInfo> fields,
-		                                                                  IReadOnlyList<PropertyInfo> properties)
+		                                                                  IReadOnlyList<PropertyInfo> properties,
+		                                                                  TypeDescription baseTypeDescription)
 		{
+			int nextId = 1;
+
+			int GetNextId()
+			{
+				int i;
+				for (i = nextId; i < short.MaxValue; ++i)
+				{
+					if (baseTypeDescription != null)
+					{
+						if (i != baseTypeDescription.TypeId) break;
+					}
+					else
+					{
+						break;
+					}
+				}
+
+				nextId = i + 1;
+				return i;
+			}
+
 			var members = new List<MemberDescription>(fields.Count + properties.Count);
 			foreach (var field in fields)
 			{
 				var typeDescription = AddType(field.FieldType);
-				var description = MemberDescription.Create(field, typeDescription);
+				var id = GetNextId();
+				var description = MemberDescription.Create(field, typeDescription, id);
 				members.Add(description);
 			}
 
 			foreach (var property in properties)
 			{
 				var typeDescription = AddType(property.PropertyType);
-				var description = MemberDescription.Create(property, typeDescription);
+				var id = GetNextId();
+				var description = MemberDescription.Create(property, typeDescription, id);
 				members.Add(description);
 			}
 
@@ -322,47 +456,6 @@ namespace IsabelDb.TypeModels
 				return AddType(serializable);
 
 			return AddType(baseType);
-		}
-
-		[Pure]
-		public static bool IsBuiltIn(Type type)
-		{
-			if (type.IsArray)
-				return true;
-			if (BuiltInProtobufTypes.Contains(type))
-				return true;
-
-			return false;
-		}
-
-		public static bool IsWellKnown(Type type)
-		{
-			if (type == typeof(object))
-				return true;
-			if (type == typeof(IPAddress))
-				return true;
-			if (type == typeof(ValueType))
-				return true;
-
-			return IsBuiltIn(type);
-		}
-
-		public static bool DoesTableExist(SQLiteConnection connection)
-		{
-			return IsabelDb.TableExists(connection, TypeTableName);
-		}
-
-		public static void CreateTable(SQLiteConnection connection)
-		{
-			using (var command = connection.CreateCommand())
-			{
-				command.CommandText = string.Format("CREATE TABLE {0} (" +
-				                                    "id INTEGER PRIMARY KEY NOT NULL," +
-				                                    "typename TEXT NOT NULL," +
-				                                    "baseId INTEGER" +
-				                                    ")", TypeTableName);
-				command.ExecuteNonQuery();
-			}
 		}
 
 		private static Type FindSerializableInterface(List<Type> interfaces)

@@ -7,5 +7,8 @@ namespace IsabelDb.Test.Entities
 	{
 		[DataMember(Order = 1)]
 		public string Name { get; set; }
+
+		[DataMember]
+		public int Age { get; set; }
 	}
 }

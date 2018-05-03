@@ -88,6 +88,7 @@
     <Compile Include="Entities\Menu.cs" />
     <Compile Include="Entities\Numbers.cs" />
     <Compile Include="Entities\Message.cs" />
+    <Compile Include="Entities\Point.cs" />
     <Compile Include="Entities\V1\Plane.cs" />
     <Compile Include="Entities\V1\Thing.cs" />
     <Compile Include="Entities\V2\Thing.cs" />
