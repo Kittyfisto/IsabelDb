@@ -88,6 +88,7 @@
     <Compile Include="Entities\Message.cs" />
     <Compile Include="Entities\V1\Plane.cs" />
     <Compile Include="Entities\V1\Thing.cs" />
+    <Compile Include="Entities\V2\Thing.cs" />
     <Compile Include="Entities\V2\Plane.cs" />
     <Compile Include="ExplicitNameAndNamespace.cs" />
     <Compile Include="ExplicitNameNoNamespace.cs" />
@@ -114,8 +115,9 @@
     <Compile Include="RequriedBehaviourAttribute.cs" />
     <Compile Include="Person.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TypeModels\ProtobufTypeModelTest.cs" />
+    <Compile Include="TypeModels\TypeModelTest.cs" />
     <Compile Include="TypeRegistryTest.cs" />
-    <Compile Include="ProtobufTypeModelTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

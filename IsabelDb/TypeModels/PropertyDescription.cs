@@ -1,4 +1,4 @@
-﻿namespace IsabelDb.TypeModel
+﻿namespace IsabelDb.TypeModels
 {
 	internal sealed class PropertyDescription
 	{

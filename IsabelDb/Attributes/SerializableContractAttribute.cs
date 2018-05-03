@@ -6,7 +6,7 @@ namespace IsabelDb
 	/// <summary>
 	/// TODO: Find a better name
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Enum)]
+	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Enum, AllowMultiple = false)]
 	public class SerializableContractAttribute
 		: Attribute
 	{

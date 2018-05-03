@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 
-namespace IsabelDb.TypeModel
+namespace IsabelDb.TypeModels
 {
 	/// <summary>
 	///     Responsible for providing fast lookups between .NET types and
@@ -44,7 +44,7 @@ namespace IsabelDb.TypeModel
 		{
 			if (!_types.ContainsKey(type))
 			{
-				var description = TypeDescription.Create(type);
+				var description = TypeDescription.Create(type, null);
 				_typesByName.Add(description.FullTypeName, type);
 				_types.Add(type, description);
 
@@ -54,11 +54,6 @@ namespace IsabelDb.TypeModel
 				    baseType != typeof(Array))
 					Register(baseType);
 			}
-		}
-
-		public TypeDescription GetDescription(Type type)
-		{
-			return _types[type];
 		}
 
 		public string GetName(Type type)

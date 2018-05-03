@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 
-namespace IsabelDb.TypeModel
+namespace IsabelDb.TypeModels
 {
 	internal sealed class TypeDescription
 	{
@@ -12,6 +13,8 @@ namespace IsabelDb.TypeModel
 		public readonly string Namespace;
 		public readonly string FullTypeName;
 		public readonly TypeDescription BaseType;
+		public Type Type;
+		public int TypeId;
 
 		private TypeDescription(string name, string @namespace, TypeDescription baseType)
 		{
@@ -30,18 +33,13 @@ namespace IsabelDb.TypeModel
 
 		#endregion
 
-		public static TypeDescription Create(Type type)
+		public static TypeDescription Create(Type type, TypeDescription baseTypeDescription)
 		{
 			ExtractTypename(type, out var @namespace, out var name);
-
-			var baseType = type.BaseType;
-			TypeDescription baseTypeDescription = null;
-			if (baseType != null &&
-			    baseType != typeof(ValueType) &&
-			    baseType != typeof(Array))
-				baseTypeDescription = Create(baseType);
-
-			return new TypeDescription(name, @namespace, baseTypeDescription);
+			return new TypeDescription(name, @namespace, baseTypeDescription)
+			{
+				Type = type
+			};
 		}
 
 		public static TypeDescription Create(string typename,
@@ -89,20 +87,28 @@ namespace IsabelDb.TypeModel
 
 		public void ThrowIfIncompatibleTo(TypeDescription otherDescription)
 		{
-			if (Name != otherDescription.Name)
+			var otherBaseType = otherDescription.BaseType;
+			if (BaseType == null && otherBaseType != null)
 				throw new BreakingChangeException();
-			if (Namespace != otherDescription.Namespace)
-				throw new BreakingChangeException();
-
-			if (BaseType == null && otherDescription.BaseType != null)
-				throw new BreakingChangeException();
-			if (BaseType != null && otherDescription.BaseType == null)
+			if (BaseType != null && otherBaseType == null)
 				throw new BreakingChangeException();
 
-			if (BaseType != null && otherDescription.BaseType != null)
+			if (BaseType != null && otherBaseType != null)
 			{
+				if (!AreSameType(BaseType, otherBaseType))
+					throw new BreakingChangeException(string.Format("The base class of the type '{0}' has been changed from '{1}' to '{2}': This is a breaking change!",
+						FullTypeName,
+						BaseType.FullTypeName,
+						otherBaseType.FullTypeName));
+
 				BaseType.ThrowIfIncompatibleTo(otherDescription.BaseType);
 			}
+		}
+
+		[Pure]
+		private static bool AreSameType(TypeDescription type, TypeDescription otherType)
+		{
+			return string.Equals(type.FullTypeName, otherType.FullTypeName);
 		}
 	}
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using IsabelDb.TypeModels;
+using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.IO;
@@ -127,7 +128,7 @@ namespace IsabelDb
 
 		private static void CreateTablesIfNecessary(SQLiteConnection connection)
 		{
-			var hasTypesTable = TypeModel.ProtobufTypeModel.DoesTableExist(connection);
+			var hasTypesTable = TypeModel.DoesTableExist(connection);
 			var hasStoresTable = ObjectStores.DoesTableExist(connection);
 			if (hasTypesTable && hasStoresTable)
 				return;
@@ -139,7 +140,7 @@ namespace IsabelDb
 
 		private static void CreateTables(SQLiteConnection connection)
 		{
-			TypeModel.ProtobufTypeModel.CreateTable(connection);
+			TypeModel.CreateTable(connection);
 			ObjectStores.CreateTable(connection);
 		}
 
@@ -156,7 +157,7 @@ namespace IsabelDb
 
 		private static void EnsureTableSchema(SQLiteConnection connection)
 		{
-			if (!TypeModel.ProtobufTypeModel.DoesTableExist(connection))
+			if (!TypeModel.DoesTableExist(connection))
 				throw new NotImplementedException();
 			if (!ObjectStores.DoesTableExist(connection))
 				throw new NotImplementedException();

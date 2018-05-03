@@ -1,6 +1,6 @@
 ﻿using System;
 using FluentAssertions;
-using IsabelDb.TypeModel;
+using IsabelDb.TypeModels;
 using NUnit.Framework;
 
 namespace IsabelDb.Test

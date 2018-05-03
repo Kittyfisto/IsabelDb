@@ -4,7 +4,7 @@ using System.Data.SQLite;
 using System.Net;
 using IsabelDb.Serializers;
 using IsabelDb.Stores;
-using IsabelDb.TypeModel;
+using IsabelDb.TypeModels;
 
 namespace IsabelDb
 {
@@ -55,7 +55,7 @@ namespace IsabelDb
 		{
 			_connection = connection;
 
-			_typeModel = TypeModel.ProtobufTypeModel.Create(connection, supportedTypes);
+			_typeModel = ProtobufTypeModel.Create(connection, supportedTypes);
 			_serializer = new Serializer(_typeModel);
 			_dictionaries = new Dictionary<string, IInternalObjectStore>();
 			_bags = new Dictionary<string, IInternalObjectStore>();

@@ -62,9 +62,9 @@
     <Compile Include="Exceptions\BreakingChangeException.cs" />
     <Compile Include="Exceptions\TypeMismatchException.cs" />
     <Compile Include="Exceptions\TypeResolveException.cs" />
-    <Compile Include="TypeModel\CompiledTypeModel.cs" />
+    <Compile Include="TypeModels\CompiledTypeModel.cs" />
     <Compile Include="IBagObjectStore.cs" />
-    <Compile Include="TypeModel\ITypeModel.cs" />
+    <Compile Include="TypeModels\ITypeModel.cs" />
     <Compile Include="Serializers\ByteArraySerializer.cs" />
     <Compile Include="Serializers\ByteSerializer.cs" />
     <Compile Include="Serializers\DoubleSerializer.cs" />
@@ -89,11 +89,11 @@
     <Compile Include="Serializers\ISQLiteSerializer.cs" />
     <Compile Include="Stores\BagObjectStore.cs" />
     <Compile Include="SQLiteHelper.cs" />
-    <Compile Include="TypeModel\PropertyDescription.cs" />
-    <Compile Include="TypeModel\TypeDescription.cs" />
-    <Compile Include="TypeModel\ProtobufTypeModel.cs" />
-    <Compile Include="TypeModel\TypeModel.cs" />
-    <Compile Include="TypeModel\TypeRegistry.cs" />
+    <Compile Include="TypeModels\PropertyDescription.cs" />
+    <Compile Include="TypeModels\TypeDescription.cs" />
+    <Compile Include="TypeModels\ProtobufTypeModel.cs" />
+    <Compile Include="TypeModels\TypeModel.cs" />
+    <Compile Include="TypeModels\TypeRegistry.cs" />
     <Compile Include="Serializer.cs" />
   </ItemGroup>
   <ItemGroup>

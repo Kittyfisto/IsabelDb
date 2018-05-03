@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Data.SQLite;
 using System.IO;
-using IsabelDb.TypeModel;
+using IsabelDb.TypeModels;
 
 namespace IsabelDb
 {
