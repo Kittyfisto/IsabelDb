@@ -1,59 +1,59 @@
-﻿using log4net;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Net;
 using System.Reflection;
+using log4net;
 
 namespace IsabelDb.TypeModels
 {
 	/// <summary>
-	///     A description of types, their serializable fields and properties as well as their base types
+	///     A description of types, their serializable fields and properties as well as their base types.
 	/// </summary>
 	/// <remarks>
-	///     This model is used to create the protobuf type model in order to compile a serializer.
+	///     This model can be stored in the database and then be restored again, in order to determine if
+	///     breaking changes were made to any type.
+	/// </remarks>
+	/// <remarks>
+	///     This model contains enough information to build a <see cref="ProtoBuf.Meta.TypeModel" />.
 	/// </remarks>
 	internal sealed class TypeModel
 		: IEnumerable<Type>
 	{
+		public const string TypeTableName = "isabel_types";
+		public const string FieldTableName = "isabel_fields";
+
 		private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-		public const string TypeTableName = "isabel_types";
-
 		/// <summary>
-		/// The followin list of types are built-in to protobuf: We cannot override their
-		/// serialization behaviour (and and for example, define that string inherits from object).
+		///     The followin list of types are built-in to protobuf: We cannot override their
+		///     serialization behaviour (and and for example, define that string inherits from object).
 		/// </summary>
-		public static HashSet<Type> BuiltInProtobufTypes = new HashSet<Type>
+		public static readonly HashSet<Type> BuiltInProtobufTypes = new HashSet<Type>
 		{
-				typeof(string),
-				typeof(float),
-				typeof(double),
-				typeof(byte),
-				typeof(sbyte),
-				typeof(short),
-				typeof(ushort),
-				typeof(int),
-				typeof(uint),
-				typeof(long),
-				typeof(byte[])
+			typeof(bool),
+			typeof(string),
+			typeof(float),
+			typeof(double),
+			typeof(byte),
+			typeof(sbyte),
+			typeof(short),
+			typeof(ushort),
+			typeof(int),
+			typeof(uint),
+			typeof(long),
+			typeof(byte[])
 		};
 
-		private readonly Dictionary<Type, TypeDescription> _typeDescriptions;
 		private readonly Dictionary<int, Type> _idToTypes;
+
+		private readonly Dictionary<Type, TypeDescription> _typeDescriptions;
 		private readonly Dictionary<Type, int> _typesToId;
 		private int _nextId;
-
-		public IEnumerable<Type> Keys => _typeDescriptions.Keys;
-
-		public IEnumerable<TypeDescription> Values => _typeDescriptions.Values;
-
-		public int Count => _typeDescriptions.Count;
-
-		public TypeDescription this[Type key] => _typeDescriptions[key];
 
 		public TypeModel()
 		{
@@ -66,6 +66,24 @@ namespace IsabelDb.TypeModels
 		private TypeModel(Dictionary<Type, TypeDescription> types)
 		{
 			_typeDescriptions = types;
+		}
+
+		public IEnumerable<Type> Keys => _typeDescriptions.Keys;
+
+		public IEnumerable<TypeDescription> Values => _typeDescriptions.Values;
+
+		public int Count => _typeDescriptions.Count;
+
+		public TypeDescription this[Type key] => _typeDescriptions[key];
+
+		public IEnumerator<Type> GetEnumerator()
+		{
+			return _typesToId.Keys.GetEnumerator();
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return GetEnumerator();
 		}
 
 		[Pure]
@@ -100,12 +118,11 @@ namespace IsabelDb.TypeModels
 		}
 
 		/// <summary>
-		/// 
 		/// </summary>
 		/// <param name="connection"></param>
-		/// <param name="typeRegistry"></param>
+		/// <param name="typeResolver"></param>
 		/// <returns></returns>
-		public static TypeModel Read(SQLiteConnection connection, TypeRegistry typeRegistry)
+		public static TypeModel Read(SQLiteConnection connection, TypeResolver typeResolver)
 		{
 			var model = new TypeModel();
 			using (var command = connection.CreateCommand())
@@ -118,15 +135,11 @@ namespace IsabelDb.TypeModels
 						var id = reader.GetInt32(i: 0);
 						var typeName = reader.GetString(i: 1);
 						int? baseId;
-						if (!reader.IsDBNull(2))
-						{
-							baseId = reader.GetInt32(2);
-						}
+						if (!reader.IsDBNull(i: 2))
+							baseId = reader.GetInt32(i: 2);
 						else
-						{
 							baseId = null;
-						}
-						model.TryAddType(id, typeName, baseId, typeRegistry);
+						model.TryAddType(id, typeName, baseId, typeResolver);
 					}
 				}
 			}
@@ -136,22 +149,19 @@ namespace IsabelDb.TypeModels
 
 		public void Add(List<Type> allTypes)
 		{
-			foreach(var type in allTypes)
-			{
-				AddType(type);
-			}
+			foreach (var type in allTypes) AddType(type);
 		}
 
-		private void TryAddType(int id, string typeName, int? baseId, TypeRegistry typeRegistry)
+		private void TryAddType(int id, string typeName, int? baseId, TypeResolver typeResolver)
 		{
 			try
 			{
 				_nextId = Math.Max(_nextId, id + 1);
-				var type = typeRegistry.Resolve(typeName);
+				var type = typeResolver.Resolve(typeName);
 				if (type != null)
 				{
 					var baseType = baseId != null ? GetType(baseId.Value) : null;
-					AddType(typeName, type, id, baseType, null);
+					AddType(typeName, type, id, baseType, fields: null);
 				}
 				else
 				{
@@ -164,18 +174,15 @@ namespace IsabelDb.TypeModels
 			}
 			catch (Exception e)
 			{
-				Log.ErrorFormat("Unable to resolve '{0}' to a .NET type! Values of this type will not be readable: {0}", typeName,
-								e);
+				Log.ErrorFormat("Unable to resolve '{0}' to a .NET type! Values of this type will not be readable: {1}", typeName,
+				                e);
 			}
 		}
 
 		public static TypeModel Create(IEnumerable<Type> supportedTypes)
 		{
 			var model = new TypeModel();
-			foreach(var type in supportedTypes)
-			{
-				model.AddType(type);
-			}
+			foreach (var type in supportedTypes) model.AddType(type);
 			return model;
 		}
 
@@ -184,7 +191,8 @@ namespace IsabelDb.TypeModels
 			using (var transaction = connection.BeginTransaction())
 			using (var command = connection.CreateCommand())
 			{
-				command.CommandText = string.Format("INSERT OR REPLACE INTO {0} (id, typename, baseId) VALUES (@id, @typename, @baseId)", TypeTableName);
+				command.CommandText =
+					string.Format("INSERT OR REPLACE INTO {0} (id, typename, baseId) VALUES (@id, @typename, @baseId)", TypeTableName);
 				var idParameter = command.Parameters.Add("@id", DbType.Int32);
 				var typename = command.Parameters.Add("@typename", DbType.String);
 				var baseIdParameter = command.Parameters.Add("@baseId", DbType.Int32);
@@ -207,13 +215,65 @@ namespace IsabelDb.TypeModels
 			}
 		}
 
-		private void AddType(string typename, Type type, int typeId,
-			Type baseType, IEnumerable<PropertyDescription> properties)
+		public TypeDescription AddType(Type type)
+		{
+			if (!_typeDescriptions.TryGetValue(type, out var typeDescription))
+			{
+				var baseTypeDescription = AddBaseTypeOf(type);
+
+				var fields = TypeDescription.FindSerializableFields(type);
+				var properties = TypeDescription.FindSerializableProperties(type);
+				var members = CreateMemberDescriptions(fields, properties);
+
+				if (type.IsArray && type.GetArrayRank() == 1)
+				{
+					AddType(type.GetElementType());
+				}
+
+				var id = _nextId;
+				++_nextId;
+				typeDescription = TypeDescription.Create(type, id, baseTypeDescription, members);
+				_typeDescriptions.Add(type, typeDescription);
+				_typesToId.Add(type, id);
+				_idToTypes.Add(id, type);
+			}
+
+			return typeDescription;
+		}
+
+		private IReadOnlyList<MemberDescription> CreateMemberDescriptions(IReadOnlyList<FieldInfo> fields,
+		                                                                  IReadOnlyList<PropertyInfo> properties)
+		{
+			var members = new List<MemberDescription>(fields.Count + properties.Count);
+			foreach (var field in fields)
+			{
+				var typeDescription = AddType(field.FieldType);
+				var description = MemberDescription.Create(field, typeDescription);
+				members.Add(description);
+			}
+
+			foreach (var property in properties)
+			{
+				var typeDescription = AddType(property.PropertyType);
+				var description = MemberDescription.Create(property, typeDescription);
+				members.Add(description);
+			}
+
+			return members;
+		}
+
+		private void AddType(string typename,
+		                     Type type,
+		                     int typeId,
+		                     Type baseType,
+		                     IEnumerable<MemberDescription> fields)
 		{
 			var baseTypeDescription = baseType != null ? _typeDescriptions[baseType] : null;
-			var typeDescription = TypeDescription.Create(typename, baseTypeDescription, properties);
-			typeDescription.Type = type;
-			typeDescription.TypeId = typeId;
+			var typeDescription = TypeDescription.Create(type,
+			                                             typename,
+			                                             typeId,
+			                                             baseTypeDescription,
+			                                             fields);
 
 			ThrowIfBreakingChangesDetect(typeDescription);
 
@@ -222,27 +282,10 @@ namespace IsabelDb.TypeModels
 			_idToTypes.Add(typeId, type);
 		}
 
-		public TypeDescription AddType(Type type)
-		{
-			if (!_typeDescriptions.TryGetValue(type, out var typeDescription))
-			{
-				var baseTypeDescription = AddBaseTypeOf(type);
-
-				var id = _nextId;
-				++_nextId;
-				typeDescription = TypeDescription.Create(type, baseTypeDescription);
-				typeDescription.TypeId = id;
-				_typeDescriptions.Add(type, typeDescription);
-				_typesToId.Add(type, id);
-				_idToTypes.Add(id, type);
-			}
-			return typeDescription;
-		}
-
 		private void ThrowIfBreakingChangesDetect(TypeDescription typeDescription)
 		{
 			var type = typeDescription.Type;
-			var current = Create(new[] { type }).GetTypeDescription(type);
+			var current = Create(new[] {type}).GetTypeDescription(type);
 			typeDescription.ThrowIfIncompatibleTo(current);
 		}
 
@@ -260,7 +303,7 @@ namespace IsabelDb.TypeModels
 
 		private TypeDescription AddBaseTypeOf(Type type)
 		{
-			if (BuiltInProtobufTypes.Contains(type))
+			if (IsBuiltIn(type))
 				return null;
 
 			if (IsSerializableInterface(type))
@@ -281,6 +324,29 @@ namespace IsabelDb.TypeModels
 			return AddType(baseType);
 		}
 
+		[Pure]
+		public static bool IsBuiltIn(Type type)
+		{
+			if (type.IsArray)
+				return true;
+			if (BuiltInProtobufTypes.Contains(type))
+				return true;
+
+			return false;
+		}
+
+		public static bool IsWellKnown(Type type)
+		{
+			if (type == typeof(object))
+				return true;
+			if (type == typeof(IPAddress))
+				return true;
+			if (type == typeof(ValueType))
+				return true;
+
+			return IsBuiltIn(type);
+		}
+
 		public static bool DoesTableExist(SQLiteConnection connection)
 		{
 			return IsabelDb.TableExists(connection, TypeTableName);
@@ -291,10 +357,10 @@ namespace IsabelDb.TypeModels
 			using (var command = connection.CreateCommand())
 			{
 				command.CommandText = string.Format("CREATE TABLE {0} (" +
-													"id INTEGER PRIMARY KEY NOT NULL," +
-													"typename TEXT NOT NULL," +
-													"baseId INTEGER" +
-													")", TypeTableName);
+				                                    "id INTEGER PRIMARY KEY NOT NULL," +
+				                                    "typename TEXT NOT NULL," +
+				                                    "baseId INTEGER" +
+				                                    ")", TypeTableName);
 				command.ExecuteNonQuery();
 			}
 		}
@@ -308,7 +374,7 @@ namespace IsabelDb.TypeModels
 			if (serializable.Count > 1)
 				throw new NotImplementedException();
 
-			return serializable[0];
+			return serializable[index: 0];
 		}
 
 		[Pure]
@@ -325,16 +391,6 @@ namespace IsabelDb.TypeModels
 				return false;
 
 			return true;
-		}
-
-		public IEnumerator<Type> GetEnumerator()
-		{
-			return _typesToId.Keys.GetEnumerator();
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return GetEnumerator();
 		}
 	}
 }

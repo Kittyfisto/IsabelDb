@@ -9,20 +9,49 @@ namespace IsabelDb.TypeModels
 {
 	internal sealed class TypeDescription
 	{
+		private readonly IReadOnlyList<MemberDescription> _members;
+		public readonly TypeDescription BaseType;
+		public readonly string FullTypeName;
 		public readonly string Name;
 		public readonly string Namespace;
-		public readonly string FullTypeName;
-		public readonly TypeDescription BaseType;
-		public Type Type;
-		public int TypeId;
+		public readonly Type Type;
+		public readonly int TypeId;
 
-		private TypeDescription(string name, string @namespace, TypeDescription baseType)
+		private TypeDescription(string name, string @namespace,
+								Type type,
+								int typeId,
+		                        TypeDescription baseType,
+		                        IReadOnlyList<MemberDescription> members)
 		{
 			Name = name;
 			Namespace = @namespace;
-			FullTypeName = string.Format("{0}.{1}", @namespace, name);
+			FullTypeName = GetTypename(@namespace, name);
+			Type = type;
+			TypeId = typeId;
+
 			BaseType = baseType;
+			_members = members;
 		}
+
+		private TypeDescription(Type type,
+		                        string typename,
+		                        int typeId,
+		                        TypeDescription baseTypeDescription,
+		                        IEnumerable<MemberDescription> fields)
+		{
+			Type = type;
+			TypeId = typeId;
+
+			var idx = typename.LastIndexOf(".", StringComparison.InvariantCulture);
+			Namespace = typename.Substring(startIndex: 0, length: idx);
+			Name = typename.Substring(idx + 1);
+			FullTypeName = typename;
+
+			BaseType = baseTypeDescription;
+			_members = fields?.ToList() ?? new List<MemberDescription>();
+		}
+
+		public IReadOnlyList<MemberDescription> Members => _members;
 
 		#region Overrides of Object
 
@@ -33,23 +62,37 @@ namespace IsabelDb.TypeModels
 
 		#endregion
 
-		public static TypeDescription Create(Type type, TypeDescription baseTypeDescription)
+		public static string GetTypename(Type type)
 		{
 			ExtractTypename(type, out var @namespace, out var name);
-			return new TypeDescription(name, @namespace, baseTypeDescription)
-			{
-				Type = type
-			};
+			return GetTypename(@namespace, name);
 		}
 
-		public static TypeDescription Create(string typename,
-		                                     TypeDescription baseTypeDescription,
-		                                     IEnumerable<PropertyDescription> properties)
+		public static string GetTypename(string @namespace, string name)
 		{
-			var idx = typename.LastIndexOf(".", StringComparison.InvariantCulture);
-			var @namespace = typename.Substring(0, idx);
-			var name = typename.Substring(idx + 1);
-			return new TypeDescription(name, @namespace,  baseTypeDescription);
+			return string.Format("{0}.{1}", @namespace, name);
+		}
+
+		public static TypeDescription Create(Type type,
+		                                     int typeId,
+		                                     TypeDescription baseTypeDescription,
+		                                     IReadOnlyList<MemberDescription> members)
+		{
+			ExtractTypename(type, out var @namespace, out var name);
+			return new TypeDescription(name, @namespace, type, typeId, baseTypeDescription, members);
+		}
+
+		public static TypeDescription Create(Type type,
+		                                     string typename,
+		                                     int typeId,
+		                                     TypeDescription baseTypeDescription,
+		                                     IEnumerable<MemberDescription> members)
+		{
+			return new TypeDescription(type,
+			                           typename,
+			                           typeId,
+			                           baseTypeDescription,
+			                           members);
 		}
 
 		private static void ExtractTypename(Type type, out string @namespace, out string name)
@@ -74,10 +117,10 @@ namespace IsabelDb.TypeModels
 				{
 					var interfaces = type.GetInterfaces();
 					if (!interfaces.Contains(typeof(ISerializable)))
-					{
-						if (!ProtobufTypeModel.IsBuiltIn(type))
-							throw new ArgumentException(string.Format("The type '{0}' is not serializable: It should have the DataContractAttribute applied", type));
-					}
+						if (!TypeModel.IsWellKnown(type))
+							throw new
+								ArgumentException(string.Format("The type '{0}' is not serializable: It should have the DataContractAttribute applied",
+								                                type));
 
 					@namespace = type.Namespace;
 					name = type.Name;
@@ -96,10 +139,11 @@ namespace IsabelDb.TypeModels
 			if (BaseType != null && otherBaseType != null)
 			{
 				if (!AreSameType(BaseType, otherBaseType))
-					throw new BreakingChangeException(string.Format("The base class of the type '{0}' has been changed from '{1}' to '{2}': This is a breaking change!",
-						FullTypeName,
-						BaseType.FullTypeName,
-						otherBaseType.FullTypeName));
+					throw new
+						BreakingChangeException(string.Format("The base class of the type '{0}' has been changed from '{1}' to '{2}': This is a breaking change!",
+						                                      FullTypeName,
+						                                      BaseType.FullTypeName,
+						                                      otherBaseType.FullTypeName));
 
 				BaseType.ThrowIfIncompatibleTo(otherDescription.BaseType);
 			}
@@ -109,6 +153,26 @@ namespace IsabelDb.TypeModels
 		private static bool AreSameType(TypeDescription type, TypeDescription otherType)
 		{
 			return string.Equals(type.FullTypeName, otherType.FullTypeName);
+		}
+
+		public static IReadOnlyList<FieldInfo> FindSerializableFields(Type type)
+		{
+			return type.GetFields(BindingFlags.Instance | BindingFlags.Public)
+			           .Where(HasDataMemberAttribute)
+			           .ToList();
+		}
+
+		public static IReadOnlyList<PropertyInfo> FindSerializableProperties(Type type)
+		{
+			return type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
+			           .Where(HasDataMemberAttribute)
+			           .ToList();
+		}
+
+		private static bool HasDataMemberAttribute(MemberInfo field)
+		{
+			var dataMemberAttribute = field.GetCustomAttribute<DataMemberAttribute>();
+			return dataMemberAttribute != null;
 		}
 	}
 }

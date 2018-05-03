@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using FluentAssertions;
+using IsabelDb.Test.Entities;
 using NUnit.Framework;
 
 namespace IsabelDb.Test

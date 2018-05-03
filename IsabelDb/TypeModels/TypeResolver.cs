@@ -5,27 +5,27 @@ using System.Diagnostics.Contracts;
 namespace IsabelDb.TypeModels
 {
 	/// <summary>
-	///     Responsible for providing fast lookups between .NET types and
-	///     their string representations which are actually persisted in the database.
+	///     Responsible for providing fast lookups between .NET types and their names
+	///     (in both directions).
 	/// </summary>
-	internal sealed class TypeRegistry
+	internal sealed class TypeResolver
 	{
-		private readonly Dictionary<Type, TypeDescription> _types;
+		private readonly Dictionary<Type, string> _namesByType;
 		private readonly Dictionary<string, Type> _typesByName;
 
 		/// <summary>
 		/// </summary>
-		/// <param name="supportedTypes"></param>
-		public TypeRegistry(IEnumerable<Type> supportedTypes)
+		/// <param name="supportedTypes">The list of types for which a mapping shall be provided</param>
+		public TypeResolver(IEnumerable<Type> supportedTypes)
 		{
 			_typesByName = new Dictionary<string, Type>();
-			_types = new Dictionary<Type, TypeDescription>();
+			_namesByType = new Dictionary<Type, string>();
 
 			foreach (var type in supportedTypes)
 				Register(type);
 		}
 
-		public IEnumerable<Type> RegisteredTypes => _types.Keys;
+		public IEnumerable<Type> RegisteredTypes => _namesByType.Keys;
 
 		/// <summary>
 		///     Registers the given type with this resolver.
@@ -42,24 +42,24 @@ namespace IsabelDb.TypeModels
 		/// <param name="type"></param>
 		public void Register(Type type)
 		{
-			if (!_types.ContainsKey(type))
+			if (!_namesByType.ContainsKey(type))
 			{
-				var description = TypeDescription.Create(type, null);
-				_typesByName.Add(description.FullTypeName, type);
-				_types.Add(type, description);
-
 				var baseType = type.BaseType;
 				if (baseType != null &&
 				    baseType != typeof(ValueType) &&
 				    baseType != typeof(Array))
 					Register(baseType);
+
+				var typename = TypeDescription.GetTypename(type);
+				_namesByType.Add(type, typename);
+				_typesByName.Add(typename, type);
 			}
 		}
 
 		public string GetName(Type type)
 		{
-			_types.TryGetValue(type, out var description);
-			return description?.FullTypeName;
+			_namesByType.TryGetValue(type, out var name);
+			return name;
 		}
 
 		public Type Resolve(string typeName)
@@ -71,7 +71,7 @@ namespace IsabelDb.TypeModels
 		[Pure]
 		public bool IsRegistered(Type type)
 		{
-			return _types.ContainsKey(type);
+			return _namesByType.ContainsKey(type);
 		}
 	}
 }

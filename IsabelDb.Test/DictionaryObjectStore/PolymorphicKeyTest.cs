@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using IsabelDb.Test.Entities;
 
 namespace IsabelDb.Test.DictionaryObjectStore
 {

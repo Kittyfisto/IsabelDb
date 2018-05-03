@@ -1,17 +1,18 @@
 ﻿using System;
 using FluentAssertions;
+using IsabelDb.Test.Entities;
 using IsabelDb.TypeModels;
 using NUnit.Framework;
 
 namespace IsabelDb.Test
 {
 	[TestFixture]
-	public sealed class TypeRegistryTest
+	public sealed class TypeResolverTest
 	{
 		[Test]
 		public void TestRegisterPolymorphicType()
 		{
-			var resolver = new TypeRegistry(new Type[0]);
+			var resolver = new TypeResolver(new Type[0]);
 			resolver.Register(typeof(KeyA));
 			resolver.IsRegistered(typeof(KeyA)).Should().BeTrue();
 			resolver.Register(typeof(IPolymorphicCustomKey));
@@ -21,7 +22,7 @@ namespace IsabelDb.Test
 		[Test]
 		public void TestDataContractExplicitNamespaceNoName()
 		{
-			var resolver = new TypeRegistry(new []{typeof(ExplicitNamespaceNoName)});
+			var resolver = new TypeResolver(new []{typeof(ExplicitNamespaceNoName)});
 			resolver.GetName(typeof(ExplicitNamespaceNoName))
 				.Should().Be("Blur.ExplicitNamespaceNoName");
 		}
@@ -29,7 +30,7 @@ namespace IsabelDb.Test
 		[Test]
 		public void TestDataContractExplicitNameNoNamespace()
 		{
-			var resolver = new TypeRegistry(new []{typeof(ExplicitNameNoNamespace)});
+			var resolver = new TypeResolver(new []{typeof(ExplicitNameNoNamespace)});
 			resolver.GetName(typeof(ExplicitNameNoNamespace))
 				.Should().Be("IsabelDb.Test.Song2");
 		}
@@ -37,7 +38,7 @@ namespace IsabelDb.Test
 		[Test]
 		public void TestDataContractNoNameNoNamespace()
 		{
-			var resolver = new TypeRegistry(new []{typeof(DataContractNoNameNoNamespace)});
+			var resolver = new TypeResolver(new []{typeof(DataContractNoNameNoNamespace)});
 			resolver.GetName(typeof(DataContractNoNameNoNamespace))
 				.Should().Be(typeof(DataContractNoNameNoNamespace).FullName);
 		}
@@ -45,7 +46,7 @@ namespace IsabelDb.Test
 		[Test]
 		public void TestExplicitNameAndNamespace()
 		{
-			var resolver = new TypeRegistry(new []{typeof(ExplicitNameAndNamespace)});
+			var resolver = new TypeResolver(new []{typeof(ExplicitNameAndNamespace)});
 			resolver.GetName(typeof(ExplicitNameAndNamespace))
 				.Should().Be("my app.FooName");
 		}

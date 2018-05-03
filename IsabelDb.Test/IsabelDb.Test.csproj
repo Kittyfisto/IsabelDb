@@ -85,6 +85,8 @@
     <Compile Include="DefectAttribute.cs" />
     <Compile Include="Entities\Animal.cs" />
     <Compile Include="Entities\Dog.cs" />
+    <Compile Include="Entities\Menu.cs" />
+    <Compile Include="Entities\Numbers.cs" />
     <Compile Include="Entities\Message.cs" />
     <Compile Include="Entities\V1\Plane.cs" />
     <Compile Include="Entities\V1\Thing.cs" />
@@ -93,14 +95,14 @@
     <Compile Include="ExplicitNameAndNamespace.cs" />
     <Compile Include="ExplicitNameNoNamespace.cs" />
     <Compile Include="ExplicitNamespaceNoName.cs" />
-    <Compile Include="ICustomKey.cs" />
+    <Compile Include="Entities\ICustomKey.cs" />
     <Compile Include="IsabelDbFileTests.cs" />
     <Compile Include="IsabelDbTest.cs" />
     <Compile Include="IssueAttribute.cs" />
-    <Compile Include="KeyA.cs" />
-    <Compile Include="KeyB.cs" />
+    <Compile Include="Entities\KeyA.cs" />
+    <Compile Include="Entities\KeyB.cs" />
     <Compile Include="DictionaryObjectStore\AbstractDictionaryObjectStoreTest.cs" />
-    <Compile Include="CustomKey.cs" />
+    <Compile Include="Entities\CustomKey.cs" />
     <Compile Include="DictionaryObjectStore\CustomKeyTest.cs" />
     <Compile Include="DictionaryObjectStore\Int16KeyTest.cs" />
     <Compile Include="DictionaryObjectStore\Int32KeyTest.cs" />
@@ -117,7 +119,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TypeModels\ProtobufTypeModelTest.cs" />
     <Compile Include="TypeModels\TypeModelTest.cs" />
-    <Compile Include="TypeRegistryTest.cs" />
+    <Compile Include="TypeResolverTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

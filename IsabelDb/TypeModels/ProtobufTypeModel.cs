@@ -4,8 +4,6 @@ using System.Data.SQLite;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net;
-using System.Reflection;
-using log4net;
 using ProtoBuf.Meta;
 
 namespace IsabelDb.TypeModels
@@ -17,10 +15,6 @@ namespace IsabelDb.TypeModels
 	/// </summary>
 	internal sealed class ProtobufTypeModel
 	{
-		public const string TypeTableName = "isabel_types";
-
-		private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
-
 		private static readonly HashSet<Type> BuiltInTypes;
 
 		private readonly TypeModel _typeModel;
@@ -69,7 +63,7 @@ namespace IsabelDb.TypeModels
 			// Protobuf doesn't allow us to register built-in types
 			// (such as System.String), hence don't try to add those.
 			var type = typeDescription.Type;
-			if (!TypeModel.BuiltInProtobufTypes.Contains(type) && !_metaTypes.TryGetValue(type, out var metaType))
+			if (!TypeModel.IsBuiltIn(type) && !_metaTypes.TryGetValue(type, out var metaType))
 			{
 				metaType = _runtimeTypeModel.Add(type, applyDefaultBehaviour: true);
 				_metaTypes.Add(type, metaType);
@@ -98,7 +92,7 @@ namespace IsabelDb.TypeModels
 		                                       IEnumerable<Type> supportedTypes)
 		{
 			var allTypes = BuiltInTypes.Concat(supportedTypes).ToList();
-			var typeRegistry = new TypeRegistry(allTypes);
+			var typeRegistry = new TypeResolver(allTypes);
 			var typeModel = TypeModel.Read(connection, typeRegistry);
 			typeModel.Add(allTypes);
 			// If we reach this point, then both type models are compatible to each other
@@ -115,12 +109,6 @@ namespace IsabelDb.TypeModels
 		{
 			var protobufTypeModel = new ProtobufTypeModel(typeModel);
 			return protobufTypeModel.Compile();
-		}
-
-		[Pure]
-		public static bool IsBuiltIn(Type type)
-		{
-			return BuiltInTypes.Contains(type);
 		}
 	}
 }

@@ -75,7 +75,7 @@ namespace IsabelDb.Test
 			{
 					new Action(() => db.GetDictionary<string, CustomKey>("SomeTable"))
 					.Should().Throw<ArgumentException>()
-					.WithMessage("The type 'IsabelDb.Test.CustomKey' has not been registered when the database was created and thus may not be used as the value type in a collection");
+					.WithMessage("The type 'IsabelDb.Test.Entities.CustomKey' has not been registered when the database was created and thus may not be used as the value type in a collection");
 			}
 		}
 
@@ -87,7 +87,7 @@ namespace IsabelDb.Test
 			{
 				new Action(() => db.GetDictionary<CustomKey, string>("SomeTable"))
 					.Should().Throw<ArgumentException>()
-					.WithMessage("The type 'IsabelDb.Test.CustomKey' has not been registered when the database was created and thus may not be used as the key type in a collection");
+					.WithMessage("The type 'IsabelDb.Test.Entities.CustomKey' has not been registered when the database was created and thus may not be used as the key type in a collection");
 			}
 		}
 
@@ -99,7 +99,7 @@ namespace IsabelDb.Test
 			{
 				new Action(() => db.GetBag<CustomKey>("SomeTable"))
 					.Should().Throw<ArgumentException>()
-					.WithMessage("The type 'IsabelDb.Test.CustomKey' has not been registered when the database was created and thus may not be used as the value type in a collection");
+					.WithMessage("The type 'IsabelDb.Test.Entities.CustomKey' has not been registered when the database was created and thus may not be used as the value type in a collection");
 			}
 		}
 

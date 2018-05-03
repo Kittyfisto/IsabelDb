@@ -4,6 +4,8 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
+using System.Linq;
+using IsabelDb.Test.Entities;
 
 namespace IsabelDb.Test.TypeModels
 {
@@ -25,6 +27,14 @@ namespace IsabelDb.Test.TypeModels
 			typeof(byte[])
 		};
 
+		public static IEnumerable<Type> Types => NonPolymorphicTypes.Concat(new[]
+		{
+			typeof(CustomKey),
+			typeof(IPolymorphicCustomKey),
+			typeof(KeyA),
+			typeof(KeyB)
+		});
+
 		private static TypeModel Roundtrip(TypeModel model, IEnumerable<Type> availableTypes)
 		{
 			var connection = new SQLiteConnection("Data Source=:memory:");
@@ -32,7 +42,7 @@ namespace IsabelDb.Test.TypeModels
 			TypeModel.CreateTable(connection);
 			model.Write(connection);
 
-			var typeRegistry = new TypeRegistry(availableTypes);
+			var typeRegistry = new TypeResolver(availableTypes);
 			model = TypeModel.Read(connection, typeRegistry);
 			return model;
 		}
@@ -60,13 +70,26 @@ namespace IsabelDb.Test.TypeModels
 		}
 
 		[Test]
-		public void TestRoundtripObject()
+		public void TestRoundtrip([ValueSource(nameof(Types))] Type type)
 		{
-			var model = Roundtrip(TypeModel.Create(new[] { typeof(object) }));
-			model.IsTypeRegistered(typeof(object)).Should().BeTrue();
-			model.GetTypeId(typeof(object)).Should().BeGreaterThan(0);
-			model.GetTypeName(typeof(object)).Should().Be("System.Object");
-			model.GetType(model.GetTypeId(typeof(object))).Should().Be<object>();
+			var model = TypeModel.Create(new[] {type});
+			var description = model.GetTypeDescription(type);
+
+			var actualModel = Roundtrip(model);
+			var actualDescription = actualModel.GetTypeDescription(type);
+			const string reason = "because the type description should contain equal values upon being deserialized again";
+			actualDescription.Should().NotBeNull(reason);
+			actualDescription.Should().NotBeSameAs(description, reason);
+			actualDescription.Name.Should().Be(description.Name, reason);
+			actualDescription.Namespace.Should().Be(description.Namespace, reason);
+			actualDescription.FullTypeName.Should().Be(description.FullTypeName, reason);
+			actualDescription.Type.Should().Be(description.Type, reason);
+			actualDescription.TypeId.Should().Be(description.TypeId, reason);
+
+			const string reason2 = "because the deserialized type model should still be able to resolve types by their name / id";
+			actualModel.GetTypeName(type).Should().Be(description.FullTypeName, reason2);
+			actualModel.GetType(description.TypeId).Should().Be(type, reason2);
+			actualModel.GetTypeId(type).Should().Be(description.TypeId, reason2);
 		}
 
 		[Test]
@@ -113,6 +136,9 @@ namespace IsabelDb.Test.TypeModels
 			model.GetTypeDescription(typeof(object)).Type.Should().Be<object>();
 			model.GetTypeDescription(typeof(object)).TypeId.Should().Be(model.GetTypeId(typeof(object)));
 			model.GetType(model.GetTypeId(typeof(object))).Should().Be<object>();
+
+			var description = model.GetTypeDescription(typeof(object));
+			description.Members.Should().BeEmpty();
 		}
 
 		[Test]
@@ -128,6 +154,34 @@ namespace IsabelDb.Test.TypeModels
 
 			model.IsTypeRegistered(typeof(KeyA)).Should().BeTrue("because we've explicitly registered that type");
 			model.GetTypeId(typeof(KeyA)).Should().BeGreaterThan(model.GetTypeId(typeof(IPolymorphicCustomKey)));
+		}
+
+		[Test]
+		public void TestKeyA()
+		{
+			var model = TypeModel.Create(new[] { typeof(KeyA) });
+			var description = model.GetTypeDescription(typeof(KeyA));
+			description.Members.Should().HaveCount(1);
+			var field = description.Members[0];
+			field.Name.Should().Be(nameof(KeyA.Value));
+		}
+
+		[Test]
+		public void TestAnimalArray()
+		{
+			var model = TypeModel.Create(new[] { typeof(Numbers) });
+			model.IsTypeRegistered(typeof(Numbers)).Should().BeTrue();
+			model.IsTypeRegistered(typeof(Animal)).Should().BeTrue("because Numbers has a field of type Animal[] and thus it's type should've been registered as well!");
+		}
+
+		[Test]
+		public void TestBoolProperty()
+		{
+			var model = TypeModel.Create(new[] { typeof(Menu) });
+			var description = model.GetTypeDescription(typeof(Menu));
+			description.Members.Should().HaveCount(1);
+			description.Members[0].Name.Should().Be("IsVisible");
+			description.Members[0].TypeDescription.FullTypeName.Should().Be("System.Boolean");
 		}
 
 		[Test]

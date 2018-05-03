@@ -1,9 +1,9 @@
 ﻿using System.Runtime.Serialization;
 
-namespace IsabelDb.Test
+namespace IsabelDb.Test.Entities
 {
 	[DataContract]
-	public sealed class KeyA
+	public sealed class KeyB
 		: IPolymorphicCustomKey
 	{
 		[DataMember(Order = 1)]
@@ -11,7 +11,7 @@ namespace IsabelDb.Test
 
 		#region Equality members
 
-		private bool Equals(KeyA other)
+		private bool Equals(KeyB other)
 		{
 			return string.Equals(Value, other.Value);
 		}
@@ -20,7 +20,7 @@ namespace IsabelDb.Test
 		{
 			if (ReferenceEquals(objA: null, objB: obj)) return false;
 			if (ReferenceEquals(this, obj)) return true;
-			return obj is KeyA && Equals((KeyA) obj);
+			return obj is KeyB && Equals((KeyB) obj);
 		}
 
 		public override int GetHashCode()
