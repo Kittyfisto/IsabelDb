@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net;
 using ProtoBuf.Meta;
@@ -65,11 +64,21 @@ namespace IsabelDb.TypeModels
 			var type = typeDescription.Type;
 			if (!TypeModel.IsBuiltIn(type) && !_metaTypes.TryGetValue(type, out var metaType))
 			{
-				metaType = _runtimeTypeModel.Add(type, applyDefaultBehaviour: true);
+				metaType = _runtimeTypeModel.Add(type, applyDefaultBehaviour: false);
+				ConfigureMetaType(metaType, typeDescription);
 				_metaTypes.Add(type, metaType);
 
 				if (baseType != null)
 					AddSubTypeTo(baseType, typeDescription);
+			}
+		}
+
+		private void ConfigureMetaType(MetaType metaType, TypeDescription typeDescription)
+		{
+			foreach (var member in typeDescription.Fields)
+			{
+				metaType.AddField(member.MemberId,
+				                  member.Member.Name);
 			}
 		}
 

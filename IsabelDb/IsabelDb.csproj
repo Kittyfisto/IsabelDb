@@ -89,7 +89,7 @@
     <Compile Include="Serializers\ISQLiteSerializer.cs" />
     <Compile Include="Stores\BagObjectStore.cs" />
     <Compile Include="SQLiteHelper.cs" />
-    <Compile Include="TypeModels\MemberDescription.cs" />
+    <Compile Include="TypeModels\FieldDescription.cs" />
     <Compile Include="TypeModels\TypeDescription.cs" />
     <Compile Include="TypeModels\ProtobufTypeModel.cs" />
     <Compile Include="TypeModels\TypeModel.cs" />

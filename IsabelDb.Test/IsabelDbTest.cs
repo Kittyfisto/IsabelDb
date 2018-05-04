@@ -356,6 +356,29 @@ namespace IsabelDb.Test
 		}
 
 		[Test]
+		public void TestPutGetPoint()
+		{
+			using (var db = IsabelDb.CreateInMemory(new []{typeof(Point)}))
+			{
+				var store = db.GetDictionary<int, Point>("Points");
+				var p0 = new Point {X = 0, Y = 0};
+				var p1 = new Point {X = 1, Y = 1};
+				var p2 = new Point {X = -3600, Y = 9000};
+				var p3 = new Point {X = Math.E, Y = Math.PI};
+
+				store.Put(0, p0);
+				store.Put(1, p1);
+				store.Put(2, p2);
+				store.Put(3, p3);
+
+				store.Get(0).Should().Be(p0);
+				store.Get(1).Should().Be(p1);
+				store.Get(2).Should().Be(p2);
+				store.Get(3).Should().Be(p3);
+			}
+		}
+
+		[Test]
 		public void TestPutMany1()
 		{
 			using (var db = IsabelDb.CreateInMemory(new []{typeof(Address), typeof(Person)}))

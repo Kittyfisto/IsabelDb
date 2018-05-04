@@ -9,7 +9,7 @@ namespace IsabelDb.TypeModels
 {
 	internal sealed class TypeDescription
 	{
-		private readonly List<MemberDescription> _members;
+		private readonly List<FieldDescription> _fields;
 		public readonly TypeDescription BaseType;
 		public readonly string FullTypeName;
 		public readonly string Name;
@@ -21,7 +21,7 @@ namespace IsabelDb.TypeModels
 								Type type,
 								int typeId,
 		                        TypeDescription baseType,
-		                        IReadOnlyList<MemberDescription> members)
+		                        IReadOnlyList<FieldDescription> fields)
 		{
 			Name = name;
 			Namespace = @namespace;
@@ -30,14 +30,14 @@ namespace IsabelDb.TypeModels
 			TypeId = typeId;
 
 			BaseType = baseType;
-			_members = members.ToList();
+			_fields = fields.ToList();
 		}
 
 		private TypeDescription(Type type,
 		                        string typename,
 		                        int typeId,
 		                        TypeDescription baseTypeDescription,
-		                        IEnumerable<MemberDescription> fields)
+		                        IEnumerable<FieldDescription> fields)
 		{
 			Type = type;
 			TypeId = typeId;
@@ -48,14 +48,14 @@ namespace IsabelDb.TypeModels
 			FullTypeName = typename;
 
 			BaseType = baseTypeDescription;
-			_members = fields?.ToList() ?? new List<MemberDescription>();
+			_fields = fields?.ToList() ?? new List<FieldDescription>();
 		}
 
-		public IReadOnlyList<MemberDescription> Members => _members;
+		public IReadOnlyList<FieldDescription> Fields => _fields;
 
-		public void Add(MemberDescription memberDescription)
+		public void Add(FieldDescription fieldDescription)
 		{
-			_members.Add(memberDescription);
+			_fields.Add(fieldDescription);
 		}
 
 		#region Overrides of Object
@@ -81,23 +81,23 @@ namespace IsabelDb.TypeModels
 		public static TypeDescription Create(Type type,
 		                                     int typeId,
 		                                     TypeDescription baseTypeDescription,
-		                                     IReadOnlyList<MemberDescription> members)
+		                                     IReadOnlyList<FieldDescription> fields)
 		{
 			ExtractTypename(type, out var @namespace, out var name);
-			return new TypeDescription(name, @namespace, type, typeId, baseTypeDescription, members);
+			return new TypeDescription(name, @namespace, type, typeId, baseTypeDescription, fields);
 		}
 
 		public static TypeDescription Create(Type type,
 		                                     string typename,
 		                                     int typeId,
 		                                     TypeDescription baseTypeDescription,
-		                                     IEnumerable<MemberDescription> members)
+		                                     IEnumerable<FieldDescription> fields)
 		{
 			return new TypeDescription(type,
 			                           typename,
 			                           typeId,
 			                           baseTypeDescription,
-			                           members);
+			                           fields);
 		}
 
 		public void ThrowIfIncompatibleTo(TypeDescription otherDescription)
@@ -158,26 +158,6 @@ namespace IsabelDb.TypeModels
 		private static bool AreSameType(TypeDescription type, TypeDescription otherType)
 		{
 			return string.Equals(type.FullTypeName, otherType.FullTypeName);
-		}
-
-		public static IReadOnlyList<FieldInfo> FindSerializableFields(Type type)
-		{
-			return type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
-			           .Where(HasDataMemberAttribute)
-			           .ToList();
-		}
-
-		public static IReadOnlyList<PropertyInfo> FindSerializableProperties(Type type)
-		{
-			return type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
-			           .Where(HasDataMemberAttribute)
-			           .ToList();
-		}
-
-		private static bool HasDataMemberAttribute(MemberInfo field)
-		{
-			var dataMemberAttribute = field.GetCustomAttribute<DataMemberAttribute>();
-			return dataMemberAttribute != null;
 		}
 	}
 }

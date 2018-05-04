@@ -25,7 +25,7 @@ namespace IsabelDb.TypeModels
 		: IEnumerable<Type>
 	{
 		private const string TypeTableName = "isabel_types";
-		private const string MemberTableName = "isabel_members";
+		private const string FieldTableName = "isabel_fields";
 
 		private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -50,9 +50,9 @@ namespace IsabelDb.TypeModels
 		};
 
 		private readonly Dictionary<int, Type> _idToTypes;
-
 		private readonly Dictionary<Type, TypeDescription> _typeDescriptions;
 		private readonly Dictionary<Type, int> _typesToId;
+
 		private int _nextId;
 
 		public TypeModel()
@@ -150,23 +150,24 @@ namespace IsabelDb.TypeModels
 
 			using (var command = connection.CreateCommand())
 			{
-				command.CommandText = string.Format("SELECT declaringTypeId, name, memberId, memberTypeId FROM {0}", MemberTableName);
+				command.CommandText = string.Format("SELECT declaringTypeId, name, fieldId, fieldTypeId FROM {0}", FieldTableName);
 				using (var reader = command.ExecuteReader())
 				{
 					while (reader.Read())
 					{
 						var declaringTypeId = reader.GetInt32(0);
-						var name = reader.GetString(1);
+						var fieldName = reader.GetString(1);
 						var memberId = reader.GetInt32(2);
-						var memberTypeId = reader.GetInt32(3);
+						var fieldTypeId = reader.GetInt32(3);
 
 						var declaringType = model.GetTypeDescription(declaringTypeId);
 						if (declaringType != null)
 						{
-							var memberType = model.GetTypeDescription(memberTypeId);
-							var memberDescription = MemberDescription.Create(name,
-							                                                 memberType,
-							                                                 memberId);
+							var fieldType = model.GetTypeDescription(fieldTypeId);
+							var memberInfo = FieldDescription.GetMemberInfo(declaringType.Type, fieldName);
+							var memberDescription = FieldDescription.Create(memberInfo,
+							                                                fieldType,
+							                                                memberId);
 							declaringType.Add(memberDescription);
 						}
 					}
@@ -182,9 +183,9 @@ namespace IsabelDb.TypeModels
 			{
 				var baseTypeDescription = AddBaseTypeOf(type);
 
-				var fields = TypeDescription.FindSerializableFields(type);
-				var properties = TypeDescription.FindSerializableProperties(type);
-				var members = CreateMemberDescriptions(fields, properties, baseTypeDescription);
+				var fields = FieldDescription.FindSerializableFields(type);
+				var properties = FieldDescription.FindSerializableProperties(type);
+				var members = CreateFieldDescriptions(fields, properties, baseTypeDescription);
 
 				if (type.IsArray && type.GetArrayRank() == 1)
 				{
@@ -221,7 +222,7 @@ namespace IsabelDb.TypeModels
 				using (var command = connection.CreateCommand())
 				{
 					command.CommandText =
-						string.Format("INSERT OR REPLACE INTO {0} (id, typename, baseId) VALUES (@id, @typename, @baseId)", TypeTableName);
+						string.Format("INSERT OR IGNORE INTO {0} (id, typename, baseId) VALUES (@id, @typename, @baseId)", TypeTableName);
 					var idParameter = command.Parameters.Add("@id", DbType.Int32);
 					var typename = command.Parameters.Add("@typename", DbType.String);
 					var baseIdParameter = command.Parameters.Add("@baseId", DbType.Int32);
@@ -243,23 +244,23 @@ namespace IsabelDb.TypeModels
 
 				using (var command = connection.CreateCommand())
 				{
-					command.CommandText = string.Format("INSERT OR IGNORE INTO {0} (declaringTypeId, memberId, name, memberTypeId)" +
-					                                    "VALUES (@declaringTypeId, @memberId, @name, @memberTypeId)",
-					                                    MemberTableName);
+					command.CommandText = string.Format("INSERT OR IGNORE INTO {0} (declaringTypeId, fieldId, name, fieldTypeId)" +
+					                                    "VALUES (@declaringTypeId, @fieldId, @name, @fieldTypeId)",
+					                                    FieldTableName);
 
 					var declaringTypeIdParameter = command.Parameters.Add("@declaringTypeId", DbType.Int32);
-					var memberIdParameter = command.Parameters.Add("@memberId", DbType.Int32);
+					var fieldIdParameter = command.Parameters.Add("@fieldId", DbType.Int32);
 					var name = command.Parameters.Add("@name", DbType.String);
-					var typeIdParameter = command.Parameters.Add("@memberTypeId", DbType.Int32);
+					var fieldTypeIdParameter = command.Parameters.Add("@fieldTypeId", DbType.Int32);
 
 					foreach (var description in _typeDescriptions.Values)
 					{
-						foreach (var memberDescription in description.Members)
+						foreach (var memberDescription in description.Fields)
 						{
 							declaringTypeIdParameter.Value = description.TypeId;
-							memberIdParameter.Value = memberDescription.MemberId;
+							fieldIdParameter.Value = memberDescription.MemberId;
 							name.Value = memberDescription.Name;
-							typeIdParameter.Value = memberDescription.TypeDescription.TypeId;
+							fieldTypeIdParameter.Value = memberDescription.TypeDescription.TypeId;
 
 							command.ExecuteNonQuery();
 						}
@@ -313,27 +314,27 @@ namespace IsabelDb.TypeModels
 			{
 				command.CommandText = string.Format("CREATE TABLE {0} (" +
 				                                    "declaringTypeId INTEGER NOT NULL," +
-				                                    "memberId INTEGER NOT NULL," +
+				                                    "fieldId INTEGER NOT NULL," +
 				                                    "name TEXT NOT NULL," +
-				                                    "memberTypeId INTEGER NOT NULL," +
-				                                    "UNIQUE(declaringTypeId, memberId)," +
+				                                    "fieldTypeId INTEGER NOT NULL," +
+				                                    "UNIQUE(declaringTypeId, fieldId)," +
 				                                    "FOREIGN KEY(declaringTypeId) REFERENCES {1}(id)," +
-				                                    "FOREIGN KEY(memberTypeId) REFERENCES {1}(id)" +
-				                                    ")", MemberTableName, TypeTableName);
+				                                    "FOREIGN KEY(fieldTypeId) REFERENCES {1}(id)" +
+				                                    ")", FieldTableName, TypeTableName);
 				command.ExecuteNonQuery();
 			}
 		}
 
-		private void TryAddType(int id, string typeName, int? baseId, TypeResolver typeResolver)
+		private void TryAddType(int typeId, string typeName, int? baseId, TypeResolver typeResolver)
 		{
 			try
 			{
-				_nextId = Math.Max(_nextId, id + 1);
+				_nextId = Math.Max(_nextId, typeId + 1);
 				var type = typeResolver.Resolve(typeName);
 				if (type != null)
 				{
 					var baseType = baseId != null ? GetType(baseId.Value) : null;
-					AddType(typeName, type, id, baseType, fields: null);
+					AddType(typeName, type, typeId, baseType, fields: null);
 				}
 				else
 				{
@@ -351,7 +352,7 @@ namespace IsabelDb.TypeModels
 			}
 		}
 
-		private IReadOnlyList<MemberDescription> CreateMemberDescriptions(IReadOnlyList<FieldInfo> fields,
+		private IReadOnlyList<FieldDescription> CreateFieldDescriptions(IReadOnlyList<FieldInfo> fields,
 		                                                                  IReadOnlyList<PropertyInfo> properties,
 		                                                                  TypeDescription baseTypeDescription)
 		{
@@ -376,12 +377,12 @@ namespace IsabelDb.TypeModels
 				return i;
 			}
 
-			var members = new List<MemberDescription>(fields.Count + properties.Count);
+			var members = new List<FieldDescription>(fields.Count + properties.Count);
 			foreach (var field in fields)
 			{
 				var typeDescription = AddType(field.FieldType);
 				var id = GetNextId();
-				var description = MemberDescription.Create(field, typeDescription, id);
+				var description = FieldDescription.Create(field, typeDescription, id);
 				members.Add(description);
 			}
 
@@ -389,7 +390,7 @@ namespace IsabelDb.TypeModels
 			{
 				var typeDescription = AddType(property.PropertyType);
 				var id = GetNextId();
-				var description = MemberDescription.Create(property, typeDescription, id);
+				var description = FieldDescription.Create(property, typeDescription, id);
 				members.Add(description);
 			}
 
@@ -400,7 +401,7 @@ namespace IsabelDb.TypeModels
 		                     Type type,
 		                     int typeId,
 		                     Type baseType,
-		                     IEnumerable<MemberDescription> fields)
+		                     IEnumerable<FieldDescription> fields)
 		{
 			var baseTypeDescription = baseType != null ? _typeDescriptions[baseType] : null;
 			var typeDescription = TypeDescription.Create(type,
