@@ -83,14 +83,17 @@
     <Compile Include="AssemblySetup.cs" />
     <Compile Include="DataContractNoNameNoNamespace.cs" />
     <Compile Include="DefectAttribute.cs" />
+    <Compile Include="CompatibilityTest.cs" />
     <Compile Include="Entities\Animal.cs" />
     <Compile Include="Entities\Dog.cs" />
     <Compile Include="Entities\Menu.cs" />
     <Compile Include="Entities\Numbers.cs" />
     <Compile Include="Entities\Message.cs" />
     <Compile Include="Entities\Point.cs" />
+    <Compile Include="Entities\V1\Comic.cs" />
     <Compile Include="Entities\V1\Plane.cs" />
     <Compile Include="Entities\V1\Thing.cs" />
+    <Compile Include="Entities\V2\Comic.cs" />
     <Compile Include="Entities\V2\Thing.cs" />
     <Compile Include="Entities\V2\Plane.cs" />
     <Compile Include="ExplicitNameAndNamespace.cs" />

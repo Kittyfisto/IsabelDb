@@ -14,11 +14,14 @@ namespace IsabelDb
 		: IDisposable
 	{
 		private readonly SQLiteConnection _connection;
+		private readonly bool _disposeConnection;
 		private readonly ObjectStores _objectStores;
 
-		private IsabelDb(SQLiteConnection connection, IEnumerable<Type> supportedTypes)
+		internal IsabelDb(SQLiteConnection connection, IEnumerable<Type> supportedTypes,
+		                  bool disposeConnection = true)
 		{
 			_connection = connection;
+			_disposeConnection = disposeConnection;
 
 			_objectStores = new ObjectStores(connection, supportedTypes.ToList());
 		}
@@ -26,8 +29,11 @@ namespace IsabelDb
 		/// <inheritdoc />
 		public void Dispose()
 		{
-			_connection.Close();
-			_connection.Dispose();
+			if (_disposeConnection)
+			{
+				_connection.Close();
+				_connection.Dispose();
+			}
 		}
 
 		/// <summary>
@@ -150,7 +156,7 @@ namespace IsabelDb
 			CreateTables(connection);
 		}
 
-		private static void CreateTables(SQLiteConnection connection)
+		internal static void CreateTables(SQLiteConnection connection)
 		{
 			TypeModel.CreateTable(connection);
 			ObjectStores.CreateTable(connection);
