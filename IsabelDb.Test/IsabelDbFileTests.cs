@@ -188,6 +188,24 @@ namespace IsabelDb.Test
 		}
 
 		[Test]
+		public void TestPutAfterReOpen()
+		{
+			using (var db = IsabelDb.OpenOrCreate(_databaseName, NoCustomTypes))
+			{
+				var values = db.GetMultiValueDictionary<int, string>("Values");
+				values.Put(1, "a");
+				values.Put(1, "b");
+			}
+
+			using (var db = IsabelDb.OpenOrCreate(_databaseName, NoCustomTypes))
+			{
+				var values = db.GetMultiValueDictionary<int, string>("Values");
+				values.Put(1, "c");
+				values.Get(1).Should().Equal("a", "b", "c");
+			}
+		}
+
+		[Test]
 		[Description("Verifies that the database refuses to ")]
 		public void TestUnresolvableBagType()
 		{

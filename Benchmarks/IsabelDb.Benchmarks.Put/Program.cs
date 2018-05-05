@@ -12,10 +12,10 @@ namespace IsabelDb.Benchmarks.Put
 			: IDisposable
 		{
 			private readonly IsabelDb _database;
-			private readonly IDictionaryObjectStore<int, Book> _books;
+			private readonly IDictionary<int, Book> _books;
 			private readonly Book _book;
-			private readonly IDictionaryObjectStore<int, int> _primes;
-			private readonly IDictionaryObjectStore<string, byte[]> _files;
+			private readonly IDictionary<int, int> _primes;
+			private readonly IDictionary<string, byte[]> _files;
 			private readonly byte[] _blob;
 
 			public BenchmarkPut()
@@ -39,19 +39,19 @@ namespace IsabelDb.Benchmarks.Put
 			}
 
 			[Benchmark]
-			public void PutBlob()
+			public void DictionaryPutBlob()
 			{
 				_files.Put(@"c:\foo", _blob);
 			}
 
 			[Benchmark]
-			public void PutInt()
+			public void DictionaryPutInt()
 			{
 				_primes.Put(41313121, 61463);
 			}
 
 			[Benchmark]
-			public void PutBook()
+			public void DictionaryPutBook()
 			{
 				_books.Put(41313121, _book);
 			}

@@ -115,6 +115,7 @@
     <Compile Include="DictionaryObjectStore\UInt32KeyTest.cs" />
     <Compile Include="ListObjectStore\BagMessageTest.cs" />
     <Compile Include="ListObjectStore\BagObjectStoreTest.cs" />
+    <Compile Include="MultiValueDictionaryStore\MultiValueDictionaryTest.cs" />
     <Compile Include="RequriedBehaviourAttribute.cs" />
     <Compile Include="Person.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

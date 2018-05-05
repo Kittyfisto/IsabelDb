@@ -2,7 +2,7 @@
 {
 	/// <summary>
 	/// </summary>
-	public interface IObjectStore
+	public interface ICollection
 	{
 		/// <summary>
 		///     Removes all objects from this store.

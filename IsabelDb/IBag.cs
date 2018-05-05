@@ -5,8 +5,8 @@ namespace IsabelDb
 	/// <summary>
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	public interface IBagObjectStore<T>
-		: IObjectStore
+	public interface IBag<T>
+		: ICollection
 	{
 		/// <summary>
 		/// </summary>

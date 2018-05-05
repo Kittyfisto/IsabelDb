@@ -147,7 +147,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MultiValueDictionaryGetByKey.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="DictionaryGetByKey.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

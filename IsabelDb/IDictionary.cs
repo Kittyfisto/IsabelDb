@@ -6,8 +6,8 @@ namespace IsabelDb
 	///     Represents a persistent dictionary.
 	///     All operations are immediately backed by the underlying storage medium.
 	/// </summary>
-	public interface IDictionaryObjectStore<TKey, TValue>
-		: IObjectStore
+	public interface IDictionary<TKey, TValue>
+		: ICollection
 	{
 		/// <summary>
 		/// </summary>

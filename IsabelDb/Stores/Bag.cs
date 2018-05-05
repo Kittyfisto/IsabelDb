@@ -5,9 +5,9 @@ using IsabelDb.Serializers;
 
 namespace IsabelDb.Stores
 {
-	internal sealed class BagObjectStore<T>
-		: IBagObjectStore<T>
-			, IInternalObjectStore
+	internal sealed class Bag<T>
+		: IBag<T>
+			, IInternalCollection
 	{
 		private readonly string _clear;
 		private readonly SQLiteConnection _connection;
@@ -17,7 +17,7 @@ namespace IsabelDb.Stores
 		private readonly ISQLiteSerializer<T> _serializer;
 		private readonly string _table;
 
-		public BagObjectStore(SQLiteConnection connection,
+		public Bag(SQLiteConnection connection,
 		                      ISQLiteSerializer<T> serializer,
 		                      string tableName)
 		{
@@ -33,7 +33,7 @@ namespace IsabelDb.Stores
 
 		#region Implementation of IInternalObjectStore
 
-		public Type ObjectType => typeof(T);
+		public Type ValueType => typeof(T);
 
 		#endregion
 

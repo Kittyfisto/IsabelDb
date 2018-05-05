@@ -7,9 +7,9 @@ using IsabelDb.Serializers;
 
 namespace IsabelDb.Stores
 {
-	internal sealed class DictionaryObjectStore<TKey, TValue>
-		: IDictionaryObjectStore<TKey, TValue>
-			, IInternalObjectStore
+	internal sealed class Dictionary<TKey, TValue>
+		: IDictionary<TKey, TValue>
+			, IInternalCollection
 
 	{
 		private readonly SQLiteConnection _connection;
@@ -25,7 +25,7 @@ namespace IsabelDb.Stores
 		private readonly string _tableName;
 		private readonly ISQLiteSerializer<TValue> _valueSerializer;
 
-		public DictionaryObjectStore(SQLiteConnection connection,
+		public Dictionary(SQLiteConnection connection,
 		                             string tableName,
 		                             ISQLiteSerializer<TKey> keySerializer,
 		                             ISQLiteSerializer<TValue> valueSerializer)
@@ -169,7 +169,7 @@ namespace IsabelDb.Stores
 			}
 		}
 
-		public Type ObjectType => typeof(TValue);
+		public Type ValueType => typeof(TValue);
 
 		#region Overrides of Object
 

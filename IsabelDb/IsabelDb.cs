@@ -36,16 +36,28 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="name"></param>
 		/// <returns></returns>
-		public IDictionaryObjectStore<TKey, TValue> GetDictionary<TKey, TValue>(string name)
+		public IDictionary<TKey, TValue> GetDictionary<TKey, TValue>(string name)
 		{
 			return _objectStores.GetDictionary<TKey, TValue>(name);
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="TKey"></typeparam>
+		/// <typeparam name="TValue"></typeparam>
+		/// <param name="name"></param>
+		/// <returns></returns>
+		public IMultiValueDictionary<TKey, TValue> GetMultiValueDictionary<TKey, TValue>(string name)
+		{
+			return _objectStores.GetMultiValueDictionary<TKey, TValue>(name);
 		}
 
 		/// <summary>
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		public IBagObjectStore<T> GetBag<T>(string name)
+		public IBag<T> GetBag<T>(string name)
 		{
 			return _objectStores.GetBag<T>(name);
 		}
