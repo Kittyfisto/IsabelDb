@@ -51,13 +51,10 @@ namespace IsabelDb.Stores
 			using (var command = CreateCommand(_getAllQuery))
 			using (var reader = command.ExecuteReader())
 			{
-				var ret = new List<KeyValuePair<TKey, TValue>>();
 				while (reader.Read())
 					if (_keySerializer.TryDeserialize(reader, valueOrdinal: 0, value: out var key))
 						if (_valueSerializer.TryDeserialize(reader, valueOrdinal: 1, value: out var value))
-							ret.Add(new KeyValuePair<TKey, TValue>(key, value));
-
-				return ret;
+							yield return new KeyValuePair<TKey, TValue>(key, value);
 			}
 		}
 
@@ -66,7 +63,6 @@ namespace IsabelDb.Stores
 			using (var command = CreateCommand(_getManyQuery))
 			{
 				var keyParameter = command.Parameters.Add("@key", DbType.String);
-				var ret = new List<KeyValuePair<TKey, TValue>>();
 				foreach (var key in keys)
 				{
 					keyParameter.Value = key;
@@ -75,12 +71,10 @@ namespace IsabelDb.Stores
 						while (reader.Read())
 							if (_valueSerializer.TryDeserialize(reader, valueOrdinal: 1, value: out var value))
 							{
-								ret.Add(new KeyValuePair<TKey, TValue>(key, value));
+								yield return new KeyValuePair<TKey, TValue>(key, value);
 							}
 					}
 				}
-
-				return ret;
 			}
 		}
 

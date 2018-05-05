@@ -75,17 +75,14 @@ namespace IsabelDb.Stores
 		{
 			using (var command = CreateCommand(_getAll))
 			{
-				var ret = new List<T>();
 				using (var reader = command.ExecuteReader())
 				{
 					while (reader.Read())
 						if (_serializer.TryDeserialize(reader, valueOrdinal: 0, value: out var value))
 						{
-							ret.Add(value);
+							yield return value;
 						}
 				}
-
-				return ret;
 			}
 		}
 

@@ -4,7 +4,7 @@ using FluentAssertions;
 using IsabelDb.Test.Entities;
 using NUnit.Framework;
 
-namespace IsabelDb.Test.ListObjectStore
+namespace IsabelDb.Test.Bag
 {
 	[TestFixture]
 	public sealed class BagMessageTest
