@@ -48,6 +48,50 @@ namespace IsabelDb.Test.MultiValueDictionaryStore
 		}
 
 		[Test]
+		public void TestRemoveAllNonExistantKey()
+		{
+			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
+			{
+				var values = db.GetMultiValueDictionary<int, string>("Values");
+				values.Put(1, "Foo");
+
+				values.RemoveAll(2);
+				values.Get(1).Should().Equal("Foo");
+			}
+		}
+
+		[Test]
+		public void TestRemoveAll()
+		{
+			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
+			{
+				var values = db.GetMultiValueDictionary<int, string>("Values");
+				values.Put(1, "Foo");
+				values.Put(2, "Bar");
+
+				values.RemoveAll(1);
+				values.Get(1).Should().BeEmpty();
+				values.Get(2).Should().Equal("Bar");
+			}
+		}
+
+		[Test]
+		public void TestRemoveAllManyValues()
+		{
+			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
+			{
+				var values = db.GetMultiValueDictionary<int, string>("Values");
+				values.Put(1, "Foo");
+				values.Put(1, "Bar");
+				values.Put(2, "Hello");
+
+				values.RemoveAll(1);
+				values.Get(1).Should().BeEmpty();
+				values.Get(2).Should().Equal("Hello");
+			}
+		}
+
+		[Test]
 		public void TestGetNonExistantKey()
 		{
 			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))

@@ -17,6 +17,7 @@ namespace IsabelDb.Stores
 		private readonly ISQLiteSerializer<TValue> _valueSerializer;
 		private readonly string _countQuery;
 		private readonly string _clearQuery;
+		private readonly string _removeQuery;
 		private readonly string _putQuery;
 		private readonly string _getByKey;
 		private readonly string _getAll;
@@ -38,6 +39,7 @@ namespace IsabelDb.Stores
 			_getAll = string.Format("SELECT key, value FROM {0}", _tableName);
 			_getByKey = string.Format("SELECT value FROM {0} where key = @key", _tableName);
 			_clearQuery = string.Format("DELETE FROM {0}", _tableName);
+			_removeQuery = string.Format("DELETE FROM {0} WHERE key = @key", _tableName);
 			_countQuery = string.Format("SELECT COUNT(*) FROM {0}", _tableName);
 
 			using (var command = _connection.CreateCommand())
@@ -223,7 +225,12 @@ namespace IsabelDb.Stores
 
 		public void RemoveAll(TKey key)
 		{
-			throw new System.NotImplementedException();
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = _removeQuery;
+				command.Parameters.AddWithValue("@key", _keySerializer.Serialize(key));
+				command.ExecuteNonQuery();
+			}
 		}
 
 		public void Remove(MultiValueKey key)

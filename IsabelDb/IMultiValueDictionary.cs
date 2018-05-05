@@ -57,11 +57,5 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="key"></param>
 		void RemoveAll(TKey key);
-
-		/// <summary>
-		///     Removes the value associated with the given key.
-		/// </summary>
-		/// <param name="key"></param>
-		void Remove(MultiValueKey key);
 	}
 }

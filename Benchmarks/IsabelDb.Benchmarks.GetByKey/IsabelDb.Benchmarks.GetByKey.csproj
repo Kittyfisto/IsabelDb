@@ -148,6 +148,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MultiValueDictionaryGetByKey.cs" />
+    <Compile Include="MultiValueDictionaryRemoveByKey.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="DictionaryGetByKey.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
