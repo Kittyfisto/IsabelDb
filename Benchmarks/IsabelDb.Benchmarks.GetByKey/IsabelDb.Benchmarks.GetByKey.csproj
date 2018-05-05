@@ -147,6 +147,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DictionaryPutMany.cs" />
     <Compile Include="MultiValueDictionaryGetByKey.cs" />
     <Compile Include="MultiValueDictionaryRemoveByKey.cs" />
     <Compile Include="Program.cs" />

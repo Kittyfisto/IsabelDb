@@ -169,7 +169,7 @@ namespace IsabelDb.Test
 
 		[Test]
 		[Description("Verifies that when data is removed, it remains removed in the next session")]
-		public void TestRemoveAfterReopen()
+		public void TestRemoveFromDictionaryAfterReopen()
 		{
 			using (var db = IsabelDb.OpenOrCreate(_databaseName, NoCustomTypes))
 			{
@@ -184,6 +184,46 @@ namespace IsabelDb.Test
 			{
 				var charts = db.GetDictionary<string, object>("Charts");
 				charts.Get("Pie").Should().BeNull();
+			}
+		}
+
+		[Test]
+		[Description("Verifies that when data is removed, it remains removed in the next session")]
+		public void TestRemoveFromMultiValueDictionaryAfterReopen()
+		{
+			using (var db = IsabelDb.OpenOrCreate(_databaseName, NoCustomTypes))
+			{
+				var charts = db.GetMultiValueDictionary<string, object>("Charts");
+				charts.Put("Pie", "Hello!");
+				charts.Get("Pie").Should().Equal("Hello!");
+				charts.RemoveAll("Pie");
+				charts.Get("Pie").Should().BeEmpty();
+			}
+
+			using (var db = IsabelDb.OpenOrCreate(_databaseName, NoCustomTypes))
+			{
+				var charts = db.GetMultiValueDictionary<string, object>("Charts");
+				charts.Get("Pie").Should().BeEmpty();
+			}
+		}
+
+		[Test]
+		[Description("Verifies that when data is removed, it remains removed in the next session")]
+		public void TestClearBagAfterReopen()
+		{
+			using (var db = IsabelDb.OpenOrCreate(_databaseName, NoCustomTypes))
+			{
+				var charts = db.GetBag<object>("Charts");
+				charts.Put("Hello!");
+				charts.GetAll().Should().Equal("Hello!");
+				charts.Clear();
+				charts.GetAll().Should().BeEmpty();
+			}
+
+			using (var db = IsabelDb.OpenOrCreate(_databaseName, NoCustomTypes))
+			{
+				var charts = db.GetBag<object>("Charts");
+				charts.GetAll().Should().BeEmpty();
 			}
 		}
 

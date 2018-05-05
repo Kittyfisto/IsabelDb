@@ -7,8 +7,9 @@ namespace IsabelDb.Benchmarks.GetByKey
 		static void Main(string[] args)
 		{
 			//BenchmarkRunner.Run<DictionaryGetByKey>();
+			BenchmarkRunner.Run<DictionaryPutMany>();
 			//BenchmarkRunner.Run<MultiValueDictionaryGetByKey>();
-			BenchmarkRunner.Run<MultiValueDictionaryRemoveByKey>();
+			//BenchmarkRunner.Run<MultiValueDictionaryRemoveByKey>();
 		}
 	}
 }
