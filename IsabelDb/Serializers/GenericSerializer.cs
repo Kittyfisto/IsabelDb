@@ -23,7 +23,7 @@ namespace IsabelDb.Serializers
 		public bool TryDeserialize(SQLiteDataReader reader, int valueOrdinal, out T value)
 		{
 			var serializedValue = (byte[]) reader.GetValue(valueOrdinal);
-			var deserializedValue = _serializer.Deserialize(serializedValue);
+			var deserializedValue = Deserialize(serializedValue);
 			if (deserializedValue == null)
 			{
 				value = default(T);
@@ -32,6 +32,11 @@ namespace IsabelDb.Serializers
 
 			value = (T) deserializedValue;
 			return true;
+		}
+
+		public object Deserialize(byte[] serializedValue)
+		{
+			return _serializer.Deserialize(serializedValue);
 		}
 	}
 }

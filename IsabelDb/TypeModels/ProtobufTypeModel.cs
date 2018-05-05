@@ -77,8 +77,8 @@ namespace IsabelDb.TypeModels
 		{
 			foreach (var member in typeDescription.Fields)
 			{
-				metaType.AddField(member.MemberId,
-				                  member.Member.Name);
+				var field = metaType.AddField(member.MemberId, member.Member.Name);
+				field.IsRequired = true;
 			}
 		}
 
