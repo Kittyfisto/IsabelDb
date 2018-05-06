@@ -16,7 +16,11 @@ namespace IsabelDb.Test.Serializers
 		public static IEnumerable<int> IntValues => new[] {int.MinValue, -1, 0, 1, int.MaxValue};
 		public static IEnumerable<byte[]> ByteArrayValues => new[] {null, new byte[]{0}, ByteValues.ToArray()};
 		public static IEnumerable<int[]> IntArrayValues => new[] {null, new[]{0}, IntValues.ToArray()};
+		public static IEnumerable<short?> NullableShortValues => new short?[] {short.MinValue, -1, 0, 1, short.MaxValue, null};
 		public static IEnumerable<int?> NullableIntValues => new int?[] {int.MinValue, -1, 0, 1, int.MaxValue, null};
+		public static IEnumerable<long?> NullableLongValues => new long?[] {long.MinValue, -1, 0, 1, long.MaxValue, null};
+		public static IEnumerable<float?> NullableFloatValues => new float?[]{float.MinValue, -1.4f, 0, (float)Math.E, (float)Math.PI, float.MaxValue, null};
+		public static IEnumerable<double?> NullableDoubleValues => new double?[]{double.MinValue, -1.4, 0, Math.E, Math.PI, double.MaxValue, null};
 		public static IEnumerable<double> DoubleValues => new[] {double.MinValue, -1.4, 0, Math.E, Math.PI, double.MaxValue};
 
 		[Test]
@@ -105,9 +109,57 @@ namespace IsabelDb.Test.Serializers
 		}
 
 		[Test]
-		public void TestRoundtripNullableField([ValueSource(nameof(NullableIntValues))] int? value)
+		public void TestRoundtripNullableShort([ValueSource(nameof(NullableShortValues))] short? value)
+		{
+			var obj = new NullableShort
+			{
+				Value = value
+			};
+			var actualObj = Roundtrip(obj);
+			actualObj.Should().NotBeNull();
+			actualObj.Value.Should().Be(value);
+		}
+
+		[Test]
+		public void TestRoundtripNullableInt([ValueSource(nameof(NullableIntValues))] int? value)
 		{
 			var obj = new NullableInt
+			{
+				Value = value
+			};
+			var actualObj = Roundtrip(obj);
+			actualObj.Should().NotBeNull();
+			actualObj.Value.Should().Be(value);
+		}
+
+		[Test]
+		public void TestRoundtripNullableLong([ValueSource(nameof(NullableLongValues))] long? value)
+		{
+			var obj = new NullableLong
+			{
+				Value = value
+			};
+			var actualObj = Roundtrip(obj);
+			actualObj.Should().NotBeNull();
+			actualObj.Value.Should().Be(value);
+		}
+
+		[Test]
+		public void TestRoundtripNullableFloat([ValueSource(nameof(NullableFloatValues))] float? value)
+		{
+			var obj = new NullableFloat
+			{
+				Value = value
+			};
+			var actualObj = Roundtrip(obj);
+			actualObj.Should().NotBeNull();
+			actualObj.Value.Should().Be(value);
+		}
+
+		[Test]
+		public void TestRoundtripNullableDouble([ValueSource(nameof(NullableDoubleValues))] double? value)
+		{
+			var obj = new NullableDouble
 			{
 				Value = value
 			};
