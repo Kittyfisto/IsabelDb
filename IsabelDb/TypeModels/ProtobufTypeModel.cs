@@ -79,6 +79,10 @@ namespace IsabelDb.TypeModels
 			{
 				var field = metaType.AddField(member.MemberId, member.Member.Name);
 				field.IsRequired = true;
+
+				var fieldType = member.TypeDescription.Type;
+				if (IsPrimitiveArray(fieldType))
+					field.IsPacked = true;
 			}
 		}
 
@@ -118,6 +122,40 @@ namespace IsabelDb.TypeModels
 		{
 			var protobufTypeModel = new ProtobufTypeModel(typeModel);
 			return protobufTypeModel.Compile();
+		}
+
+		private static bool IsPrimitiveArray(Type fieldType)
+		{
+			if (!fieldType.IsArray)
+				return false;
+
+			var args = fieldType.GenericTypeArguments;
+			if (args.Length != 1)
+				return false;
+
+			var type = args[0];
+			if (type == typeof(float))
+				return true;
+			if (type == typeof(double))
+				return true;
+			if (type == typeof(byte))
+				return true;
+			if (type == typeof(sbyte))
+				return true;
+			if (type == typeof(short))
+				return true;
+			if (type == typeof(ushort))
+				return true;
+			if (type == typeof(int))
+				return true;
+			if (type == typeof(uint))
+				return true;
+			if (type == typeof(long))
+				return true;
+			if (type == typeof(ulong))
+				return true;
+
+			return false;
 		}
 	}
 }

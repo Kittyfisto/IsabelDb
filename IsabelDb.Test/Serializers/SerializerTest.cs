@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using FluentAssertions;
 using IsabelDb.Serializers;
 using IsabelDb.Test.Entities;
@@ -11,8 +12,12 @@ namespace IsabelDb.Test.Serializers
 	public sealed class SerializerTest
 	{
 		public static IEnumerable<string> StringValues => new[] {null, string.Empty, "Hello", "World"};
-		public static IEnumerable<int> IntValues => new[] {-1, 0, 1};
-		public static IEnumerable<double> DoubleValues => new[] {-1.4, 0, Math.E, Math.PI};
+		public static IEnumerable<byte> ByteValues => new byte[] {byte.MinValue, 128, byte.MaxValue};
+		public static IEnumerable<int> IntValues => new[] {int.MinValue, -1, 0, 1, int.MaxValue};
+		public static IEnumerable<byte[]> ByteArrayValues => new[] {null, new byte[]{0}, ByteValues.ToArray()};
+		public static IEnumerable<int[]> IntArrayValues => new[] {null, new[]{0}, IntValues.ToArray()};
+		public static IEnumerable<int?> NullableIntValues => new int?[] {int.MinValue, -1, 0, 1, int.MaxValue, null};
+		public static IEnumerable<double> DoubleValues => new[] {double.MinValue, -1.4, 0, Math.E, Math.PI, double.MaxValue};
 
 		[Test]
 		[RequriedBehaviour]
@@ -43,6 +48,72 @@ namespace IsabelDb.Test.Serializers
 			var actualObj = Roundtrip(obj);
 			actualObj.Should().NotBeNull();
 			actualObj.DoubleValue.Should().Be(value);
+		}
+
+		[Test]
+		public void TestRoundtripIntList()
+		{
+			var obj = new IntList
+			{
+				Values = new List<int>(IntValues)
+			};
+			var actualObj = Roundtrip(obj);
+			actualObj.Should().NotBeNull();
+			actualObj.Values.Should().Equal(IntValues);
+		}
+
+		//[Test]
+		//public void Test()
+		//{
+		//	var typeModel = ProtoBuf.Meta.TypeModel.Create();
+		//	var type = typeModel.Add(typeof(IntArray), applyDefaultBehaviour: false);
+		//	var field = type.AddField(1, "Values", typeof(int), typeof(int[]));
+		//	field.IsPacked = true;
+
+		//	var value = new IntArray {Values = new int[10000]};
+		//	using (var stream = new MemoryStream())
+		//	{
+		//		typeModel.Serialize(stream, value);
+		//		stream.Position = 0;
+		//		var actualValue = typeModel.Deserialize(stream, null, typeof(IntArray));
+		//		int n = 0;
+		//	}
+		//}
+
+		[Test]
+		public void TestRoundtripIntArray([ValueSource(nameof(IntArrayValues))] int[] values)
+		{
+			var obj = new IntArray
+			{
+				Values = values
+			};
+			var actualObj = Roundtrip(obj);
+			actualObj.Should().NotBeNull();
+			actualObj.Values.Should().Equal(values);
+		}
+
+		[Test]
+		public void TestRoundtripByteArray([ValueSource(nameof(ByteArrayValues))] byte[] values)
+		{
+			var obj = new ByteArray
+			{
+				Values = values
+			};
+			var actualObj = Roundtrip(obj);
+			actualObj.Should().NotBeNull();
+			actualObj.Values.Should().Equal(values);
+		}
+
+		[Test]
+		public void TestRoundtripNullableField([ValueSource(nameof(NullableIntValues))] int? value)
+		{
+			var obj = new NullableInt
+			{
+				Value = value
+			};
+			var actualObj = Roundtrip(obj);
+			actualObj.Should().NotBeNull();
+			actualObj.Value.Should().Be(value);
 		}
 
 		private static T Roundtrip<T>(T value)

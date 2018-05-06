@@ -278,6 +278,10 @@ namespace IsabelDb.TypeModels
 				return true;
 			if (BuiltInProtobufTypes.Contains(type))
 				return true;
+			if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+				return true;
+			if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
+				return true;
 
 			return false;
 		}

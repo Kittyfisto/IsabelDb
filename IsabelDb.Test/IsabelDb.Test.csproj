@@ -89,9 +89,13 @@
     <Compile Include="DefectAttribute.cs" />
     <Compile Include="CompatibilityTest.cs" />
     <Compile Include="Entities\Animal.cs" />
+    <Compile Include="Entities\ByteArray.cs" />
     <Compile Include="Entities\Dog.cs" />
     <Compile Include="Entities\HasNonStandardCtor.cs" />
+    <Compile Include="Entities\IntArray.cs" />
+    <Compile Include="Entities\IntList.cs" />
     <Compile Include="Entities\Menu.cs" />
+    <Compile Include="Entities\NullableInt.cs" />
     <Compile Include="Entities\Numbers.cs" />
     <Compile Include="Entities\Message.cs" />
     <Compile Include="Entities\Point.cs" />
