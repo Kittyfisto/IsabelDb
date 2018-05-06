@@ -97,8 +97,17 @@ namespace IsabelDb.TypeModels
 			                           fields);
 		}
 
-		public void ThrowIfIncompatibleTo(TypeDescription otherDescription)
+		public void ThrowOnBreakingChanges(TypeDescription otherDescription)
 		{
+			foreach (var field in _fields)
+			{
+				var otherField = otherDescription._fields.FirstOrDefault(x => Equals(x.Name, field.Name));
+				if (otherField != null)
+				{
+					field.ThrowOnBreakingChanges(otherField);
+				}
+			}
+
 			var otherBaseType = otherDescription.BaseType;
 			if (BaseType == null && otherBaseType != null)
 				throw new BreakingChangeException();
@@ -114,7 +123,7 @@ namespace IsabelDb.TypeModels
 						                                      BaseType.FullTypeName,
 						                                      otherBaseType.FullTypeName));
 
-				BaseType.ThrowIfIncompatibleTo(otherDescription.BaseType);
+				BaseType.ThrowOnBreakingChanges(otherDescription.BaseType);
 			}
 		}
 

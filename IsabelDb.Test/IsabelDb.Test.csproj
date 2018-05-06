@@ -113,6 +113,8 @@
     <Compile Include="Entities\V2\Motherboard.cs" />
     <Compile Include="Entities\V2\Thing.cs" />
     <Compile Include="Entities\V2\Plane.cs" />
+    <Compile Include="Entities\V3\Cpu.cs" />
+    <Compile Include="Entities\V3\CpuModel.cs" />
     <Compile Include="ExplicitNameAndNamespace.cs" />
     <Compile Include="ExplicitNameNoNamespace.cs" />
     <Compile Include="ExplicitNamespaceNoName.cs" />
@@ -163,6 +165,8 @@
       <Link>x86\SQLite.Interop.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Entities\V2\CompatibleChanges.txt" />
+    <Content Include="Entities\V3\IncompatibleChanges.txt" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

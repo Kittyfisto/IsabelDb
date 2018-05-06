@@ -80,7 +80,7 @@ namespace IsabelDb.TypeModels
 				var field = metaType.AddField(member.MemberId, member.Member.Name);
 				field.IsRequired = true;
 
-				var fieldType = member.TypeDescription.Type;
+				var fieldType = member.FieldTypeDescription.Type;
 				if (IsPrimitiveArray(fieldType))
 					field.IsPacked = true;
 			}
@@ -105,8 +105,12 @@ namespace IsabelDb.TypeModels
 		                                       IEnumerable<Type> supportedTypes)
 		{
 			var allTypes = BuiltInTypes.Concat(supportedTypes).ToList();
-			var typeResolver = new TypeResolver(allTypes);
+			var currentTypeModel = TypeModel.Create(allTypes);
+			var typeResolver = new TypeResolver(currentTypeModel.TypeDescriptions);
 			var typeModel = TypeModel.Read(connection, typeResolver);
+
+			typeModel.ThrowOnBreakingChanges(currentTypeModel);
+
 			typeModel.Add(allTypes);
 			// If we reach this point, then both type models are compatible to each other
 			// and we can create a serializer for it!

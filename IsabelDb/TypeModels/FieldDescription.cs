@@ -9,20 +9,20 @@ namespace IsabelDb.TypeModels
 {
 	internal sealed class FieldDescription
 	{
-		private readonly TypeDescription _typeDescription;
+		private readonly TypeDescription _fieldTypeDescription;
 		private readonly string _name;
 		private readonly MemberInfo _member;
 		private readonly int _memberId;
 
-		public FieldDescription(TypeDescription typeDescription, string name, MemberInfo member, int memberId)
+		public FieldDescription(TypeDescription fieldTypeDescription, string name, MemberInfo member, int memberId)
 		{
-			_typeDescription = typeDescription;
+			_fieldTypeDescription = fieldTypeDescription;
 			_name = name;
 			_member = member;
 			_memberId = memberId;
 		}
 
-		public TypeDescription TypeDescription => _typeDescription;
+		public TypeDescription FieldTypeDescription => _fieldTypeDescription;
 
 		public int MemberId => _memberId;
 
@@ -38,7 +38,7 @@ namespace IsabelDb.TypeModels
 		}
 
 		[Pure]
-		public static MemberInfo GetMemberInfo(Type type, string name)
+		public static MemberInfo TryGetMemberInfo(Type type, string name)
 		{
 			var field = FindSerializableFields(type).FirstOrDefault(x => GetName(x) == name);
 			if (field != null)
@@ -48,7 +48,7 @@ namespace IsabelDb.TypeModels
 			if (property != null)
 				return property;
 
-			throw new NotImplementedException();
+			return null;
 		}
 
 		[Pure]
@@ -85,5 +85,24 @@ namespace IsabelDb.TypeModels
 
 			return member.Name;
 		}
+
+		public void ThrowOnBreakingChanges(FieldDescription otherField)
+		{
+			if (FieldTypeDescription.Type != otherField.FieldTypeDescription.Type)
+				throw new
+					BreakingChangeException(string.Format("The type of field '{0}' changed from '{1}' to '{2}' which is a breaking change!",
+					                                      Name,
+					                                      FieldTypeDescription,
+					                                      otherField.FieldTypeDescription));
+		}
+
+		#region Overrides of Object
+
+		public override string ToString()
+		{
+			return string.Format("{0} {1}", FieldTypeDescription, Name);
+		}
+
+		#endregion
 	}
 }

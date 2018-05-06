@@ -44,8 +44,9 @@ namespace IsabelDb.Test.TypeModels
 			model.Write(connection);
 
 			var typeRegistry = new TypeResolver(availableTypes);
-			model = TypeModel.Read(connection, typeRegistry);
-			return model;
+			var otherModel = TypeModel.Read(connection, typeRegistry);
+			otherModel.ThrowOnBreakingChanges(TypeModel.Create(availableTypes));
+			return otherModel;
 		}
 
 		private static TypeModel Roundtrip(TypeModel model)
@@ -213,7 +214,7 @@ namespace IsabelDb.Test.TypeModels
 			var description = model.GetTypeDescription(typeof(Menu));
 			description.Fields.Should().HaveCount(1);
 			description.Fields[0].Name.Should().Be("IsVisible");
-			description.Fields[0].TypeDescription.FullTypeName.Should().Be("System.Boolean");
+			description.Fields[0].FieldTypeDescription.FullTypeName.Should().Be("System.Boolean");
 			description.Fields[0].MemberId.Should().BeGreaterThan(0);
 		}
 
@@ -224,11 +225,11 @@ namespace IsabelDb.Test.TypeModels
 			var description = model.GetTypeDescription(typeof(Point));
 			description.Fields.Should().HaveCount(2);
 			description.Fields[0].Name.Should().Be("X");
-			description.Fields[0].TypeDescription.FullTypeName.Should().Be("System.Double");
+			description.Fields[0].FieldTypeDescription.FullTypeName.Should().Be("System.Double");
 			description.Fields[0].MemberId.Should().BeGreaterThan(0);
 
 			description.Fields[1].Name.Should().Be("Y");
-			description.Fields[1].TypeDescription.FullTypeName.Should().Be("System.Double");
+			description.Fields[1].FieldTypeDescription.FullTypeName.Should().Be("System.Double");
 			description.Fields[1].MemberId.Should().BeGreaterThan(0);
 			description.Fields[1].MemberId.Should().NotBe(description.Fields[0].MemberId);
 		}

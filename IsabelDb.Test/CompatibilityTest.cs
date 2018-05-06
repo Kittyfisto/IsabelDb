@@ -51,7 +51,7 @@ namespace IsabelDb.Test
 		}
 
 		[Test]
-		[RequriedBehaviour]
+		//[RequriedBehaviour]
 		[Description("Verifies that it's possible to add fields to entites and still read back 'old' database")]
 		public void TestForwardCompatibilityAddProperty()
 		{
@@ -99,6 +99,17 @@ namespace IsabelDb.Test
 				motherboard.Cpus[0].Model.Should().Be("i7");
 				motherboard.Cpus[1].Model.Should().Be("i5");
 			}
+		}
+
+		[Test]
+		public void TestChangedFieldType()
+		{
+			using (var database = CreateDatabase(typeof(Entities.V1.Cpu)))
+			{}
+
+			new Action(() => CreateDatabase(typeof(Entities.V3.Cpu)))
+				.Should().Throw<BreakingChangeException>()
+				.WithMessage("The type of field 'Model' changed from 'System.String' to 'IsabelDb.Test.Entities.CpuModel' which is a breaking change!");
 		}
 
 		private IsabelDb CreateDatabase(params Type[] type)

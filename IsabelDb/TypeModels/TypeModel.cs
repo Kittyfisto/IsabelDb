@@ -167,11 +167,14 @@ namespace IsabelDb.TypeModels
 						if (declaringType != null)
 						{
 							var fieldType = model.GetTypeDescription(fieldTypeId);
-							var memberInfo = FieldDescription.GetMemberInfo(declaringType.Type, fieldName);
-							var memberDescription = FieldDescription.Create(memberInfo,
-							                                                fieldType,
-							                                                memberId);
-							declaringType.Add(memberDescription);
+							var memberInfo = FieldDescription.TryGetMemberInfo(declaringType.Type, fieldName);
+							if (memberInfo != null)
+							{
+								var memberDescription = FieldDescription.Create(memberInfo,
+								                                                fieldType,
+								                                                memberId);
+								declaringType.Add(memberDescription);
+							}
 						}
 					}
 				}
@@ -274,7 +277,7 @@ namespace IsabelDb.TypeModels
 							declaringTypeIdParameter.Value = description.TypeId;
 							fieldIdParameter.Value = memberDescription.MemberId;
 							name.Value = memberDescription.Name;
-							fieldTypeIdParameter.Value = memberDescription.TypeDescription.TypeId;
+							fieldTypeIdParameter.Value = memberDescription.FieldTypeDescription.TypeId;
 
 							command.ExecuteNonQuery();
 						}
@@ -428,18 +431,10 @@ namespace IsabelDb.TypeModels
 			                                             baseTypeDescription,
 			                                             fields);
 
-			ThrowIfBreakingChangesDetect(typeDescription);
 
 			_typeDescriptions.Add(type, typeDescription);
 			_typesToId.Add(type, typeId);
 			_idToTypes.Add(typeId, type);
-		}
-
-		private void ThrowIfBreakingChangesDetect(TypeDescription typeDescription)
-		{
-			var type = typeDescription.Type;
-			var current = Create(new[] {type}).GetTypeDescription(type);
-			typeDescription.ThrowIfIncompatibleTo(current);
 		}
 
 		private int? GetBaseTypeId(TypeDescription typeDescription)
@@ -503,6 +498,20 @@ namespace IsabelDb.TypeModels
 				return false;
 
 			return true;
+		}
+
+		public void ThrowOnBreakingChanges(TypeModel typeModel)
+		{
+			foreach (var pair in _typeDescriptions)
+			{
+				var type = pair.Key;
+				var description = pair.Value;
+
+				if (typeModel._typeDescriptions.TryGetValue(type, out var otherDescription))
+				{
+					description.ThrowOnBreakingChanges(otherDescription);
+				}
+			}
 		}
 	}
 }
