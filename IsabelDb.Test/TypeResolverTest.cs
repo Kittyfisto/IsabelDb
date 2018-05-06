@@ -1,5 +1,4 @@
-﻿using System;
-using FluentAssertions;
+﻿using FluentAssertions;
 using IsabelDb.Test.Entities;
 using IsabelDb.TypeModels;
 using NUnit.Framework;
@@ -12,10 +11,8 @@ namespace IsabelDb.Test
 		[Test]
 		public void TestRegisterPolymorphicType()
 		{
-			var resolver = new TypeResolver(new Type[0]);
-			resolver.Register(typeof(KeyA));
+			var resolver = new TypeResolver(new []{typeof(KeyA), typeof(IPolymorphicCustomKey)});
 			resolver.IsRegistered(typeof(KeyA)).Should().BeTrue();
-			resolver.Register(typeof(IPolymorphicCustomKey));
 			resolver.IsRegistered(typeof(IPolymorphicCustomKey)).Should().BeTrue();
 		}
 

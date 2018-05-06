@@ -4,6 +4,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
+using System.Text;
 
 namespace IsabelDb.TypeModels
 {
@@ -18,6 +19,7 @@ namespace IsabelDb.TypeModels
 		public readonly int TypeId;
 
 		private TypeDescription(string name, string @namespace,
+								string fullTypeName,
 								Type type,
 								int typeId,
 		                        TypeDescription baseType,
@@ -25,7 +27,7 @@ namespace IsabelDb.TypeModels
 		{
 			Name = name;
 			Namespace = @namespace;
-			FullTypeName = GetTypename(@namespace, name);
+			FullTypeName = fullTypeName;
 			Type = type;
 			TypeId = typeId;
 
@@ -67,15 +69,10 @@ namespace IsabelDb.TypeModels
 
 		#endregion
 
-		public static string GetTypename(Type type)
+		public static string GetFullTypeName(Type type)
 		{
-			ExtractTypename(type, out var @namespace, out var name);
-			return GetTypename(@namespace, name);
-		}
-
-		public static string GetTypename(string @namespace, string name)
-		{
-			return string.Format("{0}.{1}", @namespace, name);
+			ExtractTypename(type, out var unused1, out var unused2, out var fullTypeName);
+			return fullTypeName;
 		}
 
 		public static TypeDescription Create(Type type,
@@ -83,8 +80,8 @@ namespace IsabelDb.TypeModels
 		                                     TypeDescription baseTypeDescription,
 		                                     IReadOnlyList<FieldDescription> fields)
 		{
-			ExtractTypename(type, out var @namespace, out var name);
-			return new TypeDescription(name, @namespace, type, typeId, baseTypeDescription, fields);
+			ExtractTypename(type, out var @namespace, out var name, out var fullTypeName);
+			return new TypeDescription(name, @namespace, fullTypeName, type, typeId, baseTypeDescription, fields);
 		}
 
 		public static TypeDescription Create(Type type,
@@ -121,7 +118,10 @@ namespace IsabelDb.TypeModels
 			}
 		}
 
-		private static void ExtractTypename(Type type, out string @namespace, out string name)
+		private static void ExtractTypename(Type type,
+		                                    out string @namespace,
+		                                    out string name,
+		                                    out string fullTypeName)
 		{
 			var dataContractAttributes = type.GetCustomAttribute(typeof(DataContractAttribute), inherit: false);
 			if (dataContractAttributes != null)
@@ -151,6 +151,39 @@ namespace IsabelDb.TypeModels
 					@namespace = type.Namespace;
 					name = type.Name;
 				}
+			}
+			
+			BuildFullType(type, @namespace, name, out fullTypeName);
+		}
+
+		private static void BuildFullType(Type type, string @namespace, string name, out string fullTypeName)
+		{
+			if (type.IsGenericType)
+			{
+				var args = type.GenericTypeArguments;
+				var count = string.Format("`{0}", args.Length);
+				var builder = new StringBuilder();
+				builder.Append(@namespace);
+				builder.Append(".");
+				builder.Append(name);
+				if (!name.EndsWith(count))
+					builder.Append(count);
+				builder.Append("[");
+				for (int i = 0; i < args.Length; ++i)
+				{
+					if (i != 0)
+						builder.Append(",");
+
+					var argument = args[i];
+					var argumentFullTypeName= GetFullTypeName(argument);
+					builder.Append(argumentFullTypeName);
+				}
+				builder.Append("]");
+				fullTypeName = builder.ToString();
+			}
+			else
+			{
+				fullTypeName = string.Format("{0}.{1}", @namespace, name);
 			}
 		}
 

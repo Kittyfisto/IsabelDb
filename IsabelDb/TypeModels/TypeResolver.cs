@@ -13,48 +13,26 @@ namespace IsabelDb.TypeModels
 		private readonly Dictionary<Type, string> _namesByType;
 		private readonly Dictionary<string, Type> _typesByName;
 
-		/// <summary>
-		/// </summary>
-		/// <param name="supportedTypes">The list of types for which a mapping shall be provided</param>
-		public TypeResolver(IEnumerable<Type> supportedTypes)
+		public TypeResolver(IEnumerable<TypeDescription> supportedTypes)
 		{
 			_typesByName = new Dictionary<string, Type>();
 			_namesByType = new Dictionary<Type, string>();
 
-			foreach (var type in supportedTypes)
-				Register(type);
-		}
-
-		public IEnumerable<Type> RegisteredTypes => _namesByType.Keys;
-
-		/// <summary>
-		///     Registers the given type with this resolver.
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		public void Register<T>()
-		{
-			Register(typeof(T));
-		}
-
-		/// <summary>
-		///     Registers the given type with this resolver.
-		/// </summary>
-		/// <param name="type"></param>
-		public void Register(Type type)
-		{
-			if (!_namesByType.ContainsKey(type))
+			foreach (var description in supportedTypes)
 			{
-				var baseType = type.BaseType;
-				if (baseType != null &&
-				    baseType != typeof(ValueType) &&
-				    baseType != typeof(Array))
-					Register(baseType);
-
-				var typename = TypeDescription.GetTypename(type);
-				_namesByType.Add(type, typename);
-				_typesByName.Add(typename, type);
+				_typesByName.Add(description.FullTypeName, description.Type);
+				_namesByType.Add(description.Type, description.FullTypeName);
 			}
 		}
+
+		/// <summary>
+		/// </summary>
+		/// <param name="supportedTypes">The list of types for which a mapping shall be provided</param>
+		public TypeResolver(IEnumerable<Type> supportedTypes)
+			: this(TypeModel.Create(supportedTypes).TypeDescriptions)
+		{}
+
+		public IEnumerable<Type> RegisteredTypes => _namesByType.Keys;
 
 		public string GetName(Type type)
 		{

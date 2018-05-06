@@ -63,11 +63,9 @@ namespace IsabelDb.TypeModels
 			_nextId = 1;
 		}
 
-		public IEnumerable<Type> Keys => _typeDescriptions.Keys;
+		public IEnumerable<Type> Types => _typeDescriptions.Keys;
 
-		public IEnumerable<TypeDescription> Values => _typeDescriptions.Values;
-
-		public int Count => _typeDescriptions.Count;
+		public IEnumerable<TypeDescription> TypeDescriptions => _typeDescriptions.Values;
 
 		public TypeDescription this[Type key] => _typeDescriptions[key];
 
@@ -87,18 +85,21 @@ namespace IsabelDb.TypeModels
 			return _typesToId.ContainsKey(type);
 		}
 
+		[Pure]
 		public string GetTypeName(Type type)
 		{
 			return _typeDescriptions[type].FullTypeName;
 		}
 
+		[Pure]
 		public int GetTypeId(Type type)
 		{
 			if (!_typesToId.TryGetValue(type, out var typeId))
 				throw new ArgumentException(string.Format("The type '{0}' has not been registered!", type));
 			return typeId;
 		}
-
+		
+		[Pure]
 		public Type GetType(int typeId)
 		{
 			if (!_idToTypes.TryGetValue(typeId, out var type))
@@ -107,11 +108,13 @@ namespace IsabelDb.TypeModels
 			return type;
 		}
 
+		[Pure]
 		public TypeDescription GetTypeDescription(Type type)
 		{
 			return _typeDescriptions[type];
 		}
-
+		
+		[Pure]
 		public TypeDescription GetTypeDescription(int typeId)
 		{
 			var type = GetType(typeId);
@@ -192,6 +195,14 @@ namespace IsabelDb.TypeModels
 					AddType(type.GetElementType());
 				}
 
+				if (type.IsGenericType)
+				{
+					foreach (var argument in type.GenericTypeArguments)
+					{
+						AddType(argument);
+					}
+				}
+
 				var id = _nextId;
 				++_nextId;
 				typeDescription = TypeDescription.Create(type, id, baseTypeDescription, members);
@@ -211,7 +222,10 @@ namespace IsabelDb.TypeModels
 		public static TypeModel Create(IEnumerable<Type> supportedTypes)
 		{
 			var model = new TypeModel();
-			foreach (var type in supportedTypes) model.AddType(type);
+			foreach (var type in supportedTypes)
+			{
+				model.AddType(type);
+			}
 			return model;
 		}
 

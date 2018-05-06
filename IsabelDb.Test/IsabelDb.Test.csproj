@@ -104,9 +104,13 @@
     <Compile Include="Entities\Message.cs" />
     <Compile Include="Entities\Point.cs" />
     <Compile Include="Entities\V1\Comic.cs" />
+    <Compile Include="Entities\V1\Cpu.cs" />
+    <Compile Include="Entities\V1\Motherboard.cs" />
     <Compile Include="Entities\V1\Plane.cs" />
     <Compile Include="Entities\V1\Thing.cs" />
     <Compile Include="Entities\V2\Comic.cs" />
+    <Compile Include="Entities\V2\Cpu.cs" />
+    <Compile Include="Entities\V2\Motherboard.cs" />
     <Compile Include="Entities\V2\Thing.cs" />
     <Compile Include="Entities\V2\Plane.cs" />
     <Compile Include="ExplicitNameAndNamespace.cs" />

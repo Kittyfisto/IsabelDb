@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.SQLite;
 using FluentAssertions;
+using IsabelDb.Test.Entities.V1;
 using NUnit.Framework;
 
 namespace IsabelDb.Test
@@ -70,6 +72,32 @@ namespace IsabelDb.Test
 				var comic = comics.Get(1);
 				comic.Name.Should().Be("Watchmen");
 				comic.Writer.Should().Be("Alan Moore");
+			}
+		}
+
+		[Test]
+		public void TestRenamedListArgument()
+		{
+			using (var database = CreateDatabase(typeof(Entities.V1.Motherboard)))
+			{
+				var comics = database.GetDictionary<int, Entities.V1.Motherboard>("Motherboards");
+				comics.Put(1, new Entities.V1.Motherboard
+				{
+					Cpus = new List<Cpu>
+					{
+						new Cpu { Model = "i7" },
+						new Cpu { Model = "i5" }
+					}
+				});
+			}
+
+			using (var database = CreateDatabase(typeof(Entities.V2.Motherboard)))
+			{
+				var comics = database.GetDictionary<int, Entities.V2.Motherboard>("Motherboards");
+				var motherboard = comics.Get(1);
+				motherboard.Cpus.Should().HaveCount(2);
+				motherboard.Cpus[0].Model.Should().Be("i7");
+				motherboard.Cpus[1].Model.Should().Be("i5");
 			}
 		}
 

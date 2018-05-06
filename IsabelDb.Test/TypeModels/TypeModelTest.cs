@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Linq;
 using IsabelDb.Test.Entities;
+using IsabelDb.Test.Entities.V1;
 
 namespace IsabelDb.Test.TypeModels
 {
@@ -60,6 +61,30 @@ namespace IsabelDb.Test.TypeModels
 			new Action(() => Roundtrip(typeModel, new[] { typeof(Entities.V2.Plane), typeof(Entities.V2.Thing) }))
 				.Should().Throw<BreakingChangeException>("because V2.Plane has changed its base class from Thing to object and changing base classes is a breaking change")
 				.WithMessage("The base class of the type 'IsabelDb.Test.Entities.Plane' has been changed from 'IsabelDb.Test.Entities.Thing' to 'System.Object': This is a breaking change!");
+		}
+
+		[Test]
+		[Description("Verifies that the FullTypeName includes the names of its generic type arguments, which may be dictated via DataContract.Name")]
+		public void TestGenericType1()
+		{
+			var typeModel = TypeModel.Create(new[] { typeof(Entities.V1.Motherboard) });
+
+			var description = typeModel.GetTypeDescription(typeof(List<Cpu>));
+			description.Name.Should().Be("List`1");
+			description.Namespace.Should().Be("System.Collections.Generic");
+			description.FullTypeName.Should().Be("System.Collections.Generic.List`1[IsabelDb.Test.Entities.Cpu]");
+		}
+
+		[Test]
+		[Description("Verifies that generic type arguments are also added to the type model")]
+		public void TestGenericType2()
+		{
+			var typeModel = TypeModel.Create(new[] { typeof(List<Cpu>) });
+
+			var description = typeModel.GetTypeDescription(typeof(Cpu));
+			description.Name.Should().Be("Cpu");
+			description.Namespace.Should().Be("IsabelDb.Test.Entities");
+			description.FullTypeName.Should().Be("IsabelDb.Test.Entities.Cpu");
 		}
 
 		[Test]
