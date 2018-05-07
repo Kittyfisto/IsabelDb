@@ -1,4 +1,7 @@
 # IsabelDb
+
+[![Build status](https://ci.appveyor.com/api/projects/status/mqcvw9ouvh2xi12u?svg=true)](https://ci.appveyor.com/project/Kittyfisto/isabeldb)
+
 IsabelDb is a key value store which allows you to persist .NET objects on disk and read them back again.
 
 # Introduction
@@ -28,6 +31,10 @@ using (var database = IsabelDb.Database.OpenOrCreate("some file path.isdb", new[
     }
 }
 ```
+
+# Installation
+
+Simply head over to [nuget.org](https://www.nuget.org/packages/IsabelDb/) to download the latest release of IsabelDb.
 
 # Quick facts
 
