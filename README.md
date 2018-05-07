@@ -78,14 +78,41 @@ Console.WriteLine(string.Join(", ", items.Get("foo"))); //< Prints 'Hello, World
 
 ## Defining Serializable Types
 
-Most of the type you will be creating your own data types to store in the database. The following rules apply:
-- A serializable type must be marked with the [DataContract] attribute
+IsabelDb works with every custom type if it follows these rules:
+- The type must be marked with the [DataContract] attribute
 - Fields/Properties which are to be serialized must be marked with the [DataMember] attribute
-- Serializable types may inherit from other serializable types
+- The field/property types which are marked with the [DataMember] attribute must themselves be serializable
 
-## Backward/Forward Compatibility
+These rules are pretty much aligned to what Microsoft expects from a data contract. You may head over to [docs.microsoft.com](https://docs.microsoft.com/en-us/dotnet/framework/wcf/feature-details/how-to-create-a-basic-data-contract-for-a-class-or-structure) for a more detailed explanation.
 
-IsabelDb offers both forward and backward compatibility.
+## Backward compatibility
+
+Backward compatibility in this context refers to the ability to:
+- Read data from a database which was written with a previous version
+- Modify data in a database which was written with a previous version
+
+The following list of changes is permitted without breaking backward compatibility:
+
+If you change the name or namespace of a type marked with the [DataContract] attribute, then you should put its old namespace / name in the attribute:
+```csharp
+[DataContract(Namespace "OldNamespace", Name = "OldTypeName")] public class NewType {}
+```
+
+If you change the name of a field / property marked with the [DataMember] attribute, then you should put its old name in the attribute:
+```csharp
+[DataMember(Name = "OldPropertyName")] public string NewPropertyName { get; set; }
+```
+
+Adding new fields / properties with the [DataMember] attribute.
+
+You can remove fields / properties with the [DataMember] attribute, however if you do so, then you will lose that data upon roundtripping and then reading back the object in an older version.
+
+
+## Forward Compatibility
+
+Forward compatibility in this context refers to the ability to:
+- Read data from a database which was written with a future version
+- Modify data in a database which was written with a future version
 
 ## Breaking changes to serializable types
 
