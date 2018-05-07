@@ -128,7 +128,17 @@ Forward compatibility in this context refers to the ability to:
 - Read data from a database which was written with a future version
 - Modify data in a database which was written with a future version
 
-Reading data from future versions is no problem (as unknown properties will simply be ignored). If you read an object from a database which has a field 'Foo' in a later version (but not in the version which read the object) and then store this object in the database again, then it's value of 'Foo' will be lost. You can prevent this by inheriting from Extensible, [see Marc Gravell's answer here](https://stackoverflow.com/questions/21331731/protobuf-net-keeping-future-fields).
+Reading data from future versions is no problem (as unknown properties will simply be ignored).
+Roundtripping objects from future versions will only work without data loss if they inherit from Extensible:
+
+```csharp
+using Protobuf
+...
+[DataContract]
+public class MyFutureProofType : Extensible
+{
+}
+```
 
 ## Breaking changes to serializable types
 
