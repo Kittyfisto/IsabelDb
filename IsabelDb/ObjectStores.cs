@@ -173,7 +173,7 @@ namespace IsabelDb
 
 		public static bool DoesTableExist(SQLiteConnection connection)
 		{
-			return IsabelDb.TableExists(connection, TableName);
+			return Database.TableExists(connection, TableName);
 		}
 
 		public static void CreateTable(SQLiteConnection connection)

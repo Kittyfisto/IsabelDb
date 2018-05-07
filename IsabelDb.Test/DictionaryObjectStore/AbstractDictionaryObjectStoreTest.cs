@@ -26,7 +26,7 @@ namespace IsabelDb.Test.DictionaryObjectStore
 		[Test]
 		public void TestGetKey()
 		{
-			using (var db = IsabelDb.CreateInMemory(CustomTypes))
+			using (var db = Database.CreateInMemory(CustomTypes))
 			{
 				var values = db.GetDictionary<TKey, object>("Values");
 				values.Put(SomeKey, "Hello");
@@ -44,7 +44,7 @@ namespace IsabelDb.Test.DictionaryObjectStore
 		[Test]
 		public void TestGetNonExistantKey()
 		{
-			using (var db = IsabelDb.CreateInMemory(CustomTypes))
+			using (var db = Database.CreateInMemory(CustomTypes))
 			{
 				var values = db.GetDictionary<TKey, object>("Values");
 				values.Get(SomeKey).Should().BeNull();
@@ -54,7 +54,7 @@ namespace IsabelDb.Test.DictionaryObjectStore
 		[Test]
 		public void TestOverwriteValue()
 		{
-			using (var db = IsabelDb.CreateInMemory(CustomTypes))
+			using (var db = Database.CreateInMemory(CustomTypes))
 			{
 				var values = db.GetDictionary<TKey, object>("Values");
 				values.Put(SomeKey, value: 42);
@@ -68,7 +68,7 @@ namespace IsabelDb.Test.DictionaryObjectStore
 		[Test]
 		public void TestOverwriteValueWithNull()
 		{
-			using (var db = IsabelDb.CreateInMemory(CustomTypes))
+			using (var db = Database.CreateInMemory(CustomTypes))
 			{
 				var values = db.GetDictionary<TKey, object>("Values");
 				values.Put(SomeKey, "A");
@@ -83,7 +83,7 @@ namespace IsabelDb.Test.DictionaryObjectStore
 		[Test]
 		public void TestPutManyKeys()
 		{
-			using (var db = IsabelDb.CreateInMemory(CustomTypes))
+			using (var db = Database.CreateInMemory(CustomTypes))
 			{
 				var values = db.GetDictionary<TKey, object>("Values");
 				var i = 0;
@@ -111,7 +111,7 @@ namespace IsabelDb.Test.DictionaryObjectStore
 		[Test]
 		public void TestRemoveValue()
 		{
-			using (var db = IsabelDb.CreateInMemory(CustomTypes))
+			using (var db = Database.CreateInMemory(CustomTypes))
 			{
 				var values = db.GetDictionary<TKey, object>("Values");
 				values.Put(SomeKey, "A");
@@ -126,7 +126,7 @@ namespace IsabelDb.Test.DictionaryObjectStore
 		[Test]
 		public void TestStoreTwoValues()
 		{
-			using (var db = IsabelDb.CreateInMemory(CustomTypes))
+			using (var db = Database.CreateInMemory(CustomTypes))
 			{
 				var values = db.GetDictionary<TKey, object>("Values");
 				values.Put(SomeKey, "Hello");

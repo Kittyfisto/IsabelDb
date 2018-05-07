@@ -14,7 +14,7 @@ namespace IsabelDb.Test.MultiValueDictionaryStore
 		[Test]
 		public void TestEmpty()
 		{
-			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
+			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
 				var values = db.GetMultiValueDictionary<int, string>("Values");
 				values.Count().Should().Be(0);
@@ -25,7 +25,7 @@ namespace IsabelDb.Test.MultiValueDictionaryStore
 		[Test]
 		public void TestClearEmpty()
 		{
-			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
+			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
 				var values = db.GetMultiValueDictionary<int, string>("Values");
 				values.Count().Should().Be(0);
@@ -37,7 +37,7 @@ namespace IsabelDb.Test.MultiValueDictionaryStore
 		[Test]
 		public void TestClear()
 		{
-			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
+			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
 				var values = db.GetMultiValueDictionary<int, string>("Values");
 				values.Put(1, "Foo");
@@ -50,7 +50,7 @@ namespace IsabelDb.Test.MultiValueDictionaryStore
 		[Test]
 		public void TestRemoveAllNonExistantKey()
 		{
-			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
+			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
 				var values = db.GetMultiValueDictionary<int, string>("Values");
 				values.Put(1, "Foo");
@@ -63,7 +63,7 @@ namespace IsabelDb.Test.MultiValueDictionaryStore
 		[Test]
 		public void TestRemoveAll()
 		{
-			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
+			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
 				var values = db.GetMultiValueDictionary<int, string>("Values");
 				values.Put(1, "Foo");
@@ -78,7 +78,7 @@ namespace IsabelDb.Test.MultiValueDictionaryStore
 		[Test]
 		public void TestRemoveAllManyValues()
 		{
-			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
+			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
 				var values = db.GetMultiValueDictionary<int, string>("Values");
 				values.Put(1, "Foo");
@@ -94,7 +94,7 @@ namespace IsabelDb.Test.MultiValueDictionaryStore
 		[Test]
 		public void TestGetNonExistantKey()
 		{
-			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
+			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
 				var values = db.GetMultiValueDictionary<int, string>("Values");
 				values.Get(0).Should().BeEmpty();
@@ -104,7 +104,7 @@ namespace IsabelDb.Test.MultiValueDictionaryStore
 		[Test]
 		public void TestGetManyKeys()
 		{
-			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
+			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
 				var values = db.GetMultiValueDictionary<int, double>("Values");
 				values.Put(1, Math.E);
@@ -122,7 +122,7 @@ namespace IsabelDb.Test.MultiValueDictionaryStore
 		[Test]
 		public void TestPutOneValue()
 		{
-			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
+			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
 				var values = db.GetMultiValueDictionary<int, string>("Values");
 				values.Put(1, "Foobar");
@@ -132,7 +132,7 @@ namespace IsabelDb.Test.MultiValueDictionaryStore
 		[Test]
 		public void TestPutValues()
 		{
-			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
+			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
 				var values = db.GetMultiValueDictionary<int, string>("Values");
 				values.Put(1, "Foo");
@@ -148,7 +148,7 @@ namespace IsabelDb.Test.MultiValueDictionaryStore
 		[Description("Verifies that the same value can be added multiple times")]
 		public void TestPutEqualValues()
 		{
-			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
+			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
 				var values = db.GetMultiValueDictionary<int, string>("Values");
 				values.Put(1, "a");
@@ -163,7 +163,7 @@ namespace IsabelDb.Test.MultiValueDictionaryStore
 		[Test]
 		public void TestPutManySameKey()
 		{
-			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
+			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
 				var values = db.GetMultiValueDictionary<int, string>("Values");
 				values.PutMany(1, new[] {"a", "b"});
@@ -176,7 +176,7 @@ namespace IsabelDb.Test.MultiValueDictionaryStore
 		[Test]
 		public void TestPutManyValues1()
 		{
-			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
+			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
 				var values = db.GetMultiValueDictionary<int, string>("Values");
 				values.PutMany(1, new []{"Foo", "Bar"});
@@ -190,7 +190,7 @@ namespace IsabelDb.Test.MultiValueDictionaryStore
 		[Test]
 		public void TestPutManyValues2()
 		{
-			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
+			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
 				var values = db.GetMultiValueDictionary<int, string>("Values");
 				values.PutMany(new []
@@ -208,7 +208,7 @@ namespace IsabelDb.Test.MultiValueDictionaryStore
 		[Test]
 		public void TestPutManyValues3()
 		{
-			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
+			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
 				var values = db.GetMultiValueDictionary<int, string>("Values");
 				const int count = 10000;

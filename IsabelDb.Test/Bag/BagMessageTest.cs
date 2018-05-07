@@ -17,7 +17,7 @@ namespace IsabelDb.Test.Bag
 			{
 				Value = "Foo"
 			};
-			using (var db = IsabelDb.CreateInMemory(new[] {typeof(Message)}))
+			using (var db = Database.CreateInMemory(new[] {typeof(Message)}))
 			{
 				var bag = db.GetBag<Message>("Messages");
 				new Action(() => bag.Put(message))
@@ -35,7 +35,7 @@ namespace IsabelDb.Test.Bag
 			{
 				Value = 42
 			};
-			using (var db = IsabelDb.CreateInMemory(new[] {typeof(Message)}))
+			using (var db = Database.CreateInMemory(new[] {typeof(Message)}))
 			{
 				var bag = db.GetBag<Message>("Messages");
 				new Action(() => bag.Put(message))
@@ -53,7 +53,7 @@ namespace IsabelDb.Test.Bag
 			{
 				Value = new CustomKey()
 			};
-			using (var db = IsabelDb.CreateInMemory(new []{typeof(Message), typeof(CustomKey)}))
+			using (var db = Database.CreateInMemory(new []{typeof(Message), typeof(CustomKey)}))
 			{
 				var bag = db.GetBag<Message>("Messages");
 				bag.Put(message);

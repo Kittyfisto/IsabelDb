@@ -302,7 +302,7 @@ namespace IsabelDb.TypeModels
 
 		public static bool DoesTableExist(SQLiteConnection connection)
 		{
-			return IsabelDb.TableExists(connection, TypeTableName);
+			return Database.TableExists(connection, TypeTableName);
 		}
 
 		public static void CreateTable(SQLiteConnection connection)

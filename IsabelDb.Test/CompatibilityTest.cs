@@ -17,7 +17,7 @@ namespace IsabelDb.Test
 		{
 			_connection = new SQLiteConnection("Data Source=:memory:");
 			_connection.Open();
-			IsabelDb.CreateTables(_connection);
+			Database.CreateTables(_connection);
 		}
 
 		[TearDown]
@@ -112,9 +112,9 @@ namespace IsabelDb.Test
 				.WithMessage("The type of field 'Model' changed from 'System.String' to 'IsabelDb.Test.Entities.CpuModel' which is a breaking change!");
 		}
 
-		private IsabelDb CreateDatabase(params Type[] type)
+		private Database CreateDatabase(params Type[] type)
 		{
-			return new IsabelDb(_connection, type, disposeConnection: false);
+			return new Database(_connection, type, disposeConnection: false);
 		}
 	}
 }

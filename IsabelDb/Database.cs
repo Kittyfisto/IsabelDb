@@ -10,14 +10,14 @@ namespace IsabelDb
 	/// <summary>
 	///     A key-value store for objects.
 	/// </summary>
-	public sealed class IsabelDb
+	public sealed class Database
 		: IDisposable
 	{
 		private readonly SQLiteConnection _connection;
 		private readonly bool _disposeConnection;
 		private readonly ObjectStores _objectStores;
 
-		internal IsabelDb(SQLiteConnection connection, IEnumerable<Type> supportedTypes,
+		internal Database(SQLiteConnection connection, IEnumerable<Type> supportedTypes,
 		                  bool disposeConnection = true)
 		{
 			_connection = connection;
@@ -76,14 +76,14 @@ namespace IsabelDb
 		/// </remarks>
 		/// <param name="supportedTypes">The list of custom types which are to be stored in / retrieved from the database</param>
 		/// <returns></returns>
-		public static IsabelDb CreateInMemory(IEnumerable<Type> supportedTypes)
+		public static Database CreateInMemory(IEnumerable<Type> supportedTypes)
 		{
 			var connection = new SQLiteConnection("Data Source=:memory:");
 			try
 			{
 				connection.Open();
 				CreateTables(connection);
-				return new IsabelDb(connection, supportedTypes);
+				return new Database(connection, supportedTypes);
 			}
 			catch (Exception)
 			{
@@ -98,7 +98,7 @@ namespace IsabelDb
 		/// <param name="databasePath"></param>
 		/// <param name="supportedTypes">The list of custom types which are to be stored in / retrieved from the database</param>
 		/// <returns></returns>
-		public static IsabelDb OpenOrCreate(string databasePath, IEnumerable<Type> supportedTypes)
+		public static Database OpenOrCreate(string databasePath, IEnumerable<Type> supportedTypes)
 		{
 			if (!File.Exists(databasePath)) SQLiteConnection.CreateFile(databasePath);
 
@@ -108,7 +108,7 @@ namespace IsabelDb
 			{
 				connection.Open();
 				CreateTablesIfNecessary(connection);
-				return new IsabelDb(connection, supportedTypes);
+				return new Database(connection, supportedTypes);
 			}
 			catch (Exception)
 			{
@@ -124,7 +124,7 @@ namespace IsabelDb
 		/// <param name="supportedTypes">The list of custom types which are to be stored in / retrieved from the database</param>
 		/// <returns></returns>
 		/// <exception cref="FileNotFoundException"></exception>
-		public static IsabelDb Open(string databaseFilePath, IEnumerable<Type> supportedTypes)
+		public static Database Open(string databaseFilePath, IEnumerable<Type> supportedTypes)
 		{
 			if (!File.Exists(databaseFilePath))
 				throw new FileNotFoundException("Unable to open the given database", databaseFilePath);
@@ -135,7 +135,7 @@ namespace IsabelDb
 			{
 				connection.Open();
 				EnsureTableSchema(connection);
-				return new IsabelDb(connection, supportedTypes);
+				return new Database(connection, supportedTypes);
 			}
 			catch (Exception)
 			{

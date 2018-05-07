@@ -9,7 +9,7 @@ namespace IsabelDb.Benchmarks.GetByKey
 	public class DictionaryGetByKey
 		: IDisposable
 	{
-		private readonly IsabelDb _database;
+		private readonly Database _database;
 		private readonly IDictionary<int, Book> _intKeyDictionary;
 		private readonly int _count;
 		private readonly IDictionary<long, Book> _longKeyDictionary;
@@ -23,7 +23,7 @@ namespace IsabelDb.Benchmarks.GetByKey
 			const string filename = "DictionaryGetByKey.isdb";
 			if (File.Exists(filename))
 				File.Delete(filename);
-			_database = IsabelDb.OpenOrCreate(filename, new []{typeof(Book)});
+			_database = Database.OpenOrCreate(filename, new []{typeof(Book)});
 			_intKeyDictionary = _database.GetDictionary<int, Book>("BooksByInt");
 			_longKeyDictionary = _database.GetDictionary<long, Book>("BooksByLong");
 			_stringKeyDictionary = _database.GetDictionary<string, Book>("BooksByString");

@@ -10,7 +10,7 @@ namespace IsabelDb.Benchmarks.GetByKey
 	public class MultiValueDictionaryGetByKey
 		: IDisposable
 	{
-		private readonly IsabelDb _database;
+		private readonly Database _database;
 		private IMultiValueDictionary<int, Book> _multiValueDictionary;
 		private readonly Random _random;
 
@@ -19,7 +19,7 @@ namespace IsabelDb.Benchmarks.GetByKey
 			const string filename = "DictionaryGetByKey.isdb";
 			if (File.Exists(filename))
 				File.Delete(filename);
-			_database = IsabelDb.OpenOrCreate(filename, new[] {typeof(Book)});
+			_database = Database.OpenOrCreate(filename, new[] {typeof(Book)});
 			_random = new Random();
 		}
 

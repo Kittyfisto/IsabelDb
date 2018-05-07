@@ -9,7 +9,7 @@ namespace IsabelDb.Benchmarks.GetByKey
 	public class DictionaryPutMany
 		: IDisposable
 	{
-		private readonly IsabelDb _database;
+		private readonly Database _database;
 		private IDictionary<int, Book> _books;
 
 		public DictionaryPutMany()
@@ -17,7 +17,7 @@ namespace IsabelDb.Benchmarks.GetByKey
 			const string filename = "DictionaryPutMany.isdb";
 			if (File.Exists(filename))
 				File.Delete(filename);
-			_database = IsabelDb.OpenOrCreate(filename, new []{typeof(Book)});
+			_database = Database.OpenOrCreate(filename, new []{typeof(Book)});
 		}
 
 		[Params(100, 1000, 10000, 100000)]

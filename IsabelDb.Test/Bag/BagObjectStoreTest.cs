@@ -14,7 +14,7 @@ namespace IsabelDb.Test.Bag
 		[Test]
 		public void TestClearEmpty()
 		{
-			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
+			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
 				var bag = db.GetBag<string>("foo");
 				new Action(() => bag.Clear()).Should().NotThrow();
@@ -24,7 +24,7 @@ namespace IsabelDb.Test.Bag
 		[Test]
 		public void TestClearOne()
 		{
-			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
+			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
 				var bag = db.GetBag<string>("foo");
 				bag.Put("Hello, World!");
@@ -39,7 +39,7 @@ namespace IsabelDb.Test.Bag
 		[Test]
 		public void TestClearMany()
 		{
-			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
+			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
 				var bag = db.GetBag<int>("foo");
 				bag.PutMany(Enumerable.Range(0, 1000));
@@ -54,7 +54,7 @@ namespace IsabelDb.Test.Bag
 		[Test]
 		public void TestPutSameValue()
 		{
-			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
+			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
 				var bag = db.GetBag<int>("my favourite numbers");
 				bag.Put(42);
@@ -68,7 +68,7 @@ namespace IsabelDb.Test.Bag
 		[Test]
 		public void TestPutManyValues()
 		{
-			using (var db = IsabelDb.CreateInMemory(NoCustomTypes))
+			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
 				var bag = db.GetBag<int>("foo");
 				bag.PutMany(1, 2, 3, 4);
