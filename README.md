@@ -34,7 +34,8 @@ using (var database = IsabelDb.Database.OpenOrCreate("some file path.isdb", new[
 
 # Installation
 
-Simply head over to [nuget.org](https://www.nuget.org/packages/IsabelDb/) to download the latest release of IsabelDb.
+Simply head over to [nuget.org](https://www.nuget.org/packages/IsabelDb/) to download the latest release of IsabelDb or use the following command in the Package Manager Console:
+`Install-Package IsabelDb`
 
 # Quick facts
 
