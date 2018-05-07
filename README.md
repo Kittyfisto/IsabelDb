@@ -37,6 +37,11 @@ using (var database = IsabelDb.Database.OpenOrCreate("some file path.isdb", new[
 Simply head over to [nuget.org](https://www.nuget.org/packages/IsabelDb/) to download the latest release of IsabelDb or use the following command in the Package Manager Console:
 `Install-Package IsabelDb`
 
+# Requirements
+
+Currently, IsabelDb targets .NET 4.5.  
+If you require other targets, such as .NET core , then please let me know.
+
 # Quick facts
 
 - IsabelDb stores all data in a single file on disk
