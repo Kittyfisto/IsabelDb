@@ -1,5 +1,5 @@
 # IsabelDb
-IsabelDb is a key value store which allows you to write .NET objects to disk and read them back again.
+IsabelDb is a key value store which allows you to persist .NET objects on disk and read them back again.
 
 # Introduction
 
@@ -29,14 +29,29 @@ using (var database = IsabelDb.Database.OpenOrCreate("some file path.isdb", new[
 }
 ```
 
-# Concepts
+# Quick facts
 
-A database created with this library consists of zero or more collections.
-Each collection can store zero or more objects where each object must be serializable.
-An object is serializable if it's a natively supported type (integer types, floating-point types, string, lists, arrays, etc...)
-or if it is marked with the DataContract attribute.
+- IsabelDb stores all data in a single file on disk
+- A database consists of zero or more collections
+- Each collection can store zero or more objects where each object must be serializable
+- Each operation on a collection is atomic
+- Each mutating operation blocks until its data is flushed to disk
 
-## Dictionary
+## Collections
+
+IsabelDb offers several collections which behave similar to their .NET counterpart, but their contents are stored on disk and not in memory. As such, a collection can exceed the size of a process' virtual memory and its computer's physical memory.
+
+### Bag
+
+A collection which stores a list of values: Values can be added to the collection and streamed back by iterating over GetAll(). Removing individiual values is not possible (use Dictionary if that's necessary).
+
+```csharp
+var items = database.GetDictionary<object>("Items");
+items.PutMany(new[]{1, 42, "Hello", "World!");
+Console.WriteLine(string.Join(", ", items.GetAll()); //< Prints '1, 42, Hello, World!'
+```
+
+### Dictionary
 
 A collection which maps values to non-null keys. There can never be more than one value for the same key. If you put a new key / value pair into
 the collection, then any existing value for that same key will be overwritten:
@@ -49,7 +64,7 @@ items.Put("foo", 42);
 Console.WriteLine(items.Get("foo")); //< Prints '42'
 ```
 
-## MultiValueDictionary
+### MultiValueDictionary
 
 A collection which maps values to non-null keys: There can be multiple values for the same key. If you put a key / value pair into the collection
 then that value will be appended to the previous list of values:
@@ -68,47 +83,10 @@ Most of the type you will be creating your own data types to store in the databa
 - Fields/Properties which are to be serialized must be marked with the [DataMember] attribute
 - Serializable types may inherit from other serializable types
 
-## Breaking changes to serializable types
-
-The following list gives you an overview over the list of changes to a type model which you should avoid if you desire to read data written with previous type models:
-
-### Changing the base type of a serializable type
-Changing the base class of a type is considered a breaking change and will prevent you from reading data from database prior to this change:
-
-V1:
-```csharp
-[DataContract] public abstract class Base{}
-[DataContract] public class Foo : Base {}
-```
-
-V2:
-```csharp
-[DataContract] public abstract class Base{}
-[DataContract] public class Foo {}
-```
-
-### Changing the type of serializable field / property
-Changing the type of a field is considered a breaking change and will prevent you from reading data from database prior to this change:
-
-V1:
-```csharp
-[DataContract] public class Foo
-{
-    [DataMember]
-    public int Age { get; set; }
-}
-```
-
-V2:
-```csharp
-[DataContract] public class Foo
-{
-    [DataMember]
-    public double Age { get; set; }
-}
-```
-
 ## Backward/Forward Compatibility
 
 IsabelDb offers both forward and backward compatibility.
-If you decide 
+
+## Breaking changes to serializable types
+
+IsabelDb tolerates same changes to the type model, but several changes are considered breaking changes. The following document provides you with a detailed overview of which changes are allowed and which are breaking: [Serialization](Serialization.MD).
