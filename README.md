@@ -36,6 +36,7 @@ using (var database = IsabelDb.Database.OpenOrCreate("some file path.isdb", new[
 - Each collection can store zero or more objects where each object must be serializable
 - Each operation on a collection is atomic
 - Each mutating operation blocks until its data is flushed to disk
+- Any custom type with a data contract can be stored in the database
 
 ## Collections
 
