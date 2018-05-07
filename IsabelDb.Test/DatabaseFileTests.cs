@@ -15,7 +15,7 @@ namespace IsabelDb.Test
 	///     and then verifying that everything works as expected.
 	/// </summary>
 	[TestFixture]
-	public sealed class IsabelDbFileTests
+	public sealed class DatabaseFileTests
 	{
 		[SetUp]
 		public void Setup()

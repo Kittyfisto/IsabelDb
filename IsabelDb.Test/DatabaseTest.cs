@@ -8,7 +8,7 @@ using NUnit.Framework;
 namespace IsabelDb.Test
 {
 	[TestFixture]
-	public sealed class IsabelDbTest
+	public sealed class DatabaseTest
 	{
 		private static IEnumerable<Type> NoCustomTypes => new Type[0];
 

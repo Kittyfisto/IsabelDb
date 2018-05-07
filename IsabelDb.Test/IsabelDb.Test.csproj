@@ -121,8 +121,8 @@
     <Compile Include="ExplicitNameNoNamespace.cs" />
     <Compile Include="ExplicitNamespaceNoName.cs" />
     <Compile Include="Entities\IPolymorphicCustomKey.cs" />
-    <Compile Include="IsabelDbFileTests.cs" />
-    <Compile Include="IsabelDbTest.cs" />
+    <Compile Include="DatabaseFileTests.cs" />
+    <Compile Include="DatabaseTest.cs" />
     <Compile Include="IssueAttribute.cs" />
     <Compile Include="Entities\KeyA.cs" />
     <Compile Include="Entities\KeyB.cs" />
