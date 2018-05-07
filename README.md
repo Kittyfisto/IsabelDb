@@ -60,7 +60,7 @@ IsabelDb offers several collections which behave similar to their .NET counterpa
 A collection which stores a list of values: Values can be added to the collection and streamed back by iterating over GetAll(). Removing individiual values is not possible (use Dictionary if that's necessary).
 
 ```csharp
-var items = database.GetDictionary<object>("Items");
+var items = database.GetBag<object>("Items");
 items.PutMany(new[]{1, 42, "Hello", "World!");
 Console.WriteLine(string.Join(", ", items.GetAll()); //< Prints '1, 42, Hello, World!'
 ```
