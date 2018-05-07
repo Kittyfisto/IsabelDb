@@ -32,8 +32,6 @@ namespace IsabelDb.TypeModels
 			: this(TypeModel.Create(supportedTypes).TypeDescriptions)
 		{}
 
-		public IEnumerable<Type> RegisteredTypes => _namesByType.Keys;
-
 		public string GetName(Type type)
 		{
 			_namesByType.TryGetValue(type, out var name);

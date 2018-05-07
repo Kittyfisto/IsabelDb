@@ -27,12 +27,12 @@ namespace IsabelDb.Test.TypeModels
 		[Description("Verifies that if we create a type model for an unserializable type, then an exception is thrown and the database is NOT modified")]
 		public void TestRegisterUnsupportedSetup()
 		{
-			TypeModel.Read(_connection, new TypeResolver(new Type[0])).Should().BeEmpty();
+			TypeModel.Read(_connection, new TypeResolver(new Type[0])).Types.Should().BeEmpty();
 
 			new Action(() => ProtobufTypeModel.Create(_connection, new[] { typeof(Thread) }))
 				.Should().Throw<ArgumentException>("because the Thread type simply cannot be serialized");
 
-			TypeModel.Read(_connection, new TypeResolver(new Type[0])).Should().BeEmpty();
+			TypeModel.Read(_connection, new TypeResolver(new Type[0])).Types.Should().BeEmpty();
 		}
 
 		[Test]

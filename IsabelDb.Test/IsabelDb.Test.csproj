@@ -94,6 +94,7 @@
     <Compile Include="Entities\HasNonStandardCtor.cs" />
     <Compile Include="Entities\IntArray.cs" />
     <Compile Include="Entities\IntList.cs" />
+    <Compile Include="Entities\V2\ISerializableType2.cs" />
     <Compile Include="Entities\Menu.cs" />
     <Compile Include="Entities\NullableDouble.cs" />
     <Compile Include="Entities\NullableFloat.cs" />
@@ -113,12 +114,13 @@
     <Compile Include="Entities\V2\Motherboard.cs" />
     <Compile Include="Entities\V2\Thing.cs" />
     <Compile Include="Entities\V2\Plane.cs" />
+    <Compile Include="Entities\V2\TooManyInterfaces.cs" />
     <Compile Include="Entities\V3\Cpu.cs" />
     <Compile Include="Entities\V3\CpuModel.cs" />
     <Compile Include="ExplicitNameAndNamespace.cs" />
     <Compile Include="ExplicitNameNoNamespace.cs" />
     <Compile Include="ExplicitNamespaceNoName.cs" />
-    <Compile Include="Entities\ICustomKey.cs" />
+    <Compile Include="Entities\IPolymorphicCustomKey.cs" />
     <Compile Include="IsabelDbFileTests.cs" />
     <Compile Include="IsabelDbTest.cs" />
     <Compile Include="IssueAttribute.cs" />
@@ -144,7 +146,7 @@
     <Compile Include="Serializers\SerializerTest.cs" />
     <Compile Include="TypeModels\ProtobufTypeModelTest.cs" />
     <Compile Include="TypeModels\TypeModelTest.cs" />
-    <Compile Include="TypeResolverTest.cs" />
+    <Compile Include="TypeModels\TypeResolverTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

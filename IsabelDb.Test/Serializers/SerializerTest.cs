@@ -14,13 +14,21 @@ namespace IsabelDb.Test.Serializers
 		public static IEnumerable<string> StringValues => new[] {null, string.Empty, "Hello", "World"};
 		public static IEnumerable<byte> ByteValues => new byte[] {byte.MinValue, 128, byte.MaxValue};
 		public static IEnumerable<int> IntValues => new[] {int.MinValue, -1, 0, 1, int.MaxValue};
-		public static IEnumerable<byte[]> ByteArrayValues => new[] {null, new byte[]{0}, ByteValues.ToArray()};
-		public static IEnumerable<int[]> IntArrayValues => new[] {null, new[]{0}, IntValues.ToArray()};
-		public static IEnumerable<short?> NullableShortValues => new short?[] {short.MinValue, -1, 0, 1, short.MaxValue, null};
+		public static IEnumerable<byte[]> ByteArrayValues => new[] {null, new byte[] {0}, ByteValues.ToArray()};
+		public static IEnumerable<int[]> IntArrayValues => new[] {null, new[] {0}, IntValues.ToArray()};
+
+		public static IEnumerable<short?> NullableShortValues =>
+			new short?[] {short.MinValue, -1, 0, 1, short.MaxValue, null};
+
 		public static IEnumerable<int?> NullableIntValues => new int?[] {int.MinValue, -1, 0, 1, int.MaxValue, null};
 		public static IEnumerable<long?> NullableLongValues => new long?[] {long.MinValue, -1, 0, 1, long.MaxValue, null};
-		public static IEnumerable<float?> NullableFloatValues => new float?[]{float.MinValue, -1.4f, 0, (float)Math.E, (float)Math.PI, float.MaxValue, null};
-		public static IEnumerable<double?> NullableDoubleValues => new double?[]{double.MinValue, -1.4, 0, Math.E, Math.PI, double.MaxValue, null};
+
+		public static IEnumerable<float?> NullableFloatValues => new float?[]
+			{float.MinValue, -1.4f, 0, (float) Math.E, (float) Math.PI, float.MaxValue, null};
+
+		public static IEnumerable<double?> NullableDoubleValues => new double?[]
+			{double.MinValue, -1.4, 0, Math.E, Math.PI, double.MaxValue, null};
+
 		public static IEnumerable<double> DoubleValues => new[] {double.MinValue, -1.4, 0, Math.E, Math.PI, double.MaxValue};
 
 		[Test]
@@ -109,7 +117,8 @@ namespace IsabelDb.Test.Serializers
 		}
 
 		[Test]
-		public void TestRoundtripNullableShort([ValueSource(nameof(NullableShortValues))] short? value)
+		public void TestRoundtripNullableShort([ValueSource(nameof(NullableShortValues))]
+		                                       short? value)
 		{
 			var obj = new NullableShort
 			{
@@ -121,7 +130,8 @@ namespace IsabelDb.Test.Serializers
 		}
 
 		[Test]
-		public void TestRoundtripNullableInt([ValueSource(nameof(NullableIntValues))] int? value)
+		public void TestRoundtripNullableInt([ValueSource(nameof(NullableIntValues))]
+		                                     int? value)
 		{
 			var obj = new NullableInt
 			{
@@ -133,7 +143,8 @@ namespace IsabelDb.Test.Serializers
 		}
 
 		[Test]
-		public void TestRoundtripNullableLong([ValueSource(nameof(NullableLongValues))] long? value)
+		public void TestRoundtripNullableLong([ValueSource(nameof(NullableLongValues))]
+		                                      long? value)
 		{
 			var obj = new NullableLong
 			{
@@ -145,7 +156,8 @@ namespace IsabelDb.Test.Serializers
 		}
 
 		[Test]
-		public void TestRoundtripNullableFloat([ValueSource(nameof(NullableFloatValues))] float? value)
+		public void TestRoundtripNullableFloat([ValueSource(nameof(NullableFloatValues))]
+		                                       float? value)
 		{
 			var obj = new NullableFloat
 			{
@@ -157,7 +169,8 @@ namespace IsabelDb.Test.Serializers
 		}
 
 		[Test]
-		public void TestRoundtripNullableDouble([ValueSource(nameof(NullableDoubleValues))] double? value)
+		public void TestRoundtripNullableDouble([ValueSource(nameof(NullableDoubleValues))]
+		                                        double? value)
 		{
 			var obj = new NullableDouble
 			{
@@ -173,12 +186,12 @@ namespace IsabelDb.Test.Serializers
 			var serializer = CreateSerializerFor<T>();
 			var serializedValue = serializer.Serialize(value);
 			var actualValue = serializer.Deserialize((byte[]) serializedValue);
-			return (T)actualValue;
+			return (T) actualValue;
 		}
 
 		private static GenericSerializer<T> CreateSerializerFor<T>()
 		{
-			var typeModel = TypeModel.Create(new []{typeof(T)});
+			var typeModel = TypeModel.Create(new[] {typeof(T)});
 			var protoBufTypeModel = ProtobufTypeModel.Compile(typeModel);
 			var serializer = new Serializer(new CompiledTypeModel(protoBufTypeModel, typeModel));
 			return new GenericSerializer<T>(serializer);

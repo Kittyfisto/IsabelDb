@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
@@ -22,7 +21,6 @@ namespace IsabelDb.TypeModels
 	///     This model contains enough information to build a <see cref="ProtoBuf.Meta.TypeModel" />.
 	/// </remarks>
 	internal sealed class TypeModel
-		: IEnumerable<Type>
 	{
 		private const string TypeTableName = "isabel_types";
 		private const string FieldTableName = "isabel_fields";
@@ -69,16 +67,6 @@ namespace IsabelDb.TypeModels
 
 		public TypeDescription this[Type key] => _typeDescriptions[key];
 
-		public IEnumerator<Type> GetEnumerator()
-		{
-			return _typesToId.Keys.GetEnumerator();
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return GetEnumerator();
-		}
-
 		[Pure]
 		public bool IsTypeRegistered(Type type)
 		{
@@ -88,19 +76,21 @@ namespace IsabelDb.TypeModels
 		[Pure]
 		public string GetTypeName(Type type)
 		{
-			return _typeDescriptions[type].FullTypeName;
+			if (!_typeDescriptions.TryGetValue(type, out var typeDescription))
+				throw new ArgumentException(string.Format("The type '{0}' has not been registered with this type model!", type));
+			return typeDescription.FullTypeName;
 		}
 
 		[Pure]
 		public int GetTypeId(Type type)
 		{
 			if (!_typesToId.TryGetValue(type, out var typeId))
-				throw new ArgumentException(string.Format("The type '{0}' has not been registered!", type));
+				throw new ArgumentException(string.Format("The type '{0}' has not been registered with this type model!", type));
 			return typeId;
 		}
-		
+
 		[Pure]
-		public Type GetType(int typeId)
+		public Type TryGetType(int typeId)
 		{
 			if (!_idToTypes.TryGetValue(typeId, out var type))
 				return null;
@@ -113,11 +103,11 @@ namespace IsabelDb.TypeModels
 		{
 			return _typeDescriptions[type];
 		}
-		
+
 		[Pure]
-		public TypeDescription GetTypeDescription(int typeId)
+		public TypeDescription TryGetTypeDescription(int typeId)
 		{
-			var type = GetType(typeId);
+			var type = TryGetType(typeId);
 			if (type == null)
 				return null;
 
@@ -163,10 +153,10 @@ namespace IsabelDb.TypeModels
 						var memberId = reader.GetInt32(2);
 						var fieldTypeId = reader.GetInt32(3);
 
-						var declaringType = model.GetTypeDescription(declaringTypeId);
+						var declaringType = model.TryGetTypeDescription(declaringTypeId);
 						if (declaringType != null)
 						{
-							var fieldType = model.GetTypeDescription(fieldTypeId);
+							var fieldType = model.TryGetTypeDescription(fieldTypeId);
 							var memberInfo = FieldDescription.TryGetMemberInfo(declaringType.Type, fieldName);
 							if (memberInfo != null)
 							{
@@ -183,7 +173,7 @@ namespace IsabelDb.TypeModels
 			return model;
 		}
 
-		public TypeDescription AddType(Type type)
+		public TypeDescription Add(Type type)
 		{
 			if (!_typeDescriptions.TryGetValue(type, out var typeDescription))
 			{
@@ -195,14 +185,14 @@ namespace IsabelDb.TypeModels
 
 				if (type.IsArray && type.GetArrayRank() == 1)
 				{
-					AddType(type.GetElementType());
+					Add(type.GetElementType());
 				}
 
 				if (type.IsGenericType)
 				{
 					foreach (var argument in type.GenericTypeArguments)
 					{
-						AddType(argument);
+						Add(argument);
 					}
 				}
 
@@ -217,17 +207,12 @@ namespace IsabelDb.TypeModels
 			return typeDescription;
 		}
 
-		public void Add(List<Type> allTypes)
-		{
-			foreach (var type in allTypes) AddType(type);
-		}
-
 		public static TypeModel Create(IEnumerable<Type> supportedTypes)
 		{
 			var model = new TypeModel();
 			foreach (var type in supportedTypes)
 			{
-				model.AddType(type);
+				model.Add(type);
 			}
 			return model;
 		}
@@ -354,8 +339,8 @@ namespace IsabelDb.TypeModels
 				var type = typeResolver.Resolve(typeName);
 				if (type != null)
 				{
-					var baseType = baseId != null ? GetType(baseId.Value) : null;
-					AddType(typeName, type, typeId, baseType, fields: null);
+					var baseType = baseId != null ? TryGetType(baseId.Value) : null;
+					Add(typeName, type, typeId, baseType, fields: null);
 				}
 				else
 				{
@@ -401,7 +386,7 @@ namespace IsabelDb.TypeModels
 			var members = new List<FieldDescription>(fields.Count + properties.Count);
 			foreach (var field in fields)
 			{
-				var typeDescription = AddType(field.FieldType);
+				var typeDescription = Add(field.FieldType);
 				var id = GetNextId();
 				var description = FieldDescription.Create(field, typeDescription, id);
 				members.Add(description);
@@ -409,7 +394,7 @@ namespace IsabelDb.TypeModels
 
 			foreach (var property in properties)
 			{
-				var typeDescription = AddType(property.PropertyType);
+				var typeDescription = Add(property.PropertyType);
 				var id = GetNextId();
 				var description = FieldDescription.Create(property, typeDescription, id);
 				members.Add(description);
@@ -418,7 +403,7 @@ namespace IsabelDb.TypeModels
 			return members;
 		}
 
-		private void AddType(string typename,
+		private void Add(string typename,
 		                     Type type,
 		                     int typeId,
 		                     Type baseType,
@@ -455,7 +440,7 @@ namespace IsabelDb.TypeModels
 				return null;
 
 			if (IsSerializableInterface(type))
-				return AddType(typeof(object));
+				return Add(typeof(object));
 
 			var baseType = type.BaseType;
 			if (baseType == null)
@@ -465,21 +450,26 @@ namespace IsabelDb.TypeModels
 			var allInterfaces = type.GetInterfaces();
 			var baseTypeInterfaces = baseType.GetInterfaces();
 			var interfaces = allInterfaces.Except(baseTypeInterfaces).ToList();
-			var serializable = FindSerializableInterface(interfaces);
+			var serializable = FindSerializableInterface(type, interfaces);
 			if (serializable != null)
-				return AddType(serializable);
+				return Add(serializable);
 
-			return AddType(baseType);
+			return Add(baseType);
 		}
 
-		private static Type FindSerializableInterface(List<Type> interfaces)
+		private static Type FindSerializableInterface(Type type, List<Type> interfaces)
 		{
 			var serializable = interfaces.Where(IsSerializableInterface).ToList();
 			if (serializable.Count == 0)
 				return null;
 
 			if (serializable.Count > 1)
-				throw new NotImplementedException();
+			{
+				var interfaceNames = string.Join(", ", interfaces.Select(x => x.FullName));
+				throw new ArgumentException(string.Format("The type '{0}' implements too many interfaces with the [SerializableContract] attribute! It should implement no more than 1 but actually implements: {1}",
+				                                          type.FullName,
+				                                          interfaceNames));
+			}
 
 			return serializable[index: 0];
 		}

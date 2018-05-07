@@ -23,7 +23,7 @@ namespace IsabelDb.TypeModels
 
 		public Type GetType(int typeId)
 		{
-			return _typeModel.GetType(typeId);
+			return _typeModel.TryGetType(typeId);
 		}
 
 		public bool IsRegistered(Type type)

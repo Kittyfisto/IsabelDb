@@ -43,7 +43,7 @@ namespace IsabelDb.TypeModels
 		/// <returns></returns>
 		public ProtoBuf.Meta.TypeModel Compile()
 		{
-			foreach(var type in _typeModel)
+			foreach(var type in _typeModel.Types)
 			{
 				var typeDescription = _typeModel.GetTypeDescription(type);
 				Add(typeDescription);
@@ -111,7 +111,9 @@ namespace IsabelDb.TypeModels
 
 			typeModel.ThrowOnBreakingChanges(currentTypeModel);
 
-			typeModel.Add(allTypes);
+			foreach (var type in allTypes)
+				typeModel.Add(type);
+
 			// If we reach this point, then both type models are compatible to each other
 			// and we can create a serializer for it!
 			var serializer = Compile(typeModel);

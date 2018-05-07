@@ -3,7 +3,7 @@ using IsabelDb.Test.Entities;
 using IsabelDb.TypeModels;
 using NUnit.Framework;
 
-namespace IsabelDb.Test
+namespace IsabelDb.Test.TypeModels
 {
 	[TestFixture]
 	public sealed class TypeResolverTest
@@ -13,7 +13,10 @@ namespace IsabelDb.Test
 		{
 			var resolver = new TypeResolver(new []{typeof(KeyA), typeof(IPolymorphicCustomKey)});
 			resolver.IsRegistered(typeof(KeyA)).Should().BeTrue();
+			resolver.Resolve("IsabelDb.Test.Entities.KeyA").Should().Be<KeyA>();
+
 			resolver.IsRegistered(typeof(IPolymorphicCustomKey)).Should().BeTrue();
+			resolver.Resolve("IsabelDb.Test.Entities.IPolymorphicCustomKey").Should().Be<IPolymorphicCustomKey>();
 		}
 
 		[Test]
@@ -22,6 +25,8 @@ namespace IsabelDb.Test
 			var resolver = new TypeResolver(new []{typeof(ExplicitNamespaceNoName)});
 			resolver.GetName(typeof(ExplicitNamespaceNoName))
 				.Should().Be("Blur.ExplicitNamespaceNoName");
+			resolver.Resolve("Blur.ExplicitNamespaceNoName")
+			        .Should().Be<ExplicitNamespaceNoName>();
 		}
 
 		[Test]
@@ -30,6 +35,8 @@ namespace IsabelDb.Test
 			var resolver = new TypeResolver(new []{typeof(ExplicitNameNoNamespace)});
 			resolver.GetName(typeof(ExplicitNameNoNamespace))
 				.Should().Be("IsabelDb.Test.Song2");
+			resolver.Resolve("IsabelDb.Test.Song2")
+			        .Should().Be<ExplicitNameNoNamespace>();
 		}
 
 		[Test]
@@ -38,6 +45,8 @@ namespace IsabelDb.Test
 			var resolver = new TypeResolver(new []{typeof(DataContractNoNameNoNamespace)});
 			resolver.GetName(typeof(DataContractNoNameNoNamespace))
 				.Should().Be(typeof(DataContractNoNameNoNamespace).FullName);
+			resolver.Resolve(typeof(DataContractNoNameNoNamespace).FullName)
+			        .Should().Be<DataContractNoNameNoNamespace>();
 		}
 
 		[Test]
@@ -46,6 +55,7 @@ namespace IsabelDb.Test
 			var resolver = new TypeResolver(new []{typeof(ExplicitNameAndNamespace)});
 			resolver.GetName(typeof(ExplicitNameAndNamespace))
 				.Should().Be("my app.FooName");
+			resolver.Resolve("my app.FooName").Should().Be<ExplicitNameAndNamespace>();
 		}
 	}
 }

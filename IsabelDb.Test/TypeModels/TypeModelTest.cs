@@ -6,7 +6,8 @@ using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Linq;
 using IsabelDb.Test.Entities;
-using IsabelDb.Test.Entities.V1;
+using IsabelDb.Test.Entities.V2;
+using Cpu = IsabelDb.Test.Entities.V1.Cpu;
 
 namespace IsabelDb.Test.TypeModels
 {
@@ -51,7 +52,19 @@ namespace IsabelDb.Test.TypeModels
 
 		private static TypeModel Roundtrip(TypeModel model)
 		{
-			return Roundtrip(model, model);
+			return Roundtrip(model, model.Types);
+		}
+
+		[Test]
+		public void TestCreateTable()
+		{
+			using (var connection = new SQLiteConnection("Data Source=:memory:"))
+			{
+				connection.Open();
+				TypeModel.DoesTableExist(connection).Should().BeFalse();
+				TypeModel.CreateTable(connection);
+				TypeModel.DoesTableExist(connection).Should().BeTrue();
+			}
 		}
 
 		[Test]
@@ -92,7 +105,7 @@ namespace IsabelDb.Test.TypeModels
 		public void TestRoundtripEmpty()
 		{
 			var model = Roundtrip(TypeModel.Create(new Type[0]));
-			model.Should().BeEmpty();
+			model.Types.Should().BeEmpty();
 		}
 
 		[Test]
@@ -121,7 +134,7 @@ namespace IsabelDb.Test.TypeModels
 
 			const string reason2 = "because the deserialized type model should still be able to resolve types by their name / id";
 			actualModel.GetTypeName(type).Should().Be(description.FullTypeName, reason2);
-			actualModel.GetType(description.TypeId).Should().Be(type, reason2);
+			actualModel.TryGetType(description.TypeId).Should().Be(type, reason2);
 			actualModel.GetTypeId(type).Should().Be(description.TypeId, reason2);
 		}
 
@@ -145,7 +158,7 @@ namespace IsabelDb.Test.TypeModels
 			var model = Roundtrip(TypeModel.Create(new[] { typeof(KeyA) }));
 			model.IsTypeRegistered(typeof(KeyA)).Should().BeTrue();
 
-			model.AddType(typeof(KeyB));
+			model.Add(typeof(KeyB));
 			model.IsTypeRegistered(typeof(KeyB)).Should().BeTrue();
 			model.GetTypeId(typeof(KeyB)).Should().BeGreaterThan(0);
 			model.GetTypeId(typeof(KeyB)).Should().NotBe(model.GetTypeId(typeof(KeyA)));
@@ -168,7 +181,7 @@ namespace IsabelDb.Test.TypeModels
 			model.GetTypeName(typeof(object)).Should().Be("System.Object");
 			model.GetTypeDescription(typeof(object)).Type.Should().Be<object>();
 			model.GetTypeDescription(typeof(object)).TypeId.Should().Be(model.GetTypeId(typeof(object)));
-			model.GetType(model.GetTypeId(typeof(object))).Should().Be<object>();
+			model.TryGetType(model.GetTypeId(typeof(object))).Should().Be<object>();
 
 			var description = model.GetTypeDescription(typeof(object));
 			description.Fields.Should().BeEmpty();
@@ -275,8 +288,51 @@ namespace IsabelDb.Test.TypeModels
 		public void TestCreateEmpty()
 		{
 			var model = TypeModel.Create(new Type[0]);
-			model.Should().BeEmpty();
+			model.Types.Should().BeEmpty();
 			model.IsTypeRegistered(typeof(IPolymorphicCustomKey)).Should().BeFalse();
+		}
+
+		[Test]
+		public void TestGetUnregisteredTypeId()
+		{
+			var model = TypeModel.Create(new Type[0]);
+			new Action(() => model.GetTypeId(typeof(int)))
+				.Should().Throw<ArgumentException>()
+				.WithMessage("The type 'System.Int32' has not been registered with this type model!");
+		}
+
+		[Test]
+		public void TestGetUnregisteredTypeName()
+		{
+			var model = TypeModel.Create(new Type[0]);
+			new Action(() => model.GetTypeName(typeof(int)))
+				.Should().Throw<ArgumentException>()
+				.WithMessage("The type 'System.Int32' has not been registered with this type model!");
+		}
+
+		[Test]
+		public void TestSerializableContract()
+		{
+			var model = TypeModel.Create(new[] {typeof(ISerializableType2)});
+			var description = model.GetTypeDescription(typeof(ISerializableType2));
+			description.Namespace.Should().Be("IsabelDb.Entities");
+			description.Name.Should().Be("ISerializableType");
+			description.FullTypeName.Should().Be("IsabelDb.Entities.ISerializableType");
+		}
+
+		[Test]
+		public void TestRegisterTypeWithTooManyInterfaces()
+		{
+			new Action(() => TypeModel.Create(new[] {typeof(TooManyInterfaces)}))
+				.Should().Throw<ArgumentException>()
+				.WithMessage("The type 'IsabelDb.Test.Entities.V2.TooManyInterfaces' implements too many interfaces with the [SerializableContract] attribute! It should implement no more than 1 but actually implements: IsabelDb.Test.Entities.V2.ISerializableType2, IsabelDb.Test.Entities.IPolymorphicCustomKey");
+		}
+
+		[Test]
+		public void TestGetUnreigsteredTypeId()
+		{
+			var model = TypeModel.Create(new Type[0]);
+			model.TryGetType(42).Should().BeNull();
 		}
 	}
 }
