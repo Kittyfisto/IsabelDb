@@ -128,6 +128,8 @@ Forward compatibility in this context refers to the ability to:
 - Read data from a database which was written with a future version
 - Modify data in a database which was written with a future version
 
+Reading data from future versions is no problem (as unknown properties will simply be ignored). If you read an object from a database which has a field 'Foo' in a later version (but not in the version which read the object) and then store this object in the database again, then it's value of 'Foo' will be lost. You can prevent this by inheriting from Extensible, [see Marc Gravell's answer here](https://stackoverflow.com/questions/21331731/protobuf-net-keeping-future-fields).
+
 ## Breaking changes to serializable types
 
 IsabelDb tolerates same changes to the type model, but several changes are considered breaking changes. The following document provides you with a detailed overview of which changes are allowed and which are breaking: [Serialization](Serialization.MD).
