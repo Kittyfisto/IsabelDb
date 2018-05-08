@@ -24,8 +24,7 @@ using (var database = IsabelDb.Database.OpenOrCreate("some file path.isdb", new[
     var cache = database.GetDictionary<int, Document>("Cache");
     cache.Put(42, new Document{Name = "Foo.txt", Content = "..." });
     ....
-    var document = cache.Get(42);
-    if (document != null)
+    if (cache.TryGet(42, out var document))
     {
         Console.WriteLine(document.Content);
     }

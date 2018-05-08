@@ -47,8 +47,8 @@ namespace IsabelDb.Test
 			{
 				db.GetDictionary<string, object>("a").Put("Meaning", value: 42);
 
-				db.GetDictionary<string, object>("A").Get("Meaning").Should().Be(expected: 9001);
-				db.GetDictionary<string, object>("a").Get("Meaning").Should().Be(expected: 42);
+				db.GetDictionary<string, object>("A").Get("Meaning").Should().Be(9001);
+				db.GetDictionary<string, object>("a").Get("Meaning").Should().Be(42);
 			}
 		}
 
@@ -81,15 +81,15 @@ namespace IsabelDb.Test
 			{
 				var charts = db.GetDictionary<string, object>("Charts");
 				charts.Put("Bar", value: 2);
-				charts.Get("Bar").Should().Be(expected: 2);
+				charts.Get("Bar").Should().Be(2);
 				charts.Put("Bar", value: 2.2);
-				charts.Get("Bar").Should().Be(expected: 2.2);
+				charts.Get("Bar").Should().Be(2.2);
 			}
 
 			using (var db = Database.OpenOrCreate(_databaseName, NoCustomTypes))
 			{
 				var charts = db.GetDictionary<string, object>("Charts");
-				charts.Get("Bar").Should().Be(expected: 2.2);
+				charts.Get("Bar").Should().Be(2.2);
 			}
 		}
 
@@ -115,7 +115,7 @@ namespace IsabelDb.Test
 			using (var db = Database.Open(_databaseName, new[] {typeof(Person), typeof(Address)}))
 			{
 				var persons = db.GetDictionary<string, object>("SomeTable").GetMany("foo", "bar");
-				persons.Should().HaveCount(expected: 2);
+				persons.Should().HaveCount(2);
 				var person = persons.ElementAt(index: 0);
 				person.Key.Should().Be("foo");
 				person.Value.Should().Be(strelok);
@@ -175,15 +175,15 @@ namespace IsabelDb.Test
 			{
 				var charts = db.GetDictionary<string, object>("Charts");
 				charts.Put("Pie", value: 1.5);
-				charts.Get("Pie").Should().Be(expected: 1.5);
+				charts.Get("Pie").Should().Be(1.5);
 				charts.Remove("Pie");
-				charts.Get("Pie").Should().BeNull();
+				charts.TryGet("Pie", out var unused).Should().BeFalse();
 			}
 
 			using (var db = Database.OpenOrCreate(_databaseName, NoCustomTypes))
 			{
 				var charts = db.GetDictionary<string, object>("Charts");
-				charts.Get("Pie").Should().BeNull();
+				charts.TryGet("Pie", out var unused).Should().BeFalse();
 			}
 		}
 
@@ -286,7 +286,7 @@ namespace IsabelDb.Test
 			using (var db = Database.Open(_databaseName, new[] {typeof(CustomKey)}))
 			{
 				var dictionary = db.GetDictionary<int, CustomKey>("MoreKeys");
-				dictionary.GetAll().Count().Should().Be(expected: 2);
+				dictionary.GetAll().Count().Should().Be(2);
 			}
 
 			using (var db = Database.Open(_databaseName, NoCustomTypes))
@@ -314,17 +314,17 @@ namespace IsabelDb.Test
 			{
 				var values = db.GetDictionary<int, object>("Foo");
 				var allValues = values.GetAll();
-				allValues.Count().Should().Be(expected: 3, because: "because we're still able to resolve all types");
+				allValues.Count().Should().Be(3, because: "because we're still able to resolve all types");
 			}
 
 			using (var db = Database.Open(_databaseName, NoCustomTypes))
 			{
 				var values = db.GetDictionary<int, object>("Foo");
 				var allValues = values.GetAll();
-				allValues.Count().Should().Be(expected: 2, because: "because we're no longer able to resolve CustomKey");
-				allValues.ElementAt(index: 0).Key.Should().Be(expected: 0);
-				allValues.ElementAt(index: 0).Value.Should().Be(expected: 42);
-				allValues.ElementAt(index: 1).Key.Should().Be(expected: 2);
+				allValues.Count().Should().Be(2, because: "because we're no longer able to resolve CustomKey");
+				allValues.ElementAt(index: 0).Key.Should().Be(0);
+				allValues.ElementAt(index: 0).Value.Should().Be(42);
+				allValues.ElementAt(index: 1).Key.Should().Be(2);
 				allValues.ElementAt(index: 1).Value.Should().Be("Hello, World!");
 			}
 		}

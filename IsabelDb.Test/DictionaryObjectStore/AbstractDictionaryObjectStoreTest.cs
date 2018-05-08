@@ -33,7 +33,7 @@ namespace IsabelDb.Test.DictionaryObjectStore
 				values.Put(DifferentKey, "World");
 
 				var allValues = values.GetAll();
-				allValues.Should().HaveCount(expected: 2);
+				allValues.Should().HaveCount(2);
 				allValues.ElementAt(index: 0).Key.Should().Be(SomeKey);
 				allValues.ElementAt(index: 0).Value.Should().Be("Hello");
 				allValues.ElementAt(index: 1).Key.Should().Be(DifferentKey);
@@ -47,7 +47,7 @@ namespace IsabelDb.Test.DictionaryObjectStore
 			using (var db = Database.CreateInMemory(CustomTypes))
 			{
 				var values = db.GetDictionary<TKey, object>("Values");
-				values.Get(SomeKey).Should().BeNull();
+				values.TryGet(SomeKey, out var unused).Should().BeFalse();
 			}
 		}
 
@@ -58,10 +58,14 @@ namespace IsabelDb.Test.DictionaryObjectStore
 			{
 				var values = db.GetDictionary<TKey, object>("Values");
 				values.Put(SomeKey, value: 42);
-				values.Get(SomeKey).Should().Be(expected: 42);
+				values.Get(SomeKey).Should().Be(42);
+				values.TryGet(SomeKey, out var value).Should().BeTrue();
+				value.Should().Be(42);
 
 				values.Put(SomeKey, value: 9001);
-				values.Get(SomeKey).Should().Be(expected: 9001);
+				values.Get(SomeKey).Should().Be(9001);
+				values.TryGet(SomeKey, out value).Should().BeTrue();
+				value.Should().Be(9001);
 			}
 		}
 
@@ -75,7 +79,8 @@ namespace IsabelDb.Test.DictionaryObjectStore
 				values.Get(SomeKey).Should().Be("A");
 
 				values.Put(SomeKey, value: null);
-				values.Get(SomeKey).Should().BeNull();
+				new Action(() => values.Get(SomeKey)).Should().Throw<KeyNotFoundException>();
+				values.TryGet(SomeKey, out var unused).Should().BeFalse();
 				values.GetAll().Should().BeEmpty();
 			}
 		}
@@ -97,6 +102,8 @@ namespace IsabelDb.Test.DictionaryObjectStore
 				foreach (var key in ManyKeys)
 				{
 					values.Get(key).Should().Be(i);
+					values.TryGet(key, out var value).Should().BeTrue();
+					value.Should().Be(i);
 					++i;
 				}
 
@@ -118,7 +125,8 @@ namespace IsabelDb.Test.DictionaryObjectStore
 				values.Get(SomeKey).Should().Be("A");
 
 				values.Remove(SomeKey);
-				values.Get(SomeKey).Should().BeNull();
+				new Action(() => values.Get(SomeKey)).Should().Throw<KeyNotFoundException>();
+				values.TryGet(SomeKey, out var unused).Should().BeFalse();
 				values.GetAll().Should().BeEmpty();
 			}
 		}
@@ -133,7 +141,11 @@ namespace IsabelDb.Test.DictionaryObjectStore
 				values.Put(DifferentKey, "World");
 
 				values.Get(SomeKey).Should().Be("Hello");
+				values.TryGet(SomeKey, out var value).Should().BeTrue();
+				value.Should().Be("Hello");
 				values.Get(DifferentKey).Should().Be("World");
+				values.TryGet(DifferentKey, out value).Should().BeTrue();
+				value.Should().Be("World");
 			}
 		}
 	}

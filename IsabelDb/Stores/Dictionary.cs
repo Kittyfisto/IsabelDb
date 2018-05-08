@@ -9,8 +9,7 @@ namespace IsabelDb.Stores
 {
 	internal sealed class Dictionary<TKey, TValue>
 		: IDictionary<TKey, TValue>
-			, IInternalCollection
-
+		, IInternalCollection
 	{
 		private readonly SQLiteConnection _connection;
 
@@ -85,6 +84,14 @@ namespace IsabelDb.Stores
 
 		public TValue Get(TKey key)
 		{
+			if (!TryGet(key, out var value))
+				throw new KeyNotFoundException();
+
+			return value;
+		}
+
+		public bool TryGet(TKey key, out TValue value)
+		{
 			using (var command = CreateCommand(_getQuery))
 			{
 				command.Parameters.AddWithValue("@key", _keySerializer.Serialize(key));
@@ -92,10 +99,13 @@ namespace IsabelDb.Stores
 				using (var reader = command.ExecuteReader())
 				{
 					if (!reader.Read())
-						return default(TValue);
+					{
+						value = default(TValue);
+						return false;
+					}
 
-					_valueSerializer.TryDeserialize(reader, valueOrdinal: 1, value: out var value);
-					return value;
+					_valueSerializer.TryDeserialize(reader, valueOrdinal: 1, value: out value);
+					return true;
 				}
 			}
 		}

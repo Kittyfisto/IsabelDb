@@ -20,17 +20,27 @@ namespace IsabelDb
 	///     - Your implementations of  <see cref="object.GetHashCode" /> / <see cref="object.Equals(object)" /> are irrelevant
 	///     to this database
 	///     - Two keys are equal if their serialized byte array are equal
-	///     - Once you've added a key of a particular type to the database, you may *never* modify the key type (i.e. adding new fields is a no go)
+	///     - Once you've added a key of a particular type to the database, you may *never* modify the key type (i.e. adding
+	///     new fields is a no go)
 	/// </remarks>
 	public interface IDictionary<TKey, TValue>
 		: ICollection
 	{
 		/// <summary>
+		///     Tries to retrieve the value with the given key.
+		///     Returns true if the value was retrieved, false otherwise.
+		/// </summary>
+		/// <param name="key"></param>
+		/// <param name="value"></param>
+		/// <returns></returns>
+		bool TryGet(TKey key, out TValue value);
+
+		/// <summary>
 		///     Retrieves the value with the given key.
-		///     Returns the default value for <typeparamref name="TValue" /> if the key isn't present.
 		/// </summary>
 		/// <param name="key"></param>
 		/// <returns></returns>
+		/// <exception cref="KeyNotFoundException"></exception>
 		TValue Get(TKey key);
 
 		/// <summary>

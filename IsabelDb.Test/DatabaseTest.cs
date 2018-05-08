@@ -20,7 +20,7 @@ namespace IsabelDb.Test
 			store.Put("bar", value2);
 
 			var persons = store.GetMany("foo", "bar");
-			persons.Should().HaveCount(expected: 2);
+			persons.Should().HaveCount(2);
 			var actualValue1 = persons.ElementAt(index: 0);
 			actualValue1.Key.Should().Be("foo");
 			actualValue1.Value.Should().Be(value1);
@@ -38,7 +38,7 @@ namespace IsabelDb.Test
 			store.Put("bar", value2);
 
 			var persons = store.GetMany("foo", "bar");
-			persons.Should().HaveCount(expected: 2);
+			persons.Should().HaveCount(2);
 			var actualValue1 = persons.ElementAt(index: 0);
 			actualValue1.Key.Should().Be("foo");
 			actualValue1.Value.Should().Be(value1);
@@ -55,9 +55,9 @@ namespace IsabelDb.Test
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
 				var people = db.GetDictionary<string, object>("People");
-				people.Count().Should().Be(expected: 0);
+				people.Count().Should().Be(0);
 				people.Clear();
-				people.Count().Should().Be(expected: 0);
+				people.Count().Should().Be(0);
 			}
 		}
 
@@ -146,6 +146,8 @@ namespace IsabelDb.Test
 			{
 				db.GetDictionary<string, object>("SomeTable").Put("foo", "bar");
 				db.GetDictionary<string, object>("SomeTable").Get("foo").Should().Be("bar");
+				db.GetDictionary<string, object>("SomeTable").TryGet("foo", out var value).Should().BeTrue();
+				value.Should().Be("bar");
 			}
 		}
 
@@ -162,8 +164,8 @@ namespace IsabelDb.Test
 				a.Put("1", value: 42);
 				b.Put("1", value: 50);
 
-				a.Get("1").Should().Be(expected: 42);
-				b.Get("1").Should().Be(expected: 50);
+				a.Get("1").Should().Be(42);
+				b.Get("1").Should().Be(50);
 			}
 		}
 
@@ -184,7 +186,7 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				db.GetDictionary<string, object>("SomeTable").Get("foo").Should().BeNull();
+				db.GetDictionary<string, object>("SomeTable").TryGet("foo", out var unused).Should().BeFalse();
 				db.GetDictionary<string, object>("SomeTable").GetMany("foo", "bar").Should().BeEmpty();
 			}
 		}
@@ -320,7 +322,7 @@ namespace IsabelDb.Test
 				store.Put("bar", value2);
 
 				var persons = store.GetMany("foo", "bar");
-				persons.Should().HaveCount(expected: 2);
+				persons.Should().HaveCount(2);
 				var actualValue1 = persons.ElementAt(index: 0);
 				actualValue1.Key.Should().Be("foo");
 				((byte[])actualValue1.Value).Should().Equal(value1);
@@ -344,7 +346,7 @@ namespace IsabelDb.Test
 				store.Put("bar", value2);
 
 				var persons = store.GetMany("foo", "bar");
-				persons.Should().HaveCount(expected: 2);
+				persons.Should().HaveCount(2);
 				var actualValue1 = persons.ElementAt(index: 0);
 				actualValue1.Key.Should().Be("foo");
 				actualValue1.Value.Should().Equal(value1);
@@ -404,7 +406,7 @@ namespace IsabelDb.Test
 				});
 
 
-				table.Count().Should().Be(expected: 2);
+				table.Count().Should().Be(2);
 				table.Get("bar").Should().Be(steven);
 				table.Get("foo").Should().Be(address);
 			}
@@ -460,10 +462,10 @@ namespace IsabelDb.Test
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
 				var store = db.GetDictionary<string, object>("SomeTable");
-				store.Get("42").Should().BeNull();
+				store.TryGet("42", out var unused).Should().BeFalse();
 
 				store.Put("42", value: null);
-				store.Get("42").Should().BeNull();
+				store.TryGet("42", out unused).Should().BeFalse();
 			}
 		}
 
@@ -484,10 +486,10 @@ namespace IsabelDb.Test
 			{
 				var store = db.GetDictionary<string, object>("SomeTable");
 				store.Put("foo", value: 42);
-				store.Get("foo").Should().Be(expected: 42);
+				store.Get("foo").Should().Be(42);
 
 				store.Put("foo", value: null);
-				store.Get("foo").Should().BeNull();
+				store.TryGet("foo", out var unused).Should().BeFalse();
 			}
 		}
 
@@ -502,8 +504,8 @@ namespace IsabelDb.Test
 				store.Put("b", value: 2);
 				store.Remove("a");
 
-				store.Get("a").Should().BeNull();
-				store.Get("b").Should().Be(expected: 2);
+				store.TryGet("a", out var unused).Should().BeFalse();
+				store.Get("b").Should().Be(2);
 			}
 		}
 
@@ -514,10 +516,10 @@ namespace IsabelDb.Test
 			{
 				var store = db.GetDictionary<string, object>("SomeTable");
 				store.Put("foo", value: 42);
-				store.Get("foo").Should().Be(expected: 42);
+				store.Get("foo").Should().Be(42);
 
 				store.Put("foo", value: 50);
-				store.Get("foo").Should().Be(expected: 50);
+				store.Get("foo").Should().Be(50);
 			}
 		}
 
