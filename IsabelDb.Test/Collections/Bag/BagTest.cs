@@ -1,24 +1,27 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
 
-namespace IsabelDb.Test.Bag
+namespace IsabelDb.Test.Collections.Bag
 {
 	[TestFixture]
-	public sealed class BagObjectStoreTest
+	public sealed class BagTest
+		: AbstractCollectionTest<IBag<string>>
 	{
-		private static IEnumerable<Type> NoCustomTypes => new Type[0];
-
-		[Test]
-		public void TestClearEmpty()
+		protected override IBag<string> GetCollection(Database db, string name)
 		{
-			using (var db = Database.CreateInMemory(NoCustomTypes))
-			{
-				var bag = db.GetBag<string>("foo");
-				new Action(() => bag.Clear()).Should().NotThrow();
-			}
+			return db.GetBag<string>(name);
+		}
+
+		protected override void Put(IBag<string> collection, string value)
+		{
+			collection.Put(value);
+		}
+
+		protected override void PutMany(IBag<string> collection, params string[] values)
+		{
+			collection.PutMany(values);
 		}
 
 		[Test]
@@ -32,7 +35,7 @@ namespace IsabelDb.Test.Bag
 
 				bag.Clear();
 				bag.Count().Should().Be(0);
-				bag.GetAll().Should().BeEmpty();
+				bag.GetAllValues().Should().BeEmpty();
 			}
 		}
 
@@ -47,7 +50,7 @@ namespace IsabelDb.Test.Bag
 
 				bag.Clear();
 				bag.Count().Should().Be(0);
-				bag.GetAll().Should().BeEmpty();
+				bag.GetAllValues().Should().BeEmpty();
 			}
 		}
 
@@ -61,7 +64,7 @@ namespace IsabelDb.Test.Bag
 				bag.Put(100);
 				bag.Put(42);
 
-				bag.GetAll().Should().BeEquivalentTo(42, 100, 42);
+				bag.GetAllValues().Should().BeEquivalentTo(42, 100, 42);
 			}
 		}
 
@@ -73,7 +76,7 @@ namespace IsabelDb.Test.Bag
 				var bag = db.GetBag<int>("foo");
 				bag.PutMany(1, 2, 3, 4);
 				bag.Count().Should().Be(4);
-				bag.GetAll().Should().BeEquivalentTo(1, 2, 3, 4);
+				bag.GetAllValues().Should().BeEquivalentTo(1, 2, 3, 4);
 			}
 		}
 	}

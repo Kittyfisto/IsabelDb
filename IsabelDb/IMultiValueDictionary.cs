@@ -6,7 +6,7 @@ namespace IsabelDb
 	///     A dictionary where multiple values are associated with the same key.
 	/// </summary>
 	public interface IMultiValueDictionary<TKey, TValue>
-		: ICollection
+		: ICollection<TValue>
 	{
 		/// <summary>
 		/// </summary>

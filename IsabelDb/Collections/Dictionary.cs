@@ -8,7 +8,8 @@ using IsabelDb.Serializers;
 namespace IsabelDb.Collections
 {
 	internal sealed class Dictionary<TKey, TValue>
-		: IDictionary<TKey, TValue>
+		: AbstractCollection<TValue>
+		, IDictionary<TKey, TValue>
 		, IInternalCollection
 	{
 		private readonly SQLiteConnection _connection;
@@ -28,6 +29,7 @@ namespace IsabelDb.Collections
 		                             string tableName,
 		                             ISQLiteSerializer<TKey> keySerializer,
 		                             ISQLiteSerializer<TValue> valueSerializer)
+			: base(connection, tableName, valueSerializer)
 		{
 			_connection = connection;
 			_tableName = tableName;
@@ -153,23 +155,6 @@ namespace IsabelDb.Collections
 					command.ExecuteNonQuery();
 					transaction.Commit();
 				}
-			}
-		}
-
-		public void Clear()
-		{
-			using (var command = CreateCommand(_deleteAllQuery))
-			{
-				command.ExecuteNonQuery();
-			}
-		}
-
-		public int Count()
-		{
-			using (var command = CreateCommand(_countQuery))
-			{
-				var count = Convert.ToInt32(command.ExecuteScalar());
-				return count;
 			}
 		}
 

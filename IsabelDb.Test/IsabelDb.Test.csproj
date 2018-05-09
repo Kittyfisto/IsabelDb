@@ -23,6 +23,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -31,6 +32,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Castle.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
@@ -85,6 +87,8 @@
   <ItemGroup>
     <Compile Include="Address.cs" />
     <Compile Include="AssemblySetup.cs" />
+    <Compile Include="Collections\AbstractCollectionTest.cs" />
+    <Compile Include="Collections\DictionaryObjectStore\DictionaryTest.cs" />
     <Compile Include="DataContractNoNameNoNamespace.cs" />
     <Compile Include="DefectAttribute.cs" />
     <Compile Include="CompatibilityTest.cs" />
@@ -123,28 +127,29 @@
     <Compile Include="Entities\IPolymorphicCustomKey.cs" />
     <Compile Include="DatabaseFileTests.cs" />
     <Compile Include="DatabaseTest.cs" />
-    <Compile Include="IntervalCollection\IntervalCollectionTest.cs" />
+    <Compile Include="Collections\IntervalCollection\IntervalCollectionTest.cs" />
     <Compile Include="IntervalTest.cs" />
     <Compile Include="IssueAttribute.cs" />
     <Compile Include="Entities\KeyA.cs" />
     <Compile Include="Entities\KeyB.cs" />
-    <Compile Include="DictionaryObjectStore\AbstractDictionaryObjectStoreTest.cs" />
+    <Compile Include="Collections\DictionaryObjectStore\AbstractDictionaryObjectStoreTest.cs" />
     <Compile Include="Entities\CustomKey.cs" />
-    <Compile Include="DictionaryObjectStore\CustomKeyTest.cs" />
-    <Compile Include="DictionaryObjectStore\Int16KeyTest.cs" />
-    <Compile Include="DictionaryObjectStore\Int32KeyTest.cs" />
-    <Compile Include="DictionaryObjectStore\Int64KeyTest.cs" />
-    <Compile Include="DictionaryObjectStore\IpAddressKeyTest.cs" />
-    <Compile Include="DictionaryObjectStore\PolymorphicKeyTest.cs" />
-    <Compile Include="DictionaryObjectStore\StringKeyTest.cs" />
-    <Compile Include="DictionaryObjectStore\UInt16KeyTest.cs" />
-    <Compile Include="DictionaryObjectStore\UInt32KeyTest.cs" />
-    <Compile Include="Bag\BagMessageTest.cs" />
-    <Compile Include="Bag\BagObjectStoreTest.cs" />
-    <Compile Include="MultiValueDictionaryStore\MultiValueDictionaryTest.cs" />
+    <Compile Include="Collections\DictionaryObjectStore\CustomKeyTest.cs" />
+    <Compile Include="Collections\DictionaryObjectStore\Int16KeyTest.cs" />
+    <Compile Include="Collections\DictionaryObjectStore\Int32KeyTest.cs" />
+    <Compile Include="Collections\DictionaryObjectStore\Int64KeyTest.cs" />
+    <Compile Include="Collections\DictionaryObjectStore\IpAddressKeyTest.cs" />
+    <Compile Include="Collections\DictionaryObjectStore\PolymorphicKeyTest.cs" />
+    <Compile Include="Collections\DictionaryObjectStore\StringKeyTest.cs" />
+    <Compile Include="Collections\DictionaryObjectStore\UInt16KeyTest.cs" />
+    <Compile Include="Collections\DictionaryObjectStore\UInt32KeyTest.cs" />
+    <Compile Include="Collections\Bag\BagMessageTest.cs" />
+    <Compile Include="Collections\Bag\BagTest.cs" />
+    <Compile Include="Collections\MultiValueDictionary\MultiValueDictionaryTest.cs" />
     <Compile Include="RequriedBehaviourAttribute.cs" />
     <Compile Include="Person.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Collections\OrderedCollection\OrderedCollectionTest.cs" />
     <Compile Include="Serializers\SerializerTest.cs" />
     <Compile Include="TypeModels\ProtobufTypeModelTest.cs" />
     <Compile Include="TypeModels\TypeModelTest.cs" />

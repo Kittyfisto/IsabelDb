@@ -4,7 +4,7 @@ using FluentAssertions;
 using IsabelDb.Test.Entities;
 using NUnit.Framework;
 
-namespace IsabelDb.Test.Bag
+namespace IsabelDb.Test.Collections.Bag
 {
 	[TestFixture]
 	public sealed class BagMessageTest
@@ -23,7 +23,7 @@ namespace IsabelDb.Test.Bag
 				new Action(() => bag.Put(message))
 					.Should().Throw<Exception>("because protobuf doesn't support native types to inherit from anything");
 				bag.Count().Should().Be(0);
-				bag.GetAll().Should().BeEmpty();
+				bag.GetAllValues().Should().BeEmpty();
 			}
 		}
 
@@ -41,7 +41,7 @@ namespace IsabelDb.Test.Bag
 				new Action(() => bag.Put(message))
 					.Should().Throw<Exception>("because protobuf doesn't support native types to inherit from anything");
 				bag.Count().Should().Be(0);
-				bag.GetAll().Should().BeEmpty();
+				bag.GetAllValues().Should().BeEmpty();
 			}
 		}
 
@@ -57,7 +57,7 @@ namespace IsabelDb.Test.Bag
 			{
 				var bag = db.GetBag<Message>("Messages");
 				bag.Put(message);
-				var actualValue = bag.GetAll().First();
+				var actualValue = bag.GetAllValues().First();
 				actualValue.Should().NotBeNull();
 				actualValue.Value.Should().BeOfType<CustomKey>();
 				actualValue.Value.Should().Be(message.Value);

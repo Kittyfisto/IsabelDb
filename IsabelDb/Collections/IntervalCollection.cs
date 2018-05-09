@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SQLite;
 using System.Text;
 using System.Threading;
@@ -8,7 +9,8 @@ using IsabelDb.Serializers;
 namespace IsabelDb.Collections
 {
 	internal sealed class IntervalCollection<T, TValue>
-		: IIntervalCollection<T, TValue>
+		: AbstractCollection<TValue>
+		, IIntervalCollection<T, TValue>
 		, IInternalCollection
 		where T : IComparable<T>
 	{
@@ -22,6 +24,7 @@ namespace IsabelDb.Collections
 		                          string tableName,
 		                          ISQLiteSerializer<T> keySerializer,
 		                          ISQLiteSerializer<TValue> valueSerializer)
+			: base(connection, tableName, valueSerializer)
 		{
 			_connection = connection;
 			_tableName = tableName;
@@ -36,24 +39,6 @@ namespace IsabelDb.Collections
 		#region Implementation of IInternalCollection
 
 		public Type ValueType => throw new NotImplementedException();
-
-		#endregion
-
-		#region Implementation of ICollection
-
-		public void Clear()
-		{
-			using (var command = _connection.CreateCommand())
-			{
-				command.CommandText = string.Format("DELETE FROM {0}", _tableName);
-				command.ExecuteNonQuery();
-			}
-		}
-
-		public int Count()
-		{
-			throw new NotImplementedException();
-		}
 
 		#endregion
 
@@ -73,6 +58,39 @@ namespace IsabelDb.Collections
 
 				command.ExecuteNonQuery();
 				return new ValueKey(id);
+			}
+		}
+
+		public IEnumerable<ValueKey> PutMany(IEnumerable<KeyValuePair<Interval<T>, TValue>> values)
+		{
+			using (var transaction = _connection.BeginTransaction())
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = string.Format("INSERT INTO {0} (id, minimum, maximum, value) VALUES (@id, @minimum, @maximum, @value)",
+				                                    _tableName);
+				var idParameter = command.Parameters.Add("@id", DbType.Int64);
+				var minimumParameter = command.Parameters.Add("@minimum", _keySerializer.DatabaseType);
+				var maximumParameter = command.Parameters.Add("@maximum", _keySerializer.DatabaseType);
+				var valueParameter = command.Parameters.Add("@value", _valueSerializer.DatabaseType);
+
+				var ret = new List<ValueKey>();
+				foreach (var pair in values)
+				{
+					var interval = pair.Key;
+					var value = pair.Value;
+
+					var id = Interlocked.Increment(ref _lastId);
+					idParameter.Value = id;
+					minimumParameter.Value = _keySerializer.Serialize(interval.Minimum);
+					maximumParameter.Value = _keySerializer.Serialize(interval.Maximum);
+					valueParameter.Value = _valueSerializer.Serialize(value);
+					command.ExecuteNonQuery();
+
+					ret.Add(new ValueKey(id));
+				}
+
+				transaction.Commit();
+				return ret;
 			}
 		}
 
@@ -134,25 +152,6 @@ namespace IsabelDb.Collections
 						{
 							var interval = Interval.Create(minimum, maximum);
 							yield return new KeyValuePair<Interval<T>, TValue>(interval, value);
-						}
-					}
-				}
-			}
-		}
-
-		public IEnumerable<TValue> GetAllValues()
-		{
-			using (var command = _connection.CreateCommand())
-			{
-				command.CommandText = string.Format("SELECT value FROM {0}", _tableName);
-
-				using (var reader = command.ExecuteReader())
-				{
-					while (reader.Read())
-					{
-						if (_valueSerializer.TryDeserialize(reader, 0, out var value))
-						{
-							yield return value;
 						}
 					}
 				}

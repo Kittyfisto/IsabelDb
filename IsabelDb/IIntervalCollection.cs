@@ -10,7 +10,7 @@ namespace IsabelDb
 	/// <typeparam name="T">The type of the interval (such as int, double, DateTime) to which values are mapped</typeparam>
 	/// <typeparam name="TValue"></typeparam>
 	public interface IIntervalCollection<T, TValue>
-		: ICollection
+		: ICollection<TValue>
 		where T : IComparable<T>
 	{
 		/// <summary>
@@ -20,6 +20,12 @@ namespace IsabelDb
 		/// <param name="value"></param>
 		/// <returns></returns>
 		ValueKey Put(Interval<T> interval, TValue value);
+
+		/// <summary>
+		///     Adds the given values to this collection.
+		/// </summary>
+		/// <param name="values"></param>
+		IEnumerable<ValueKey> PutMany(IEnumerable<KeyValuePair<Interval<T>, TValue>> values);
 
 		/// <summary>
 		///     Returns the list of values who's intervals intersect with the given key.
@@ -47,13 +53,6 @@ namespace IsabelDb
 		/// <returns></returns>
 		[Pure]
 		IEnumerable<KeyValuePair<Interval<T>, TValue>> GetAll();
-
-		/// <summary>
-		///     Returns the list of all values.
-		/// </summary>
-		/// <returns></returns>
-		[Pure]
-		IEnumerable<TValue> GetAllValues();
 
 		/// <summary>
 		///     Removes all values who's interval intersects with the given key.

@@ -8,7 +8,8 @@ using IsabelDb.Serializers;
 namespace IsabelDb.Collections
 {
 	internal sealed class MultiValueDictionary<TKey, TValue>
-		: IMultiValueDictionary<TKey, TValue>
+		: AbstractCollection<TValue>
+		, IMultiValueDictionary<TKey, TValue>
 		, IInternalCollection
 	{
 		private readonly SQLiteConnection _connection;
@@ -27,6 +28,7 @@ namespace IsabelDb.Collections
 		                            string tableName,
 		                            ISQLiteSerializer<TKey> keySerializer,
 		                            ISQLiteSerializer<TValue> valueSerializer)
+			: base(connection, tableName, valueSerializer)
 		{
 			_connection = connection;
 			_tableName = tableName;
@@ -52,28 +54,6 @@ namespace IsabelDb.Collections
 				}
 			}
 		}
-
-		#region Implementation of ICollection
-
-		public void Clear()
-		{
-			using (var command = _connection.CreateCommand())
-			{
-				command.CommandText = _clearQuery;
-				command.ExecuteNonQuery();
-			}
-		}
-
-		public int Count()
-		{
-			using (var command = _connection.CreateCommand())
-			{
-				command.CommandText = _countQuery;
-				return Convert.ToInt32(command.ExecuteScalar());
-			}
-		}
-
-		#endregion
 
 		#region Implementation of IMultiValueDictionary<TKey,TValue>
 

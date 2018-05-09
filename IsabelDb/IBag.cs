@@ -15,14 +15,8 @@ namespace IsabelDb
 	/// </remarks>
 	/// <typeparam name="T"></typeparam>
 	public interface IBag<T>
-		: ICollection
+		: ICollection<T>
 	{
-		/// <summary>
-		///     Retrieves all values from this bag.
-		/// </summary>
-		/// <returns></returns>
-		IEnumerable<T> GetAll();
-
 		/// <summary>
 		///     Adds a new value to this bag.
 		/// </summary>

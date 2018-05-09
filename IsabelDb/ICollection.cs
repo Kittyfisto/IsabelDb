@@ -1,5 +1,23 @@
-﻿namespace IsabelDb
+﻿using System.Collections.Generic;
+using System.Diagnostics.Contracts;
+
+namespace IsabelDb
 {
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <typeparam name="TValue"></typeparam>
+	public interface ICollection<out TValue>
+		: ICollection
+	{
+		/// <summary>
+		///     Returns the list of all values.
+		/// </summary>
+		/// <returns></returns>
+		[Pure]
+		IEnumerable<TValue> GetAllValues();
+	}
+
 	/// <summary>
 	/// </summary>
 	public interface ICollection
@@ -17,6 +35,6 @@
 		///     we have an inconsistency between Count() and GetAll().Count() when some
 		///     types fail to be resolved.
 		/// </remarks>
-		int Count();
+		long Count();
 	}
 }

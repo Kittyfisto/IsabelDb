@@ -96,7 +96,7 @@ namespace IsabelDb.Benchmark
 
 			_isabel.Measure(testCase, db =>
 			{
-				collection1.GetAll().ToList();
+				collection1.GetAllValues().ToList();
 			});
 			_lite.Measure(testCase, db =>
 			{

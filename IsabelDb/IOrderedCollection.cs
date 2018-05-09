@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace IsabelDb
 {
@@ -9,8 +10,20 @@ namespace IsabelDb
 	/// <typeparam name="TKey"></typeparam>
 	/// <typeparam name="TValue"></typeparam>
 	public interface IOrderedCollection<TKey, TValue>
-		: IDictionary<TKey, TValue>
+		: ICollection<TValue>
 		where TKey : IComparable<TKey>
 	{
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="key"></param>
+		/// <param name="value"></param>
+		void Put(TKey key, TValue value);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="pairs"></param>
+		void PutMany(IEnumerable<KeyValuePair<TKey, TValue>> pairs);
 	}
 }

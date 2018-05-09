@@ -215,15 +215,15 @@ namespace IsabelDb.Test
 			{
 				var charts = db.GetBag<object>("Charts");
 				charts.Put("Hello!");
-				charts.GetAll().Should().Equal("Hello!");
+				charts.GetAllValues().Should().Equal("Hello!");
 				charts.Clear();
-				charts.GetAll().Should().BeEmpty();
+				charts.GetAllValues().Should().BeEmpty();
 			}
 
 			using (var db = Database.OpenOrCreate(_databaseName, NoCustomTypes))
 			{
 				var charts = db.GetBag<object>("Charts");
-				charts.GetAll().Should().BeEmpty();
+				charts.GetAllValues().Should().BeEmpty();
 			}
 		}
 
@@ -259,7 +259,7 @@ namespace IsabelDb.Test
 			using (var db = Database.Open(_databaseName, new[] {typeof(CustomKey)}))
 			{
 				var bag = db.GetBag<CustomKey>("Keys");
-				var values = bag.GetAll();
+				var values = bag.GetAllValues();
 				values.Should().BeEquivalentTo(new CustomKey {A = 1}, new CustomKey {B = 2});
 			}
 

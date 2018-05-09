@@ -28,6 +28,7 @@ namespace IsabelDb
 
 		private readonly System.Collections.Generic.Dictionary<string, IInternalCollection> _dictionaries;
 		private readonly System.Collections.Generic.Dictionary<string, IInternalCollection> _multiValueDictionaries;
+		private readonly System.Collections.Generic.Dictionary<string, IInternalCollection> _orderedCollections;
 		private readonly Serializer _serializer;
 		private readonly CompiledTypeModel _typeModel;
 
@@ -60,6 +61,7 @@ namespace IsabelDb
 			_serializer = new Serializer(_typeModel);
 			_dictionaries = new System.Collections.Generic.Dictionary<string, IInternalCollection>();
 			_multiValueDictionaries = new System.Collections.Generic.Dictionary<string, IInternalCollection>();
+			_orderedCollections = new System.Collections.Generic.Dictionary<string, IInternalCollection>();
 			_bags = new System.Collections.Generic.Dictionary<string, IInternalCollection>();
 		}
 
@@ -166,10 +168,48 @@ namespace IsabelDb
 				}
 
 				store = CreateMultiValueDictionary<TKey, TValue>(tableName);
-				_dictionaries.Add(name, store);
+				_multiValueDictionaries.Add(name, store);
 			}
 
 			if (!(store is IMultiValueDictionary<TKey, TValue> target))
+				throw new
+					ArgumentException(string.Format("The dictionary '{0}' has a value type of '{1}': If your intent was to create a new dictionary, you have to pick a new name!",
+					                                name,
+					                                store.ValueType.FullName));
+
+			return target;
+		}
+
+		public IOrderedCollection<TKey, TValue> GetOrderedCollection<TKey, TValue>(string name) where TKey : IComparable<TKey>
+		{
+			if (!_orderedCollections.TryGetValue(name, out var store))
+			{
+				if (TryRetrieveTableNameFor(name, out var tableName, out var keyType, out var valueType))
+				{
+					EnsureTypeSafety(name,
+					                 typeof(TKey), typeof(TValue),
+					                 keyType, valueType);
+				}
+				else
+				{
+					if (!_typeModel.IsRegistered(typeof(TKey)))
+						throw new
+							ArgumentException(string.Format("The type '{0}' has not been registered when the database was created and thus may not be used as the key type in a collection",
+							                                typeof(TKey).FullName));
+
+					if (!_typeModel.IsRegistered(typeof(TValue)))
+						throw new
+							ArgumentException(string.Format("The type '{0}' has not been registered when the database was created and thus may not be used as the value type in a collection",
+							                                typeof(TValue).FullName));
+
+					tableName = AddTable(name, typeof(TKey), typeof(TValue));
+				}
+
+				store = CreateOrderedCollection<TKey, TValue>(tableName);
+				_orderedCollections.Add(name, store);
+			}
+
+			if (!(store is IOrderedCollection<TKey, TValue> target))
 				throw new
 					ArgumentException(string.Format("The dictionary '{0}' has a value type of '{1}': If your intent was to create a new dictionary, you have to pick a new name!",
 					                                name,
@@ -294,12 +334,22 @@ namespace IsabelDb
 			                                           valueSerializer);
 		}
 
+		private IInternalCollection CreateOrderedCollection<TKey, TValue>(string tableName) where TKey : IComparable<TKey>
+		{
+			var keySerializer = GetSerializer<TKey>();
+			var valueSerializer = GetSerializer<TValue>();
+			return new OrderedCollection<TKey, TValue>(_connection,
+			                                              tableName,
+			                                              keySerializer,
+			                                              valueSerializer);
+		}
+
 		private IInternalCollection CreateBag<T>(string tableName)
 		{
 			var serializer = GetSerializer<T>();
 			return new Bag<T>(_connection,
-			                             serializer,
-			                             tableName);
+			                  tableName,
+			                  serializer);
 		}
 
 		private ISQLiteSerializer<T> GetSerializer<T>()

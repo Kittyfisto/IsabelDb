@@ -4,7 +4,7 @@ using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
 
-namespace IsabelDb.Test.DictionaryObjectStore
+namespace IsabelDb.Test.Collections.DictionaryObjectStore
 {
 	[TestFixture]
 	public abstract class AbstractDictionaryObjectStoreTest<TKey>

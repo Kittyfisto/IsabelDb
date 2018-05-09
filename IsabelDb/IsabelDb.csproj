@@ -59,6 +59,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\SerializableContractAttribute.cs" />
+    <Compile Include="Collections\AbstractCollection.cs" />
+    <Compile Include="Collections\OrderedCollection.cs" />
     <Compile Include="Exceptions\BreakingChangeException.cs" />
     <Compile Include="Exceptions\TypeMismatchException.cs" />
     <Compile Include="Exceptions\TypeResolveException.cs" />

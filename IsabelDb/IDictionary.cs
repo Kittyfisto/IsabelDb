@@ -24,7 +24,7 @@ namespace IsabelDb
 	///     new fields is a no go)
 	/// </remarks>
 	public interface IDictionary<TKey, TValue>
-		: ICollection
+		: ICollection<TValue>
 	{
 		/// <summary>
 		///     Tries to retrieve the value with the given key.

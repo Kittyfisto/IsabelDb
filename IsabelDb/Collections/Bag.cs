@@ -6,29 +6,25 @@ using IsabelDb.Serializers;
 namespace IsabelDb.Collections
 {
 	internal sealed class Bag<T>
-		: IBag<T>
-			, IInternalCollection
+		: AbstractCollection<T>
+		, IBag<T>
+		, IInternalCollection
 	{
-		private readonly string _clear;
 		private readonly SQLiteConnection _connection;
-		private readonly string _count;
-		private readonly string _getAll;
 		private readonly string _put;
 		private readonly ISQLiteSerializer<T> _serializer;
 		private readonly string _table;
 
 		public Bag(SQLiteConnection connection,
-		                      ISQLiteSerializer<T> serializer,
-		                      string tableName)
+		                      string tableName,
+		                      ISQLiteSerializer<T> serializer)
+			: base(connection, tableName, serializer)
 		{
 			_connection = connection;
 			_serializer = serializer;
 			CreateTableIfNecessary(connection, serializer, tableName, out _table);
 
-			_clear = string.Format("DELETE FROM {0}", tableName);
-			_getAll = string.Format("SELECT value FROM {0}", tableName);
 			_put = string.Format("INSERT INTO {0} (value) VALUES (@value)", tableName);
-			_count = string.Format("SELECT COUNT(*) FROM {0}", tableName);
 		}
 
 		#region Implementation of IInternalObjectStore
@@ -71,21 +67,6 @@ namespace IsabelDb.Collections
 
 		#region Implementation of IListObjectStore<T>
 
-		public IEnumerable<T> GetAll()
-		{
-			using (var command = CreateCommand(_getAll))
-			{
-				using (var reader = command.ExecuteReader())
-				{
-					while (reader.Read())
-						if (_serializer.TryDeserialize(reader, valueOrdinal: 0, value: out var value))
-						{
-							yield return value;
-						}
-				}
-			}
-		}
-
 		public void Put(T value)
 		{
 			using (var command = CreateCommand(_put))
@@ -115,22 +96,6 @@ namespace IsabelDb.Collections
 		public void PutMany(params T[] values)
 		{
 			PutMany((IEnumerable<T>) values);
-		}
-
-		public void Clear()
-		{
-			using (var command = CreateCommand(_clear))
-			{
-				command.ExecuteNonQuery();
-			}
-		}
-
-		public int Count()
-		{
-			using (var command = CreateCommand(_count))
-			{
-				return Convert.ToInt32(command.ExecuteScalar());
-			}
 		}
 
 		#endregion

@@ -1,15 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using FluentAssertions;
 using NUnit.Framework;
 
-namespace IsabelDb.Test.MultiValueDictionaryStore
+namespace IsabelDb.Test.Collections.MultiValueDictionary
 {
 	[TestFixture]
 	public sealed class MultiValueDictionaryTest
+		: AbstractCollectionTest<IMultiValueDictionary<int, string>>
 	{
-		private static readonly Type[] NoCustomTypes = new Type[0];
+		private int _lastKey;
+
+		[SetUp]
+		public void Setup()
+		{
+			_lastKey = 0;
+		}
 
 		[Test]
 		public void TestEmpty()
@@ -19,31 +27,6 @@ namespace IsabelDb.Test.MultiValueDictionaryStore
 				var values = db.GetMultiValueDictionary<int, string>("Values");
 				values.Count().Should().Be(0);
 				values.GetAll().Should().BeEmpty();
-			}
-		}
-
-		[Test]
-		public void TestClearEmpty()
-		{
-			using (var db = Database.CreateInMemory(NoCustomTypes))
-			{
-				var values = db.GetMultiValueDictionary<int, string>("Values");
-				values.Count().Should().Be(0);
-				values.Clear();
-				values.Count().Should().Be(0);
-			}
-		}
-
-		[Test]
-		public void TestClear()
-		{
-			using (var db = Database.CreateInMemory(NoCustomTypes))
-			{
-				var values = db.GetMultiValueDictionary<int, string>("Values");
-				values.Put(1, "Foo");
-				values.Put(1, "Bar");
-				values.Put(2, "Hello, World!");
-				values.Count().Should().Be(3);
 			}
 		}
 
@@ -216,6 +199,26 @@ namespace IsabelDb.Test.MultiValueDictionaryStore
 				values.PutMany(1, Enumerable.Range(1, count).Select(x => x.ToString()));
 				values.Count().Should().Be(count);
 			}
+		}
+
+		protected override IMultiValueDictionary<int, string> GetCollection(Database db, string name)
+		{
+			return db.GetMultiValueDictionary<int, string>(name);
+		}
+
+		protected override void Put(IMultiValueDictionary<int, string> collection, string value)
+		{
+			collection.Put(Interlocked.Increment(ref _lastKey), value);
+		}
+
+		protected override void PutMany(IMultiValueDictionary<int, string> collection, params string[] values)
+		{
+			var pairs = new List<KeyValuePair<int, IEnumerable<string>>>();
+			foreach (var value in values)
+			{
+				pairs.Add(new KeyValuePair<int, IEnumerable<string>>(Interlocked.Increment(ref _lastKey), new []{value}));
+			}
+			collection.PutMany(pairs);
 		}
 	}
 }

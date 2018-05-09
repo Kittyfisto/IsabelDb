@@ -49,19 +49,6 @@ namespace IsabelDb.Test
 		}
 
 		[Test]
-		[Description("Verifies that clearing an empty dictionary is allowed")]
-		public void TestClearEmpty()
-		{
-			using (var db = Database.CreateInMemory(NoCustomTypes))
-			{
-				var people = db.GetDictionary<string, object>("People");
-				people.Count().Should().Be(0);
-				people.Clear();
-				people.Count().Should().Be(0);
-			}
-		}
-
-		[Test]
 		public void TestCreateInMemory()
 		{
 			Database.CreateInMemory(NoCustomTypes);
@@ -136,58 +123,6 @@ namespace IsabelDb.Test
 				var values = db.GetBag<object>("SomeTable");
 				new Action(() => values.Put(new CustomKey()))
 					.Should().Throw<ArgumentException>();
-			}
-		}
-
-		[Test]
-		public void TestGet1()
-		{
-			using (var db = Database.CreateInMemory(NoCustomTypes))
-			{
-				db.GetDictionary<string, object>("SomeTable").Put("foo", "bar");
-				db.GetDictionary<string, object>("SomeTable").Get("foo").Should().Be("bar");
-				db.GetDictionary<string, object>("SomeTable").TryGet("foo", out var value).Should().BeTrue();
-				value.Should().Be("bar");
-			}
-		}
-
-		[Test]
-		[Description("Verifies that GetDictionary allows for names to be case sensitive")]
-		public void TestGetDictionaryCaseSensitiveNames()
-		{
-			using (var db = Database.CreateInMemory(NoCustomTypes))
-			{
-				var a = db.GetDictionary<string, object>("A");
-				var b = db.GetDictionary<string, object>("a");
-				a.Should().NotBe(b);
-
-				a.Put("1", value: 42);
-				b.Put("1", value: 50);
-
-				a.Get("1").Should().Be(42);
-				b.Get("1").Should().Be(50);
-			}
-		}
-
-		[Test]
-		public void TestGetDictionaryDifferentTypes()
-		{
-			using (var db = Database.CreateInMemory(NoCustomTypes))
-			{
-				var a = db.GetDictionary<string, string>("Names");
-				new Action(() => db.GetDictionary<string, int>("Names"))
-					.Should().Throw<ArgumentException>()
-					.WithMessage("The dictionary 'Names' has a value type of 'System.String': If your intent was to create a new dictionary, you have to pick a new name!");
-			}
-		}
-
-		[Test]
-		public void TestGetNone()
-		{
-			using (var db = Database.CreateInMemory(NoCustomTypes))
-			{
-				db.GetDictionary<string, object>("SomeTable").TryGet("foo", out var unused).Should().BeFalse();
-				db.GetDictionary<string, object>("SomeTable").GetMany("foo", "bar").Should().BeEmpty();
 			}
 		}
 

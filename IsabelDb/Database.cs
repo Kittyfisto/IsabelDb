@@ -73,6 +73,18 @@ namespace IsabelDb
 		}
 
 		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="TKey"></typeparam>
+		/// <typeparam name="TValue"></typeparam>
+		/// <param name="name"></param>
+		/// <returns></returns>
+		public IOrderedCollection<TKey, TValue> GetOrderedCollection<TKey, TValue>(string name) where TKey : IComparable<TKey>
+		{
+			return _objectStores.GetOrderedCollection<TKey, TValue>(name);
+		}
+
+		/// <summary>
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
