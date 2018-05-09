@@ -5,7 +5,7 @@ using System.Data.SQLite;
 using System.Text;
 using IsabelDb.Serializers;
 
-namespace IsabelDb.Stores
+namespace IsabelDb.Collections
 {
 	internal sealed class Dictionary<TKey, TValue>
 		: IDictionary<TKey, TValue>

@@ -5,7 +5,7 @@ using System.Data.SQLite;
 using System.Threading;
 using IsabelDb.Serializers;
 
-namespace IsabelDb.Stores
+namespace IsabelDb.Collections
 {
 	internal sealed class MultiValueDictionary<TKey, TValue>
 		: IMultiValueDictionary<TKey, TValue>
@@ -233,7 +233,7 @@ namespace IsabelDb.Stores
 			}
 		}
 
-		public void Remove(MultiValueKey key)
+		public void Remove(ValueKey key)
 		{
 			throw new System.NotImplementedException();
 		}

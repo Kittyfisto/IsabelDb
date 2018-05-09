@@ -1,0 +1,76 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.Contracts;
+
+namespace IsabelDb
+{
+	/// <summary>
+	///     This collections maps values to intervals.
+	/// </summary>
+	/// <typeparam name="T">The type of the interval (such as int, double, DateTime) to which values are mapped</typeparam>
+	/// <typeparam name="TValue"></typeparam>
+	public interface IIntervalCollection<T, TValue>
+		: ICollection
+		where T : IComparable<T>
+	{
+		/// <summary>
+		///     Adds a new value with the given interval to this collection.
+		/// </summary>
+		/// <param name="interval"></param>
+		/// <param name="value"></param>
+		/// <returns></returns>
+		ValueKey Put(Interval<T> interval, TValue value);
+
+		/// <summary>
+		///     Returns the list of values who's intervals intersect with the given key.
+		/// </summary>
+		/// <remarks>
+		///     Never throws, returns an empty enumeration if no interval intersects the given key.
+		/// </remarks>
+		/// <param name="key"></param>
+		/// <returns></returns>
+		[Pure]
+		IEnumerable<TValue> GetValues(T key);
+
+		/// <summary>
+		///     Returns the list of values who's interval intersects with the given interval.
+		/// </summary>
+		/// <param name="minimum"></param>
+		/// <param name="maximum"></param>
+		/// <returns></returns>
+		[Pure]
+		IEnumerable<TValue> GetValues(T minimum, T maximum);
+
+		/// <summary>
+		///     Returns the list of all values including their intervals.
+		/// </summary>
+		/// <returns></returns>
+		[Pure]
+		IEnumerable<KeyValuePair<Interval<T>, TValue>> GetAll();
+
+		/// <summary>
+		///     Returns the list of all values.
+		/// </summary>
+		/// <returns></returns>
+		[Pure]
+		IEnumerable<TValue> GetAllValues();
+
+		/// <summary>
+		///     Removes all values who's interval intersects with the given key.
+		/// </summary>
+		/// <param name="key"></param>
+		void Remove(T key);
+
+		/// <summary>
+		///     Removes all values who's interval intersects with the given interval.
+		/// </summary>
+		/// <param name="interval"></param>
+		void Remove(Interval<T> interval);
+
+		/// <summary>
+		///     Removes a value which was previously inserted via <see cref="Put" />.
+		/// </summary>
+		/// <param name="valueKey"></param>
+		void Remove(ValueKey valueKey);
+	}
+}

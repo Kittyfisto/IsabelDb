@@ -60,6 +60,19 @@ namespace IsabelDb
 		}
 
 		/// <summary>
+		///     Gets or creates a collection with the given name.
+		/// </summary>
+		/// <typeparam name="TKey"></typeparam>
+		/// <typeparam name="TValue"></typeparam>
+		/// <param name="name"></param>
+		/// <returns></returns>
+		public IIntervalCollection<TKey, TValue> GetIntervalCollection<TKey, TValue>(string name)
+			where TKey : IComparable<TKey>
+		{
+			return _objectStores.GetIntervalCollection<TKey, TValue>(name);
+		}
+
+		/// <summary>
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
@@ -185,7 +198,6 @@ namespace IsabelDb
 		{
 			var builder = new SQLiteConnectionStringBuilder();
 			builder.DataSource = databaseIsdb;
-			builder.JournalMode = SQLiteJournalModeEnum.Wal;
 			var connectionString = builder.ToString();
 			return connectionString;
 		}

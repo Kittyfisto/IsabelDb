@@ -4,19 +4,21 @@ namespace IsabelDb
 {
 	/// <summary>
 	/// </summary>
-	public struct MultiValueKey
-		: IEquatable<MultiValueKey>
+	public struct ValueKey
+		: IEquatable<ValueKey>
 	{
+		private readonly long _value;
+
 		/// <summary>
 		///     The numeric value of this key: Two keys with the same value are equal.
 		/// </summary>
-		private readonly long _value;
+		public long Value => _value;
 
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="value"></param>
-		public MultiValueKey(long value)
+		public ValueKey(long value)
 		{
 			_value = value;
 		}
@@ -24,7 +26,7 @@ namespace IsabelDb
 		#region Equality members
 
 		/// <inheritdoc />
-		public bool Equals(MultiValueKey other)
+		public bool Equals(ValueKey other)
 		{
 			return _value == other._value;
 		}
@@ -33,7 +35,7 @@ namespace IsabelDb
 		public override bool Equals(object obj)
 		{
 			if (ReferenceEquals(objA: null, objB: obj)) return false;
-			return obj is MultiValueKey && Equals((MultiValueKey) obj);
+			return obj is ValueKey && Equals((ValueKey) obj);
 		}
 
 		#region Equality members
@@ -52,7 +54,7 @@ namespace IsabelDb
 		/// <param name="left"></param>
 		/// <param name="right"></param>
 		/// <returns></returns>
-		public static bool operator ==(MultiValueKey left, MultiValueKey right)
+		public static bool operator ==(ValueKey left, ValueKey right)
 		{
 			return left.Equals(right);
 		}
@@ -63,7 +65,7 @@ namespace IsabelDb
 		/// <param name="left"></param>
 		/// <param name="right"></param>
 		/// <returns></returns>
-		public static bool operator !=(MultiValueKey left, MultiValueKey right)
+		public static bool operator !=(ValueKey left, ValueKey right)
 		{
 			return !left.Equals(right);
 		}

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Data.SQLite;
 using IsabelDb.Serializers;
 
-namespace IsabelDb.Stores
+namespace IsabelDb.Collections
 {
 	internal sealed class Bag<T>
 		: IBag<T>

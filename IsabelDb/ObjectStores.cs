@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Net;
+using IsabelDb.Collections;
 using IsabelDb.Serializers;
-using IsabelDb.Stores;
 using IsabelDb.TypeModels;
 
 namespace IsabelDb
@@ -61,6 +61,45 @@ namespace IsabelDb
 			_dictionaries = new System.Collections.Generic.Dictionary<string, IInternalCollection>();
 			_multiValueDictionaries = new System.Collections.Generic.Dictionary<string, IInternalCollection>();
 			_bags = new System.Collections.Generic.Dictionary<string, IInternalCollection>();
+		}
+
+		public IIntervalCollection<T, TValue> GetIntervalCollection<T, TValue>(string name)
+			where T : IComparable<T>
+		{
+			if (!_dictionaries.TryGetValue(name, out var store))
+			{
+				if (TryRetrieveTableNameFor(name, out var tableName, out var keyType, out var valueType))
+				{
+					EnsureTypeSafety(name,
+					                 typeof(T), typeof(TValue),
+					                 keyType, valueType);
+				}
+				else
+				{
+					if (!_typeModel.IsRegistered(typeof(T)))
+						throw new
+							ArgumentException(string.Format("The type '{0}' has not been registered when the database was created and thus may not be used as the key type in a collection",
+							                                typeof(T).FullName));
+
+					if (!_typeModel.IsRegistered(typeof(TValue)))
+						throw new
+							ArgumentException(string.Format("The type '{0}' has not been registered when the database was created and thus may not be used as the value type in a collection",
+							                                typeof(TValue).FullName));
+
+					tableName = AddTable(name, typeof(T), typeof(TValue));
+				}
+
+				store = CreateIntervalCollection<T, TValue>(tableName);
+				_dictionaries.Add(name, store);
+			}
+
+			if (!(store is IIntervalCollection<T, TValue> target))
+				throw new
+					ArgumentException(string.Format("The dictionary '{0}' has a value type of '{1}': If your intent was to create a new dictionary, you have to pick a new name!",
+					                                name,
+					                                store.ValueType.FullName));
+
+			return target;
 		}
 
 		public IDictionary<TKey, TValue> GetDictionary<TKey, TValue>(string name)
@@ -191,16 +230,6 @@ namespace IsabelDb
 			}
 		}
 
-		private static ProtoBuf.Meta.TypeModel CompileTypeModel(IEnumerable<Type> supportedTypes)
-		{
-			var typeModel = ProtoBuf.Meta.TypeModel.Create();
-			foreach (var type in supportedTypes)
-			{
-				typeModel.Add(type, applyDefaultBehaviour: true);
-			}
-			return typeModel.Compile();
-		}
-
 		private void EnsureTypeSafety(string collectionName,
 		                              Type expectedKeyType,
 		                              Type expectedValueType,
@@ -234,11 +263,22 @@ namespace IsabelDb
 					                                    expectedValueType));
 		}
 
+		private IInternalCollection CreateIntervalCollection<T, TValue>(string tableName)
+			where T: IComparable<T>
+		{
+			var keySerializer = GetSerializer<T>();
+			var valueSerializer = GetSerializer<TValue>();
+			return new IntervalCollection<T, TValue>(_connection,
+			                                   tableName,
+			                                   keySerializer,
+			                                   valueSerializer);
+		}
+
 		private IInternalCollection CreateDictionary<TKey, TValue>(string tableName)
 		{
 			var keySerializer = GetSerializer<TKey>();
 			var valueSerializer = GetSerializer<TValue>();
-			return new Stores.Dictionary<TKey, TValue>(_connection,
+			return new Collections.Dictionary<TKey, TValue>(_connection,
 			                                               tableName,
 			                                               keySerializer,
 			                                               valueSerializer);
@@ -248,7 +288,7 @@ namespace IsabelDb
 		{
 			var keySerializer = GetSerializer<TKey>();
 			var valueSerializer = GetSerializer<TValue>();
-			return new Stores.MultiValueDictionary<TKey, TValue>(_connection,
+			return new MultiValueDictionary<TKey, TValue>(_connection,
 			                                           tableName,
 			                                           keySerializer,
 			                                           valueSerializer);
