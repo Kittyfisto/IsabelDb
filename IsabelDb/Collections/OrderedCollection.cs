@@ -73,6 +73,36 @@ namespace IsabelDb.Collections
 			}
 		}
 
+		public IEnumerable<TValue> GetValuesInRange(Interval<TKey> interval)
+		{
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = string.Format("SELECT value FROM {0} WHERE key >= @minimum AND key <= @maximum", _tableName);
+				command.Parameters.AddWithValue("@minimum", interval.Minimum);
+				command.Parameters.AddWithValue("@maximum", interval.Maximum);
+
+				using (var reader = command.ExecuteReader())
+				{
+					while (reader.Read())
+					{
+						if (_valueSerializer.TryDeserialize(reader, 0, out var value))
+							yield return value;
+					}
+				}
+			}
+		}
+
+		public void RemoveRange(Interval<TKey> interval)
+		{
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = string.Format("DELETE FROM {0} WHERE key >= @minimum AND key <= @maximum", _tableName);
+				command.Parameters.AddWithValue("@minimum", _keySerializer.Serialize(interval.Minimum));
+				command.Parameters.AddWithValue("@maximum", _keySerializer.Serialize(interval.Maximum));
+				command.ExecuteNonQuery();
+			}
+		}
+
 		#endregion
 
 		private void CreateObjectTableIfNecessary()

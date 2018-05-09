@@ -20,6 +20,17 @@ namespace IsabelDb
 		{
 			return new Interval<T>(minimum, maximum);
 		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="value"></param>
+		/// <returns></returns>
+		public static Interval<T> Create<T>(T value) where T : IComparable<T>
+		{
+			return new Interval<T>(value, value);
+		}
 	}
 
 	/// <summary>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using FluentAssertions;
 using NUnit.Framework;
 
@@ -155,6 +156,26 @@ namespace IsabelDb.Test.Collections
 			{
 				var collection = GetCollection(db, "Values");
 				Put(collection, "Monty Python");
+			}
+		}
+
+		[Test]
+		public void TestPut()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				var collection = GetCollection(db, "Values");
+
+				const int count = 1000;
+				var values = new List<string>(count);
+				for (int i = 0; i < count; ++i)
+				{
+					var value = "Stuff";
+					Put(collection, value);
+					values.Add(value);
+				}
+
+				collection.GetAllValues().Should().Equal(values);
 			}
 		}
 

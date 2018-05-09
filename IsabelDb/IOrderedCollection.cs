@@ -14,16 +14,27 @@ namespace IsabelDb
 		where TKey : IComparable<TKey>
 	{
 		/// <summary>
-		/// 
 		/// </summary>
 		/// <param name="key"></param>
 		/// <param name="value"></param>
 		void Put(TKey key, TValue value);
 
 		/// <summary>
-		/// 
 		/// </summary>
 		/// <param name="pairs"></param>
 		void PutMany(IEnumerable<KeyValuePair<TKey, TValue>> pairs);
+
+		/// <summary>
+		///     Returns all values in the given range.
+		/// </summary>
+		/// <param name="interval"></param>
+		/// <returns></returns>
+		IEnumerable<TValue> GetValuesInRange(Interval<TKey> interval);
+
+		/// <summary>
+		///     Removes all values in the given range.
+		/// </summary>
+		/// <param name="interval"></param>
+		void RemoveRange(Interval<TKey> interval);
 	}
 }
