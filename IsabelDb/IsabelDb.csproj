@@ -69,6 +69,7 @@
     <Compile Include="Interval.cs" />
     <Compile Include="Collections\IntervalCollection.cs" />
     <Compile Include="IOrderedCollection.cs" />
+    <Compile Include="Serializers\ValueKeySerializer.cs" />
     <Compile Include="ValueKey.cs" />
     <Compile Include="Collections\MultiValueDictionary.cs" />
     <Compile Include="TypeModels\CompiledTypeModel.cs" />

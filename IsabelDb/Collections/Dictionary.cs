@@ -84,6 +84,25 @@ namespace IsabelDb.Collections
 			return GetMany((IEnumerable<TKey>) keys);
 		}
 
+		public IEnumerable<TValue> GetManyValues(IEnumerable<TKey> keys)
+		{
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = string.Format("SELECT value FROM {0} WHERE key = @key", _tableName);
+				var keyParameter = command.Parameters.Add("@key", _keySerializer.DatabaseType);
+				foreach (var key in keys)
+				{
+					keyParameter.Value = _keySerializer.Serialize(key);
+					using (var reader = command.ExecuteReader())
+					{
+						if (reader.Read())
+							if (_valueSerializer.TryDeserialize(reader, 0, out var value))
+								yield return value;
+					}
+				}
+			}
+		}
+
 		public TValue Get(TKey key)
 		{
 			if (!TryGet(key, out var value))

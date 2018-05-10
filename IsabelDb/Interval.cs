@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Runtime.Serialization;
 
 namespace IsabelDb
@@ -104,8 +105,43 @@ namespace IsabelDb
 		/// <param name="maximum"></param>
 		public Interval(T minimum, T maximum)
 		{
-			Minimum = minimum;
-			Maximum = maximum;
+			if (minimum.CompareTo(maximum) > 0)
+			{
+				Minimum = maximum;
+				Maximum = minimum;
+			}
+			else
+			{
+				Minimum = minimum;
+				Maximum = maximum;
+			}
 		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="value"></param>
+		/// <returns></returns>
+		[Pure]
+		public bool Contains(T value)
+		{
+			if (Minimum.CompareTo(value) > 0)
+				return false;
+
+			if (Maximum.CompareTo(value) < 0)
+				return false;
+
+			return true;
+		}
+
+		#region Overrides of ValueType
+
+		/// <inheritdoc />
+		public override string ToString()
+		{
+			return string.Format("[{0}, {1}]", Minimum, Maximum);
+		}
+
+		#endregion
 	}
 }

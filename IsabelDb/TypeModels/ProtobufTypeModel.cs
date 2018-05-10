@@ -25,7 +25,8 @@ namespace IsabelDb.TypeModels
 			BuiltInTypes = new HashSet<Type>
 			{
 				typeof(object),
-				typeof(IPAddress)
+				typeof(IPAddress),
+				typeof(ValueKey)
 			};
 			foreach (var type in TypeModel.BuiltInProtobufTypes) BuiltInTypes.Add(type);
 		}

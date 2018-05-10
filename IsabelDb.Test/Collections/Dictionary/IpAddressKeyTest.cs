@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using NUnit.Framework;
 
-namespace IsabelDb.Test.Collections.DictionaryObjectStore
+namespace IsabelDb.Test.Collections.Dictionary
 {
 	[TestFixture]
 	public sealed class IpAddressKeyTest

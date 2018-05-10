@@ -4,7 +4,7 @@ using System.Threading;
 using FluentAssertions;
 using NUnit.Framework;
 
-namespace IsabelDb.Test.Collections.DictionaryObjectStore
+namespace IsabelDb.Test.Collections.Dictionary
 {
 	[TestFixture]
 	public sealed class DictionaryTest
@@ -27,6 +27,45 @@ namespace IsabelDb.Test.Collections.DictionaryObjectStore
 				db.GetDictionary<string, object>("SomeTable").Get("foo").Should().Be("bar");
 				db.GetDictionary<string, object>("SomeTable").TryGet("foo", out var value).Should().BeTrue();
 				value.Should().Be("bar");
+			}
+		}
+
+		[Test]
+		public void TestGetManyValues1()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				var collection = db.GetDictionary<int, string>("Stuff");
+				collection.Put(1, "A");
+				collection.Put(2, "B");
+				collection.Put(3, "C");
+				collection.Put(4, "D");
+				collection.GetManyValues(new[] {2, 3}).Should().Equal("B", "C");
+			}
+		}
+
+		[Test]
+		public void TestGetManyValues2()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				var collection = db.GetDictionary<int, string>("Stuff");
+				collection.Put(1, "A");
+				collection.Put(2, "B");
+				collection.GetManyValues(new[] {0, 1}).Should().Equal("A");
+				collection.GetManyValues(new[] {2, 3}).Should().Equal("B");
+			}
+		}
+
+		[Test]
+		public void TestGetManyValues3()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				var collection = db.GetDictionary<int, string>("Stuff");
+				collection.Put(1, "A");
+				collection.Put(2, "B");
+				collection.GetManyValues(new[] {0, 3, 5}).Should().BeEmpty();
 			}
 		}
 

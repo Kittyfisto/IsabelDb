@@ -1,18 +1,19 @@
 ﻿using System;
+using System.Runtime.Serialization;
 
 namespace IsabelDb
 {
 	/// <summary>
 	/// </summary>
+	[DataContract]
 	public struct ValueKey
 		: IEquatable<ValueKey>
 	{
-		private readonly long _value;
-
 		/// <summary>
 		///     The numeric value of this key: Two keys with the same value are equal.
 		/// </summary>
-		public long Value => _value;
+		[DataMember]
+		public long Value { get; set; }
 
 		/// <summary>
 		/// 
@@ -20,7 +21,7 @@ namespace IsabelDb
 		/// <param name="value"></param>
 		public ValueKey(long value)
 		{
-			_value = value;
+			Value = value;
 		}
 
 		#region Equality members
@@ -28,7 +29,7 @@ namespace IsabelDb
 		/// <inheritdoc />
 		public bool Equals(ValueKey other)
 		{
-			return _value == other._value;
+			return Value == other.Value;
 		}
 
 		/// <inheritdoc />
@@ -43,7 +44,7 @@ namespace IsabelDb
 		/// <inheritdoc />
 		public override int GetHashCode()
 		{
-			return _value.GetHashCode();
+			return Value.GetHashCode();
 		}
 
 		#endregion

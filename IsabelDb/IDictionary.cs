@@ -64,6 +64,13 @@ namespace IsabelDb
 		IEnumerable<KeyValuePair<TKey, TValue>> GetMany(params TKey[] keys);
 
 		/// <summary>
+		///     Finds all objects with the given keys and type.
+		/// </summary>
+		/// <param name="keys"></param>
+		/// <returns></returns>
+		IEnumerable<TValue> GetManyValues(IEnumerable<TKey> keys);
+
+		/// <summary>
 		///     Adds or replaces the value at the given key with the new value.
 		/// </summary>
 		/// <param name="key"></param>

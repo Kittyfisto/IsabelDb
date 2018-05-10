@@ -28,6 +28,12 @@ namespace IsabelDb
 		IEnumerable<ValueKey> PutMany(IEnumerable<KeyValuePair<Interval<T>, TValue>> values);
 
 		/// <summary>
+		/// </summary>
+		/// <param name="keys"></param>
+		/// <returns></returns>
+		IEnumerable<Interval<T>> GetManyIntervals(IEnumerable<ValueKey> keys);
+
+		/// <summary>
 		///     Returns the list of values who's intervals intersect with the given key.
 		/// </summary>
 		/// <remarks>
@@ -53,6 +59,13 @@ namespace IsabelDb
 		/// <returns></returns>
 		[Pure]
 		IEnumerable<KeyValuePair<Interval<T>, TValue>> GetAll();
+
+		/// <summary>
+		///     Changes the interval of the value referenced by <paramref name="key" /> to the given interval.
+		/// </summary>
+		/// <param name="key"></param>
+		/// <param name="interval"></param>
+		void Move(ValueKey key, Interval<T> interval);
 
 		/// <summary>
 		///     Removes all values who's interval intersects with the given key.

@@ -94,6 +94,11 @@ namespace IsabelDb.Collections
 			}
 		}
 
+		public IEnumerable<Interval<T>> GetManyIntervals(IEnumerable<ValueKey> keys)
+		{
+			throw new NotImplementedException();
+		}
+
 		public IEnumerable<TValue> GetValues(T key)
 		{
 			using (var command = _connection.CreateCommand())
@@ -156,6 +161,11 @@ namespace IsabelDb.Collections
 					}
 				}
 			}
+		}
+
+		public void Move(ValueKey key, Interval<T> interval)
+		{
+			throw new NotImplementedException();
 		}
 
 		public void Remove(T key)

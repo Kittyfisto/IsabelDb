@@ -24,6 +24,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsabelDb.Benchmarks.GetByKe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsabelDb.Benchmarks.Serializer", "Benchmarks\IsabelDb.Benchmarks.Serializer\IsabelDb.Benchmarks.Serializer.csproj", "{8F6C8A44-9725-4FC3-BF29-0B456E68E8CA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsabelDb.AcceptanceTest", "IsabelDb.AcceptanceTest\IsabelDb.AcceptanceTest.csproj", "{46B11958-19D7-4BC8-98EE-308618FFB124}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -50,6 +52,10 @@ Global
 		{8F6C8A44-9725-4FC3-BF29-0B456E68E8CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8F6C8A44-9725-4FC3-BF29-0B456E68E8CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8F6C8A44-9725-4FC3-BF29-0B456E68E8CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{46B11958-19D7-4BC8-98EE-308618FFB124}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46B11958-19D7-4BC8-98EE-308618FFB124}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46B11958-19D7-4BC8-98EE-308618FFB124}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46B11958-19D7-4BC8-98EE-308618FFB124}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -59,6 +65,7 @@ Global
 		{21393821-D777-49C3-9AFC-57D1E0344446} = {86F31708-E1CB-4EA8-8181-ABC291DE30D5}
 		{804D2442-D8BE-4C06-ADE6-6005A968EC06} = {86F31708-E1CB-4EA8-8181-ABC291DE30D5}
 		{8F6C8A44-9725-4FC3-BF29-0B456E68E8CA} = {86F31708-E1CB-4EA8-8181-ABC291DE30D5}
+		{46B11958-19D7-4BC8-98EE-308618FFB124} = {0097BD80-9714-46AD-B1BC-86F6FDB56642}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1D8FD4EC-9BE0-45B8-BFBF-7EB3C33D9749}

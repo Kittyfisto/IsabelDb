@@ -47,7 +47,8 @@ namespace IsabelDb
 				{typeof(string), new StringSerializer()},
 				{typeof(float), new SingleSerializer()},
 				{typeof(double), new DoubleSerializer()},
-				{typeof(byte[]), new ByteArraySerializer()}
+				{typeof(byte[]), new ByteArraySerializer()},
+				{typeof(ValueKey), new ValueKeySerializer()}
 			};
 			NativeSerializers = nativeSerializers;
 		}

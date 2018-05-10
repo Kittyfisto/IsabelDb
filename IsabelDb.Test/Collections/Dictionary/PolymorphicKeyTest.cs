@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using IsabelDb.Test.Entities;
 
-namespace IsabelDb.Test.Collections.DictionaryObjectStore
+namespace IsabelDb.Test.Collections.Dictionary
 {
 	public sealed class PolymorphicKeyTest
 		: AbstractDictionaryObjectStoreTest<IPolymorphicCustomKey>

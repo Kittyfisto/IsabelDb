@@ -135,7 +135,7 @@ namespace IsabelDb.Test.Collections
 				collection.GetAllValues().Should().Equal("Monty");
 			}
 		}
-		
+
 		[Test]
 		public void TestGetAllValues()
 		{

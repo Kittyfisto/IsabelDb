@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using IsabelDb.Test.Entities;
 using NUnit.Framework;
 
-namespace IsabelDb.Test.Collections.DictionaryObjectStore
+namespace IsabelDb.Test.Collections.Dictionary
 {
 	[TestFixture]
 	public sealed class CustomKeyTest
