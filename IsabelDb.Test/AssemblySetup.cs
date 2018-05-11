@@ -6,6 +6,7 @@ using NUnit.Framework;
 namespace IsabelDb.Test
 {
 	[SetUpFixture]
+	[Parallelizable(ParallelScope.Fixtures)]
 	public sealed class AssemblySetup
 	{
 		public static string AssemblyDirectory

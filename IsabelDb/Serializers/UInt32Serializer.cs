@@ -6,7 +6,7 @@ namespace IsabelDb.Serializers
 	internal sealed class UInt32Serializer
 		: ISQLiteSerializer<uint>
 	{
-		public DbType DatabaseType => DbType.UInt32;
+		public DbType DatabaseType => DbType.Int64;
 
 		public object Serialize(uint value)
 		{

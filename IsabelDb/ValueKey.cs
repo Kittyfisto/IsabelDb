@@ -8,6 +8,7 @@ namespace IsabelDb
 	[DataContract]
 	public struct ValueKey
 		: IEquatable<ValueKey>
+		, IComparable<ValueKey>
 	{
 		/// <summary>
 		///     The numeric value of this key: Two keys with the same value are equal.
@@ -30,6 +31,12 @@ namespace IsabelDb
 		public bool Equals(ValueKey other)
 		{
 			return Value == other.Value;
+		}
+
+		/// <inheritdoc />
+		public int CompareTo(ValueKey other)
+		{
+			return Value.CompareTo(other.Value);
 		}
 
 		/// <inheritdoc />

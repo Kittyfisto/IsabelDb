@@ -24,52 +24,9 @@ namespace IsabelDb
 	///     new fields is a no go)
 	/// </remarks>
 	public interface IDictionary<TKey, TValue>
-		: ICollection<TValue>
+		: IReadOnlyDictionary<TKey, TValue>
+		, ICollection<TValue>
 	{
-		/// <summary>
-		///     Tries to retrieve the value with the given key.
-		///     Returns true if the value was retrieved, false otherwise.
-		/// </summary>
-		/// <param name="key"></param>
-		/// <param name="value"></param>
-		/// <returns></returns>
-		bool TryGet(TKey key, out TValue value);
-
-		/// <summary>
-		///     Retrieves the value with the given key.
-		/// </summary>
-		/// <param name="key"></param>
-		/// <returns></returns>
-		/// <exception cref="KeyNotFoundException"></exception>
-		TValue Get(TKey key);
-
-		/// <summary>
-		///     Retrieves all values from this database.
-		/// </summary>
-		/// <returns></returns>
-		IEnumerable<KeyValuePair<TKey, TValue>> GetAll();
-
-		/// <summary>
-		///     Finds all objects with the given keys and type.
-		/// </summary>
-		/// <param name="keys"></param>
-		/// <returns></returns>
-		IEnumerable<KeyValuePair<TKey, TValue>> GetMany(IEnumerable<TKey> keys);
-
-		/// <summary>
-		///     Finds all objects with the given keys and type.
-		/// </summary>
-		/// <param name="keys"></param>
-		/// <returns></returns>
-		IEnumerable<KeyValuePair<TKey, TValue>> GetMany(params TKey[] keys);
-
-		/// <summary>
-		///     Finds all objects with the given keys and type.
-		/// </summary>
-		/// <param name="keys"></param>
-		/// <returns></returns>
-		IEnumerable<TValue> GetManyValues(IEnumerable<TKey> keys);
-
 		/// <summary>
 		///     Adds or replaces the value at the given key with the new value.
 		/// </summary>

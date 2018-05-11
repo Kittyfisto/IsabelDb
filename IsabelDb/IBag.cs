@@ -3,11 +3,11 @@
 namespace IsabelDb
 {
 	/// <summary>
-	///     A collection which holds a list of values: Values can be added or the entire collection
-	///     can be cleared and the same value can be added many times.
+	///     A collection which holds a list of values in their inserted order.
+	///     Values can be streamed back or queried in batches.
 	/// </summary>
 	/// <remarks>
-	///     <see cref="Put" />, <see cref="PutMany(T[])" /> and <see cref="ICollection.Clear" />
+	///     <see cref="Put" />, <see cref="PutMany" /> and <see cref="ICollection.Clear" />
 	///     only return once the data has been written to the disk / removed from it.
 	/// </remarks>
 	/// <remarks>
@@ -15,23 +15,25 @@ namespace IsabelDb
 	/// </remarks>
 	/// <typeparam name="T"></typeparam>
 	public interface IBag<T>
-		: ICollection<T>
+		: IReadOnlyBag<T>
+		, ICollection<T>
 	{
 		/// <summary>
 		///     Adds a new value to this bag.
 		/// </summary>
 		/// <param name="value"></param>
-		void Put(T value);
+		ValueKey Put(T value);
 
 		/// <summary>
 		///     Adds the given values to this bag.
 		/// </summary>
 		/// <param name="values"></param>
-		void PutMany(IEnumerable<T> values);
+		IEnumerable<ValueKey> PutMany(IEnumerable<T> values);
 
 		/// <summary>
+		///     Removes the value associated with the given key.
 		/// </summary>
-		/// <param name="values"></param>
-		void PutMany(params T[] values);
+		/// <param name="key"></param>
+		void Remove(ValueKey key);
 	}
 }

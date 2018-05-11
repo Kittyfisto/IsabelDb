@@ -91,7 +91,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 			}
 		}
 
-		protected override IDictionary<int, string> GetCollection(Database db, string name)
+		protected override IDictionary<int, string> GetCollection(IDatabase db, string name)
 		{
 			return db.GetDictionary<int, string>(name);
 		}
@@ -109,6 +109,11 @@ namespace IsabelDb.Test.Collections.Dictionary
 				pairs.Add(new KeyValuePair<int, string>(Interlocked.Increment(ref _lastKey), value));
 			}
 			collection.PutMany(pairs);
+		}
+
+		protected override void RemoveLastPutValue(IDictionary<int, string> collection)
+		{
+			collection.Remove(_lastKey);
 		}
 	}
 }

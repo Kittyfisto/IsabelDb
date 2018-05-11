@@ -112,9 +112,9 @@ namespace IsabelDb.Test
 				.WithMessage("The type of field 'Model' changed from 'System.String' to 'IsabelDb.Test.Entities.CpuModel' which is a breaking change!");
 		}
 
-		private Database CreateDatabase(params Type[] type)
+		private IDatabase CreateDatabase(params Type[] type)
 		{
-			return new Database(_connection, type, disposeConnection: false);
+			return new IsabelDb(_connection, type, disposeConnection: false, isReadOnly: false);
 		}
 	}
 }

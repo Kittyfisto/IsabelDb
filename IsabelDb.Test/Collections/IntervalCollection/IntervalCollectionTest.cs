@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using FluentAssertions;
+using IsabelDb.Test.Entities;
 using NUnit.Framework;
 
 namespace IsabelDb.Test.Collections.IntervalCollection
@@ -9,14 +12,16 @@ namespace IsabelDb.Test.Collections.IntervalCollection
 	public sealed class IntervalCollectionTest
 		: AbstractCollectionTest<IIntervalCollection<int, string>>
 	{
-		protected override IIntervalCollection<int, string> GetCollection(Database db, string name)
+		private int _lastId;
+
+		protected override IIntervalCollection<int, string> GetCollection(IDatabase db, string name)
 		{
 			return db.GetIntervalCollection<int, string>(name);
 		}
 
 		protected override void Put(IIntervalCollection<int, string> collection, string value)
 		{
-			collection.Put(Interval.Create(minimum: 1, maximum: 2), value);
+			collection.Put(Interval.Create(Interlocked.Increment(ref _lastId)), value);
 		}
 
 		protected override void PutMany(IIntervalCollection<int, string> collection, params string[] values)
@@ -24,10 +29,74 @@ namespace IsabelDb.Test.Collections.IntervalCollection
 			var pairs = new List<KeyValuePair<Interval<int>, string>>(values.Length);
 			foreach (var value in values)
 			{
-				var interval = Interval.Create(1, 2);
+				var interval = Interval.Create(Interlocked.Increment(ref _lastId));
 				pairs.Add(new KeyValuePair<Interval<int>, string>(interval, value));
 			}
 			collection.PutMany(pairs);
+		}
+
+		protected override void RemoveLastPutValue(IIntervalCollection<int, string> collection)
+		{
+			collection.Remove(_lastId);
+		}
+
+		[Test]
+		public void TestByteKey()
+		{
+			TestKeyLimits(byte.MinValue, byte.MaxValue);
+		}
+
+		[Test]
+		public void TestSByteKey()
+		{
+			TestKeyLimits(sbyte.MinValue, sbyte.MaxValue);
+		}
+
+		[Test]
+		public void TestShortKey()
+		{
+			TestKeyLimits(short.MinValue, short.MaxValue);
+		}
+
+		[Test]
+		public void TestUShortKey()
+		{
+			TestKeyLimits(ushort.MinValue, ushort.MaxValue);
+		}
+
+		[Test]
+		public void TestIntKey()
+		{
+			TestKeyLimits(int.MinValue, int.MaxValue);
+		}
+
+		[Test]
+		public void TestUIntKey()
+		{
+			TestKeyLimits(uint.MinValue, uint.MaxValue);
+		}
+
+		[Test]
+		public void TestLongKey()
+		{
+			TestKeyLimits(long.MinValue, long.MaxValue);
+		}
+
+		[Test]
+		public void TestULongKey()
+		{
+			TestKeyLimits(ulong.MinValue, ulong.MaxValue);
+		}
+
+		[Test]
+		public void TestCustomType()
+		{
+			using (var db = Database.CreateInMemory(new []{typeof(MySortableKey) }))
+			{
+				new Action(() => db.GetIntervalCollection<MySortableKey, string>("Values"))
+					.Should().Throw<NotSupportedException>("Custom types cannot be used as sortable keys")
+					.WithMessage("The type 'IsabelDb.Test.Entities.MySortableKey' may not be used as a key in an interval collection! Only basic numeric types can be used for now.");
+			}
 		}
 
 		[Test]
@@ -117,19 +186,6 @@ namespace IsabelDb.Test.Collections.IntervalCollection
 		}
 
 		[Test]
-		public void TestRemoveNonExistingValue()
-		{
-			using (var db = Database.CreateInMemory(NoCustomTypes))
-			{
-				var values = db.GetIntervalCollection<int, string>("Values");
-				values.Put(new Interval<int>(minimum: 1, maximum: 10), "Hello");
-
-				values.Remove(new ValueKey(value: 34214121));
-				values.GetValues(key: 5).Should().Equal("Hello");
-			}
-		}
-
-		[Test]
 		public void TestRemoveNonIntersectingInterval1()
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
@@ -162,18 +218,42 @@ namespace IsabelDb.Test.Collections.IntervalCollection
 		}
 
 		[Test]
-		public void TestRemoveOneSpecificValue()
+		public void TestRemoveIntervalReadOnlyDatabase()
+		{
+			using (var connection = CreateConnection())
+			{
+				using (var db = new IsabelDb(connection, NoCustomTypes, false, false))
+				{
+					var collection = db.GetIntervalCollection<int, string>("Stuff");
+					collection.Put(Interval.Create(1), "One");
+				}
+
+				using (var db = new IsabelDb(connection, NoCustomTypes, false, isReadOnly: true))
+				{
+					var collection = db.GetIntervalCollection<int, string>("Stuff");
+					collection.GetAllValues().Should().Equal("One");
+
+					new Action(() => collection.Remove(Interval.Create(1)))
+						.Should().Throw<InvalidOperationException>()
+						.WithMessage("The database has been opened read-only and therefore may not be modified");
+
+					collection.GetAllValues().Should().Equal("One");
+				}
+			}
+		}
+
+		private void TestKeyLimits<TKey>(TKey minimum, TKey maximum) where TKey : IComparable<TKey>
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetIntervalCollection<int, string>("Values");
-				values.Put(new Interval<int>(minimum: 1, maximum: 10), "A");
-				var b = values.Put(new Interval<int>(minimum: 2, maximum: 11), "B");
-				values.Put(new Interval<int>(minimum: 3, maximum: 12), "C");
+				var collection = db.GetIntervalCollection<TKey, string>("Values");
+				collection.Put(Interval.Create(minimum), "Helo");
+				collection.Put(Interval.Create(maximum), "Boomer");
 
-				values.GetAllValues().Should().Equal("A", "B", "C");
-				values.Remove(b);
-				values.GetAllValues().Should().Equal("A", "C");
+				collection.Count().Should().Be(2);
+				collection.GetValues(minimum).Should().Equal("Helo");
+				collection.GetValues(maximum).Should().Equal("Boomer");
+				collection.GetValues(minimum, maximum).Should().Equal("Helo", "Boomer");
 			}
 		}
 	}

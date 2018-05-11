@@ -26,6 +26,7 @@ namespace IsabelDb.Test.TypeModels
 			typeof(int),
 			typeof(uint),
 			typeof(long),
+			typeof(ulong),
 			typeof(byte[])
 		};
 

@@ -9,7 +9,7 @@ namespace IsabelDb.Benchmarks.GetByKey
 	public class DictionaryGetByKey
 		: IDisposable
 	{
-		private readonly Database _database;
+		private readonly IDatabase _database;
 		private readonly IDictionary<int, Book> _intKeyDictionary;
 		private readonly int _count;
 		private readonly IDictionary<long, Book> _longKeyDictionary;

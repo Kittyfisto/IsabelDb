@@ -195,15 +195,15 @@ namespace IsabelDb.Test
 			{
 				var charts = db.GetMultiValueDictionary<string, object>("Charts");
 				charts.Put("Pie", "Hello!");
-				charts.Get("Pie").Should().Equal("Hello!");
+				charts.GetValues("Pie").Should().Equal("Hello!");
 				charts.RemoveAll("Pie");
-				charts.Get("Pie").Should().BeEmpty();
+				charts.GetValues("Pie").Should().BeEmpty();
 			}
 
 			using (var db = Database.OpenOrCreate(_databaseName, NoCustomTypes))
 			{
 				var charts = db.GetMultiValueDictionary<string, object>("Charts");
-				charts.Get("Pie").Should().BeEmpty();
+				charts.GetValues("Pie").Should().BeEmpty();
 			}
 		}
 
@@ -241,7 +241,7 @@ namespace IsabelDb.Test
 			{
 				var values = db.GetMultiValueDictionary<int, string>("Values");
 				values.Put(1, "c");
-				values.Get(1).Should().Equal("a", "b", "c");
+				values.GetValues(1).Should().Equal("a", "b", "c");
 			}
 		}
 

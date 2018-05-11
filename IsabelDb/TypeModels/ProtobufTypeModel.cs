@@ -101,9 +101,11 @@ namespace IsabelDb.TypeModels
 		/// </summary>
 		/// <param name="connection"></param>
 		/// <param name="supportedTypes"></param>
+		/// <param name="isReadOnly"></param>
 		/// <returns></returns>
 		public static CompiledTypeModel Create(SQLiteConnection connection,
-		                                       IEnumerable<Type> supportedTypes)
+		                                       IEnumerable<Type> supportedTypes,
+		                                       bool isReadOnly = false)
 		{
 			var allTypes = BuiltInTypes.Concat(supportedTypes).ToList();
 			var currentTypeModel = TypeModel.Create(allTypes);
@@ -119,8 +121,11 @@ namespace IsabelDb.TypeModels
 			// and we can create a serializer for it!
 			var serializer = Compile(typeModel);
 
-			// Now that the serializer is compiled, we should also update the typemodel in the database.
-			typeModel.Write(connection);
+			if (!isReadOnly)
+			{
+				// Now that the serializer is compiled, we should also update the typemodel in the database.
+				typeModel.Write(connection);
+			}
 
 			return new CompiledTypeModel(serializer, typeModel);
 		}

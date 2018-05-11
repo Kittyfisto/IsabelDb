@@ -9,6 +9,7 @@ using NUnit.Framework;
 
 namespace IsabelDb.Test.Serializers
 {
+	[TestFixture]
 	public sealed class SerializerTest
 	{
 		public static IEnumerable<string> StringValues => new[] {null, string.Empty, "Hello", "World"};

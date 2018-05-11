@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
+using System.Linq;
 using System.Text;
 using IsabelDb.Serializers;
 
@@ -17,11 +18,31 @@ namespace IsabelDb.Collections
 		private readonly string _tableName;
 		private readonly ISQLiteSerializer<TValue> _valueSerializer;
 
+		private static readonly IReadOnlyList<Type> SupportedKeyTypes;
+
+		static OrderedCollection()
+		{
+			SupportedKeyTypes = new List<Type>
+			{
+				typeof(byte),
+				typeof(sbyte),
+				typeof(short),
+				typeof(ushort),
+				typeof(int),
+				typeof(uint),
+				typeof(long),
+				typeof(ulong),
+				typeof(float),
+				typeof(double)
+			};
+		}
+
 		public OrderedCollection(SQLiteConnection connection,
 		                         string tableName,
 		                         ISQLiteSerializer<TKey> keySerializer,
-		                         ISQLiteSerializer<TValue> valueSerializer)
-			: base(connection, tableName, valueSerializer)
+		                         ISQLiteSerializer<TValue> valueSerializer,
+		                         bool isReadOnly)
+			: base(connection, tableName, valueSerializer, isReadOnly)
 		{
 			_connection = connection;
 			_tableName = tableName;
@@ -41,6 +62,8 @@ namespace IsabelDb.Collections
 
 		public void Put(TKey key, TValue value)
 		{
+			ThrowIfReadOnly();
+
 			using (var command = _connection.CreateCommand())
 			{
 				command.CommandText = string.Format("INSERT INTO {0} (key, value) VALUES (@key, @value)",
@@ -54,6 +77,8 @@ namespace IsabelDb.Collections
 
 		public void PutMany(IEnumerable<KeyValuePair<TKey, TValue>> values)
 		{
+			ThrowIfReadOnly();
+
 			using (var transaction = _connection.BeginTransaction())
 			using (var command = _connection.CreateCommand())
 			{
@@ -73,13 +98,13 @@ namespace IsabelDb.Collections
 			}
 		}
 
-		public IEnumerable<TValue> GetValuesInRange(Interval<TKey> interval)
+		public IEnumerable<TValue> GetValues(Interval<TKey> interval)
 		{
 			using (var command = _connection.CreateCommand())
 			{
 				command.CommandText = string.Format("SELECT value FROM {0} WHERE key >= @minimum AND key <= @maximum", _tableName);
-				command.Parameters.AddWithValue("@minimum", interval.Minimum);
-				command.Parameters.AddWithValue("@maximum", interval.Maximum);
+				command.Parameters.AddWithValue("@minimum", _keySerializer.Serialize(interval.Minimum));
+				command.Parameters.AddWithValue("@maximum", _keySerializer.Serialize(interval.Maximum));
 
 				using (var reader = command.ExecuteReader())
 				{
@@ -94,6 +119,8 @@ namespace IsabelDb.Collections
 
 		public void RemoveRange(Interval<TKey> interval)
 		{
+			ThrowIfReadOnly();
+
 			using (var command = _connection.CreateCommand())
 			{
 				command.CommandText = string.Format("DELETE FROM {0} WHERE key >= @minimum AND key <= @maximum", _tableName);
@@ -117,6 +144,14 @@ namespace IsabelDb.Collections
 				command.CommandText = builder.ToString();
 				command.ExecuteNonQuery();
 			}
+		}
+
+		public static void ThrowIfUnsupportedKeyType()
+		{
+			var type = typeof(TKey);
+			if (!SupportedKeyTypes.Contains(type))
+				throw new NotSupportedException(string.Format("The type '{0}' may not be used as a key in an ordered collection! Only basic numeric types can be used for now.",
+					type.FullName));
 		}
 	}
 }

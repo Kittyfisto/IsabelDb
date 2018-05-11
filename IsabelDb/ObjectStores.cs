@@ -20,11 +20,12 @@ namespace IsabelDb
 		///     A list of serializers for .NET types which natively map to SQLite types
 		///     (int, string, etc...).
 		/// </summary>
-		private static readonly IReadOnlyDictionary<Type, ISQLiteSerializer> NativeSerializers;
+		private static readonly System.Collections.Generic.IReadOnlyDictionary<Type, ISQLiteSerializer> NativeSerializers;
 
 		private readonly System.Collections.Generic.Dictionary<string, IInternalCollection> _bags;
 
 		private readonly SQLiteConnection _connection;
+		private readonly bool _isReadOnly;
 
 		private readonly System.Collections.Generic.Dictionary<string, IInternalCollection> _dictionaries;
 		private readonly System.Collections.Generic.Dictionary<string, IInternalCollection> _multiValueDictionaries;
@@ -43,6 +44,7 @@ namespace IsabelDb
 				{typeof(uint), new UInt32Serializer()},
 				{typeof(int), new Int32Serializer()},
 				{typeof(long), new Int64Serializer()},
+				{typeof(ulong), new UInt64Serializer()},
 				{typeof(IPAddress), new IpAddressSerializer()},
 				{typeof(string), new StringSerializer()},
 				{typeof(float), new SingleSerializer()},
@@ -54,11 +56,13 @@ namespace IsabelDb
 		}
 
 		public ObjectStores(SQLiteConnection connection,
-		                    IReadOnlyList<Type> supportedTypes)
+		                    IReadOnlyList<Type> supportedTypes,
+		                    bool isReadOnly)
 		{
 			_connection = connection;
+			_isReadOnly = isReadOnly;
 
-			_typeModel = ProtobufTypeModel.Create(connection, supportedTypes);
+			_typeModel = ProtobufTypeModel.Create(connection, supportedTypes, isReadOnly);
 			_serializer = new Serializer(_typeModel);
 			_dictionaries = new System.Collections.Generic.Dictionary<string, IInternalCollection>();
 			_multiValueDictionaries = new System.Collections.Generic.Dictionary<string, IInternalCollection>();
@@ -79,6 +83,9 @@ namespace IsabelDb
 				}
 				else
 				{
+					if (_isReadOnly)
+						throw new ArgumentException(string.Format("Unable to find a collection named '{0}'", name));
+
 					if (!_typeModel.IsRegistered(typeof(T)))
 						throw new
 							ArgumentException(string.Format("The type '{0}' has not been registered when the database was created and thus may not be used as the key type in a collection",
@@ -89,6 +96,7 @@ namespace IsabelDb
 							ArgumentException(string.Format("The type '{0}' has not been registered when the database was created and thus may not be used as the value type in a collection",
 							                                typeof(TValue).FullName));
 
+					IntervalCollection<T, TValue>.ThrowIfInvalidKey();
 					tableName = AddTable(name, typeof(T), typeof(TValue));
 				}
 
@@ -117,6 +125,9 @@ namespace IsabelDb
 				}
 				else
 				{
+					if (_isReadOnly)
+						throw new ArgumentException(string.Format("Unable to find a collection named '{0}'", name));
+
 					if (!_typeModel.IsRegistered(typeof(TKey)))
 						throw new
 							ArgumentException(string.Format("The type '{0}' has not been registered when the database was created and thus may not be used as the key type in a collection",
@@ -155,6 +166,9 @@ namespace IsabelDb
 				}
 				else
 				{
+					if (_isReadOnly)
+						throw new ArgumentException(string.Format("Unable to find a collection named '{0}'", name));
+
 					if (!_typeModel.IsRegistered(typeof(TKey)))
 						throw new
 							ArgumentException(string.Format("The type '{0}' has not been registered when the database was created and thus may not be used as the key type in a collection",
@@ -193,6 +207,9 @@ namespace IsabelDb
 				}
 				else
 				{
+					if (_isReadOnly)
+						throw new ArgumentException(string.Format("Unable to find a collection named '{0}'", name));
+
 					if (!_typeModel.IsRegistered(typeof(TKey)))
 						throw new
 							ArgumentException(string.Format("The type '{0}' has not been registered when the database was created and thus may not be used as the key type in a collection",
@@ -202,6 +219,8 @@ namespace IsabelDb
 						throw new
 							ArgumentException(string.Format("The type '{0}' has not been registered when the database was created and thus may not be used as the value type in a collection",
 							                                typeof(TValue).FullName));
+
+					OrderedCollection<TKey, TValue>.ThrowIfUnsupportedKeyType();
 
 					tableName = AddTable(name, typeof(TKey), typeof(TValue));
 				}
@@ -230,6 +249,9 @@ namespace IsabelDb
 				}
 				else
 				{
+					if (_isReadOnly)
+						throw new ArgumentException(string.Format("Unable to find a collection named '{0}'", name));
+
 					if (!_typeModel.IsRegistered(typeof(T)))
 						throw new
 							ArgumentException(string.Format("The type '{0}' has not been registered when the database was created and thus may not be used as the value type in a collection",
@@ -312,7 +334,8 @@ namespace IsabelDb
 			return new IntervalCollection<T, TValue>(_connection,
 			                                   tableName,
 			                                   keySerializer,
-			                                   valueSerializer);
+			                                   valueSerializer,
+			                                   _isReadOnly);
 		}
 
 		private IInternalCollection CreateDictionary<TKey, TValue>(string tableName)
@@ -322,7 +345,8 @@ namespace IsabelDb
 			return new Collections.Dictionary<TKey, TValue>(_connection,
 			                                               tableName,
 			                                               keySerializer,
-			                                               valueSerializer);
+			                                               valueSerializer,
+			                                               _isReadOnly);
 		}
 
 		private IInternalCollection CreateMultiValueDictionary<TKey, TValue>(string tableName)
@@ -330,9 +354,10 @@ namespace IsabelDb
 			var keySerializer = GetSerializer<TKey>();
 			var valueSerializer = GetSerializer<TValue>();
 			return new MultiValueDictionary<TKey, TValue>(_connection,
-			                                           tableName,
-			                                           keySerializer,
-			                                           valueSerializer);
+			                                              tableName,
+			                                              keySerializer,
+			                                              valueSerializer,
+			                                              _isReadOnly);
 		}
 
 		private IInternalCollection CreateOrderedCollection<TKey, TValue>(string tableName) where TKey : IComparable<TKey>
@@ -340,9 +365,10 @@ namespace IsabelDb
 			var keySerializer = GetSerializer<TKey>();
 			var valueSerializer = GetSerializer<TValue>();
 			return new OrderedCollection<TKey, TValue>(_connection,
-			                                              tableName,
-			                                              keySerializer,
-			                                              valueSerializer);
+			                                           tableName,
+			                                           keySerializer,
+			                                           valueSerializer,
+			                                           _isReadOnly);
 		}
 
 		private IInternalCollection CreateBag<T>(string tableName)
@@ -350,7 +376,8 @@ namespace IsabelDb
 			var serializer = GetSerializer<T>();
 			return new Bag<T>(_connection,
 			                  tableName,
-			                  serializer);
+			                  serializer,
+			                  _isReadOnly);
 		}
 
 		private ISQLiteSerializer<T> GetSerializer<T>()

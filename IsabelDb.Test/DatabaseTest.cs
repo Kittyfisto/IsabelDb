@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using FluentAssertions;
 using IsabelDb.Test.Entities;
@@ -12,7 +13,7 @@ namespace IsabelDb.Test
 	{
 		private static IEnumerable<Type> NoCustomTypes => new Type[0];
 
-		private static void PutAndGetObjectTable<T>(Database db, T value1, T value2)
+		private static void PutAndGetObjectTable<T>(IDatabase db, T value1, T value2)
 		{
 			var store = db.GetDictionary<string, object>("ObjectTable");
 
@@ -30,7 +31,7 @@ namespace IsabelDb.Test
 			actualValue2.Value.Should().Be(value2);
 		}
 
-		private static void PutAndGetValueTable<T>(Database db, T value1, T value2)
+		private static void PutAndGetValueTable<T>(IDatabase db, T value1, T value2)
 		{
 			var store = db.GetDictionary<string, T>("ValueTable");
 
@@ -46,6 +47,40 @@ namespace IsabelDb.Test
 			var actualValue2 = persons.ElementAt(index: 1);
 			actualValue2.Key.Should().Be("bar");
 			actualValue2.Value.Should().Be(value2);
+		}
+
+		[Test]
+		[Description("OpenRead shall throw an appropriate exception if the file doesn't exist")]
+		public void TestOpenReadOnly1()
+		{
+			new Action(() => Database.OpenRead("doesn't exist", NoCustomTypes))
+				.Should().Throw<FileNotFoundException>();
+		}
+
+		[Test]
+		[Description("OpenRead shall be able to read from a readonly file")]
+		public void TestOpenReadOnly2()
+		{
+			const string filename = "ReadonlyDatabase.isdb";
+			if (File.Exists(filename))
+			{
+				File.SetAttributes(filename, FileAttributes.Normal);
+				File.Delete(filename);
+			}
+
+			using (var db = Database.OpenOrCreate(filename, NoCustomTypes))
+			{
+				var collection = db.GetBag<string>("Values");
+				collection.PutMany("a", "b", "c");
+			}
+
+			File.SetAttributes(filename, FileAttributes.ReadOnly);
+
+			using (var db = Database.OpenRead(filename, NoCustomTypes))
+			{
+				var collection = db.GetBag<string>("Values");
+				collection.GetAllValues().Should().Equal("a", "b", "c");
+			}
 		}
 
 		[Test]

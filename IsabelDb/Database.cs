@@ -1,114 +1,32 @@
-﻿using IsabelDb.TypeModels;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.IO;
-using System.Linq;
+using IsabelDb.TypeModels;
 
 namespace IsabelDb
 {
 	/// <summary>
-	///     A key-value store for objects.
+	///     Factory to create an <see cref="IDatabase" />.
 	/// </summary>
-	public sealed class Database
-		: IDisposable
+	public static class Database
 	{
-		private readonly SQLiteConnection _connection;
-		private readonly bool _disposeConnection;
-		private readonly ObjectStores _objectStores;
-
-		internal Database(SQLiteConnection connection, IEnumerable<Type> supportedTypes,
-		                  bool disposeConnection = true)
-		{
-			_connection = connection;
-			_disposeConnection = disposeConnection;
-
-			_objectStores = new ObjectStores(connection, supportedTypes.ToList());
-		}
-
-		/// <inheritdoc />
-		public void Dispose()
-		{
-			if (_disposeConnection)
-			{
-				_connection.Close();
-				_connection.Dispose();
-			}
-		}
-
-		/// <summary>
-		///     Returns an object store in which each object is identified by a key of the given type
-		///     <typeparamref name="TKey" />.
-		/// </summary>
-		/// <param name="name"></param>
-		/// <returns></returns>
-		public IDictionary<TKey, TValue> GetDictionary<TKey, TValue>(string name)
-		{
-			return _objectStores.GetDictionary<TKey, TValue>(name);
-		}
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <typeparam name="TKey"></typeparam>
-		/// <typeparam name="TValue"></typeparam>
-		/// <param name="name"></param>
-		/// <returns></returns>
-		public IMultiValueDictionary<TKey, TValue> GetMultiValueDictionary<TKey, TValue>(string name)
-		{
-			return _objectStores.GetMultiValueDictionary<TKey, TValue>(name);
-		}
-
-		/// <summary>
-		///     Gets or creates a collection with the given name.
-		/// </summary>
-		/// <typeparam name="TKey"></typeparam>
-		/// <typeparam name="TValue"></typeparam>
-		/// <param name="name"></param>
-		/// <returns></returns>
-		public IIntervalCollection<TKey, TValue> GetIntervalCollection<TKey, TValue>(string name)
-			where TKey : IComparable<TKey>
-		{
-			return _objectStores.GetIntervalCollection<TKey, TValue>(name);
-		}
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <typeparam name="TKey"></typeparam>
-		/// <typeparam name="TValue"></typeparam>
-		/// <param name="name"></param>
-		/// <returns></returns>
-		public IOrderedCollection<TKey, TValue> GetOrderedCollection<TKey, TValue>(string name) where TKey : IComparable<TKey>
-		{
-			return _objectStores.GetOrderedCollection<TKey, TValue>(name);
-		}
-
-		/// <summary>
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		public IBag<T> GetBag<T>(string name)
-		{
-			return _objectStores.GetBag<T>(name);
-		}
-
 		/// <summary>
 		///     Creates a new database which is backed by memory.
 		/// </summary>
 		/// <remarks>
-		///     This is probably only useful for tests.
+		///     This is probably only useful when writing tests to not thrash the disk.
 		/// </remarks>
 		/// <param name="supportedTypes">The list of custom types which are to be stored in / retrieved from the database</param>
 		/// <returns></returns>
-		public static Database CreateInMemory(IEnumerable<Type> supportedTypes)
+		public static IDatabase CreateInMemory(IEnumerable<Type> supportedTypes)
 		{
 			var connection = new SQLiteConnection("Data Source=:memory:");
 			try
 			{
 				connection.Open();
 				CreateTables(connection);
-				return new Database(connection, supportedTypes);
+				return new IsabelDb(connection, supportedTypes, true, false);
 			}
 			catch (Exception)
 			{
@@ -123,7 +41,7 @@ namespace IsabelDb
 		/// <param name="databasePath"></param>
 		/// <param name="supportedTypes">The list of custom types which are to be stored in / retrieved from the database</param>
 		/// <returns></returns>
-		public static Database OpenOrCreate(string databasePath, IEnumerable<Type> supportedTypes)
+		public static IDatabase OpenOrCreate(string databasePath, IEnumerable<Type> supportedTypes)
 		{
 			if (!File.Exists(databasePath)) SQLiteConnection.CreateFile(databasePath);
 
@@ -133,7 +51,7 @@ namespace IsabelDb
 			{
 				connection.Open();
 				CreateTablesIfNecessary(connection);
-				return new Database(connection, supportedTypes);
+				return new IsabelDb(connection, supportedTypes, true, false);
 			}
 			catch (Exception)
 			{
@@ -144,12 +62,28 @@ namespace IsabelDb
 
 		/// <summary>
 		///     Opens an existing database at the given path.
+		///     The database can both be read from and written to.
 		/// </summary>
 		/// <param name="databaseFilePath"></param>
 		/// <param name="supportedTypes">The list of custom types which are to be stored in / retrieved from the database</param>
 		/// <returns></returns>
 		/// <exception cref="FileNotFoundException"></exception>
-		public static Database Open(string databaseFilePath, IEnumerable<Type> supportedTypes)
+		public static IDatabase Open(string databaseFilePath, IEnumerable<Type> supportedTypes)
+		{
+			return Open(databaseFilePath, supportedTypes, false);
+		}
+
+		/// <summary>
+		///     Opens an existing database at the given path **for reading only**.
+		/// </summary>
+		/// <param name="databaseFilePath"></param>
+		/// <param name="supportedTypes"></param>
+		public static IReadOnlyDatabase OpenRead(string databaseFilePath, IEnumerable<Type> supportedTypes)
+		{
+			return Open(databaseFilePath, supportedTypes, true);
+		}
+
+		private static IDatabase Open(string databaseFilePath, IEnumerable<Type> supportedTypes, bool isReadOnly)
 		{
 			if (!File.Exists(databaseFilePath))
 				throw new FileNotFoundException("Unable to open the given database", databaseFilePath);
@@ -160,7 +94,7 @@ namespace IsabelDb
 			{
 				connection.Open();
 				EnsureTableSchema(connection);
-				return new Database(connection, supportedTypes);
+				return new IsabelDb(connection, supportedTypes, true, isReadOnly);
 			}
 			catch (Exception)
 			{

@@ -28,8 +28,9 @@ namespace IsabelDb.Collections
 		public Dictionary(SQLiteConnection connection,
 		                             string tableName,
 		                             ISQLiteSerializer<TKey> keySerializer,
-		                             ISQLiteSerializer<TValue> valueSerializer)
-			: base(connection, tableName, valueSerializer)
+		                             ISQLiteSerializer<TValue> valueSerializer,
+		                             bool isReadOnly)
+			: base(connection, tableName, valueSerializer, isReadOnly)
 		{
 			_connection = connection;
 			_tableName = tableName;
@@ -136,6 +137,8 @@ namespace IsabelDb.Collections
 			if (key == null)
 				throw new ArgumentNullException(nameof(key));
 
+			ThrowIfReadOnly();
+
 			if (value == null)
 				Remove(key);
 			else
@@ -144,6 +147,8 @@ namespace IsabelDb.Collections
 
 		public void PutMany(IEnumerable<KeyValuePair<TKey, TValue>> values)
 		{
+			ThrowIfReadOnly();
+
 			using (var transaction = BeginTransaction())
 			using (var command = CreateCommand(_putQuery))
 			{
@@ -165,6 +170,8 @@ namespace IsabelDb.Collections
 		{
 			if (key == null)
 				throw new ArgumentNullException(nameof(key));
+
+			ThrowIfReadOnly();
 
 			using (var transaction = BeginTransaction())
 			{

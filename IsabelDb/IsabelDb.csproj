@@ -59,16 +59,27 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\SerializableContractAttribute.cs" />
+    <Compile Include="BagExtensions.cs" />
     <Compile Include="Collections\AbstractCollection.cs" />
     <Compile Include="Collections\OrderedCollection.cs" />
     <Compile Include="Exceptions\BreakingChangeException.cs" />
     <Compile Include="Exceptions\TypeMismatchException.cs" />
     <Compile Include="Exceptions\TypeResolveException.cs" />
+    <Compile Include="IDatabase.cs" />
     <Compile Include="IIntervalCollection.cs" />
     <Compile Include="IMultiValueDictionary.cs" />
     <Compile Include="Interval.cs" />
     <Compile Include="Collections\IntervalCollection.cs" />
     <Compile Include="IOrderedCollection.cs" />
+    <Compile Include="IReadOnlyBag.cs" />
+    <Compile Include="IReadOnlyCollection.cs" />
+    <Compile Include="IReadOnlyDatabase.cs" />
+    <Compile Include="IReadOnlyDictionary.cs" />
+    <Compile Include="IReadOnlyIntervalCollection.cs" />
+    <Compile Include="IReadOnlyMultiValueDictionary.cs" />
+    <Compile Include="IReadOnlyOrderedCollection.cs" />
+    <Compile Include="IsabelDb.cs" />
+    <Compile Include="Serializers\UInt64Serializer.cs" />
     <Compile Include="Serializers\ValueKeySerializer.cs" />
     <Compile Include="ValueKey.cs" />
     <Compile Include="Collections\MultiValueDictionary.cs" />

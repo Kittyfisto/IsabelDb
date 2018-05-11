@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SQLite;
+using System.IO;
 using FluentAssertions;
 using NUnit.Framework;
 
@@ -179,8 +181,212 @@ namespace IsabelDb.Test.Collections
 			}
 		}
 
-		protected abstract TCollection GetCollection(Database db, string name);
+		#region Session Tests
+
+		[Test]
+		[Description("Verifies that values stored in one session can be read from the collection in a different one")]
+		public void TestPutGetDifferentSessions()
+		{
+			using (var connection = CreateConnection())
+			{
+				using (var db = CreateDatabase(connection))
+				{
+					var collection = GetCollection(db, "Values");
+					Put(collection, "Stuff");
+				}
+
+				using (var db = CreateDatabase(connection))
+				{
+					var collection = GetCollection(db, "Values");
+					collection.Count().Should().Be(1);
+					collection.GetAllValues().Should().Equal("Stuff");
+				}
+			}
+		}
+
+		[Test]
+		[Description("Verifies that new values can be appended to the same collection in a different session")]
+		public void TestPutPutDifferentSessions()
+		{
+			using (var connection = CreateConnection())
+			{
+				using (var db = CreateDatabase(connection))
+				{
+					var collection = GetCollection(db, "Values");
+					Put(collection, "Peter");
+				}
+
+				using (var db = CreateDatabase(connection))
+				{
+					var collection = GetCollection(db, "Values");
+					Put(collection, "Parker");
+					collection.Count().Should().Be(2);
+					collection.GetAllValues().Should().Equal("Peter", "Parker");
+				}
+			}
+		}
+
+		[Test]
+		[Description("Verifies that removed values are still gone, even if the database is reopened")]
+		public void TestRemoveDifferentSessions()
+		{
+			using (var connection = CreateConnection())
+			{
+				using (var db = CreateDatabase(connection))
+				{
+					var collection = GetCollection(db, "Values");
+					Put(collection, "Peter");
+					collection.GetAllValues().Should().Equal("Peter");
+
+					RemoveLastPutValue(collection);
+					collection.Count().Should().Be(0);
+					collection.GetAllValues().Should().BeEmpty();
+				}
+
+				using (var db = CreateDatabase(connection))
+				{
+					var collection = GetCollection(db, "Values");
+					collection.Count().Should().Be(0);
+					collection.GetAllValues().Should().BeEmpty();
+				}
+			}
+		}
+
+		[Test]
+		public void TestGetNonExistantCollectionInReadOnlyDatabase()
+		{
+			using (var connection = CreateConnection())
+			using (var db = new IsabelDb(connection, NoCustomTypes, false, isReadOnly: true))
+			{
+				new Action(() => GetCollection((IDatabase) db, "Stuff"))
+					.Should().Throw<ArgumentException>()
+					.WithMessage("Unable to find a collection named 'Stuff'");
+			}
+		}
+
+		[Test]
+		public void TestPutReadOnlyDatabase()
+		{
+			using (var connection = CreateConnection())
+			{
+				using (var db = new IsabelDb(connection, NoCustomTypes, false, false))
+				{
+					var collection = GetCollection(db, "Stuff");
+					Put(collection, "One");
+				}
+
+				using (var db = new IsabelDb(connection, NoCustomTypes, false, isReadOnly: true))
+				{
+					var stuff = GetCollection(db, "Stuff");
+					stuff.GetAllValues().Should().Equal("One");
+
+					new Action(() => Put(stuff, "Two"))
+						.Should().Throw<InvalidOperationException>()
+						.WithMessage("The database has been opened read-only and therefore may not be modified");
+
+					stuff.GetAllValues().Should().Equal("One");
+				}
+			}
+		}
+
+		[Test]
+		public void TestClearReadOnlyDatabase()
+		{
+			using (var connection = CreateConnection())
+			{
+				using (var db = new IsabelDb(connection, NoCustomTypes, false, false))
+				{
+					var collection = GetCollection(db, "Stuff");
+					Put(collection, "One");
+				}
+
+				using (var db = new IsabelDb(connection, NoCustomTypes, false, isReadOnly: true))
+				{
+					var collection = GetCollection(db, "Stuff");
+					collection.GetAllValues().Should().Equal("One");
+
+					new Action(() => collection.Clear())
+						.Should().Throw<InvalidOperationException>()
+						.WithMessage("The database has been opened read-only and therefore may not be modified");
+
+					collection.GetAllValues().Should().Equal("One");
+				}
+			}
+		}
+
+		[Test]
+		public void TestPutManyReadOnlyDatabase()
+		{
+			using (var connection = CreateConnection())
+			{
+				using (var db = new IsabelDb(connection, NoCustomTypes, false, false))
+				{
+					var collection = GetCollection(db, "Stuff");
+					Put(collection, "One");
+				}
+
+				using (var db = new IsabelDb(connection, NoCustomTypes, false, isReadOnly: true))
+				{
+					var collection = GetCollection(db, "Stuff");
+					collection.GetAllValues().Should().Equal("One");
+
+					new Action(() => PutMany(collection, "Two", "Three"))
+						.Should().Throw<InvalidOperationException>()
+						.WithMessage("The database has been opened read-only and therefore may not be modified");
+
+					collection.GetAllValues().Should().Equal("One");
+				}
+			}
+		}
+
+		[Test]
+		public void TestRemoveReadOnlyDatabase()
+		{
+			using (var connection = CreateConnection())
+			{
+				using (var db = new IsabelDb(connection, NoCustomTypes, false, false))
+				{
+					var collection = GetCollection(db, "Stuff");
+					Put(collection, "One");
+				}
+
+				using (var db = new IsabelDb(connection, NoCustomTypes, false, isReadOnly: true))
+				{
+					var collection = GetCollection(db, "Stuff");
+					collection.GetAllValues().Should().Equal("One");
+
+					new Action(() => RemoveLastPutValue(collection))
+						.Should().Throw<InvalidOperationException>()
+						.WithMessage("The database has been opened read-only and therefore may not be modified");
+
+					collection.GetAllValues().Should().Equal("One");
+				}
+			}
+		}
+
+		#endregion
+
+		protected abstract TCollection GetCollection(IDatabase db, string name);
 		protected abstract void Put(TCollection collection, string value);
 		protected abstract void PutMany(TCollection collection, params string[] values);
+		protected abstract void RemoveLastPutValue(TCollection collection);
+
+		protected SQLiteConnection CreateConnection()
+		{
+			var connection = new SQLiteConnection("Data Source=:memory:");
+			connection.Open();
+			Database.CreateTables(connection);
+			return connection;
+		}
+
+		protected IDatabase CreateDatabase(SQLiteConnection connection, params Type[] types)
+		{
+			return new IsabelDb(connection, types, disposeConnection: false, isReadOnly: false);
+		}
+
+		protected IReadOnlyDatabase CreateReadOnlyDatabase(SQLiteConnection connection, params Type[] types)
+		{
+			return new IsabelDb(connection, types, disposeConnection: false, isReadOnly: true);
+		}
 	}
 }

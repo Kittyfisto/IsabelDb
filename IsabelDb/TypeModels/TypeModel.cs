@@ -44,6 +44,7 @@ namespace IsabelDb.TypeModels
 			typeof(int),
 			typeof(uint),
 			typeof(long),
+			typeof(ulong),
 			typeof(byte[])
 		};
 

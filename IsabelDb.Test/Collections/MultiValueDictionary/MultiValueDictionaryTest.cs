@@ -39,7 +39,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 				values.Put(1, "Foo");
 
 				values.RemoveAll(2);
-				values.Get(1).Should().Equal("Foo");
+				values.GetValues(1).Should().Equal("Foo");
 			}
 		}
 
@@ -53,8 +53,8 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 				values.Put(2, "Bar");
 
 				values.RemoveAll(1);
-				values.Get(1).Should().BeEmpty();
-				values.Get(2).Should().Equal("Bar");
+				values.GetValues(1).Should().BeEmpty();
+				values.GetValues(2).Should().Equal("Bar");
 			}
 		}
 
@@ -69,8 +69,8 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 				values.Put(2, "Hello");
 
 				values.RemoveAll(1);
-				values.Get(1).Should().BeEmpty();
-				values.Get(2).Should().Equal("Hello");
+				values.GetValues(1).Should().BeEmpty();
+				values.GetValues(2).Should().Equal("Hello");
 			}
 		}
 
@@ -80,7 +80,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
 				var values = db.GetMultiValueDictionary<int, string>("Values");
-				values.Get(0).Should().BeEmpty();
+				values.GetValues(0).Should().BeEmpty();
 			}
 		}
 
@@ -95,10 +95,8 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 				values.Put(3, 1337);
 				values.Put(4, 9001);
 
-				var actualValues = values.GetMany(new[] {2, 3});
-				actualValues.Should().HaveCount(2);
-				actualValues.ElementAt(0).Should().Equal(Math.PI);
-				actualValues.ElementAt(1).Should().Equal(1337);
+				var actualValues = values.GetValues(new[] {2, 3});
+				actualValues.Should().Equal(Math.PI, 1337);
 			}
 		}
 
@@ -122,8 +120,8 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 				values.Put(1, "Bar");
 				values.Put(2, "Hello");
 
-				values.Get(1).Should().Equal("Foo", "Bar");
-				values.Get(2).Should().Equal("Hello");
+				values.GetValues(1).Should().Equal("Foo", "Bar");
+				values.GetValues(2).Should().Equal("Hello");
 			}
 		}
 
@@ -138,8 +136,8 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 				values.Put(1, "a");
 				values.Put(2, "a");
 
-				values.Get(1).Should().Equal("a", "a");
-				values.Get(2).Should().Equal("a");
+				values.GetValues(1).Should().Equal("a", "a");
+				values.GetValues(2).Should().Equal("a");
 			}
 		}
 
@@ -152,7 +150,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 				values.PutMany(1, new[] {"a", "b"});
 				values.PutMany(1, new []{"c", "d"});
 
-				values.Get(1).Should().Equal("a", "b", "c", "d");
+				values.GetValues(1).Should().Equal("a", "b", "c", "d");
 			}
 		}
 
@@ -165,8 +163,8 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 				values.PutMany(1, new []{"Foo", "Bar"});
 				values.PutMany(2, new []{"Hello"});
 
-				values.Get(1).Should().Equal("Foo", "Bar");
-				values.Get(2).Should().Equal("Hello");
+				values.GetValues(1).Should().Equal("Foo", "Bar");
+				values.GetValues(2).Should().Equal("Hello");
 			}
 		}
 
@@ -183,8 +181,8 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 				});
 
 				values.Count().Should().Be(3);
-				values.Get(1).Should().Equal("a", "b");
-				values.Get(2).Should().Equal("Hello");
+				values.GetValues(1).Should().Equal("a", "b");
+				values.GetValues(2).Should().Equal("Hello");
 			}
 		}
 
@@ -201,7 +199,107 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 			}
 		}
 
-		protected override IMultiValueDictionary<int, string> GetCollection(Database db, string name)
+		[Test]
+		public void TestByteKey()
+		{
+			TestKeyLimits(byte.MinValue, byte.MaxValue);
+		}
+
+		[Test]
+		public void TestSByteKey()
+		{
+			TestKeyLimits(sbyte.MinValue, sbyte.MaxValue);
+		}
+
+		[Test]
+		public void TestShortKey()
+		{
+			TestKeyLimits(short.MinValue, short.MaxValue);
+		}
+
+		[Test]
+		public void TestUShortKey()
+		{
+			TestKeyLimits(ushort.MinValue, ushort.MaxValue);
+		}
+
+		[Test]
+		public void TestIntKey()
+		{
+			TestKeyLimits(int.MinValue, int.MaxValue);
+		}
+
+		[Test]
+		public void TestUIntKey()
+		{
+			TestKeyLimits(uint.MinValue, uint.MaxValue);
+		}
+
+		[Test]
+		public void TestLongKey()
+		{
+			TestKeyLimits(long.MinValue, long.MaxValue);
+		}
+
+		[Test]
+		public void TestULongKey()
+		{
+			TestKeyLimits(ulong.MinValue, ulong.MaxValue);
+		}
+
+		[Test]
+		public void TestPutMany2ReadOnlyDatabase()
+		{
+			using (var connection = CreateConnection())
+			{
+				using (var db = new IsabelDb(connection, NoCustomTypes, false, false))
+				{
+					var collection = db.GetMultiValueDictionary<int, string>("Stuff");
+					collection.Put(1, "One");
+					collection.Put(1, "Two");
+				}
+
+				using (var db = new IsabelDb(connection, NoCustomTypes, false, isReadOnly: true))
+				{
+					var collection = db.GetMultiValueDictionary<int, string>("Stuff");
+					collection.GetAllValues().Should().Equal("One", "Two");
+
+					new Action(() => collection.PutMany(1, new []{"Three"}))
+						.Should().Throw<InvalidOperationException>()
+						.WithMessage("The database has been opened read-only and therefore may not be modified");
+
+					collection.GetAllValues().Should().Equal("One", "Two");
+				}
+			}
+		}
+
+		[Test]
+		public void TestRemoveAllReadOnlyDatabase()
+		{
+			using (var connection = CreateConnection())
+			{
+				using (var db = new IsabelDb(connection, NoCustomTypes, false, false))
+				{
+					var collection = db.GetMultiValueDictionary<int, string>("Stuff");
+					collection.Put(1, "One");
+					collection.Put(1, "Two");
+				}
+
+				using (var db = new IsabelDb(connection, NoCustomTypes, false, isReadOnly: true))
+				{
+					var collection = db.GetMultiValueDictionary<int, string>("Stuff");
+					collection.GetAllValues().Should().Equal("One", "Two");
+
+					new Action(() => collection.RemoveAll(1))
+						.Should().Throw<InvalidOperationException>()
+						.WithMessage("The database has been opened read-only and therefore may not be modified");
+
+					collection.GetAllValues().Should().Equal("One", "Two");
+				}
+			}
+		}
+
+		protected override IMultiValueDictionary<int, string> GetCollection(IDatabase db, string name)
 		{
 			return db.GetMultiValueDictionary<int, string>(name);
 		}
@@ -219,6 +317,26 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 				pairs.Add(new KeyValuePair<int, IEnumerable<string>>(Interlocked.Increment(ref _lastKey), new []{value}));
 			}
 			collection.PutMany(pairs);
+		}
+
+		protected override void RemoveLastPutValue(IMultiValueDictionary<int, string> collection)
+		{
+			collection.RemoveAll(_lastKey);
+		}
+
+		private void TestKeyLimits<TKey>(TKey minimum, TKey maximum) where TKey : IComparable<TKey>
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				var collection = db.GetMultiValueDictionary<TKey, string>("Values");
+				collection.Put(minimum, "Helo");
+				collection.Put(maximum, "Boomer");
+
+				collection.Count().Should().Be(2);
+				collection.GetValues(minimum).Should().Equal(new object[]{"Helo"});
+				collection.GetValues(maximum).Should().Equal(new object[]{"Boomer"});
+				collection.GetValues(new[] {minimum, maximum}).Should().Equal(new object[] {"Helo", "Boomer"});
+			}
 		}
 	}
 }

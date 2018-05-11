@@ -19,6 +19,7 @@ namespace IsabelDb
 				case DbType.Int32:
 				case DbType.UInt32:
 				case DbType.Int64:
+				case DbType.UInt64:
 					return "INTEGER";
 
 				case DbType.Single:

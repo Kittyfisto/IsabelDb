@@ -9,7 +9,7 @@ namespace IsabelDb.Benchmarks.GetByKey
 	public class MultiValueDictionaryRemoveByKey
 		: IDisposable
 	{
-		private readonly Database _database;
+		private readonly IDatabase _database;
 		private IMultiValueDictionary<int, Book> _multiValueDictionary;
 		private readonly Random _random;
 

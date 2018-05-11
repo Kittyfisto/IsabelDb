@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SQLite;
+using System.Threading;
 using IsabelDb.Serializers;
 
 namespace IsabelDb.Collections
@@ -14,14 +16,19 @@ namespace IsabelDb.Collections
 		private readonly string _put;
 		private readonly ISQLiteSerializer<T> _serializer;
 		private readonly string _table;
+		private readonly string _tableName;
+		private long _lastId;
 
 		public Bag(SQLiteConnection connection,
 		                      string tableName,
-		                      ISQLiteSerializer<T> serializer)
-			: base(connection, tableName, serializer)
+		                      ISQLiteSerializer<T> serializer,
+		                      bool isReadOnly)
+			: base(connection, tableName, serializer, isReadOnly)
 		{
 			_connection = connection;
 			_serializer = serializer;
+			_tableName = tableName;
+
 			CreateTableIfNecessary(connection, serializer, tableName, out _table);
 
 			_put = string.Format("INSERT INTO {0} (value) VALUES (@value)", tableName);
@@ -67,35 +74,136 @@ namespace IsabelDb.Collections
 
 		#region Implementation of IListObjectStore<T>
 
-		public void Put(T value)
+		public ValueKey Put(T value)
 		{
+			ThrowIfReadOnly();
+
 			using (var command = CreateCommand(_put))
 			{
+				var id = Interlocked.Increment(ref _lastId);
+				command.Parameters.AddWithValue("@id", id);
 				command.Parameters.AddWithValue("@value", _serializer.Serialize(value));
 				command.ExecuteNonQuery();
+				return new ValueKey(id);
 			}
 		}
 
-		public void PutMany(IEnumerable<T> values)
+		public IEnumerable<ValueKey> PutMany(IEnumerable<T> values)
 		{
+			ThrowIfReadOnly();
+
 			using (var transaction = _connection.BeginTransaction())
 			using (var command = CreateCommand(_put))
 			{
-				var parameter = command.Parameters.Add("@value", _serializer.DatabaseType);
+				var idParameter = command.Parameters.Add("@id", DbType.Int64);
+				var valueParameter = command.Parameters.Add("@value", _serializer.DatabaseType);
 
+				var ret = new List<ValueKey>();
 				foreach (var value in values)
 				{
-					parameter.Value = _serializer.Serialize(value);
+					var id = Interlocked.Increment(ref _lastId);
+					idParameter.Value = id;
+					valueParameter.Value = _serializer.Serialize(value);
 					command.ExecuteNonQuery();
+
+					ret.Add(new ValueKey(id));
 				}
 
 				transaction.Commit();
+				return ret;
 			}
 		}
 
-		public void PutMany(params T[] values)
+		public T GetValue(ValueKey key)
 		{
-			PutMany((IEnumerable<T>) values);
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = string.Format("SELECT value FROM {0} WHERE id = @id", _tableName);
+				command.Parameters.AddWithValue("@id", key.Value);
+				using (var reader = command.ExecuteReader())
+				{
+					if (!reader.Read())
+						throw new KeyNotFoundException();
+
+					if (!_serializer.TryDeserialize(reader, 0, out var value))
+						throw new NotImplementedException();
+
+					return value;
+				}
+			}
+		}
+
+		public bool TryGetValue(ValueKey key, out T value)
+		{
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = string.Format("SELECT value FROM {0} WHERE id = @id", _tableName);
+				command.Parameters.AddWithValue("@id", key.Value);
+				using (var reader = command.ExecuteReader())
+				{
+					if (reader.Read())
+					{
+						if (_serializer.TryDeserialize(reader, 0, out value))
+						return true;
+					}
+				}
+
+				value = default(T);
+				return false;
+			}
+		}
+
+		public IEnumerable<T> GetValues(Interval<ValueKey> interval)
+		{
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = string.Format("SELECT value FROM {0} WHERE id >= @minimum AND id <= @maximum", _tableName);
+				command.Parameters.AddWithValue("@minimum", interval.Minimum.Value);
+				command.Parameters.AddWithValue("@maximum", interval.Maximum.Value);
+
+				using (var reader = command.ExecuteReader())
+				{
+					while (reader.Read())
+					{
+						if (_serializer.TryDeserialize(reader, 0, out var value))
+							yield return value;
+					}
+				}
+			}
+		}
+
+		public IEnumerable<T> GetManyValues(IEnumerable<ValueKey> keys)
+		{
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = string.Format("SELECT value FROM {0} WHERE id = @id", _tableName);
+				var idParameter = command.Parameters.Add("@id", DbType.Int64);
+
+				foreach (var key in keys)
+				{
+					idParameter.Value = key.Value;
+					using (var reader = command.ExecuteReader())
+					{
+						while (reader.Read())
+						{
+							if (_serializer.TryDeserialize(reader, 0, out var value))
+								yield return value;
+						}
+					}
+				}
+			}
+		}
+
+		public void Remove(ValueKey key)
+		{
+			ThrowIfReadOnly();
+
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = string.Format("DELETE FROM {0} WHERE id = @id", _tableName);
+				command.Parameters.AddWithValue("@id", key.Value);
+				command.ExecuteNonQuery();
+			}
 		}
 
 		#endregion

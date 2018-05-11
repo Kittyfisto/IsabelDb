@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using IsabelDb.Serializers;
@@ -14,17 +15,37 @@ namespace IsabelDb.Collections
 		, IInternalCollection
 		where T : IComparable<T>
 	{
+		private static readonly IReadOnlyList<Type> SupportedKeys;
+
 		private readonly SQLiteConnection _connection;
 		private readonly string _tableName;
 		private readonly ISQLiteSerializer<T> _keySerializer;
 		private readonly ISQLiteSerializer<TValue> _valueSerializer;
 		private long _lastId;
 
+		static IntervalCollection()
+		{
+			SupportedKeys = new List<Type>
+			{
+				typeof(byte),
+				typeof(sbyte),
+				typeof(short),
+				typeof(ushort),
+				typeof(int),
+				typeof(uint),
+				typeof(long),
+				typeof(ulong),
+				typeof(float),
+				typeof(double)
+			};
+		}
+
 		public IntervalCollection(SQLiteConnection connection,
 		                          string tableName,
 		                          ISQLiteSerializer<T> keySerializer,
-		                          ISQLiteSerializer<TValue> valueSerializer)
-			: base(connection, tableName, valueSerializer)
+		                          ISQLiteSerializer<TValue> valueSerializer,
+		                          bool isReadOnly)
+			: base(connection, tableName, valueSerializer, isReadOnly)
 		{
 			_connection = connection;
 			_tableName = tableName;
@@ -33,7 +54,15 @@ namespace IsabelDb.Collections
 
 			CreateObjectTableIfNecessary();
 
-			_lastId = 0;
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = string.Format("SELECT MAX(id) FROM {0}", _tableName);
+				var value = command.ExecuteScalar();
+				if (!Convert.IsDBNull(value))
+				{
+					_lastId = Convert.ToInt64(value);
+				}
+			}
 		}
 
 		#region Implementation of IInternalCollection
@@ -44,8 +73,10 @@ namespace IsabelDb.Collections
 
 		#region Implementation of IIntervalCollection<T,TValue>
 
-		public ValueKey Put(Interval<T> interval, TValue value)
+		public void Put(Interval<T> interval, TValue value)
 		{
+			ThrowIfReadOnly();
+
 			using (var command = _connection.CreateCommand())
 			{
 				var id = Interlocked.Increment(ref _lastId);
@@ -57,12 +88,13 @@ namespace IsabelDb.Collections
 				command.Parameters.AddWithValue("@value", _valueSerializer.Serialize(value));
 
 				command.ExecuteNonQuery();
-				return new ValueKey(id);
 			}
 		}
 
-		public IEnumerable<ValueKey> PutMany(IEnumerable<KeyValuePair<Interval<T>, TValue>> values)
+		public void PutMany(IEnumerable<KeyValuePair<Interval<T>, TValue>> values)
 		{
+			ThrowIfReadOnly();
+
 			using (var transaction = _connection.BeginTransaction())
 			using (var command = _connection.CreateCommand())
 			{
@@ -90,7 +122,6 @@ namespace IsabelDb.Collections
 				}
 
 				transaction.Commit();
-				return ret;
 			}
 		}
 
@@ -103,9 +134,9 @@ namespace IsabelDb.Collections
 		{
 			using (var command = _connection.CreateCommand())
 			{
-				command.CommandText = string.Format("SELECT value FROM {0} WHERE minimum <= @value AND maximum >= @value",
-				                                    _tableName);
-				command.Parameters.AddWithValue("@value", _keySerializer.Serialize(key));
+				command.CommandText = string.Format("SELECT value FROM {0} WHERE minimum <= @key AND maximum >= @key",
+													_tableName);
+				command.Parameters.AddWithValue("@key", _keySerializer.Serialize(key));
 				using (var reader = command.ExecuteReader())
 				{
 					while (reader.Read())
@@ -163,13 +194,10 @@ namespace IsabelDb.Collections
 			}
 		}
 
-		public void Move(ValueKey key, Interval<T> interval)
-		{
-			throw new NotImplementedException();
-		}
-
 		public void Remove(T key)
 		{
+			ThrowIfReadOnly();
+
 			using (var command = _connection.CreateCommand())
 			{
 				command.CommandText = string.Format("DELETE FROM {0} WHERE minimum <= @key AND maximum >= @key", _tableName);
@@ -180,21 +208,13 @@ namespace IsabelDb.Collections
 
 		public void Remove(Interval<T> interval)
 		{
+			ThrowIfReadOnly();
+
 			using (var command = _connection.CreateCommand())
 			{
 				command.CommandText = string.Format("DELETE FROM {0} WHERE NOT (@maximum < minimum OR @minimum > maximum)", _tableName);
 				command.Parameters.AddWithValue("@minimum", _keySerializer.Serialize(interval.Minimum));
 				command.Parameters.AddWithValue("@maximum", _keySerializer.Serialize(interval.Maximum));
-				command.ExecuteNonQuery();
-			}
-		}
-
-		public void Remove(ValueKey valueKey)
-		{
-			using (var command = _connection.CreateCommand())
-			{
-				command.CommandText = string.Format("DELETE FROM {0} WHERE id = @id", _tableName);
-				command.Parameters.AddWithValue("@id", valueKey.Value);
 				command.ExecuteNonQuery();
 			}
 		}
@@ -213,10 +233,20 @@ namespace IsabelDb.Collections
 				builder.AppendFormat("maximum {0} NOT NULL, ", SQLiteHelper.GetAffinity(_keySerializer.DatabaseType));
 				builder.AppendFormat("value {0} NOT NULL", SQLiteHelper.GetAffinity(_valueSerializer.DatabaseType));
 				builder.Append(");");
-				builder.AppendFormat("CREATE INDEX IF NOT EXISTS min on {0}(minimum)", _tableName);
+				builder.AppendFormat("CREATE INDEX IF NOT EXISTS {0}_minimum on {0}(minimum);", _tableName);
 				command.CommandText = builder.ToString();
 				command.ExecuteNonQuery();
 			}
+		}
+
+		public static void ThrowIfInvalidKey()
+		{
+			var key = typeof(T);
+			if (!SupportedKeys.Contains(key))
+				throw new NotSupportedException(
+					string.Format(
+						"The type '{0}' may not be used as a key in an interval collection! Only basic numeric types can be used for now.",
+						key.FullName));
 		}
 	}
 }

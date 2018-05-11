@@ -10,7 +10,7 @@ namespace IsabelDb.Benchmarks.GetByKey
 	public class MultiValueDictionaryGetByKey
 		: IDisposable
 	{
-		private readonly Database _database;
+		private readonly IDatabase _database;
 		private IMultiValueDictionary<int, Book> _multiValueDictionary;
 		private readonly Random _random;
 
@@ -45,7 +45,7 @@ namespace IsabelDb.Benchmarks.GetByKey
 		public void Get()
 		{
 			var key = _random.Next(0, N - 1);
-			_multiValueDictionary.Get(key).ToList();
+			_multiValueDictionary.GetValues(key).ToList();
 		}
 
 		#region IDisposable

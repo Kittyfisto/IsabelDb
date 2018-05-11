@@ -10,7 +10,8 @@ namespace IsabelDb
 	/// <typeparam name="TKey"></typeparam>
 	/// <typeparam name="TValue"></typeparam>
 	public interface IOrderedCollection<TKey, TValue>
-		: ICollection<TValue>
+		: IReadOnlyOrderedCollection<TKey, TValue>
+		, ICollection<TValue>
 		where TKey : IComparable<TKey>
 	{
 		/// <summary>
@@ -23,13 +24,6 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="pairs"></param>
 		void PutMany(IEnumerable<KeyValuePair<TKey, TValue>> pairs);
-
-		/// <summary>
-		///     Returns all values in the given range.
-		/// </summary>
-		/// <param name="interval"></param>
-		/// <returns></returns>
-		IEnumerable<TValue> GetValuesInRange(Interval<TKey> interval);
 
 		/// <summary>
 		///     Removes all values in the given range.

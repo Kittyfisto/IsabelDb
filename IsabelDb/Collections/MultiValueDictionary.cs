@@ -27,8 +27,9 @@ namespace IsabelDb.Collections
 		public MultiValueDictionary(SQLiteConnection connection,
 		                            string tableName,
 		                            ISQLiteSerializer<TKey> keySerializer,
-		                            ISQLiteSerializer<TValue> valueSerializer)
-			: base(connection, tableName, valueSerializer)
+		                            ISQLiteSerializer<TValue> valueSerializer,
+		                            bool isReadOnly)
+			: base(connection, tableName, valueSerializer, isReadOnly)
 		{
 			_connection = connection;
 			_tableName = tableName;
@@ -59,6 +60,8 @@ namespace IsabelDb.Collections
 
 		public void Put(TKey key, TValue value)
 		{
+			ThrowIfReadOnly();
+
 			using (var command = _connection.CreateCommand())
 			{
 				command.CommandText = _putQuery;
@@ -73,6 +76,8 @@ namespace IsabelDb.Collections
 
 		public void PutMany(TKey key, IEnumerable<TValue> values)
 		{
+			ThrowIfReadOnly();
+
 			using (var transaction = _connection.BeginTransaction())
 			using (var command = _connection.CreateCommand())
 			{
@@ -95,6 +100,8 @@ namespace IsabelDb.Collections
 
 		public void PutMany(IEnumerable<KeyValuePair<TKey, IEnumerable<TValue>>> values)
 		{
+			ThrowIfReadOnly();
+
 			using (var transaction = _connection.BeginTransaction())
 			using (var command = _connection.CreateCommand())
 			{
@@ -120,7 +127,7 @@ namespace IsabelDb.Collections
 			}
 		}
 
-		public IEnumerable<TValue> Get(TKey key)
+		public IEnumerable<TValue> GetValues(TKey key)
 		{
 			using (var command = _connection.CreateCommand())
 			{
@@ -140,33 +147,28 @@ namespace IsabelDb.Collections
 			}
 		}
 
-		public IEnumerable<IEnumerable<TValue>> GetMany(IEnumerable<TKey> keys)
+		public IEnumerable<TValue> GetValues(IEnumerable<TKey> keys)
 		{
 			using (var command = _connection.CreateCommand())
 			{
 				command.CommandText = _getByKey;
 				var keyParameter = command.Parameters.Add("@key", _keySerializer.DatabaseType);
 
-				var ret = new List<List<TValue>>();
 				foreach (var key in keys)
 				{
 					keyParameter.Value = _keySerializer.Serialize(key);
 
-					var values = new List<TValue>();
-					ret.Add(values);
 					using (var reader = command.ExecuteReader())
 					{
 						while (reader.Read())
 						{
 							if (_valueSerializer.TryDeserialize(reader, 0, out var value))
 							{
-								values.Add(value);
+								yield return value;
 							}
 						}
 					}
 				}
-
-				return ret;
 			}
 		}
 
@@ -205,17 +207,14 @@ namespace IsabelDb.Collections
 
 		public void RemoveAll(TKey key)
 		{
+			ThrowIfReadOnly();
+
 			using (var command = _connection.CreateCommand())
 			{
 				command.CommandText = _removeQuery;
 				command.Parameters.AddWithValue("@key", _keySerializer.Serialize(key));
 				command.ExecuteNonQuery();
 			}
-		}
-
-		public void Remove(ValueKey key)
-		{
-			throw new System.NotImplementedException();
 		}
 
 		#endregion
@@ -234,7 +233,7 @@ namespace IsabelDb.Collections
 					string.Format("CREATE TABLE IF NOT EXISTS {0} (id INTEGER PRIMARY KEY NOT NULL, " +
 					              "key {1} NOT NULL, " +
 					              "value {2} NOT NULL);" +
-					              "CREATE INDEX IF NOT EXISTS keys ON {0}(key)",
+					              "CREATE INDEX IF NOT EXISTS {0}_keys ON {0}(key)",
 					              _tableName,
 					              SQLiteHelper.GetAffinity(_keySerializer.DatabaseType),
 					              SQLiteHelper.GetAffinity(_valueSerializer.DatabaseType));

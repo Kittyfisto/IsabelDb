@@ -9,7 +9,7 @@ namespace IsabelDb.Benchmarks.GetByKey
 	public class DictionaryPutMany
 		: IDisposable
 	{
-		private readonly Database _database;
+		private readonly IDatabase _database;
 		private IDictionary<int, Book> _books;
 
 		public DictionaryPutMany()

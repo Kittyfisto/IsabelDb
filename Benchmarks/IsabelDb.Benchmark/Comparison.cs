@@ -18,7 +18,7 @@ namespace IsabelDb.Benchmark
 			var filePath = CreateDatabaseName(databasePath, "isdb");
 			if (File.Exists(filePath))
 				File.Delete(filePath);
-			_isabel = new TestBench<Database>(Database.OpenOrCreate(filePath, new []{typeof(Customer)}),
+			_isabel = new TestBench<IDatabase>(Database.OpenOrCreate(filePath, new []{typeof(Customer)}),
 			                                    filePath);
 
 			var liteDatabase = CreateDatabaseName(databasePath, "ldb");
@@ -39,7 +39,7 @@ namespace IsabelDb.Benchmark
 			1000000
 		};
 
-		private TestBench<Database> _isabel;
+		private TestBench<IDatabase> _isabel;
 		private TestBench<LiteDatabase> _lite;
 
 		private static string CreateDatabaseName(string path, string extension)
