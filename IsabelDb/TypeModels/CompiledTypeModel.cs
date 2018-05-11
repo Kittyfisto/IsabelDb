@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace IsabelDb.TypeModels
 {
@@ -15,6 +16,13 @@ namespace IsabelDb.TypeModels
 		}
 
 		#region Implementation of ITypeModel
+
+		public IEnumerable<TypeDescription> TypeDescriptions => _typeModel.TypeDescriptions;
+
+		public TypeDescription GetTypeDescription(int typeId)
+		{
+			return _typeModel.GetTypeDescription(typeId);
+		}
 
 		public int GetTypeId(Type type)
 		{

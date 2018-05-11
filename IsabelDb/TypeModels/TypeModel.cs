@@ -48,6 +48,7 @@ namespace IsabelDb.TypeModels
 			typeof(byte[])
 		};
 
+		private readonly Dictionary<int, TypeDescription> _typeDescriptionsById;
 		private readonly Dictionary<int, Type> _idToTypes;
 		private readonly Dictionary<Type, TypeDescription> _typeDescriptions;
 		private readonly Dictionary<Type, int> _typesToId;
@@ -56,6 +57,7 @@ namespace IsabelDb.TypeModels
 
 		public TypeModel()
 		{
+			_typeDescriptionsById = new Dictionary<int, TypeDescription>();
 			_typeDescriptions = new Dictionary<Type, TypeDescription>();
 			_idToTypes = new Dictionary<int, Type>();
 			_typesToId = new Dictionary<Type, int>();
@@ -64,7 +66,7 @@ namespace IsabelDb.TypeModels
 
 		public IEnumerable<Type> Types => _typeDescriptions.Keys;
 
-		public IEnumerable<TypeDescription> TypeDescriptions => _typeDescriptions.Values;
+		public IEnumerable<TypeDescription> TypeDescriptions => _typeDescriptionsById.Values;
 
 		public TypeDescription this[Type key] => _typeDescriptions[key];
 
@@ -97,6 +99,13 @@ namespace IsabelDb.TypeModels
 				return null;
 
 			return type;
+		}
+
+		[Pure]
+		public TypeDescription GetTypeDescription(int typeId)
+		{
+			_typeDescriptionsById.TryGetValue(typeId, out var typeDescription);
+			return typeDescription;
 		}
 
 		[Pure]
@@ -200,6 +209,7 @@ namespace IsabelDb.TypeModels
 				var id = _nextId;
 				++_nextId;
 				typeDescription = TypeDescription.Create(type, id, baseTypeDescription, members);
+				_typeDescriptionsById.Add(id, typeDescription);
 				_typeDescriptions.Add(type, typeDescription);
 				_typesToId.Add(type, id);
 				_idToTypes.Add(id, type);
@@ -338,12 +348,10 @@ namespace IsabelDb.TypeModels
 			{
 				_nextId = Math.Max(_nextId, typeId + 1);
 				var type = typeResolver.Resolve(typeName);
-				if (type != null)
-				{
-					var baseType = baseId != null ? TryGetType(baseId.Value) : null;
-					Add(typeName, type, typeId, baseType, fields: null);
-				}
-				else
+				var baseType = baseId != null ? TryGetType(baseId.Value) : null;
+				Add(typeName, type, typeId, baseType, baseId, fields: null);
+
+				if (type == null)
 				{
 					Log.ErrorFormat("Unable to resolve '{0}' to a .NET type! Values of this type will not be readable", typeName);
 				}
@@ -408,19 +416,24 @@ namespace IsabelDb.TypeModels
 		                     Type type,
 		                     int typeId,
 		                     Type baseType,
+		                     int? baseTypeId,
 		                     IEnumerable<FieldDescription> fields)
 		{
-			var baseTypeDescription = baseType != null ? _typeDescriptions[baseType] : null;
+			//var baseTypeDescription = baseType != null ? _typeDescriptions[baseType] : null;
+			var baseTypeDescription = baseTypeId != null ? _typeDescriptionsById[baseTypeId.Value] : null;
 			var typeDescription = TypeDescription.Create(type,
 			                                             typename,
 			                                             typeId,
 			                                             baseTypeDescription,
 			                                             fields);
 
-
-			_typeDescriptions.Add(type, typeDescription);
-			_typesToId.Add(type, typeId);
-			_idToTypes.Add(typeId, type);
+			_typeDescriptionsById.Add(typeId, typeDescription);
+			if (type != null)
+			{
+				_typeDescriptions.Add(type, typeDescription);
+				_typesToId.Add(type, typeId);
+				_idToTypes.Add(typeId, type);
+			}
 		}
 
 		private int? GetBaseTypeId(TypeDescription typeDescription)

@@ -40,6 +40,9 @@ namespace IsabelDb.TypeModels
 
 		public Type Resolve(string typeName)
 		{
+			if (typeName == null)
+				return null;
+
 			_typesByName.TryGetValue(typeName, out var type);
 			return type;
 		}

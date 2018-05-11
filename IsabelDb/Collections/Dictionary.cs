@@ -10,7 +10,6 @@ namespace IsabelDb.Collections
 	internal sealed class Dictionary<TKey, TValue>
 		: AbstractCollection<TValue>
 		, IDictionary<TKey, TValue>
-		, IInternalCollection
 	{
 		private readonly SQLiteConnection _connection;
 
@@ -26,11 +25,12 @@ namespace IsabelDb.Collections
 		private readonly ISQLiteSerializer<TValue> _valueSerializer;
 
 		public Dictionary(SQLiteConnection connection,
-		                             string tableName,
-		                             ISQLiteSerializer<TKey> keySerializer,
-		                             ISQLiteSerializer<TValue> valueSerializer,
-		                             bool isReadOnly)
-			: base(connection, tableName, valueSerializer, isReadOnly)
+		                  string name,
+		                  string tableName,
+		                  ISQLiteSerializer<TKey> keySerializer,
+		                  ISQLiteSerializer<TValue> valueSerializer,
+		                  bool isReadOnly)
+			: base(connection, name, tableName, valueSerializer, isReadOnly)
 		{
 			_connection = connection;
 			_tableName = tableName;
@@ -184,7 +184,9 @@ namespace IsabelDb.Collections
 			}
 		}
 
-		public Type ValueType => typeof(TValue);
+		public override CollectionType Type => CollectionType.Dictionary;
+
+		public override Type KeyType => typeof(TKey);
 
 		#region Overrides of Object
 

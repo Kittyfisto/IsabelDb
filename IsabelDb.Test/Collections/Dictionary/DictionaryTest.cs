@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using FluentAssertions;
+using IsabelDb.Test.Entities;
 using NUnit.Framework;
 
 namespace IsabelDb.Test.Collections.Dictionary
@@ -70,14 +72,26 @@ namespace IsabelDb.Test.Collections.Dictionary
 		}
 
 		[Test]
-		public void TestGetDictionaryDifferentTypes()
+		public void TestGetDictionaryDifferentKeyTypes()
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var a = db.GetDictionary<string, string>("Names");
+				db.GetDictionary<string, string>("Names");
+				new Action(() => db.GetDictionary<int, string>("Names"))
+					.Should().Throw<TypeMismatchException>()
+					.WithMessage("The Dictionary 'Names' uses keys of type 'System.String' which does not match the requested key type 'System.Int32': If your intent was to create a new Dictionary then you have to pick a new name!");
+			}
+		}
+
+		[Test]
+		public void TestGetDictionaryDifferentValueTypes()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				db.GetDictionary<string, string>("Names");
 				new Action(() => db.GetDictionary<string, int>("Names"))
-					.Should().Throw<ArgumentException>()
-					.WithMessage("The dictionary 'Names' has a value type of 'System.String': If your intent was to create a new dictionary, you have to pick a new name!");
+					.Should().Throw<TypeMismatchException>()
+					.WithMessage("The Dictionary 'Names' uses values of type 'System.String' which does not match the requested value type 'System.Int32': If your intent was to create a new Dictionary then you have to pick a new name!");
 			}
 		}
 
@@ -90,6 +104,72 @@ namespace IsabelDb.Test.Collections.Dictionary
 				db.GetDictionary<string, object>("SomeTable").GetMany("foo", "bar").Should().BeEmpty();
 			}
 		}
+
+		[Test]
+		[Defect("https://github.com/Kittyfisto/IsabelDb/issues/1")]
+		[Description("Verifies that collections skip un-deserializable values")]
+		public void TestUnresolvableValue()
+		{
+			using (var connection = CreateConnection())
+			{
+				using (var db = CreateDatabase(connection, typeof(CustomKey)))
+				{
+					var values = db.GetDictionary<int, object>("Foo");
+					values.Put(key: 0, value: 42);
+					values.Put(key: 1, value: new CustomKey {A = 42});
+					values.Put(key: 2, value: "Hello, World!");
+				}
+
+				using (var db = CreateDatabase(connection, typeof(CustomKey)))
+				{
+					var values = db.GetDictionary<int, object>("Foo");
+					var allValues = values.GetAll();
+					allValues.Count().Should().Be(3, because: "because we're still able to resolve all types");
+				}
+
+				using (var db = CreateDatabase(connection, NoCustomTypes))
+				{
+					var values = db.GetDictionary<int, object>("Foo");
+					var allValues = values.GetAll();
+					allValues.Count().Should().Be(2, because: "because we're no longer able to resolve CustomKey");
+					allValues.ElementAt(index: 0).Key.Should().Be(0);
+					allValues.ElementAt(index: 0).Value.Should().Be(42);
+					allValues.ElementAt(index: 1).Key.Should().Be(2);
+					allValues.ElementAt(index: 1).Value.Should().Be("Hello, World!");
+				}
+			}
+		}
+
+		[Test]
+		[Defect("https://github.com/Kittyfisto/IsabelDb/issues/1")]
+		[Description("Verifies that a dictionary cannot be retrieved if it's value type is unresolved")]
+		public void TestUnresolvableValueType()
+		{
+			using (var connection = CreateConnection())
+			{
+				using (var db = CreateDatabase(connection, typeof(CustomKey)))
+				{
+					var dictionary = db.GetDictionary<int, CustomKey>("MoreKeys");
+					dictionary.Put(key: 1, value: new CustomKey {C = 2});
+					dictionary.Put(key: 2, value: new CustomKey {D = -2});
+				}
+
+				using (var db = CreateDatabase(connection, typeof(CustomKey)))
+				{
+					var dictionary = db.GetDictionary<int, CustomKey>("MoreKeys");
+					dictionary.GetAll().Count().Should().Be(2);
+				}
+
+				using (var db = CreateDatabase(connection, NoCustomTypes))
+				{
+					new Action(() => db.GetDictionary<int, CustomKey>("MoreKeys"))
+						.Should().Throw<TypeResolveException>()
+						.WithMessage("A Dictionary named 'MoreKeys' already exists but it's value type could not be resolved: If your intent is to re-use this existing collection, then you need to add 'IsabelDb.Test.Entities.CustomKey' to the list of supported types upon creating the database. If your intent is to create a new collection, then you need to pick a different name!");
+				}
+			}
+		}
+
+		protected override CollectionType CollectionType => CollectionType.Dictionary;
 
 		protected override IDictionary<int, string> GetCollection(IDatabase db, string name)
 		{

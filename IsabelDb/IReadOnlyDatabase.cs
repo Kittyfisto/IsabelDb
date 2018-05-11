@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace IsabelDb
 {
@@ -12,6 +13,11 @@ namespace IsabelDb
 	public interface IReadOnlyDatabase
 		: IDisposable
 	{
+		/// <summary>
+		///     Provides access to the list of collections in this database.
+		/// </summary>
+		IEnumerable<IReadOnlyCollection> Collections { get; }
+
 		/// <summary>
 		///      Returns a "bag" collection which has previously been created with
 		///      <see cref="IDatabase.GetBag{T}"/>.

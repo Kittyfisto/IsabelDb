@@ -10,7 +10,6 @@ namespace IsabelDb.Collections
 	internal sealed class MultiValueDictionary<TKey, TValue>
 		: AbstractCollection<TValue>
 		, IMultiValueDictionary<TKey, TValue>
-		, IInternalCollection
 	{
 		private readonly SQLiteConnection _connection;
 		private readonly string _tableName;
@@ -25,11 +24,12 @@ namespace IsabelDb.Collections
 		private long _lastId;
 
 		public MultiValueDictionary(SQLiteConnection connection,
+		                            string name,
 		                            string tableName,
 		                            ISQLiteSerializer<TKey> keySerializer,
 		                            ISQLiteSerializer<TValue> valueSerializer,
 		                            bool isReadOnly)
-			: base(connection, tableName, valueSerializer, isReadOnly)
+			: base(connection, name, tableName, valueSerializer, isReadOnly)
 		{
 			_connection = connection;
 			_tableName = tableName;
@@ -221,7 +221,9 @@ namespace IsabelDb.Collections
 
 		#region Implementation of IInternalCollection
 
-		public Type ValueType => typeof(TValue);
+		public override CollectionType Type => CollectionType.MultiValueDictionary;
+
+		public override Type KeyType => typeof(TKey);
 
 		#endregion
 

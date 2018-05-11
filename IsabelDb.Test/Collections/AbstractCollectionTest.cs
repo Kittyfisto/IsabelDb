@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
-using System.IO;
+using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
 
@@ -178,6 +178,34 @@ namespace IsabelDb.Test.Collections
 				}
 
 				collection.GetAllValues().Should().Equal(values);
+			}
+		}
+
+		[Test]
+		public void TestGetCollections()
+		{
+			using (var connection = CreateConnection())
+			{
+				using (var db = new IsabelDb(connection, NoCustomTypes, false, false))
+				{
+					db.Collections.Should().BeEmpty();
+					var collection = GetCollection(db, "Stuff");
+					db.Collections.Should().Equal(collection);
+				}
+			}
+		}
+
+		[Test]
+		public void TestCollectionName()
+		{
+			using (var connection = CreateConnection())
+			{
+				using (var db = new IsabelDb(connection, NoCustomTypes, false, false))
+				{
+					var collection = GetCollection(db, "For The Fallen Dreams");
+					collection.Name.Should().Be("For The Fallen Dreams");
+					collection.Type.Should().Be(CollectionType);
+				}
 			}
 		}
 
@@ -364,8 +392,51 @@ namespace IsabelDb.Test.Collections
 			}
 		}
 
+		[Test]
+		public void TestGetCollectionsAfterReopen()
+		{
+			using (var connection = CreateConnection())
+			{
+				using (var db = new IsabelDb(connection, NoCustomTypes, false, false))
+				{
+					db.Collections.Should().BeEmpty();
+					var collection = GetCollection(db, "Stuff");
+					db.Collections.Should().Equal(collection);
+				}
+
+				using (var db = new IsabelDb(connection, NoCustomTypes, false, isReadOnly: true))
+				{
+					db.Collections.Should().HaveCount(1);
+					var collection = db.Collections.First();
+					var actualCollection = GetCollection(db, "Stuff");
+					collection.Should().BeSameAs(actualCollection);
+				}
+			}
+		}
+
+		[Test]
+		public void TestRestoreCollection()
+		{
+			using (var connection = CreateConnection())
+			{
+				using (var db = CreateDatabase(connection))
+				{
+					GetCollection(db, "For The Fallen Dreams");
+				}
+
+				using (var db = CreateDatabase(connection))
+				{
+					db.Collections.Should().HaveCount(1);
+					var collection = db.Collections.First();
+					collection.Name.Should().Be("For The Fallen Dreams");
+					collection.Type.Should().Be(CollectionType);
+				}
+			}
+		}
+
 		#endregion
 
+		protected abstract CollectionType CollectionType { get; }
 		protected abstract TCollection GetCollection(IDatabase db, string name);
 		protected abstract void Put(TCollection collection, string value);
 		protected abstract void PutMany(TCollection collection, params string[] values);

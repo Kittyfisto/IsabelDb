@@ -20,6 +20,30 @@ namespace IsabelDb.Test.Collections.OrderedCollection
 		}
 
 		[Test]
+		public void TestGetGetOrderedCollectionDifferentKeyTypes()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				db.GetOrderedCollection<int, string>("Names");
+				new Action(() => db.GetOrderedCollection<uint, string>("Names"))
+					.Should().Throw<TypeMismatchException>()
+					.WithMessage("The OrderedCollection 'Names' uses keys of type 'System.Int32' which does not match the requested key type 'System.UInt32': If your intent was to create a new OrderedCollection then you have to pick a new name!");
+			}
+		}
+
+		[Test]
+		public void TestGetGetOrderedCollectionDifferentValueTypes()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				db.GetOrderedCollection<int, string>("Names");
+				new Action(() => db.GetOrderedCollection<int, int>("Names"))
+					.Should().Throw<TypeMismatchException>()
+					.WithMessage("The OrderedCollection 'Names' uses values of type 'System.String' which does not match the requested value type 'System.Int32': If your intent was to create a new OrderedCollection then you have to pick a new name!");
+			}
+		}
+
+		[Test]
 		public void TestGetValuesInRange()
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
@@ -168,6 +192,8 @@ namespace IsabelDb.Test.Collections.OrderedCollection
 		}
 
 		#region Overrides of AbstractCollectionTest<IOrderedCollection<int,string>>
+
+		protected override CollectionType CollectionType => CollectionType.OrderedCollection;
 
 		protected override IOrderedCollection<int, string> GetCollection(IDatabase db, string name)
 		{

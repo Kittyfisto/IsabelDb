@@ -62,6 +62,8 @@
     <Compile Include="BagExtensions.cs" />
     <Compile Include="Collections\AbstractCollection.cs" />
     <Compile Include="Collections\OrderedCollection.cs" />
+    <Compile Include="Collections\UnresolvedTypeCollection.cs" />
+    <Compile Include="CollectionType.cs" />
     <Compile Include="Exceptions\BreakingChangeException.cs" />
     <Compile Include="Exceptions\TypeMismatchException.cs" />
     <Compile Include="Exceptions\TypeResolveException.cs" />
@@ -81,6 +83,7 @@
     <Compile Include="IsabelDb.cs" />
     <Compile Include="Serializers\UInt64Serializer.cs" />
     <Compile Include="Serializers\ValueKeySerializer.cs" />
+    <Compile Include="Collections\UnknownTypeCollection.cs" />
     <Compile Include="ValueKey.cs" />
     <Compile Include="Collections\MultiValueDictionary.cs" />
     <Compile Include="TypeModels\CompiledTypeModel.cs" />

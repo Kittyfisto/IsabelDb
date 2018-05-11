@@ -8,24 +8,32 @@ namespace IsabelDb.Collections
 {
 	internal abstract class AbstractCollection<TValue>
 		: ICollection<TValue>
+		, IInternalCollection
 	{
 		private readonly SQLiteConnection _connection;
 		private readonly string _tableName;
 		private readonly ISQLiteSerializer<TValue> _valueSerializer;
 		private readonly bool _isReadOnly;
+		private readonly string _name;
 
 		protected AbstractCollection(SQLiteConnection connection,
+		                             string name,
 		                             string tableName,
 		                             ISQLiteSerializer<TValue> valueSerializer,
 		                             bool isReadOnly)
 		{
 			_connection = connection;
+			_name = name;
 			_tableName = tableName;
 			_valueSerializer = valueSerializer;
 			_isReadOnly = isReadOnly;
 		}
 
 		#region Implementation of ICollection
+
+		public string Name => _name;
+
+		public abstract CollectionType Type { get; }
 
 		public IEnumerable<TValue> GetAllValues()
 		{
@@ -75,5 +83,17 @@ namespace IsabelDb.Collections
 			if (_isReadOnly)
 				throw new InvalidOperationException("The database has been opened read-only and therefore may not be modified");
 		}
+
+		#region Implementation of IInternalCollection
+
+		public abstract Type KeyType { get; }
+
+		public Type ValueType => typeof(TValue);
+
+		public string ValueTypeName => throw new NotImplementedException();
+
+		public string KeyTypeName => throw new NotImplementedException();
+
+		#endregion
 	}
 }

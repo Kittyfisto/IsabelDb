@@ -28,6 +28,16 @@ namespace IsabelDb
 	public interface IReadOnlyCollection
 	{
 		/// <summary>
+		///     The name of this collection.
+		/// </summary>
+		string Name { get; }
+
+		/// <summary>
+		///     The of this collection.
+		/// </summary>
+		CollectionType Type { get; }
+
+		/// <summary>
 		///     Returns the list of all values.
 		/// </summary>
 		/// <remarks>
@@ -47,8 +57,8 @@ namespace IsabelDb
 		/// </remarks>
 		/// <remarks>
 		///     TODO: There's a second argument as to why this method should be removed.
-		///           In its current incarnation it is incredibly slow. I thought select count()
-		///           was fast, but alas, it requires a full table scan (great).
+		///     In its current incarnation it is incredibly slow. I thought select count()
+		///     was fast, but alas, it requires a full table scan (great).
 		/// </remarks>
 		long Count();
 	}

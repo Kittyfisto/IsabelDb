@@ -9,17 +9,16 @@ using IsabelDb.Serializers;
 
 namespace IsabelDb.Collections
 {
-	internal sealed class IntervalCollection<T, TValue>
+	internal sealed class IntervalCollection<TKey, TValue>
 		: AbstractCollection<TValue>
-		, IIntervalCollection<T, TValue>
-		, IInternalCollection
-		where T : IComparable<T>
+		, IIntervalCollection<TKey, TValue>
+		where TKey : IComparable<TKey>
 	{
 		private static readonly IReadOnlyList<Type> SupportedKeys;
 
 		private readonly SQLiteConnection _connection;
 		private readonly string _tableName;
-		private readonly ISQLiteSerializer<T> _keySerializer;
+		private readonly ISQLiteSerializer<TKey> _keySerializer;
 		private readonly ISQLiteSerializer<TValue> _valueSerializer;
 		private long _lastId;
 
@@ -41,11 +40,12 @@ namespace IsabelDb.Collections
 		}
 
 		public IntervalCollection(SQLiteConnection connection,
+		                          string name,
 		                          string tableName,
-		                          ISQLiteSerializer<T> keySerializer,
+		                          ISQLiteSerializer<TKey> keySerializer,
 		                          ISQLiteSerializer<TValue> valueSerializer,
 		                          bool isReadOnly)
-			: base(connection, tableName, valueSerializer, isReadOnly)
+			: base(connection, name, tableName, valueSerializer, isReadOnly)
 		{
 			_connection = connection;
 			_tableName = tableName;
@@ -65,15 +65,9 @@ namespace IsabelDb.Collections
 			}
 		}
 
-		#region Implementation of IInternalCollection
-
-		public Type ValueType => throw new NotImplementedException();
-
-		#endregion
-
 		#region Implementation of IIntervalCollection<T,TValue>
 
-		public void Put(Interval<T> interval, TValue value)
+		public void Put(Interval<TKey> interval, TValue value)
 		{
 			ThrowIfReadOnly();
 
@@ -91,7 +85,7 @@ namespace IsabelDb.Collections
 			}
 		}
 
-		public void PutMany(IEnumerable<KeyValuePair<Interval<T>, TValue>> values)
+		public void PutMany(IEnumerable<KeyValuePair<Interval<TKey>, TValue>> values)
 		{
 			ThrowIfReadOnly();
 
@@ -125,12 +119,12 @@ namespace IsabelDb.Collections
 			}
 		}
 
-		public IEnumerable<Interval<T>> GetManyIntervals(IEnumerable<ValueKey> keys)
+		public IEnumerable<Interval<TKey>> GetManyIntervals(IEnumerable<ValueKey> keys)
 		{
 			throw new NotImplementedException();
 		}
 
-		public IEnumerable<TValue> GetValues(T key)
+		public IEnumerable<TValue> GetValues(TKey key)
 		{
 			using (var command = _connection.CreateCommand())
 			{
@@ -150,7 +144,7 @@ namespace IsabelDb.Collections
 			}
 		}
 
-		public IEnumerable<TValue> GetValues(T minimum, T maximum)
+		public IEnumerable<TValue> GetValues(TKey minimum, TKey maximum)
 		{
 			using (var command = _connection.CreateCommand())
 			{
@@ -172,7 +166,7 @@ namespace IsabelDb.Collections
 			}
 		}
 
-		public IEnumerable<KeyValuePair<Interval<T>, TValue>> GetAll()
+		public IEnumerable<KeyValuePair<Interval<TKey>, TValue>> GetAll()
 		{
 			using (var command = _connection.CreateCommand())
 			{
@@ -187,14 +181,14 @@ namespace IsabelDb.Collections
 						    _valueSerializer.TryDeserialize(reader, 2, out var value))
 						{
 							var interval = Interval.Create(minimum, maximum);
-							yield return new KeyValuePair<Interval<T>, TValue>(interval, value);
+							yield return new KeyValuePair<Interval<TKey>, TValue>(interval, value);
 						}
 					}
 				}
 			}
 		}
 
-		public void Remove(T key)
+		public void Remove(TKey key)
 		{
 			ThrowIfReadOnly();
 
@@ -206,7 +200,7 @@ namespace IsabelDb.Collections
 			}
 		}
 
-		public void Remove(Interval<T> interval)
+		public void Remove(Interval<TKey> interval)
 		{
 			ThrowIfReadOnly();
 
@@ -241,12 +235,20 @@ namespace IsabelDb.Collections
 
 		public static void ThrowIfInvalidKey()
 		{
-			var key = typeof(T);
+			var key = typeof(TKey);
 			if (!SupportedKeys.Contains(key))
 				throw new NotSupportedException(
 					string.Format(
 						"The type '{0}' may not be used as a key in an interval collection! Only basic numeric types can be used for now.",
 						key.FullName));
 		}
+
+		#region Overrides of AbstractCollection<TValue>
+
+		public override CollectionType Type => CollectionType.IntervalCollection;
+
+		public override Type KeyType => typeof(TKey);
+
+		#endregion
 	}
 }

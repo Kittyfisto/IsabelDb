@@ -14,6 +14,8 @@ namespace IsabelDb.Test.Collections.IntervalCollection
 	{
 		private int _lastId;
 
+		protected override CollectionType CollectionType => CollectionType.IntervalCollection;
+
 		protected override IIntervalCollection<int, string> GetCollection(IDatabase db, string name)
 		{
 			return db.GetIntervalCollection<int, string>(name);
@@ -98,6 +100,30 @@ namespace IsabelDb.Test.Collections.IntervalCollection
 		public void TestDoubleKey()
 		{
 			TestKeyLimits(double.MinValue, double.MaxValue);
+		}
+
+		[Test]
+		public void TestGetIntervalCollectionDifferentKeyTypes()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				db.GetIntervalCollection<int, string>("Names");
+				new Action(() => db.GetIntervalCollection<uint, string>("Names"))
+					.Should().Throw<TypeMismatchException>()
+					.WithMessage("The IntervalCollection 'Names' uses keys of type 'System.Int32' which does not match the requested key type 'System.UInt32': If your intent was to create a new IntervalCollection then you have to pick a new name!");
+			}
+		}
+
+		[Test]
+		public void TestGetIntervalCollectionDifferentValueTypes()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				db.GetIntervalCollection<int, string>("Names");
+				new Action(() => db.GetIntervalCollection<int, int>("Names"))
+					.Should().Throw<TypeMismatchException>()
+					.WithMessage("The IntervalCollection 'Names' uses values of type 'System.String' which does not match the requested value type 'System.Int32': If your intent was to create a new IntervalCollection then you have to pick a new name!");
+			}
 		}
 
 		[Test]

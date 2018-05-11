@@ -10,7 +10,6 @@ namespace IsabelDb.Collections
 	internal sealed class Bag<T>
 		: AbstractCollection<T>
 		, IBag<T>
-		, IInternalCollection
 	{
 		private readonly SQLiteConnection _connection;
 		private readonly string _put;
@@ -20,10 +19,11 @@ namespace IsabelDb.Collections
 		private long _lastId;
 
 		public Bag(SQLiteConnection connection,
-		                      string tableName,
-		                      ISQLiteSerializer<T> serializer,
-		                      bool isReadOnly)
-			: base(connection, tableName, serializer, isReadOnly)
+		           string name,
+		           string tableName,
+		           ISQLiteSerializer<T> serializer,
+		           bool isReadOnly)
+			: base(connection, name, tableName, serializer, isReadOnly)
 		{
 			_connection = connection;
 			_serializer = serializer;
@@ -36,7 +36,9 @@ namespace IsabelDb.Collections
 
 		#region Implementation of IInternalObjectStore
 
-		public Type ValueType => typeof(T);
+		public override CollectionType Type => CollectionType.Bag;
+
+		public override Type KeyType => null;
 
 		#endregion
 

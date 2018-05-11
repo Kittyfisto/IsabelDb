@@ -20,6 +20,30 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		}
 
 		[Test]
+		public void TestGetGetMultiValueDictionaryDifferentKeyTypes()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				db.GetMultiValueDictionary<int, string>("Names");
+				new Action(() => db.GetMultiValueDictionary<uint, string>("Names"))
+					.Should().Throw<TypeMismatchException>()
+					.WithMessage("The MultiValueDictionary 'Names' uses keys of type 'System.Int32' which does not match the requested key type 'System.UInt32': If your intent was to create a new MultiValueDictionary then you have to pick a new name!");
+			}
+		}
+
+		[Test]
+		public void TestGetGetMultiValueDictionaryDifferentValueTypes()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				db.GetMultiValueDictionary<int, string>("Names");
+				new Action(() => db.GetMultiValueDictionary<int, int>("Names"))
+					.Should().Throw<TypeMismatchException>()
+					.WithMessage("The MultiValueDictionary 'Names' uses values of type 'System.String' which does not match the requested value type 'System.Int32': If your intent was to create a new MultiValueDictionary then you have to pick a new name!");
+			}
+		}
+
+		[Test]
 		public void TestEmpty()
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
@@ -298,6 +322,8 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 				}
 			}
 		}
+
+		protected override CollectionType CollectionType => CollectionType.MultiValueDictionary;
 
 		protected override IMultiValueDictionary<int, string> GetCollection(IDatabase db, string name)
 		{

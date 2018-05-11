@@ -10,7 +10,6 @@ namespace IsabelDb.Collections
 	internal sealed class OrderedCollection<TKey, TValue>
 		: AbstractCollection<TValue>
 		, IOrderedCollection<TKey, TValue>
-		, IInternalCollection
 		where TKey : IComparable<TKey>
 	{
 		private readonly SQLiteConnection _connection;
@@ -38,11 +37,12 @@ namespace IsabelDb.Collections
 		}
 
 		public OrderedCollection(SQLiteConnection connection,
+		                         string name,
 		                         string tableName,
 		                         ISQLiteSerializer<TKey> keySerializer,
 		                         ISQLiteSerializer<TValue> valueSerializer,
 		                         bool isReadOnly)
-			: base(connection, tableName, valueSerializer, isReadOnly)
+			: base(connection, name, tableName, valueSerializer, isReadOnly)
 		{
 			_connection = connection;
 			_tableName = tableName;
@@ -51,12 +51,6 @@ namespace IsabelDb.Collections
 
 			CreateObjectTableIfNecessary();
 		}
-
-		#region Implementation of IInternalCollection
-
-		public Type ValueType => throw new NotImplementedException();
-
-		#endregion
 
 		#region Implementation of IOrderedCollection
 
@@ -153,5 +147,13 @@ namespace IsabelDb.Collections
 				throw new NotSupportedException(string.Format("The type '{0}' may not be used as a key in an ordered collection! Only basic numeric types can be used for now.",
 					type.FullName));
 		}
+
+		#region Overrides of AbstractCollection<TValue>
+
+		public override CollectionType Type => CollectionType.OrderedCollection;
+
+		public override Type KeyType => typeof(TKey);
+
+		#endregion
 	}
 }

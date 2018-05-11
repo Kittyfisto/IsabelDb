@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
+using IsabelDb.Test.Entities;
 using NUnit.Framework;
 
 namespace IsabelDb.Test.Collections.Bag
@@ -11,6 +12,8 @@ namespace IsabelDb.Test.Collections.Bag
 		: AbstractCollectionTest<IBag<string>>
 	{
 		private ValueKey _lastValueKey;
+
+		protected override CollectionType CollectionType => CollectionType.Bag;
 
 		protected override IBag<string> GetCollection(IDatabase db, string name)
 		{
@@ -30,6 +33,41 @@ namespace IsabelDb.Test.Collections.Bag
 		protected override void RemoveLastPutValue(IBag<string> collection)
 		{
 			collection.Remove(_lastValueKey);
+		}
+
+		[Test]
+		[Description("Verifies that the database refuses to ")]
+		public void TestUnresolvableBagType()
+		{
+			using (var connection = CreateConnection())
+			{
+				using (var db = CreateDatabase(connection, typeof(CustomKey)))
+				{
+					var bag = db.GetBag<CustomKey>("Keys");
+					bag.Put(new CustomKey {A = 1});
+					bag.Put(new CustomKey {B = 2});
+				}
+
+				using (var db = CreateDatabase(connection))
+				{
+					new Action(() => db.GetBag<CustomKey>("Keys"))
+						.Should().Throw<TypeResolveException>()
+						.WithMessage("A Bag named 'Keys' already exists but it's value type could not be resolved: If your intent is to re-use this existing collection, then you need to add 'IsabelDb.Test.Entities.CustomKey' to the list of supported types upon creating the database. If your intent is to create a new collection, then you need to pick a different name!");
+				}
+			}
+
+		}
+
+		[Test]
+		public void TestGetGetBagDifferentValueTypes()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				db.GetBag<string>("Names");
+				new Action(() => db.GetBag<int>("Names"))
+					.Should().Throw<TypeMismatchException>()
+					.WithMessage("The Bag 'Names' uses values of type 'System.String' which does not match the requested value type 'System.Int32': If your intent was to create a new Bag then you have to pick a new name!");
+			}
 		}
 
 		[Test]

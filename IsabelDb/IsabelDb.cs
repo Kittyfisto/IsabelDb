@@ -32,6 +32,10 @@ namespace IsabelDb
 			}
 		}
 
+		public IEnumerable<ICollection> Collections => _objectStores.Collections;
+
+		IEnumerable<IReadOnlyCollection> IReadOnlyDatabase.Collections => Collections;
+
 		IReadOnlyBag<T> IReadOnlyDatabase.GetBag<T>(string name)
 		{
 			return GetBag<T>(name);
