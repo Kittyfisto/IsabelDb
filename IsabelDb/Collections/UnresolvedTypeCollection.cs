@@ -7,7 +7,7 @@ namespace IsabelDb.Collections
 	///     A placeholder for a collection who's key and/or value type could not be resolved.
 	/// </summary>
 	internal sealed class UnresolvedTypeCollection
-		: IInternalCollection
+		: ICollection
 	{
 		private readonly CollectionType _type;
 		private readonly Type _keyType;

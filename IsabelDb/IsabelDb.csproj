@@ -104,7 +104,6 @@
     <Compile Include="Serializers\UInt32Serializer.cs" />
     <Compile Include="Collections\Dictionary.cs" />
     <Compile Include="IDictionary.cs" />
-    <Compile Include="IInternalCollection.cs" />
     <Compile Include="ICollection.cs" />
     <Compile Include="Database.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

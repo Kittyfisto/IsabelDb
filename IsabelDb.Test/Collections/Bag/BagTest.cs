@@ -36,7 +36,7 @@ namespace IsabelDb.Test.Collections.Bag
 		}
 
 		[Test]
-		[Description("Verifies that the database refuses to ")]
+		[Description("Verifies that the database refuses to return an IBag object for bags who's value type cannot be resolved")]
 		public void TestUnresolvableBagType()
 		{
 			using (var connection = CreateConnection())
@@ -53,9 +53,14 @@ namespace IsabelDb.Test.Collections.Bag
 					new Action(() => db.GetBag<CustomKey>("Keys"))
 						.Should().Throw<TypeResolveException>()
 						.WithMessage("A Bag named 'Keys' already exists but it's value type could not be resolved: If your intent is to re-use this existing collection, then you need to add 'IsabelDb.Test.Entities.CustomKey' to the list of supported types upon creating the database. If your intent is to create a new collection, then you need to pick a different name!");
+
+					var collection = db.Collections.First();
+					collection.KeyType.Should().BeNull("Because bags don't have keys");
+					collection.KeyTypeName.Should().BeNull("Because bags don't have keys");
+					collection.ValueType.Should().BeNull("because the value type couldn't be resolved");
+					collection.ValueTypeName.Should().Be("IsabelDb.Test.Entities.CustomKey");
 				}
 			}
-
 		}
 
 		[Test]

@@ -142,6 +142,34 @@ namespace IsabelDb.Test.Collections.Dictionary
 
 		[Test]
 		[Defect("https://github.com/Kittyfisto/IsabelDb/issues/1")]
+		[Description("Verifies that a dictionary cannot be retrieved if it's key type is unresolved")]
+		public void TestUnresolvableKeyType()
+		{
+			using (var connection = CreateConnection())
+			{
+				using (var db = CreateDatabase(connection, typeof(CustomKey)))
+				{
+					db.GetDictionary<CustomKey, string>("Pies");
+				}
+
+				using (var db = CreateDatabase(connection, NoCustomTypes))
+				{
+					new Action(() => db.GetDictionary<CustomKey, string>("Pies"))
+						.Should().Throw<TypeResolveException>()
+						.WithMessage("A Dictionary named 'Pies' already exists but it's key type could not be resolved: If your intent is to re-use this existing collection, then you need to add 'IsabelDb.Test.Entities.CustomKey' to the list of supported types upon creating the database. If your intent is to create a new collection, then you need to pick a different name!");
+
+					var collection = db.Collections.First();
+					collection.Name.Should().Be("Pies");
+					collection.KeyType.Should().BeNull("because the key type couldn't be resolved");
+					collection.KeyTypeName.Should().Be("IsabelDb.Test.Entities.CustomKey");
+					collection.ValueType.Should().Be<string>();
+					collection.ValueTypeName.Should().Be("System.String");
+				}
+			}
+		}
+
+		[Test]
+		[Defect("https://github.com/Kittyfisto/IsabelDb/issues/1")]
 		[Description("Verifies that a dictionary cannot be retrieved if it's value type is unresolved")]
 		public void TestUnresolvableValueType()
 		{
@@ -165,6 +193,13 @@ namespace IsabelDb.Test.Collections.Dictionary
 					new Action(() => db.GetDictionary<int, CustomKey>("MoreKeys"))
 						.Should().Throw<TypeResolveException>()
 						.WithMessage("A Dictionary named 'MoreKeys' already exists but it's value type could not be resolved: If your intent is to re-use this existing collection, then you need to add 'IsabelDb.Test.Entities.CustomKey' to the list of supported types upon creating the database. If your intent is to create a new collection, then you need to pick a different name!");
+
+					var collection = db.Collections.First();
+					collection.Name.Should().Be("MoreKeys");
+					collection.KeyType.Should().Be<int>();
+					collection.KeyTypeName.Should().Be("System.Int32");
+					collection.ValueType.Should().BeNull("because the value type couldn't be resolved");
+					collection.ValueTypeName.Should().Be("IsabelDb.Test.Entities.CustomKey");
 				}
 			}
 		}

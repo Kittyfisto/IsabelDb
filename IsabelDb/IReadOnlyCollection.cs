@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 
@@ -36,6 +37,41 @@ namespace IsabelDb
 		///     The of this collection.
 		/// </summary>
 		CollectionType Type { get; }
+
+		/// <summary>
+		///     The type of key used in this collection.
+		/// </summary>
+		/// <remarks>
+		///     Null when this collection type doesn't have keys or when the key type could not be resolved (because it wasn't provided to <see cref="Database.OpenOrCreate"/>).
+		/// </remarks>
+		Type KeyType { get; }
+
+		/// <summary>
+		///     The full name of the key type.
+		/// </summary>
+		/// <remarks>
+		///     Null when this collection type doesn't have keys.
+		/// </remarks>
+		/// <remarks>
+		///     Will be set to the type name of the key type being used, even when the type itself could not be resolved.
+		/// </remarks>
+		string KeyTypeName { get; }
+
+		/// <summary>
+		///     The type of value used in this collection.
+		/// </summary>
+		/// <remarks>
+		///     Null when the value type could not be resolved (because it wasn't provided to <see cref="Database.OpenOrCreate"/>).
+		/// </remarks>
+		Type ValueType { get; }
+
+		/// <summary>
+		///     The full name of the value type.
+		/// </summary>
+		/// <remarks>
+		///     Will be set to the type name of the value type being used, even when the type itself could not be resolved.
+		/// </remarks>
+		string ValueTypeName { get; }
 
 		/// <summary>
 		///     Returns the list of all values.

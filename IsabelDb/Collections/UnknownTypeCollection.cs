@@ -7,7 +7,7 @@ namespace IsabelDb.Collections
 	/// A placeholder value for a collection who's type is unknown.
 	/// </summary>
 	internal sealed class UnknownTypeCollection
-		: IInternalCollection
+		: ICollection
 	{
 		private readonly Type _valueType;
 		private readonly Type _keyType;

@@ -8,7 +8,6 @@ namespace IsabelDb.Collections
 {
 	internal abstract class AbstractCollection<TValue>
 		: ICollection<TValue>
-		, IInternalCollection
 	{
 		private readonly SQLiteConnection _connection;
 		private readonly string _tableName;
