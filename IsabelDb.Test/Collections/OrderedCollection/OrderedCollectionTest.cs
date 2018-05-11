@@ -97,6 +97,17 @@ namespace IsabelDb.Test.Collections.OrderedCollection
 		}
 
 		[Test]
+		public void TestStringType()
+		{
+			using (var db = Database.CreateInMemory(new[] { typeof(MySortableKey) }))
+			{
+				new Action(() => db.GetOrderedCollection<string, string>("Values"))
+					.Should().Throw<NotSupportedException>("Custom types cannot be used as sortable keys")
+					.WithMessage("The type 'System.String' may not be used as a key in an ordered collection! Only basic numeric types can be used for now.");
+			}
+		}
+
+		[Test]
 		public void TestByteKey()
 		{
 			TestKeyLimits(byte.MinValue, byte.MaxValue);
@@ -142,6 +153,18 @@ namespace IsabelDb.Test.Collections.OrderedCollection
 		public void TestULongKey()
 		{
 			TestKeyLimits(ulong.MinValue, ulong.MaxValue);
+		}
+
+		[Test]
+		public void TestFloatKey()
+		{
+			TestKeyLimits(float.MinValue, float.MaxValue);
+		}
+
+		[Test]
+		public void TestDoubleKey()
+		{
+			TestKeyLimits(double.MinValue, double.MaxValue);
 		}
 
 		#region Overrides of AbstractCollectionTest<IOrderedCollection<int,string>>

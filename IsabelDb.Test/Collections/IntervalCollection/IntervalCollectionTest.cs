@@ -89,6 +89,18 @@ namespace IsabelDb.Test.Collections.IntervalCollection
 		}
 
 		[Test]
+		public void TestFloatKey()
+		{
+			TestKeyLimits(float.MinValue, float.MaxValue);
+		}
+
+		[Test]
+		public void TestDoubleKey()
+		{
+			TestKeyLimits(double.MinValue, double.MaxValue);
+		}
+
+		[Test]
 		public void TestCustomType()
 		{
 			using (var db = Database.CreateInMemory(new []{typeof(MySortableKey) }))
@@ -96,6 +108,17 @@ namespace IsabelDb.Test.Collections.IntervalCollection
 				new Action(() => db.GetIntervalCollection<MySortableKey, string>("Values"))
 					.Should().Throw<NotSupportedException>("Custom types cannot be used as sortable keys")
 					.WithMessage("The type 'IsabelDb.Test.Entities.MySortableKey' may not be used as a key in an interval collection! Only basic numeric types can be used for now.");
+			}
+		}
+
+		[Test]
+		public void TestStringType()
+		{
+			using (var db = Database.CreateInMemory(new []{typeof(MySortableKey) }))
+			{
+				new Action(() => db.GetIntervalCollection<string, string>("Values"))
+					.Should().Throw<NotSupportedException>("Custom types cannot be used as sortable keys")
+					.WithMessage("The type 'System.String' may not be used as a key in an interval collection! Only basic numeric types can be used for now.");
 			}
 		}
 
