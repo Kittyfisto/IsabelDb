@@ -64,6 +64,6 @@ namespace IsabelDb
 		///     USE WITH CARE.
 		/// </remarks>
 		/// <param name="collection"></param>
-		void Drop(ICollection collection);
+		void Remove(ICollection collection);
 	}
 }

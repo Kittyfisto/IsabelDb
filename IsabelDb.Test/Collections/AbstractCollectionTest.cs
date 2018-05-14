@@ -436,10 +436,10 @@ namespace IsabelDb.Test.Collections
 
 		#endregion
 
-		#region Dropping Collections
+		#region Removing Collections
 
 		[Test]
-		public void TestDrop1()
+		public void TestRemove1()
 		{
 			using (var connection = CreateConnection())
 			{
@@ -447,15 +447,15 @@ namespace IsabelDb.Test.Collections
 				{
 					var collection = GetCollection(db, "For The Fallen Dreams");
 					db.Collections.Should().Equal(collection);
-					db.Drop(collection);
+					db.Remove(collection);
 					db.Collections.Should().BeEmpty();
 				}
 			}
 		}
 
 		[Test]
-		[Description("Verifies that dropped collections remain dropped even after the connection is closed")]
-		public void TestDrop2()
+		[Description("Verifies that removed collections remain removed even after the connection is closed")]
+		public void TestRemove2()
 		{
 			using (var connection = CreateConnection())
 			{
@@ -463,7 +463,7 @@ namespace IsabelDb.Test.Collections
 				{
 					var collection = GetCollection(db, "For The Fallen Dreams");
 					db.Collections.Should().Equal(collection);
-					db.Drop(collection);
+					db.Remove(collection);
 					db.Collections.Should().BeEmpty();
 				}
 
@@ -475,21 +475,21 @@ namespace IsabelDb.Test.Collections
 		}
 		
 		[Test]
-		[Description("Verifies that dropping the same collection twice is allowed and doesn't do anything further")]
-		public void TestDrop3()
+		[Description("Verifies that removing the same collection twice is allowed and doesn't do anything further")]
+		public void TestRemove3()
 		{
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
 				var collection = GetCollection(db, "For The Fallen Dreams");
-				db.Drop(collection);
-				new Action(() => db.Drop(collection)).Should().NotThrow();
+				db.Remove(collection);
+				new Action(() => db.Remove(collection)).Should().NotThrow();
 			}
 		}
 
 		[Test]
-		[Description("Verifies that the data from dropped collections isn't available anymore")]
-		public void TestDrop4()
+		[Description("Verifies that the data from removed collections isn't available anymore")]
+		public void TestRemove4()
 		{
 			using (var connection = CreateConnection())
 			{
@@ -497,7 +497,7 @@ namespace IsabelDb.Test.Collections
 				{
 					var collection = GetCollection(db, "Characters");
 					Put(collection, "Harry Bosch");
-					db.Drop(collection);
+					db.Remove(collection);
 				}
 
 				using (var db = CreateDatabase(connection))
@@ -509,8 +509,8 @@ namespace IsabelDb.Test.Collections
 		}
 
 		[Test]
-		[Description("Verifies that drop ignores collections from other databases, even if they have the same name")]
-		public void TestDrop5()
+		[Description("Verifies that remove ignores collections from other databases, even if they have the same name")]
+		public void TestRemove5()
 		{
 			using (var connection1 = CreateConnection())
 			using (var db1 = CreateDatabase(connection1))
@@ -523,51 +523,51 @@ namespace IsabelDb.Test.Collections
 				var collection2 = GetCollection(db2, "Characters");
 				Put(collection2, "Jerry Edgar");
 
-				new Action(() => db1.Drop(collection2)).Should().NotThrow();
+				new Action(() => db1.Remove(collection2)).Should().NotThrow();
 				db1.Collections.Should().Equal(collection1);
 				collection1.GetAllValues().Should().Equal("Harry Bosch");
 			}
 		}
 
 		[Test]
-		public void TestDrop6()
+		public void TestRemove6()
 		{
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				new Action(() => db.Drop(null)).Should().NotThrow();
+				new Action(() => db.Remove(null)).Should().NotThrow();
 			}
 		}
 
 		[Test]
-		[Description("Verifies that drop doesn't remove another collection with the same name")]
-		public void TestDrop7()
+		[Description("Verifies that remove doesn't remove another collection with the same name")]
+		public void TestRemove7()
 		{
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
 				var collection1 = GetCollection(db, "Characters");
 				Put(collection1, "Harry Bosch");
-				db.Drop(collection1);
+				db.Remove(collection1);
 
 				var collection2 = GetCollection(db, "Characters");
 				Put(collection2, "Jerry Edgar");
 
-				new Action(() => db.Drop(collection1)).Should().NotThrow();
+				new Action(() => db.Remove(collection1)).Should().NotThrow();
 				collection2.GetAllValues().Should().Equal("Jerry Edgar");
 			}
 		}
 
 		[Test]
-		[Description("Verifies that reading data from a dropped collection is allowed, but never returns any values")]
-		public void TestDrop8()
+		[Description("Verifies that reading data from a removed collection is allowed, but never returns any values")]
+		public void TestRemove8()
 		{
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
 				var collection = GetCollection(db, "Characters");
 				Put(collection, "Harry Bosch");
-				db.Drop(collection);
+				db.Remove(collection);
 
 				collection.Count().Should().Be(0);
 				collection.GetAllValues().Should().BeEmpty();
@@ -575,49 +575,49 @@ namespace IsabelDb.Test.Collections
 		}
 
 		[Test]
-		[Description("Verifies that writing data to a dropped collection is NOT allowed and throws")]
-		public void TestDrop9()
+		[Description("Verifies that writing data to a removed collection is NOT allowed and throws")]
+		public void TestRemove9()
 		{
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
 				var collection = GetCollection(db, "Characters");
 				Put(collection, "Harry Bosch");
-				db.Drop(collection);
+				db.Remove(collection);
 
 				new Action(() => Put(collection, "Madeline Bosch"))
 					.Should().Throw<InvalidOperationException>()
-					.WithMessage("This collection has been dropped from the database and may no longer be modified");
+					.WithMessage("This collection has been removed from the database and may no longer be modified");
 			}
 		}
 
 		[Test]
-		[Description("Verifies that writing data to a dropped collection is NOT allowed and throws")]
-		public void TestDrop10()
+		[Description("Verifies that writing data to a removed collection is NOT allowed and throws")]
+		public void TestRemove10()
 		{
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
 				var collection = GetCollection(db, "Characters");
 				Put(collection, "Harry Bosch");
-				db.Drop(collection);
+				db.Remove(collection);
 
 				new Action(() => PutMany(collection, "Eleanor Wish", "Maddeline Bosch"))
 					.Should().Throw<InvalidOperationException>()
-					.WithMessage("This collection has been dropped from the database and may no longer be modified");
+					.WithMessage("This collection has been removed from the database and may no longer be modified");
 			}
 		}
 
 		[Test]
-		[Description("Verifies that clearing a dropped collection is allowed and is a NOP")]
-		public void TestDrop11()
+		[Description("Verifies that clearing a removed collection is allowed and is a NOP")]
+		public void TestRemove11()
 		{
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
 				var collection = GetCollection(db, "Characters");
 				Put(collection, "Harry Bosch");
-				db.Drop(collection);
+				db.Remove(collection);
 
 				new Action(() => collection.Clear()).Should().NotThrow();
 				collection.GetAllValues().Should().BeEmpty();

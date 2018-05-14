@@ -40,7 +40,7 @@ namespace IsabelDb.Collections
 		protected void ThrowIfDropped()
 		{
 			if (_dropped)
-				throw new InvalidOperationException("This collection has been dropped from the database and may no longer be modified");
+				throw new InvalidOperationException("This collection has been removed from the database and may no longer be modified");
 		}
 
 		#region Implementation of ICollection

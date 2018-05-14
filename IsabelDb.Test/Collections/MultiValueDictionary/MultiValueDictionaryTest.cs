@@ -324,17 +324,17 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		}
 		
 		[Test]
-		public void TestPutManyDropped()
+		public void TestPutManyRemoved()
 		{
 			using (var connection = CreateConnection())
 			using (var db = new IsabelDb(connection, NoCustomTypes, false, false))
 			{
 				var collection = db.GetMultiValueDictionary<int, string>("Blessthefall");
 				collection.Put(1, "Wishful Sinking");
-				db.Drop(collection);
+				db.Remove(collection);
 				new Action(() => collection.PutMany(2, new[] {"Find Yourself", "Sakura Blues"}))
 					.Should().Throw<InvalidOperationException>()
-					.WithMessage("This collection has been dropped from the database and may no longer be modified");
+					.WithMessage("This collection has been removed from the database and may no longer be modified");
 			}
 		}
 

@@ -61,7 +61,7 @@ namespace IsabelDb
 			return GetOrderedCollection<TKey, TValue>(name);
 		}
 
-		public void Drop(ICollection collection)
+		public void Remove(ICollection collection)
 		{
 			_objectStores.Drop(collection);
 		}
