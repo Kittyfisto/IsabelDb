@@ -40,6 +40,8 @@ namespace IsabelDb.Collections
 
 		public override Type KeyType => null;
 
+		public override string KeyTypeName => null;
+
 		#endregion
 
 		#region Overrides of Object

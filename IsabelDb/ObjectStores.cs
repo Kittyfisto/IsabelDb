@@ -446,7 +446,7 @@ namespace IsabelDb
 						var valueTypeId = reader.GetInt32(4);
 
 						var collection = CreateCollection(name, collectionType, tableName, keyTypeId, valueTypeId);
-						_collectionsByName.Add(name, collection);
+						AddCollection(name, collection);
 					}
 				}
 			}
@@ -462,13 +462,13 @@ namespace IsabelDb
 			string valueTypeName = _typeModel.GetTypeDescription(valueTypeId)?.FullTypeName;
 
 			if (valueType == null)
-				return new UnresolvedTypeCollection(collectionType, name, keyType, keyTypeName, null, valueTypeName);
+				return new UnresolvedTypeCollection(_connection, collectionType, name, tableName, keyType, keyTypeName, null, valueTypeName, _isReadOnly);
 
 			if (collectionType == CollectionType.Bag)
 				return CreateBag(name, tableName, valueType);
 
 			if (keyType == null)
-				return new UnresolvedTypeCollection(collectionType, name, null, keyTypeName, valueType, valueTypeName);
+				return new UnresolvedTypeCollection(_connection, collectionType, name, tableName, null, keyTypeName, valueType, valueTypeName, _isReadOnly);
 
 			switch (collectionType)
 			{

@@ -7,61 +7,30 @@ using IsabelDb.Serializers;
 
 namespace IsabelDb.Collections
 {
-	internal abstract class AbstractCollection<TValue>
-		: ICollection<TValue>
-			, IInternalCollection
+	internal abstract class AbstractCollection
+		: IInternalCollection
 	{
 		private readonly SQLiteConnection _connection;
-		private readonly bool _isReadOnly;
 		private readonly string _name;
 		private readonly string _tableName;
-		private readonly ISQLiteSerializer<TValue> _valueSerializer;
-		private bool _dropped;
+		private readonly bool _isReadOnly;
+		private bool _isDropped;
 
-		protected AbstractCollection(SQLiteConnection connection,
-		                             string name,
-		                             string tableName,
-		                             ISQLiteSerializer<TValue> valueSerializer,
-		                             bool isReadOnly)
+		protected AbstractCollection(SQLiteConnection connection, string name, string tableName, bool isReadOnly)
 		{
 			_connection = connection;
 			_name = name;
 			_tableName = tableName;
-			_valueSerializer = valueSerializer;
 			_isReadOnly = isReadOnly;
 		}
 
-		protected void ThrowIfReadOnly()
-		{
-			if (_isReadOnly)
-				throw new InvalidOperationException("The database has been opened read-only and therefore may not be modified");
-		}
-
-		protected void ThrowIfDropped()
-		{
-			if (_dropped)
-				throw new InvalidOperationException("This collection has been removed from the database and may no longer be modified");
-		}
-
 		#region Implementation of ICollection
-
-		public string Name => _name;
-
-		public abstract CollectionType Type { get; }
-
-		public IEnumerable<TValue> GetAllValues()
-		{
-			if (_dropped)
-				return Enumerable.Empty<TValue>();
-
-			return GetAllValuesInternal();
-		}
 
 		public void Clear()
 		{
 			ThrowIfReadOnly();
 
-			if (_dropped)
+			if (IsDropped)
 				return;
 
 			using (var command = _connection.CreateCommand())
@@ -71,14 +40,19 @@ namespace IsabelDb.Collections
 			}
 		}
 
-		IEnumerable IReadOnlyCollection.GetAllValues()
-		{
-			return GetAllValues();
-		}
+		#endregion
+
+		#region Implementation of IReadOnlyCollection
+
+		public string Name => _name;
+
+		public abstract CollectionType Type { get; }
+
+		public abstract bool CanBeAccessed { get; }
 
 		public long Count()
 		{
-			if (_dropped)
+			if (IsDropped)
 				return 0;
 
 			using (var command = _connection.CreateCommand())
@@ -88,28 +62,91 @@ namespace IsabelDb.Collections
 			}
 		}
 
+		public abstract IEnumerable GetAllValues();
+
 		#endregion
 
 		#region Implementation of IInternalCollection
 
 		public abstract Type KeyType { get; }
 
-		public Type ValueType => typeof(TValue);
+		public abstract Type ValueType { get; }
 
-		public string ValueTypeName => throw new NotImplementedException();
+		public abstract string ValueTypeName { get; }
 
-		public string KeyTypeName => throw new NotImplementedException();
-
-		#endregion
-
-		#region Implementation of IInternalCollection
+		public abstract string KeyTypeName { get; }
 
 		public string TableName => _tableName;
 
 		public void MarkAsDropped()
 		{
-			_dropped = true;
+			_isDropped = true;
 		}
+
+		#endregion
+
+		protected void ThrowIfReadOnly()
+		{
+			if (_isReadOnly)
+				throw new InvalidOperationException("The database has been opened read-only and therefore may not be modified");
+		}
+
+		protected void ThrowIfDropped()
+		{
+			if (_isDropped)
+				throw new InvalidOperationException("This collection has been removed from the database and may no longer be modified");
+		}
+
+		protected bool IsDropped => _isDropped;
+	}
+
+	internal abstract class AbstractCollection<TValue>
+		: AbstractCollection
+		, ICollection<TValue>
+	{
+		private readonly SQLiteConnection _connection;
+		private readonly string _name;
+		private readonly string _tableName;
+		private readonly ISQLiteSerializer<TValue> _valueSerializer;
+
+		protected AbstractCollection(SQLiteConnection connection,
+		                             string name,
+		                             string tableName,
+		                             ISQLiteSerializer<TValue> valueSerializer,
+		                             bool isReadOnly)
+			: base(connection, name, tableName, isReadOnly)
+		{
+			_connection = connection;
+			_name = name;
+			_tableName = tableName;
+			_valueSerializer = valueSerializer;
+		}
+
+		#region Implementation of ICollection
+
+		public override bool CanBeAccessed => true;
+		public override Type ValueType => typeof(TValue);
+		public override string ValueTypeName => null;
+
+		IEnumerable<TValue> IReadOnlyCollection<TValue>.GetAllValues()
+		{
+			if (IsDropped)
+				return Enumerable.Empty<TValue>();
+
+			return GetAllValuesInternal();
+		}
+
+		public override IEnumerable GetAllValues()
+		{
+			if (IsDropped)
+				return Enumerable.Empty<TValue>();
+
+			return GetAllValuesInternal();
+		}
+
+		#endregion
+
+		#region Implementation of IInternalCollection
 
 		#endregion
 

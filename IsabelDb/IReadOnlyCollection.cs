@@ -19,6 +19,7 @@ namespace IsabelDb
 		///     Values are streamed from the database on-demand as the iterator is moved.
 		/// </remarks>
 		/// <returns></returns>
+		/// <exception cref="InvalidOperationException">When <see cref="IReadOnlyCollection.CanBeAccessed"/> is false.</exception>
 		[Pure]
 		new IEnumerable<TValue> GetAllValues();
 	}
@@ -28,6 +29,27 @@ namespace IsabelDb
 	/// </summary>
 	public interface IReadOnlyCollection
 	{
+		/// <summary>
+		///     Whether or not this application can access the contents of this collection.
+		/// </summary>
+		/// <remarks>
+		///     An application is unable to access the contents if any of the following is true:
+		///     - The collection uses a key and/or value type which has not been registered upon opening the database
+		///     - The collection is from a future IsabelDb version and it's collection type isn't known yet
+		/// </remarks>
+		/// <remarks>
+		///     When this property is set to false, then the following (logical) operations will still work:
+		///     - Clear
+		///     - Count
+		///     - Remove
+		/// </remarks>
+		/// <remarks>
+		///     When this property is set to false, then the following (logical) operations will throw:
+		///     - Get
+		///     - GetMany
+		/// </remarks>
+		bool CanBeAccessed { get; }
+
 		/// <summary>
 		///     The name of this collection.
 		/// </summary>
@@ -80,6 +102,7 @@ namespace IsabelDb
 		///     Values are streamed from the database on-demand as the iterator is moved.
 		/// </remarks>
 		/// <returns></returns>
+		/// <exception cref="InvalidOperationException">When <see cref="CanBeAccessed"/> is false.</exception>
 		[Pure]
 		IEnumerable GetAllValues();
 

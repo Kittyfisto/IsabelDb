@@ -251,6 +251,8 @@ namespace IsabelDb.Collections
 
 		public override Type KeyType => typeof(TKey);
 
+		public override string KeyTypeName => null;
+
 		#endregion
 	}
 }

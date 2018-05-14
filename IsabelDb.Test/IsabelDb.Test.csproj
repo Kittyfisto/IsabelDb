@@ -88,9 +88,15 @@
   <ItemGroup>
     <Compile Include="Address.cs" />
     <Compile Include="AssemblySetup.cs" />
+    <Compile Include="Collections\AbstractCollectionCompatibilityTest.cs" />
     <Compile Include="Collections\AbstractCollectionTest.cs" />
+    <Compile Include="Collections\Bag\BagCompatibilityTest.cs" />
+    <Compile Include="Collections\Dictionary\DictionaryCompatibilityTest.cs" />
     <Compile Include="Collections\Dictionary\DictionaryTest.cs" />
     <Compile Include="Collections\Dictionary\UInt64KeyTest.cs" />
+    <Compile Include="Collections\IntervalCollection\IntervalCollectionCompabilityTest.cs" />
+    <Compile Include="Collections\MultiValueDictionary\MultiValueDictionaryCompatibilityTest.cs" />
+    <Compile Include="Collections\OrderedCollection\OrderedCollectionCompatibilityTest.cs" />
     <Compile Include="Entities\MySortableKey.cs" />
     <Compile Include="DataContractNoNameNoNamespace.cs" />
     <Compile Include="DefectAttribute.cs" />

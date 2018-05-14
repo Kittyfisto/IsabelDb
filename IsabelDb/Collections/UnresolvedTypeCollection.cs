@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Data.SQLite;
 
 namespace IsabelDb.Collections
 {
@@ -7,24 +8,26 @@ namespace IsabelDb.Collections
 	///     A placeholder for a collection who's key and/or value type could not be resolved.
 	/// </summary>
 	internal sealed class UnresolvedTypeCollection
-		: ICollection
+		: AbstractCollection
 	{
 		private readonly CollectionType _type;
 		private readonly Type _keyType;
 		private readonly string _keyTypeName;
 		private readonly Type _valueType;
 		private readonly string _valueTypeName;
-		private readonly string _name;
 
-		public UnresolvedTypeCollection(CollectionType type,
+		public UnresolvedTypeCollection(SQLiteConnection connection,
+		                                CollectionType type,
 		                                string name,
+		                                string tableName,
 		                                Type keyType,
 		                                string keyTypeName,
 		                                Type valueType,
-		                                string valueTypeName)
+		                                string valueTypeName,
+		                                bool isReadOnly)
+			: base(connection, name, tableName, isReadOnly)
 		{
 			_type = type;
-			_name = name;
 			_keyType = keyType;
 			_keyTypeName = keyTypeName;
 			_valueType = valueType;
@@ -33,36 +36,29 @@ namespace IsabelDb.Collections
 
 		#region Implementation of IReadOnlyCollection
 
-		public string Name => _name;
+		public override CollectionType Type => _type;
 
-		public CollectionType Type => _type;
+		public override bool CanBeAccessed => false;
 
-		public IEnumerable GetAllValues()
+		public override string ValueTypeName => _valueTypeName;
+
+		public override string KeyTypeName => _keyTypeName;
+
+		public override IEnumerable GetAllValues()
 		{
-			throw new NotImplementedException();
+			string unavailableTypeName;
+			if (_valueType == null)
+				unavailableTypeName = _valueTypeName;
+			else
+				unavailableTypeName = _keyTypeName;
+			var message = string.Format("This collection cannot be accessed because the type '{0}' is not available!",
+			                            unavailableTypeName);
+			throw new InvalidOperationException(message);
 		}
 
-		public long Count()
-		{
-			throw new NotImplementedException();
-		}
+		public override Type KeyType => _keyType;
 
-		public void Clear()
-		{
-			throw new NotImplementedException();
-		}
-
-		#endregion
-
-		#region Implementation of IInternalCollection
-
-		public Type KeyType => _keyType;
-
-		public Type ValueType => _valueType;
-
-		public string ValueTypeName => _valueTypeName;
-
-		public string KeyTypeName => _keyTypeName;
+		public override Type ValueType => _valueType;
 
 		#endregion
 	}

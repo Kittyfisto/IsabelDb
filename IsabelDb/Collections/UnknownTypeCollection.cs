@@ -22,6 +22,8 @@ namespace IsabelDb.Collections
 
 		#region Implementation of IReadOnlyCollection
 
+		public bool CanBeAccessed => false;
+
 		public string Name => _name;
 
 		public CollectionType Type => CollectionType.Unknown;
