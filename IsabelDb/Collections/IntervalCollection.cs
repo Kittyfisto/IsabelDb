@@ -70,6 +70,7 @@ namespace IsabelDb.Collections
 		public void Put(Interval<TKey> interval, TValue value)
 		{
 			ThrowIfReadOnly();
+			ThrowIfDropped();
 
 			using (var command = _connection.CreateCommand())
 			{
@@ -88,6 +89,7 @@ namespace IsabelDb.Collections
 		public void PutMany(IEnumerable<KeyValuePair<Interval<TKey>, TValue>> values)
 		{
 			ThrowIfReadOnly();
+			ThrowIfDropped();
 
 			using (var transaction = _connection.BeginTransaction())
 			using (var command = _connection.CreateCommand())

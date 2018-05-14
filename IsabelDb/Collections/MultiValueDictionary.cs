@@ -15,8 +15,6 @@ namespace IsabelDb.Collections
 		private readonly string _tableName;
 		private readonly ISQLiteSerializer<TKey> _keySerializer;
 		private readonly ISQLiteSerializer<TValue> _valueSerializer;
-		private readonly string _countQuery;
-		private readonly string _clearQuery;
 		private readonly string _removeQuery;
 		private readonly string _putQuery;
 		private readonly string _getByKey;
@@ -41,9 +39,7 @@ namespace IsabelDb.Collections
 			_putQuery = string.Format("INSERT INTO {0} (id, key, value) VALUES (@id, @key, @value)", _tableName);
 			_getAll = string.Format("SELECT key, value FROM {0}", _tableName);
 			_getByKey = string.Format("SELECT value FROM {0} where key = @key", _tableName);
-			_clearQuery = string.Format("DELETE FROM {0}", _tableName);
 			_removeQuery = string.Format("DELETE FROM {0} WHERE key = @key", _tableName);
-			_countQuery = string.Format("SELECT COUNT(*) FROM {0}", _tableName);
 
 			using (var command = _connection.CreateCommand())
 			{
@@ -61,6 +57,7 @@ namespace IsabelDb.Collections
 		public void Put(TKey key, TValue value)
 		{
 			ThrowIfReadOnly();
+			ThrowIfDropped();
 
 			using (var command = _connection.CreateCommand())
 			{
@@ -77,6 +74,7 @@ namespace IsabelDb.Collections
 		public void PutMany(TKey key, IEnumerable<TValue> values)
 		{
 			ThrowIfReadOnly();
+			ThrowIfDropped();
 
 			using (var transaction = _connection.BeginTransaction())
 			using (var command = _connection.CreateCommand())
@@ -101,6 +99,7 @@ namespace IsabelDb.Collections
 		public void PutMany(IEnumerable<KeyValuePair<TKey, IEnumerable<TValue>>> values)
 		{
 			ThrowIfReadOnly();
+			ThrowIfDropped();
 
 			using (var transaction = _connection.BeginTransaction())
 			using (var command = _connection.CreateCommand())

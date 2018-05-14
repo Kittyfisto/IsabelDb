@@ -322,6 +322,21 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 				}
 			}
 		}
+		
+		[Test]
+		public void TestPutManyDropped()
+		{
+			using (var connection = CreateConnection())
+			using (var db = new IsabelDb(connection, NoCustomTypes, false, false))
+			{
+				var collection = db.GetMultiValueDictionary<int, string>("Blessthefall");
+				collection.Put(1, "Wishful Sinking");
+				db.Drop(collection);
+				new Action(() => collection.PutMany(2, new[] {"Find Yourself", "Sakura Blues"}))
+					.Should().Throw<InvalidOperationException>()
+					.WithMessage("This collection has been dropped from the database and may no longer be modified");
+			}
+		}
 
 		protected override CollectionType CollectionType => CollectionType.MultiValueDictionary;
 

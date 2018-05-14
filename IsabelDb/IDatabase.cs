@@ -53,5 +53,17 @@ namespace IsabelDb
 		/// <param name="name"></param>
 		/// <returns></returns>
 		new IOrderedCollection<TKey, TValue> GetOrderedCollection<TKey, TValue>(string name) where TKey : IComparable<TKey>;
+
+		/// <summary>
+		///     Drops the given collection from this database.
+		///     Doesn't do anything when this collection isn't part of this database.
+		/// </summary>
+		/// <remarks>
+		///     THIS OPERATION IMMEDIATELY REMOVES ALL OBJECTS FROM THE GIVEN COLLECTION FROM STORAGE.
+		///     THIS OPERATION IS NOT REVERSIBLE.
+		///     USE WITH CARE.
+		/// </remarks>
+		/// <param name="collection"></param>
+		void Drop(ICollection collection);
 	}
 }

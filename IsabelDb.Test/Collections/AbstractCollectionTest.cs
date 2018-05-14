@@ -436,6 +436,196 @@ namespace IsabelDb.Test.Collections
 
 		#endregion
 
+		#region Dropping Collections
+
+		[Test]
+		public void TestDrop1()
+		{
+			using (var connection = CreateConnection())
+			{
+				using (var db = CreateDatabase(connection))
+				{
+					var collection = GetCollection(db, "For The Fallen Dreams");
+					db.Collections.Should().Equal(collection);
+					db.Drop(collection);
+					db.Collections.Should().BeEmpty();
+				}
+			}
+		}
+
+		[Test]
+		[Description("Verifies that dropped collections remain dropped even after the connection is closed")]
+		public void TestDrop2()
+		{
+			using (var connection = CreateConnection())
+			{
+				using (var db = CreateDatabase(connection))
+				{
+					var collection = GetCollection(db, "For The Fallen Dreams");
+					db.Collections.Should().Equal(collection);
+					db.Drop(collection);
+					db.Collections.Should().BeEmpty();
+				}
+
+				using (var db = CreateDatabase(connection))
+				{
+					db.Collections.Should().BeEmpty();
+				}
+			}
+		}
+		
+		[Test]
+		[Description("Verifies that dropping the same collection twice is allowed and doesn't do anything further")]
+		public void TestDrop3()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var collection = GetCollection(db, "For The Fallen Dreams");
+				db.Drop(collection);
+				new Action(() => db.Drop(collection)).Should().NotThrow();
+			}
+		}
+
+		[Test]
+		[Description("Verifies that the data from dropped collections isn't available anymore")]
+		public void TestDrop4()
+		{
+			using (var connection = CreateConnection())
+			{
+				using (var db = CreateDatabase(connection))
+				{
+					var collection = GetCollection(db, "Characters");
+					Put(collection, "Harry Bosch");
+					db.Drop(collection);
+				}
+
+				using (var db = CreateDatabase(connection))
+				{
+					var collection = GetCollection(db, "Characters");
+					collection.GetAllValues().Should().BeEmpty();
+				}
+			}
+		}
+
+		[Test]
+		[Description("Verifies that drop ignores collections from other databases, even if they have the same name")]
+		public void TestDrop5()
+		{
+			using (var connection1 = CreateConnection())
+			using (var db1 = CreateDatabase(connection1))
+			using (var connection2 = CreateConnection())
+			using (var db2 = CreateDatabase(connection2))
+			{
+				var collection1 = GetCollection(db1, "Characters");
+				Put(collection1, "Harry Bosch");
+
+				var collection2 = GetCollection(db2, "Characters");
+				Put(collection2, "Jerry Edgar");
+
+				new Action(() => db1.Drop(collection2)).Should().NotThrow();
+				db1.Collections.Should().Equal(collection1);
+				collection1.GetAllValues().Should().Equal("Harry Bosch");
+			}
+		}
+
+		[Test]
+		public void TestDrop6()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				new Action(() => db.Drop(null)).Should().NotThrow();
+			}
+		}
+
+		[Test]
+		[Description("Verifies that drop doesn't remove another collection with the same name")]
+		public void TestDrop7()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var collection1 = GetCollection(db, "Characters");
+				Put(collection1, "Harry Bosch");
+				db.Drop(collection1);
+
+				var collection2 = GetCollection(db, "Characters");
+				Put(collection2, "Jerry Edgar");
+
+				new Action(() => db.Drop(collection1)).Should().NotThrow();
+				collection2.GetAllValues().Should().Equal("Jerry Edgar");
+			}
+		}
+
+		[Test]
+		[Description("Verifies that reading data from a dropped collection is allowed, but never returns any values")]
+		public void TestDrop8()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var collection = GetCollection(db, "Characters");
+				Put(collection, "Harry Bosch");
+				db.Drop(collection);
+
+				collection.Count().Should().Be(0);
+				collection.GetAllValues().Should().BeEmpty();
+			}
+		}
+
+		[Test]
+		[Description("Verifies that writing data to a dropped collection is NOT allowed and throws")]
+		public void TestDrop9()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var collection = GetCollection(db, "Characters");
+				Put(collection, "Harry Bosch");
+				db.Drop(collection);
+
+				new Action(() => Put(collection, "Madeline Bosch"))
+					.Should().Throw<InvalidOperationException>()
+					.WithMessage("This collection has been dropped from the database and may no longer be modified");
+			}
+		}
+
+		[Test]
+		[Description("Verifies that writing data to a dropped collection is NOT allowed and throws")]
+		public void TestDrop10()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var collection = GetCollection(db, "Characters");
+				Put(collection, "Harry Bosch");
+				db.Drop(collection);
+
+				new Action(() => PutMany(collection, "Eleanor Wish", "Maddeline Bosch"))
+					.Should().Throw<InvalidOperationException>()
+					.WithMessage("This collection has been dropped from the database and may no longer be modified");
+			}
+		}
+
+		[Test]
+		[Description("Verifies that clearing a dropped collection is allowed and is a NOP")]
+		public void TestDrop11()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var collection = GetCollection(db, "Characters");
+				Put(collection, "Harry Bosch");
+				db.Drop(collection);
+
+				new Action(() => collection.Clear()).Should().NotThrow();
+				collection.GetAllValues().Should().BeEmpty();
+			}
+		}
+
+		#endregion
+
 		protected abstract CollectionType CollectionType { get; }
 		protected abstract TCollection GetCollection(IDatabase db, string name);
 		protected abstract void Put(TCollection collection, string value);

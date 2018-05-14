@@ -14,7 +14,7 @@ namespace IsabelDb
 	/// </summary>
 	internal sealed class ObjectStores
 	{
-		private const string TableName = "isabel_stores";
+		private const string CollectionsTableName = "isabel_collections";
 
 		/// <summary>
 		///     A list of serializers for .NET types which natively map to SQLite types
@@ -25,7 +25,8 @@ namespace IsabelDb
 		private readonly SQLiteConnection _connection;
 		private readonly bool _isReadOnly;
 
-		private readonly System.Collections.Generic.Dictionary<string, ICollection> _collections;
+		private readonly System.Collections.Generic.Dictionary<string, ICollection> _collectionsByName;
+		private readonly System.Collections.Generic.HashSet<ICollection> _collections;
 		private readonly Serializer _serializer;
 		private readonly CompiledTypeModel _typeModel;
 
@@ -60,17 +61,18 @@ namespace IsabelDb
 
 			_typeModel = ProtobufTypeModel.Create(connection, supportedTypes, isReadOnly);
 			_serializer = new Serializer(_typeModel);
-			_collections = new System.Collections.Generic.Dictionary<string, ICollection>();
+			_collections = new HashSet<ICollection>();
+			_collectionsByName = new System.Collections.Generic.Dictionary<string, ICollection>();
 
 			CreateCollections();
 		}
 
-		public IEnumerable<ICollection> Collections => _collections.Values;
+		public IEnumerable<ICollection> Collections => _collectionsByName.Values;
 
 		public IIntervalCollection<TKey, TValue> GetIntervalCollection<TKey, TValue>(string name)
 			where TKey : IComparable<TKey>
 		{
-			if (!_collections.TryGetValue(name, out var collection))
+			if (!_collectionsByName.TryGetValue(name, out var collection))
 			{
 				if (_isReadOnly)
 					throw new ArgumentException(string.Format("Unable to find a collection named '{0}'", name));
@@ -88,7 +90,7 @@ namespace IsabelDb
 				IntervalCollection<TKey, TValue>.ThrowIfInvalidKey();
 				var tableName = AddTable(name, CollectionType.IntervalCollection, typeof(TKey), typeof(TValue));
 				collection = CreateIntervalCollection<TKey, TValue>(name, tableName);
-				_collections.Add(name, collection);
+				AddCollection(name, collection);
 			}
 
 			EnsureTypeSafety(collection, CollectionType.IntervalCollection, typeof(TKey), typeof(TValue));
@@ -104,7 +106,7 @@ namespace IsabelDb
 
 		public IDictionary<TKey, TValue> GetDictionary<TKey, TValue>(string name)
 		{
-			if (!_collections.TryGetValue(name, out var collection))
+			if (!_collectionsByName.TryGetValue(name, out var collection))
 			{
 				if (_isReadOnly)
 					throw new ArgumentException(string.Format("Unable to find a collection named '{0}'", name));
@@ -121,7 +123,7 @@ namespace IsabelDb
 
 				var tableName = AddTable(name, CollectionType.Dictionary, typeof(TKey), typeof(TValue));
 				collection = CreateDictionary<TKey, TValue>(name, tableName);
-				_collections.Add(name, collection);
+				AddCollection(name, collection);
 			}
 
 			EnsureTypeSafety(collection, CollectionType.Dictionary, typeof(TKey), typeof(TValue));
@@ -137,7 +139,7 @@ namespace IsabelDb
 
 		public IMultiValueDictionary<TKey, TValue> GetMultiValueDictionary<TKey, TValue>(string name)
 		{
-			if (!_collections.TryGetValue(name, out var collection))
+			if (!_collectionsByName.TryGetValue(name, out var collection))
 			{
 				if (_isReadOnly)
 					throw new ArgumentException(string.Format("Unable to find a collection named '{0}'", name));
@@ -154,7 +156,7 @@ namespace IsabelDb
 
 				var tableName = AddTable(name, CollectionType.MultiValueDictionary, typeof(TKey), typeof(TValue));
 				collection = CreateMultiValueDictionary<TKey, TValue>(name, tableName);
-				_collections.Add(name, collection);
+				AddCollection(name, collection);
 			}
 
 			EnsureTypeSafety(collection, CollectionType.MultiValueDictionary, typeof(TKey), typeof(TValue));
@@ -170,7 +172,7 @@ namespace IsabelDb
 
 		public IOrderedCollection<TKey, TValue> GetOrderedCollection<TKey, TValue>(string name) where TKey : IComparable<TKey>
 		{
-			if (!_collections.TryGetValue(name, out var collection))
+			if (!_collectionsByName.TryGetValue(name, out var collection))
 			{
 				if (_isReadOnly)
 					throw new ArgumentException(string.Format("Unable to find a collection named '{0}'", name));
@@ -189,7 +191,7 @@ namespace IsabelDb
 
 				var tableName = AddTable(name, CollectionType.OrderedCollection, typeof(TKey), typeof(TValue));
 				collection = CreateOrderedCollection<TKey, TValue>(name, tableName);
-				_collections.Add(name, collection);
+				AddCollection(name, collection);
 			}
 
 			EnsureTypeSafety(collection, CollectionType.OrderedCollection, typeof(TKey), typeof(TValue));
@@ -205,7 +207,7 @@ namespace IsabelDb
 
 		public IBag<T> GetBag<T>(string name)
 		{
-			if (!_collections.TryGetValue(name, out var collection))
+			if (!_collectionsByName.TryGetValue(name, out var collection))
 			{
 				if (_isReadOnly)
 					throw new ArgumentException(string.Format("Unable to find a collection named '{0}'", name));
@@ -217,7 +219,7 @@ namespace IsabelDb
 
 				var tableName = AddTable(name, CollectionType.Bag, keyType: null, valueType: typeof(T));
 				collection = CreateBag<T>(name, tableName);
-				_collections.Add(name, collection);
+				AddCollection(name, collection);
 			}
 
 			EnsureTypeSafety(collection, CollectionType.Bag, null, typeof(T));
@@ -231,9 +233,38 @@ namespace IsabelDb
 			return target;
 		}
 
+		public void Drop(ICollection collection)
+		{
+			if (collection is IInternalCollection collectionToRemove && _collections.Contains(collectionToRemove))
+			{
+				using (var transaction = _connection.BeginTransaction())
+				{
+					var tableName = collectionToRemove.TableName;
+					using (var command = _connection.CreateCommand())
+					{
+						command.CommandText = string.Format("DROP TABLE {0}", tableName);
+						command.ExecuteNonQuery();
+					}
+
+					using (var command = _connection.CreateCommand())
+					{
+						command.CommandText = string.Format("DELETE FROM {0} WHERE tableName = @tableName", CollectionsTableName);
+						command.Parameters.AddWithValue("@tableName", tableName);
+						command.ExecuteNonQuery();
+					}
+
+					transaction.Commit();
+				}
+
+				_collectionsByName.Remove(collectionToRemove.Name);
+				_collections.Remove(collectionToRemove);
+				collectionToRemove.MarkAsDropped();
+			}
+		}
+
 		public static bool DoesTableExist(SQLiteConnection connection)
 		{
-			return Database.TableExists(connection, TableName);
+			return Database.TableExists(connection, CollectionsTableName);
 		}
 
 		public static void CreateTable(SQLiteConnection connection)
@@ -246,10 +277,16 @@ namespace IsabelDb
 				                                    "collectionType INTEGER NOT NULL," +
 				                                    "keyType INTEGER," +
 				                                    "valueType INTEGER NOT NULL" +
-				                                    ")", TableName);
+				                                    ")", CollectionsTableName);
 
 				command.ExecuteNonQuery();
 			}
+		}
+
+		private void AddCollection(string name, ICollection collection)
+		{
+			_collections.Add(collection);
+			_collectionsByName.Add(name, collection);
 		}
 
 		private void EnsureTypeSafety(ICollection collection,
@@ -359,44 +396,12 @@ namespace IsabelDb
 			return new GenericSerializer<T>(_serializer);
 		}
 
-		private bool TryRetrieveTableNameFor(string name,
-		                                     out string tableName,
-		                                     out Type keyType,
-		                                     out Type valueType)
-		{
-			using (var command = _connection.CreateCommand())
-			{
-				command.CommandText = string.Format("SELECT tableName, keyType, valueType FROM {0} WHERE name = @name LIMIT 0,1",
-				                                    TableName);
-				command.Parameters.AddWithValue("@name", name);
-				using (var reader = command.ExecuteReader())
-				{
-					if (!reader.Read())
-					{
-						tableName = null;
-						keyType = null;
-						valueType = null;
-						return false;
-					}
-
-					tableName = reader.GetString(i: 0);
-					if (!reader.IsDBNull(i: 1))
-						keyType = _typeModel.GetType(reader.GetInt32(i: 1));
-					else
-						keyType = null;
-
-					valueType = _typeModel.GetType(reader.GetInt32(i: 2));
-					return true;
-				}
-			}
-		}
-
 		private string AddTable(string name, CollectionType collectionType, Type keyType, Type valueType)
 		{
 			using (var command = _connection.CreateCommand())
 			{
 				command.CommandText = string.Format("INSERT INTO {0} (name, collectionType, tableName, keyType, valueType)" +
-				                                    "VALUES (@name, @collectionType, @tableName, @keyType, @valueType)", TableName);
+				                                    "VALUES (@name, @collectionType, @tableName, @keyType, @valueType)", CollectionsTableName);
 
 				var keyTypeId = keyType != null ? (int?) _typeModel.GetTypeId(keyType) : null;
 				var valueTypeId = _typeModel.GetTypeId(valueType);
@@ -419,7 +424,7 @@ namespace IsabelDb
 		{
 			using (var command = _connection.CreateCommand())
 			{
-				command.CommandText = string.Format("SELECT COUNT(*) FROM {0}", TableName);
+				command.CommandText = string.Format("SELECT COUNT(*) FROM {0}", CollectionsTableName);
 				var count = Convert.ToInt32(command.ExecuteScalar());
 				return string.Format("ObjectStore_{0}", count);
 			}
@@ -429,7 +434,7 @@ namespace IsabelDb
 		{
 			using (var command = _connection.CreateCommand())
 			{
-				command.CommandText = string.Format("SELECT name, collectionType, tableName, keyType, valueType FROM {0}", TableName);
+				command.CommandText = string.Format("SELECT name, collectionType, tableName, keyType, valueType FROM {0}", CollectionsTableName);
 				using (var reader = command.ExecuteReader())
 				{
 					while (reader.Read())
@@ -441,7 +446,7 @@ namespace IsabelDb
 						var valueTypeId = reader.GetInt32(4);
 
 						var collection = CreateCollection(name, collectionType, tableName, keyTypeId, valueTypeId);
-						_collections.Add(name, collection);
+						_collectionsByName.Add(name, collection);
 					}
 				}
 			}

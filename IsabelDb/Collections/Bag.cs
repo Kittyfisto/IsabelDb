@@ -79,6 +79,7 @@ namespace IsabelDb.Collections
 		public ValueKey Put(T value)
 		{
 			ThrowIfReadOnly();
+			ThrowIfDropped();
 
 			using (var command = CreateCommand(_put))
 			{
@@ -93,6 +94,7 @@ namespace IsabelDb.Collections
 		public IEnumerable<ValueKey> PutMany(IEnumerable<T> values)
 		{
 			ThrowIfReadOnly();
+			ThrowIfDropped();
 
 			using (var transaction = _connection.BeginTransaction())
 			using (var command = CreateCommand(_put))

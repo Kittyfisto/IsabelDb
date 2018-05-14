@@ -61,6 +61,11 @@ namespace IsabelDb
 			return GetOrderedCollection<TKey, TValue>(name);
 		}
 
+		public void Drop(ICollection collection)
+		{
+			_objectStores.Drop(collection);
+		}
+
 		/// <inheritdoc />
 		public IDictionary<TKey, TValue> GetDictionary<TKey, TValue>(string name)
 		{

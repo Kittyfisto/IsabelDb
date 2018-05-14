@@ -138,6 +138,7 @@ namespace IsabelDb.Collections
 				throw new ArgumentNullException(nameof(key));
 
 			ThrowIfReadOnly();
+			ThrowIfDropped();
 
 			if (value == null)
 				Remove(key);
@@ -148,6 +149,7 @@ namespace IsabelDb.Collections
 		public void PutMany(IEnumerable<KeyValuePair<TKey, TValue>> values)
 		{
 			ThrowIfReadOnly();
+			ThrowIfDropped();
 
 			using (var transaction = BeginTransaction())
 			using (var command = CreateCommand(_putQuery))

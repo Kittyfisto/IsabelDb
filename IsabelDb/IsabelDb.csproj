@@ -61,6 +61,7 @@
     <Compile Include="Attributes\SerializableContractAttribute.cs" />
     <Compile Include="BagExtensions.cs" />
     <Compile Include="Collections\AbstractCollection.cs" />
+    <Compile Include="Collections\IInternalCollection.cs" />
     <Compile Include="Collections\OrderedCollection.cs" />
     <Compile Include="Collections\UnresolvedTypeCollection.cs" />
     <Compile Include="CollectionType.cs" />

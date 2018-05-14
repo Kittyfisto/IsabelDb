@@ -2,18 +2,21 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Data.SQLite;
+using System.Linq;
 using IsabelDb.Serializers;
 
 namespace IsabelDb.Collections
 {
 	internal abstract class AbstractCollection<TValue>
 		: ICollection<TValue>
+			, IInternalCollection
 	{
 		private readonly SQLiteConnection _connection;
-		private readonly string _tableName;
-		private readonly ISQLiteSerializer<TValue> _valueSerializer;
 		private readonly bool _isReadOnly;
 		private readonly string _name;
+		private readonly string _tableName;
+		private readonly ISQLiteSerializer<TValue> _valueSerializer;
+		private bool _dropped;
 
 		protected AbstractCollection(SQLiteConnection connection,
 		                             string name,
@@ -28,6 +31,18 @@ namespace IsabelDb.Collections
 			_isReadOnly = isReadOnly;
 		}
 
+		protected void ThrowIfReadOnly()
+		{
+			if (_isReadOnly)
+				throw new InvalidOperationException("The database has been opened read-only and therefore may not be modified");
+		}
+
+		protected void ThrowIfDropped()
+		{
+			if (_dropped)
+				throw new InvalidOperationException("This collection has been dropped from the database and may no longer be modified");
+		}
+
 		#region Implementation of ICollection
 
 		public string Name => _name;
@@ -36,23 +51,18 @@ namespace IsabelDb.Collections
 
 		public IEnumerable<TValue> GetAllValues()
 		{
-			using (var command = _connection.CreateCommand())
-			{
-				command.CommandText = string.Format("SELECT value FROM {0}", _tableName);
-				using (var reader = command.ExecuteReader())
-				{
-					while (reader.Read())
-					{
-						if (_valueSerializer.TryDeserialize(reader, 0, out var value))
-							yield return value;
-					}
-				}
-			}
+			if (_dropped)
+				return Enumerable.Empty<TValue>();
+
+			return GetAllValuesInternal();
 		}
 
 		public void Clear()
 		{
 			ThrowIfReadOnly();
+
+			if (_dropped)
+				return;
 
 			using (var command = _connection.CreateCommand())
 			{
@@ -68,6 +78,9 @@ namespace IsabelDb.Collections
 
 		public long Count()
 		{
+			if (_dropped)
+				return 0;
+
 			using (var command = _connection.CreateCommand())
 			{
 				command.CommandText = string.Format("SELECT COUNT (*) FROM {0}", _tableName);
@@ -76,12 +89,6 @@ namespace IsabelDb.Collections
 		}
 
 		#endregion
-
-		protected void ThrowIfReadOnly()
-		{
-			if (_isReadOnly)
-				throw new InvalidOperationException("The database has been opened read-only and therefore may not be modified");
-		}
 
 		#region Implementation of IInternalCollection
 
@@ -94,5 +101,30 @@ namespace IsabelDb.Collections
 		public string KeyTypeName => throw new NotImplementedException();
 
 		#endregion
+
+		#region Implementation of IInternalCollection
+
+		public string TableName => _tableName;
+
+		public void MarkAsDropped()
+		{
+			_dropped = true;
+		}
+
+		#endregion
+
+		private IEnumerable<TValue> GetAllValuesInternal()
+		{
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = string.Format("SELECT value FROM {0}", _tableName);
+				using (var reader = command.ExecuteReader())
+				{
+					while (reader.Read())
+						if (_valueSerializer.TryDeserialize(reader, valueOrdinal: 0, value: out var value))
+							yield return value;
+				}
+			}
+		}
 	}
 }
