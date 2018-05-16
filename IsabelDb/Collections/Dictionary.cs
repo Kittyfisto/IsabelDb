@@ -168,6 +168,29 @@ namespace IsabelDb.Collections
 			}
 		}
 
+		public void Move(TKey oldKey, TKey newKey)
+		{
+			if (Equals(oldKey, newKey))
+				return;
+
+			using (var getCommand = _connection.CreateCommand())
+			using (var storeCommand = _connection.CreateCommand())
+			{
+				getCommand.CommandText = string.Format("SELECT value FROM {0} WHERE key = @oldKey LIMIT 0,1", _tableName);
+				getCommand.Parameters.AddWithValue("@oldKey", _keySerializer.Serialize(oldKey));
+				var value = getCommand.ExecuteScalar();
+				if (value != null && !Convert.IsDBNull(value))
+				{
+					storeCommand.CommandText = string.Format("DELETE FROM {0} WHERE key = @oldKey;" +
+					                                         "INSERT OR REPLACE INTO {0} VALUES (@newKey, @value)", _tableName);
+					storeCommand.Parameters.AddWithValue("@newKey", _keySerializer.Serialize(newKey));
+					storeCommand.Parameters.AddWithValue("@oldKey", _keySerializer.Serialize(oldKey));
+					storeCommand.Parameters.AddWithValue("@value", value);
+					storeCommand.ExecuteNonQuery();
+				}
+			}
+		}
+
 		public void Remove(TKey key)
 		{
 			if (key == null)

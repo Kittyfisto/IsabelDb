@@ -21,6 +21,65 @@ namespace IsabelDb.Test.Collections.Dictionary
 		}
 
 		[Test]
+		public void TestMove1()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				var values = db.GetDictionary<string, object>("Values");
+				values.Put("b", 42);
+				values.Move("a", "b");
+				values.Get("b").Should().Be(42);
+			}
+		}
+
+		[Test]
+		public void TestMove2()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				var values = db.GetDictionary<string, object>("Values");
+				values.Put("a", 42);
+				values.Get("a").Should().Be(42);
+
+				values.Move("a", "b");
+				values.Get("b").Should().Be(42);
+				new Action(() => values.Get("a")).Should().Throw<KeyNotFoundException>();
+			}
+		}
+
+		[Test]
+		public void TestMove3()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				var values = db.GetDictionary<string, object>("Values");
+				values.Put("a", 42);
+				values.Put("b", 9001);
+				values.Get("a").Should().Be(42);
+				values.Get("b").Should().Be(9001);
+
+				values.Move("a", "b");
+				values.Get("b").Should().Be(42);
+				new Action(() => values.Get("a")).Should().Throw<KeyNotFoundException>();
+			}
+		}
+
+		[Test]
+		public void TestMove4()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				var values = db.GetDictionary<int, object>("Values");
+				values.Put(1, "Parkway Drive");
+				values.Put(2, "Wishing Well");
+
+				values.Move(1, 1);
+				values.Get(1).Should().Be("Parkway Drive");
+				values.Get(2).Should().Be("Wishing Well");
+			}
+		}
+
+		[Test]
 		public void TestGet1()
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))

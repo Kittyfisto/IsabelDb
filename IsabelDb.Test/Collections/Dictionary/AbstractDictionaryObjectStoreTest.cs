@@ -24,6 +24,23 @@ namespace IsabelDb.Test.Collections.Dictionary
 		}
 
 		[Test]
+		public void TestMove()
+		{
+			using (var db = Database.CreateInMemory(CustomTypes))
+			{
+				var values = db.GetDictionary<TKey, object>("Values");
+				values.Put(SomeKey, "Noether's Theorem");
+				values.Put(DifferentKey, "The Symmetries of Reality");
+				values.Get(SomeKey).Should().Be("Noether's Theorem");
+				values.Get(DifferentKey).Should().Be("The Symmetries of Reality");
+
+				values.Move(SomeKey, DifferentKey);
+				new Action(() => values.Get(SomeKey)).Should().Throw<KeyNotFoundException>();
+				values.Get(DifferentKey).Should().Be("Noether's Theorem");
+			}
+		}
+
+		[Test]
 		public void TestGetKey()
 		{
 			using (var db = Database.CreateInMemory(CustomTypes))

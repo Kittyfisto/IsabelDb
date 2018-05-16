@@ -50,40 +50,6 @@ namespace IsabelDb.Test
 		}
 
 		[Test]
-		[Description("OpenRead shall throw an appropriate exception if the file doesn't exist")]
-		public void TestOpenReadOnly1()
-		{
-			new Action(() => Database.OpenRead("doesn't exist", NoCustomTypes))
-				.Should().Throw<FileNotFoundException>();
-		}
-
-		[Test]
-		[Description("OpenRead shall be able to read from a readonly file")]
-		public void TestOpenReadOnly2()
-		{
-			const string filename = "ReadonlyDatabase.isdb";
-			if (File.Exists(filename))
-			{
-				File.SetAttributes(filename, FileAttributes.Normal);
-				File.Delete(filename);
-			}
-
-			using (var db = Database.OpenOrCreate(filename, NoCustomTypes))
-			{
-				var collection = db.GetBag<string>("Values");
-				collection.PutMany("a", "b", "c");
-			}
-
-			File.SetAttributes(filename, FileAttributes.ReadOnly);
-
-			using (var db = Database.OpenRead(filename, NoCustomTypes))
-			{
-				var collection = db.GetBag<string>("Values");
-				collection.GetAllValues().Should().Equal("a", "b", "c");
-			}
-		}
-
-		[Test]
 		public void TestCreateInMemory()
 		{
 			Database.CreateInMemory(NoCustomTypes);

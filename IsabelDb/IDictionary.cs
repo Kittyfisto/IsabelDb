@@ -41,6 +41,23 @@ namespace IsabelDb
 		void PutMany(IEnumerable<KeyValuePair<TKey, TValue>> values);
 
 		/// <summary>
+		///     Moves the value from <paramref name="oldKey"/> to <paramref name="newKey"/>.
+		///     If there already exists a value for <paramref name="newKey"/>, then it is overwritten.
+		///     If <paramref name="oldKey"/> does not exist, then nothing is changed.
+		/// </summary>
+		/// <remarks>
+		///     This method behaves almost identical to the following methods called in that order:
+		///     - <see cref="IReadOnlyDictionary{TKey,TValue}.TryGet"/>
+		///     - <see cref="Remove"/>
+		///     - <see cref="Put"/>
+		///     With the exception that TryGet will return false the value cannot be deserialized whereas
+		///     this method will simply move data without attempting a deserialization / serialization roundtrip.
+		/// </remarks>
+		/// <param name="oldKey"></param>
+		/// <param name="newKey"></param>
+		void Move(TKey oldKey, TKey newKey);
+
+		/// <summary>
 		///     Removes the value with the given key.
 		///     Does nothing if the key is not part of this dictionary.
 		/// </summary>
