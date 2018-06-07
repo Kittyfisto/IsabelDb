@@ -82,6 +82,7 @@
     <Compile Include="IReadOnlyMultiValueDictionary.cs" />
     <Compile Include="IReadOnlyOrderedCollection.cs" />
     <Compile Include="IsabelDb.cs" />
+    <Compile Include="Serializers\DateTimeSerializer.cs" />
     <Compile Include="Serializers\UInt64Serializer.cs" />
     <Compile Include="Serializers\ValueKeySerializer.cs" />
     <Compile Include="Collections\UnknownTypeCollection.cs" />

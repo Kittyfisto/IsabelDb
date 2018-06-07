@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using FluentAssertions;
 using IsabelDb.Test.Entities;
@@ -290,6 +289,18 @@ namespace IsabelDb.Test
 				var actualValue2 = persons.ElementAt(index: 1);
 				actualValue2.Key.Should().Be("bar");
 				actualValue2.Value.Should().Equal(value2);
+			}
+		}
+
+		[Test]
+		public void TestPutGetDateTime()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				var value1 = new DateTime(2018, 06, 07, 13, 25, 23);
+				var value2 = new DateTime(2018, 06, 07, 13, 26, 02);
+				PutAndGetObjectTable(db, value1, value2);
+				PutAndGetValueTable(db, value1, value2);
 			}
 		}
 
