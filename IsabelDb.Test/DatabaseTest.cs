@@ -305,6 +305,18 @@ namespace IsabelDb.Test
 		}
 
 		[Test]
+		public void TestPutGetGuid()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				var value1 = Guid.NewGuid();
+				var value2 = Guid.Parse("C6138CD7-EBFB-4BBD-A82F-493FF2F0828D");
+				PutAndGetObjectTable(db, value1, value2);
+				PutAndGetValueTable(db, value1, value2);
+			}
+		}
+
+		[Test]
 		public void TestPutGetPoint()
 		{
 			using (var db = Database.CreateInMemory(new []{typeof(Point)}))

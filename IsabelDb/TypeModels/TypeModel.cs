@@ -46,7 +46,8 @@ namespace IsabelDb.TypeModels
 			typeof(long),
 			typeof(ulong),
 			typeof(byte[]),
-			typeof(DateTime)
+			typeof(DateTime),
+			typeof(Guid)
 		};
 
 		private readonly Dictionary<int, TypeDescription> _typeDescriptionsById;
