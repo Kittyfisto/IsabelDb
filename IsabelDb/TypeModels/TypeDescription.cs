@@ -97,34 +97,21 @@ namespace IsabelDb.TypeModels
 			                           fields);
 		}
 
-		public void ThrowOnBreakingChanges(TypeDescription otherDescription)
+		public static TypeDescription Merge(TypeDescription previousDescription, TypeDescription currentDescription)
 		{
-			foreach (var field in _fields)
-			{
-				var otherField = otherDescription._fields.FirstOrDefault(x => Equals(x.Name, field.Name));
-				if (otherField != null)
-				{
-					field.ThrowOnBreakingChanges(otherField);
-				}
-			}
+			previousDescription.ThrowOnBreakingChanges(currentDescription);
 
-			var otherBaseType = otherDescription.BaseType;
-			if (BaseType == null && otherBaseType != null)
-				throw new BreakingChangeException();
-			if (BaseType != null && otherBaseType == null)
-				throw new BreakingChangeException();
-
-			if (BaseType != null && otherBaseType != null)
-			{
-				if (!AreSameType(BaseType, otherBaseType))
-					throw new
-						BreakingChangeException(string.Format("The base class of the type '{0}' has been changed from '{1}' to '{2}': This is a breaking change!",
-						                                      FullTypeName,
-						                                      BaseType.FullTypeName,
-						                                      otherBaseType.FullTypeName));
-
-				BaseType.ThrowOnBreakingChanges(otherDescription.BaseType);
-			}
+			var type = previousDescription.Type;
+			var typename = currentDescription.FullTypeName;
+			var typeId = currentDescription.TypeId;
+			var baseTypeDescription = currentDescription.BaseType;
+			var fields = FieldDescription.Merge(previousDescription.Fields, currentDescription.Fields);
+			var description = new TypeDescription(type,
+			                                      typename,
+			                                      typeId,
+			                                      baseTypeDescription,
+			                                      fields);
+			return description;
 		}
 
 		private static void ExtractTypename(Type type,
@@ -200,6 +187,36 @@ namespace IsabelDb.TypeModels
 		private static bool AreSameType(TypeDescription type, TypeDescription otherType)
 		{
 			return string.Equals(type.FullTypeName, otherType.FullTypeName);
+		}
+
+		private void ThrowOnBreakingChanges(TypeDescription otherDescription)
+		{
+			foreach (var field in _fields)
+			{
+				var otherField = otherDescription._fields.FirstOrDefault(x => Equals(x.Name, field.Name));
+				if (otherField != null)
+				{
+					field.ThrowOnBreakingChanges(otherField);
+				}
+			}
+
+			var otherBaseType = otherDescription.BaseType;
+			if (BaseType == null && otherBaseType != null)
+				throw new BreakingChangeException();
+			if (BaseType != null && otherBaseType == null)
+				throw new BreakingChangeException();
+
+			if (BaseType != null && otherBaseType != null)
+			{
+				if (!AreSameType(BaseType, otherBaseType))
+					throw new
+						BreakingChangeException(string.Format("The base class of the type '{0}' has been changed from '{1}' to '{2}': This is a breaking change!",
+						                                      FullTypeName,
+						                                      BaseType.FullTypeName,
+						                                      otherBaseType.FullTypeName));
+
+				BaseType.ThrowOnBreakingChanges(otherDescription.BaseType);
+			}
 		}
 	}
 }

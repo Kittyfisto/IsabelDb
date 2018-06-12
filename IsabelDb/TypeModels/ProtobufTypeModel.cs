@@ -111,11 +111,7 @@ namespace IsabelDb.TypeModels
 			var currentTypeModel = TypeModel.Create(allTypes);
 			var typeResolver = new TypeResolver(currentTypeModel.TypeDescriptions);
 			var typeModel = TypeModel.Read(connection, typeResolver);
-
-			typeModel.ThrowOnBreakingChanges(currentTypeModel);
-
-			foreach (var type in allTypes)
-				typeModel.Add(type);
+			typeModel.Add(currentTypeModel);
 
 			// If we reach this point, then both type models are compatible to each other
 			// and we can create a serializer for it!

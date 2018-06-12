@@ -104,5 +104,19 @@ namespace IsabelDb.TypeModels
 		}
 
 		#endregion
+
+		public static IReadOnlyList<FieldDescription> Merge(IReadOnlyList<FieldDescription> previousFields, IReadOnlyList<FieldDescription> currentFields)
+		{
+			var fields = previousFields.ToDictionary(x => x.Name, x => x);
+			foreach (var currentField in currentFields)
+			{
+				if (!fields.ContainsKey(currentField.Name))
+				{
+					fields.Add(currentField.Name, currentField);
+				}
+			}
+
+			return fields.Values.ToList();
+		}
 	}
 }

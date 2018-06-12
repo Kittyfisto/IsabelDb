@@ -185,36 +185,31 @@ namespace IsabelDb.TypeModels
 			return model;
 		}
 
+		public void Add(TypeModel otherTypeModel)
+		{
+			foreach (var currentDescription in otherTypeModel.TypeDescriptions)
+			{
+				var type = currentDescription.Type;
+				if (!_typeDescriptions.TryGetValue(type, out var previousDescription))
+				{
+					AddType(type);
+				}
+				else
+				{
+					var mergedDescription = TypeDescription.Merge(previousDescription, currentDescription);
+					_typeDescriptions[type] = mergedDescription;
+				}
+			}
+
+			foreach (var type in otherTypeModel.Types)
+				Add(type);
+		}
+
 		public TypeDescription Add(Type type)
 		{
 			if (!_typeDescriptions.TryGetValue(type, out var typeDescription))
 			{
-				var baseTypeDescription = AddBaseTypeOf(type);
-
-				var fields = FieldDescription.FindSerializableFields(type);
-				var properties = FieldDescription.FindSerializableProperties(type);
-				var members = CreateFieldDescriptions(fields, properties, baseTypeDescription);
-
-				if (type.IsArray && type.GetArrayRank() == 1)
-				{
-					Add(type.GetElementType());
-				}
-
-				if (type.IsGenericType)
-				{
-					foreach (var argument in type.GenericTypeArguments)
-					{
-						Add(argument);
-					}
-				}
-
-				var id = _nextId;
-				++_nextId;
-				typeDescription = TypeDescription.Create(type, id, baseTypeDescription, members);
-				_typeDescriptionsById.Add(id, typeDescription);
-				_typeDescriptions.Add(type, typeDescription);
-				_typesToId.Add(type, id);
-				_idToTypes.Add(id, type);
+				typeDescription = AddType(type);
 			}
 
 			return typeDescription;
@@ -342,6 +337,37 @@ namespace IsabelDb.TypeModels
 				                                    ")", FieldTableName, TypeTableName);
 				command.ExecuteNonQuery();
 			}
+		}
+
+		private TypeDescription AddType(Type type)
+		{
+			var baseTypeDescription = AddBaseTypeOf(type);
+
+			var fields = FieldDescription.FindSerializableFields(type);
+			var properties = FieldDescription.FindSerializableProperties(type);
+			var members = CreateFieldDescriptions(fields, properties, baseTypeDescription);
+
+			if (type.IsArray && type.GetArrayRank() == 1)
+			{
+				Add(type.GetElementType());
+			}
+
+			if (type.IsGenericType)
+			{
+				foreach (var argument in type.GenericTypeArguments)
+				{
+					Add(argument);
+				}
+			}
+
+			var id = _nextId;
+			++_nextId;
+			var typeDescription = TypeDescription.Create(type, id, baseTypeDescription, members);
+			_typeDescriptionsById.Add(id, typeDescription);
+			_typeDescriptions.Add(type, typeDescription);
+			_typesToId.Add(type, id);
+			_idToTypes.Add(id, type);
+			return typeDescription;
 		}
 
 		private void TryAddType(int typeId, string typeName, int? baseId, TypeResolver typeResolver)
@@ -504,20 +530,6 @@ namespace IsabelDb.TypeModels
 				return false;
 
 			return true;
-		}
-
-		public void ThrowOnBreakingChanges(TypeModel typeModel)
-		{
-			foreach (var pair in _typeDescriptions)
-			{
-				var type = pair.Key;
-				var description = pair.Value;
-
-				if (typeModel._typeDescriptions.TryGetValue(type, out var otherDescription))
-				{
-					description.ThrowOnBreakingChanges(otherDescription);
-				}
-			}
 		}
 	}
 }

@@ -51,7 +51,46 @@ namespace IsabelDb.Test
 		}
 
 		[Test]
-		//[RequriedBehaviour]
+		[Description("Verifies that upgrading the schema by adding a property works")]
+		public void TestUpgradeAddProperty2()
+		{
+			using (var database = CreateDatabase(typeof(Entities.V1.Comic)))
+			{
+				var comics = database.GetDictionary<int, Entities.V1.Comic>("Comcis");
+				comics.Put(1, new Entities.V1.Comic
+				{
+					Name = "Watchmen",
+					Writer = "Alan Moore"
+				});
+			}
+
+			using (var database = CreateDatabase(typeof(Entities.V2.Comic)))
+			{
+				var comics = database.GetDictionary<int, Entities.V2.Comic>("Comcis");
+				comics.Put(2, new Entities.V2.Comic
+				{
+					Name = "Rise of Atriox",
+					Writer = "Cullen Bunn",
+					Artist = "Eric Nguyen"
+				});
+			}
+
+			using (var database = CreateDatabase(typeof(Entities.V2.Comic)))
+			{
+				var comics = database.GetDictionary<int, Entities.V2.Comic>("Comcis");
+				var comic = comics.Get(1);
+				comic.Name.Should().Be("Watchmen");
+				comic.Writer.Should().Be("Alan Moore");
+				comic.Artist.Should().BeNull();
+
+				comic = comics.Get(2);
+				comic.Name.Should().Be("Rise of Atriox");
+				comic.Writer.Should().Be("Cullen Bunn");
+				comic.Artist.Should().Be("Eric Nguyen");
+			}
+		}
+
+		[Test]
 		[Description("Verifies that it's possible to add fields to entites and still read back 'old' database")]
 		public void TestForwardCompatibilityAddProperty()
 		{

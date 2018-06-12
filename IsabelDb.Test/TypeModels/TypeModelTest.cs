@@ -47,7 +47,7 @@ namespace IsabelDb.Test.TypeModels
 
 			var typeRegistry = new TypeResolver(availableTypes);
 			var otherModel = TypeModel.Read(connection, typeRegistry);
-			otherModel.ThrowOnBreakingChanges(TypeModel.Create(availableTypes));
+			otherModel.Add(TypeModel.Create(availableTypes));
 			return otherModel;
 		}
 
