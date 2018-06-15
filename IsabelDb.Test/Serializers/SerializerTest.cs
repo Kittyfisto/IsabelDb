@@ -19,6 +19,8 @@ namespace IsabelDb.Test.Serializers
 		public static IEnumerable<int[]> IntArrayValues => new[] {null, new[] {0}, IntValues.ToArray()};
 		public static IEnumerable<ValueKey> ValueKeyValues => new[]{new ValueKey(0), new ValueKey(long.MinValue), new ValueKey(long.MaxValue) };
 
+		public static IEnumerable<SomeEnum> SomeEnumValues => Enum.GetValues(typeof(SomeEnum)).Cast<SomeEnum>().ToList();
+
 		public static IEnumerable<short?> NullableShortValues =>
 			new short?[] {short.MinValue, -1, 0, 1, short.MaxValue, null};
 
@@ -175,6 +177,18 @@ namespace IsabelDb.Test.Serializers
 		                                        double? value)
 		{
 			var obj = new NullableDouble
+			{
+				Value = value
+			};
+			var actualObj = Roundtrip(obj);
+			actualObj.Should().NotBeNull();
+			actualObj.Value.Should().Be(value);
+		}
+
+		[Test]
+		public void TestRoundtripTypeWithEnum([ValueSource(nameof(SomeEnumValues))] SomeEnum value)
+		{
+			var obj = new TypeWithEnum
 			{
 				Value = value
 			};

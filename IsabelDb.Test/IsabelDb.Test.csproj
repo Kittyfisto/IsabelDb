@@ -111,6 +111,7 @@
     <Compile Include="Entities\IntArray.cs" />
     <Compile Include="Entities\IntList.cs" />
     <Compile Include="Entities\SomeEnum.cs" />
+    <Compile Include="Entities\TypeWithEnum.cs" />
     <Compile Include="Entities\V2\ISerializableType2.cs" />
     <Compile Include="Entities\Menu.cs" />
     <Compile Include="Entities\NullableDouble.cs" />

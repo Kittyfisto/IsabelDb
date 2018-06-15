@@ -292,6 +292,8 @@ namespace IsabelDb.TypeModels
 				return true;
 			if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
 				return true;
+			if (type.IsEnum)
+				return true;
 
 			return false;
 		}
@@ -486,9 +488,6 @@ namespace IsabelDb.TypeModels
 
 			var baseType = type.BaseType;
 			if (baseType == null)
-				return null;
-
-			if (type.IsEnum) //< Enums don't have base types in our type model
 				return null;
 
 			// Let's find out if this type implements a serializable interface!
