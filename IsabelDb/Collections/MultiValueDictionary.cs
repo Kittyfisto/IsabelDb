@@ -229,6 +229,25 @@ namespace IsabelDb.Collections
 			}
 		}
 
+		public void RemoveMany(IEnumerable<TKey> keys)
+		{
+			ThrowIfReadOnly();
+
+			using (var transaction = _connection.BeginTransaction())
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = _removeQuery;
+				var parameter = command.Parameters.Add("@key", _keySerializer.DatabaseType);
+				foreach (var key in keys)
+				{
+					parameter.Value = _keySerializer.Serialize(key);
+					command.ExecuteNonQuery();
+				}
+
+				transaction.Commit();
+			}
+		}
+
 		#endregion
 
 		#region Implementation of IInternalCollection

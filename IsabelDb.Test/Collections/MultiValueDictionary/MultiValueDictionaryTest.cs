@@ -339,6 +339,41 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		}
 
 		[Test]
+		public void TestRemoveMany1()
+		{
+			using (var connection = CreateConnection())
+			{
+				using (var db = CreateDatabase(connection))
+				{
+					var collection = db.GetMultiValueDictionary<int, string>("Blessthefall");
+					collection.Put(1, "a");
+					collection.Put(2, "b");
+					collection.Put(2, "c");
+					collection.GetAllValues().Should().Equal("a", "b", "c");
+
+					collection.RemoveMany(new []{2});
+					collection.GetAllValues().Should().Equal("a");
+				}
+			}
+		}
+
+		[Test]
+		public void TestRemoveMany2()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var collection = db.GetMultiValueDictionary<int, string>("Blessthefall");
+				collection.PutMany(1, new[]{"a", "b"});
+				collection.PutMany(2, new[]{"c", "d"});
+				collection.GetAllValues().Should().Equal("a", "b", "c", "d");
+
+				collection.RemoveMany(new []{3, 2, 1});
+				collection.GetAllValues().Should().BeEmpty();
+			}
+		}
+
+		[Test]
 		public void TestContainsKey()
 		{
 			using (var connection = CreateConnection())
