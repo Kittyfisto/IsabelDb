@@ -137,12 +137,17 @@ namespace IsabelDb.TypeModels
 				}
 				else
 				{
-					var interfaces = type.GetInterfaces();
-					if (!interfaces.Contains(typeof(ISerializable)))
-						if (!TypeModel.IsWellKnown(type))
-							throw new
-								ArgumentException(string.Format("The type '{0}' is not serializable: It should have the DataContractAttribute applied",
-								                                type));
+					if (!type.IsEnum)
+					{
+						var interfaces = type.GetInterfaces();
+						if (!interfaces.Contains(typeof(ISerializable)))
+						{
+							if (!TypeModel.IsWellKnown(type))
+								throw new
+									ArgumentException(string.Format("The type '{0}' is not serializable: It should have the DataContractAttribute applied",
+									                                type));
+						}
+					}
 
 					@namespace = type.Namespace;
 					name = type.Name;

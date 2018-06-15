@@ -488,6 +488,9 @@ namespace IsabelDb.TypeModels
 			if (baseType == null)
 				return null;
 
+			if (type.IsEnum) //< Enums don't have base types in our type model
+				return null;
+
 			// Let's find out if this type implements a serializable interface!
 			var allInterfaces = type.GetInterfaces();
 			var baseTypeInterfaces = baseType.GetInterfaces();

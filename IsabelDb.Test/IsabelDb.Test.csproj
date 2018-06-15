@@ -93,6 +93,7 @@
     <Compile Include="Collections\Bag\BagCompatibilityTest.cs" />
     <Compile Include="Collections\Dictionary\DictionaryCompatibilityTest.cs" />
     <Compile Include="Collections\Dictionary\DictionaryTest.cs" />
+    <Compile Include="Collections\Dictionary\EnumKeyTest.cs" />
     <Compile Include="Collections\Dictionary\UInt64KeyTest.cs" />
     <Compile Include="Collections\IntervalCollection\IntervalCollectionCompabilityTest.cs" />
     <Compile Include="Collections\MultiValueDictionary\MultiValueDictionaryCompatibilityTest.cs" />
@@ -109,6 +110,7 @@
     <Compile Include="Entities\HasNonStandardCtor.cs" />
     <Compile Include="Entities\IntArray.cs" />
     <Compile Include="Entities\IntList.cs" />
+    <Compile Include="Entities\SomeEnum.cs" />
     <Compile Include="Entities\V2\ISerializableType2.cs" />
     <Compile Include="Entities\Menu.cs" />
     <Compile Include="Entities\NullableDouble.cs" />

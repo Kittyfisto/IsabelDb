@@ -335,5 +335,17 @@ namespace IsabelDb.Test.TypeModels
 			var model = TypeModel.Create(new Type[0]);
 			model.TryGetType(42).Should().BeNull();
 		}
+
+		[Test]
+		public void TestEnum()
+		{
+			var model = TypeModel.Create(new[] {typeof(SomeEnum)});
+			var description = model.GetTypeDescription(typeof(SomeEnum));
+			description.Type.Should().Be<SomeEnum>();
+			description.BaseType.Should().BeNull();
+			description.Name.Should().Be("SomeEnum");
+			description.Namespace.Should().Be("IsabelDb.Test.Entities");
+			description.Fields.Should().BeEmpty();
+		}
 	}
 }
