@@ -45,6 +45,7 @@ namespace IsabelDb.Collections
 			_countQuery = string.Format("SELECT COUNT(*) FROM {0}", _tableName);
 			_deleteAllQuery = string.Format("DELETE FROM {0}", _tableName);
 			_deleteQuery = string.Format("DELETE FROM {0} WHERE key = @key", _tableName);
+			_existsQuery = string.Format("SELECT EXISTS(SELECT * FROM {0} WHERE key = @key)", _tableName);
 			_putQuery = PutQuery(_tableName);
 		}
 
@@ -110,6 +111,16 @@ namespace IsabelDb.Collections
 				throw new KeyNotFoundException();
 
 			return value;
+		}
+
+		public bool ContainsKey(TKey key)
+		{
+			using (var command = CreateCommand(_existsQuery))
+			{
+				command.Parameters.AddWithValue("@key", _keySerializer.Serialize(key));
+				var value = Convert.ToInt64(command.ExecuteScalar());
+				return value != 0;
+			}
 		}
 
 		public bool TryGet(TKey key, out TValue value)
@@ -301,6 +312,7 @@ namespace IsabelDb.Collections
 		private readonly string _getAllQuery;
 		private readonly string _getManyQuery;
 		private readonly string _getQuery;
+		private readonly string _existsQuery;
 		private readonly string _putQuery;
 
 		#endregion

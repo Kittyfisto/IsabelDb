@@ -18,6 +18,7 @@ namespace IsabelDb.Collections
 		private readonly string _removeQuery;
 		private readonly string _putQuery;
 		private readonly string _getByKey;
+		private readonly string _existsQuery;
 		private readonly string _getAll;
 		private long _lastId;
 
@@ -36,6 +37,7 @@ namespace IsabelDb.Collections
 
 			CreateObjectTableIfNecessary();
 
+			_existsQuery = string.Format("SELECT EXISTS(SELECT * FROM {0} WHERE key = @key)", _tableName);
 			_putQuery = string.Format("INSERT INTO {0} (id, key, value) VALUES (@id, @key, @value)", _tableName);
 			_getAll = string.Format("SELECT key, value FROM {0}", _tableName);
 			_getByKey = string.Format("SELECT value FROM {0} where key = @key", _tableName);
@@ -123,6 +125,17 @@ namespace IsabelDb.Collections
 				}
 
 				transaction.Commit();
+			}
+		}
+
+		public bool ContainsKey(TKey key)
+		{
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = _existsQuery;
+				command.Parameters.AddWithValue("@key", _keySerializer.Serialize(key));
+				var value = Convert.ToInt64(command.ExecuteScalar());
+				return value != 0;
 			}
 		}
 

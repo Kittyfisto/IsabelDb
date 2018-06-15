@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 
 namespace IsabelDb
 {
@@ -13,6 +14,14 @@ namespace IsabelDb
 	/// <typeparam name="TValue"></typeparam>
 	public interface IReadOnlyMultiValueDictionary<TKey, TValue>
 	{
+		/// <summary>
+		///    Tests if there is a value with the given key in this collection.
+		/// </summary>
+		/// <param name="key"></param>
+		/// <returns></returns>
+		[Pure]
+		bool ContainsKey(TKey key);
+
 		/// <summary>
 		///     Returns all values associated with the given key.
 		/// </summary>

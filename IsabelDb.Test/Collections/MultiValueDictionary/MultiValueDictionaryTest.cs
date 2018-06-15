@@ -338,6 +338,23 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 			}
 		}
 
+		[Test]
+		public void TestContainsKey()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var collection = db.GetMultiValueDictionary<int, string>("Blessthefall");
+				collection.Put(1, "1");
+				collection.PutMany(2, new []{"2", "3"});
+
+				collection.ContainsKey(1).Should().BeTrue();
+				collection.ContainsKey(2).Should().BeTrue();
+				collection.ContainsKey(0).Should().BeFalse();
+				collection.ContainsKey(3).Should().BeFalse();
+			}
+		}
+
 		protected override CollectionType CollectionType => CollectionType.MultiValueDictionary;
 
 		protected override IMultiValueDictionary<int, string> GetCollection(IDatabase db, string name)

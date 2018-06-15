@@ -285,17 +285,32 @@ namespace IsabelDb.Test.Collections.Dictionary
 		public void TestRemoveMany2()
 		{
 			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
 			{
-				using (var db = CreateDatabase(connection))
-				{
-					var collection = db.GetDictionary<int, string>("Stuff");
-					collection.Put(1, "1");
-					collection.Put(2, "2");
-					collection.GetAllValues().Should().Equal("1", "2");
+				var collection = db.GetDictionary<int, string>("Stuff");
+				collection.Put(1, "1");
+				collection.Put(2, "2");
+				collection.GetAllValues().Should().Equal("1", "2");
 
-					collection.RemoveMany(new []{3, 2, 1});
-					collection.GetAllValues().Should().BeEmpty();
-				}
+				collection.RemoveMany(new []{3, 2, 1});
+				collection.GetAllValues().Should().BeEmpty();
+			}
+		}
+
+		[Test]
+		public void TestContainsKey()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var collection = db.GetDictionary<int, string>("Stuff");
+				collection.Put(1, "1");
+				collection.Put(2, "2");
+
+				collection.ContainsKey(1).Should().BeTrue();
+				collection.ContainsKey(2).Should().BeTrue();
+				collection.ContainsKey(0).Should().BeFalse();
+				collection.ContainsKey(3).Should().BeFalse();
 			}
 		}
 
