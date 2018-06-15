@@ -263,6 +263,42 @@ namespace IsabelDb.Test.Collections.Dictionary
 			}
 		}
 
+		[Test]
+		public void TestRemoveMany1()
+		{
+			using (var connection = CreateConnection())
+			{
+				using (var db = CreateDatabase(connection))
+				{
+					var collection = db.GetDictionary<int, string>("Stuff");
+					collection.Put(1, "1");
+					collection.Put(2, "2");
+					collection.GetAllValues().Should().Equal("1", "2");
+
+					collection.RemoveMany(new []{2});
+					collection.GetAllValues().Should().Equal("1");
+				}
+			}
+		}
+
+		[Test]
+		public void TestRemoveMany2()
+		{
+			using (var connection = CreateConnection())
+			{
+				using (var db = CreateDatabase(connection))
+				{
+					var collection = db.GetDictionary<int, string>("Stuff");
+					collection.Put(1, "1");
+					collection.Put(2, "2");
+					collection.GetAllValues().Should().Equal("1", "2");
+
+					collection.RemoveMany(new []{3, 2, 1});
+					collection.GetAllValues().Should().BeEmpty();
+				}
+			}
+		}
+
 		protected override CollectionType CollectionType => CollectionType.Dictionary;
 
 		protected override IDictionary<int, string> GetCollection(IDatabase db, string name)

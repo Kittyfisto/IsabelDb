@@ -63,5 +63,11 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="key"></param>
 		void Remove(TKey key);
+
+		/// <summary>
+		///     Removes the values with the given keys.
+		/// </summary>
+		/// <param name="keys"></param>
+		void RemoveMany(IEnumerable<TKey> keys);
 	}
 }

@@ -209,6 +209,23 @@ namespace IsabelDb.Collections
 			}
 		}
 
+		public void RemoveMany(IEnumerable<TKey> keys)
+		{
+			using (var transaction = BeginTransaction())
+			{
+				using (var command = CreateCommand(_deleteQuery))
+				{
+					var parameter = command.Parameters.Add("@key", _keySerializer.DatabaseType);
+					foreach (var key in keys)
+					{
+						parameter.Value = key;
+						command.ExecuteNonQuery();
+					}
+					transaction.Commit();
+				}
+			}
+		}
+
 		public override CollectionType Type => CollectionType.Dictionary;
 
 		public override Type KeyType => typeof(TKey);
