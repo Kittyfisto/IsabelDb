@@ -31,6 +31,12 @@ namespace IsabelDb
 		/// <param name="value"></param>
 		/// <returns></returns>
 		bool TryGet(TKey key, out TValue value);
+		
+		/// <summary>
+		///     Returns all keys in this collection.
+		/// </summary>
+		/// <returns></returns>
+		IEnumerable<TKey> GetAllKeys();
 
 		/// <summary>
 		///     Retrieves the value with the given key.

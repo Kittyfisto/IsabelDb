@@ -15,6 +15,12 @@ namespace IsabelDb
 	public interface IReadOnlyMultiValueDictionary<TKey, TValue>
 	{
 		/// <summary>
+		///     Returns all keys in this collection.
+		/// </summary>
+		/// <returns></returns>
+		IEnumerable<TKey> GetAllKeys();
+
+		/// <summary>
 		///    Tests if there is a value with the given key in this collection.
 		/// </summary>
 		/// <param name="key"></param>

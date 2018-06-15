@@ -40,6 +40,7 @@ namespace IsabelDb.Collections
 			CreateObjectTableIfNecessary(out _table);
 
 			_getAllQuery = string.Format("SELECT key, value FROM {0}", tableName);
+			_getAllKeysQuery = string.Format("SELECT key FROM {0}", tableName);
 			_getManyQuery = string.Format("SELECT key, value FROM {0} WHERE key = @key", tableName);
 			_getQuery = string.Format("SELECT key, value FROM {0} WHERE key = @key", tableName);
 			_countQuery = string.Format("SELECT COUNT(*) FROM {0}", _tableName);
@@ -100,6 +101,21 @@ namespace IsabelDb.Collections
 						if (reader.Read())
 							if (_valueSerializer.TryDeserialize(reader, 0, out var value))
 								yield return value;
+					}
+				}
+			}
+		}
+
+		public IEnumerable<TKey> GetAllKeys()
+		{
+			using (var command = CreateCommand(_getAllKeysQuery))
+			{
+				using (var reader = command.ExecuteReader())
+				{
+					while (reader.Read())
+					{
+						if (_keySerializer.TryDeserialize(reader, 0, out var key))
+							yield return key;
 					}
 				}
 			}
@@ -314,6 +330,7 @@ namespace IsabelDb.Collections
 		private readonly string _getQuery;
 		private readonly string _existsQuery;
 		private readonly string _putQuery;
+		private readonly string _getAllKeysQuery;
 
 		#endregion
 	}

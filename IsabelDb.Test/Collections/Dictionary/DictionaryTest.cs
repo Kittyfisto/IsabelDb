@@ -314,6 +314,29 @@ namespace IsabelDb.Test.Collections.Dictionary
 			}
 		}
 
+		[Test]
+		public void TestGetAllKeysEmpty()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				var collection = db.GetDictionary<int, string>("Stuff");
+				collection.GetAllKeys().Should().BeEmpty();
+			}
+		}
+
+		[Test]
+		public void TestGetAllKeys1()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				var collection = db.GetDictionary<int, string>("Stuff");
+				collection.Put(1, "a");
+				collection.Put(2, "b");
+
+				collection.GetAllKeys().Should().Equal(1, 2);
+			}
+		}
+
 		protected override CollectionType CollectionType => CollectionType.Dictionary;
 
 		protected override IDictionary<int, string> GetCollection(IDatabase db, string name)

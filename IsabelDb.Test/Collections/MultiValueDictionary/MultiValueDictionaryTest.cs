@@ -224,6 +224,48 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		}
 
 		[Test]
+		public void TestPutManyValues4()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				var values = db.GetMultiValueDictionary<int, string>("Values");
+				const int count = 10000;
+
+				values.PutMany(Enumerable.Range(1, count).Select(x => new KeyValuePair<int, string>(x, x.ToString())));
+				values.Count().Should().Be(count);
+				for (int i = 1; i <= count; ++i)
+				{
+					var actual = values.GetValues(i);
+					actual.Should().HaveCount(1);
+					actual.Should().Equal(new[] {i.ToString()});
+				}
+			}
+		}
+
+		[Test]
+		public void TestGetAllKeysEmpty()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				var values = db.GetMultiValueDictionary<int, string>("Values");
+				values.GetAllKeys().Should().BeEmpty();
+			}
+		}
+
+		[Test]
+		public void TestGetAllKeys1()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				var values = db.GetMultiValueDictionary<int, string>("Values");
+				values.Put(1, "a");
+				values.Put(2, "b");
+
+				values.GetAllKeys().Should().Equal(1, 2);
+			}
+		}
+
+		[Test]
 		public void TestByteKey()
 		{
 			TestKeyLimits(byte.MinValue, byte.MaxValue);

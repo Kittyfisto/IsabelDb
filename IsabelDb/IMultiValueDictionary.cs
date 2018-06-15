@@ -28,6 +28,11 @@ namespace IsabelDb
 		void PutMany(IEnumerable<KeyValuePair<TKey, IEnumerable<TValue>>> values);
 
 		/// <summary>
+		/// </summary>
+		/// <param name="values"></param>
+		void PutMany(IEnumerable<KeyValuePair<TKey, TValue>> values);
+
+		/// <summary>
 		///     Removes the value associated with the given key.
 		/// </summary>
 		/// <param name="key"></param>

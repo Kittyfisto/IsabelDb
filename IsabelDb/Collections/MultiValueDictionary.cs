@@ -20,6 +20,7 @@ namespace IsabelDb.Collections
 		private readonly string _getByKey;
 		private readonly string _existsQuery;
 		private readonly string _getAll;
+		private readonly string _getAllKeys;
 		private long _lastId;
 
 		public MultiValueDictionary(SQLiteConnection connection,
@@ -39,6 +40,7 @@ namespace IsabelDb.Collections
 
 			_existsQuery = string.Format("SELECT EXISTS(SELECT * FROM {0} WHERE key = @key)", _tableName);
 			_putQuery = string.Format("INSERT INTO {0} (id, key, value) VALUES (@id, @key, @value)", _tableName);
+			_getAllKeys = string.Format("SELECT key FROM {0}", _tableName);
 			_getAll = string.Format("SELECT key, value FROM {0}", _tableName);
 			_getByKey = string.Format("SELECT value FROM {0} where key = @key", _tableName);
 			_removeQuery = string.Format("DELETE FROM {0} WHERE key = @key", _tableName);
@@ -125,6 +127,49 @@ namespace IsabelDb.Collections
 				}
 
 				transaction.Commit();
+			}
+		}
+
+		public void PutMany(IEnumerable<KeyValuePair<TKey, TValue>> values)
+		{
+			ThrowIfReadOnly();
+			ThrowIfDropped();
+
+			using (var transaction = _connection.BeginTransaction())
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = _putQuery;
+
+				var idParameter = command.Parameters.Add("@id", DbType.Int64);
+				var keyParameter = command.Parameters.Add("@key", _keySerializer.DatabaseType);
+				var valueParameter = command.Parameters.Add("@value", _valueSerializer.DatabaseType);
+
+				foreach (var pair in values)
+				{
+					keyParameter.Value = _keySerializer.Serialize(pair.Key);
+					idParameter.Value = Interlocked.Increment(ref _lastId);
+					valueParameter.Value = _valueSerializer.Serialize(pair.Value);
+					command.ExecuteNonQuery();
+				}
+
+				transaction.Commit();
+			}
+		}
+
+		public IEnumerable<TKey> GetAllKeys()
+		{
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = _getAllKeys;
+
+				using (var reader = command.ExecuteReader())
+				{
+					while (reader.Read())
+					{
+						if (_keySerializer.TryDeserialize(reader, 0, out var key))
+							yield return key;
+					}
+				}
 			}
 		}
 
