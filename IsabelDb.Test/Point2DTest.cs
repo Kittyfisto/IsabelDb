@@ -16,5 +16,11 @@ namespace IsabelDb.Test
 			(a == b).Should().BeFalse();
 			(a != b).Should().BeTrue();
 		}
+
+		[Test]
+		public void TestToString()
+		{
+			new Point2D(1, 2).ToString().Should().Be("X: 1, Y: 2");
+		}
 	}
 }
