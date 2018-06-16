@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using IsabelDb.Collections;
 
 namespace IsabelDb
 {
@@ -60,5 +61,13 @@ namespace IsabelDb
 		/// <returns></returns>
 		IReadOnlyOrderedCollection<TKey, TValue> GetOrderedCollection<TKey, TValue>(string name)
 			where TKey : IComparable<TKey>;
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="name"></param>
+		/// <returns></returns>
+		IReadOnlyPoint2DCollection<T> GetPoint2DCollection<T>(string name);
 	}
 }

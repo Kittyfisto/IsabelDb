@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Linq;
+using IsabelDb.Collections;
 
 namespace IsabelDb
 {
@@ -61,6 +62,11 @@ namespace IsabelDb
 			return GetOrderedCollection<TKey, TValue>(name);
 		}
 
+		IReadOnlyPoint2DCollection<T> IReadOnlyDatabase.GetPoint2DCollection<T>(string name)
+		{
+			return GetPoint2DCollection<T>(name);
+		}
+
 		public void Remove(ICollection collection)
 		{
 			_objectStores.Drop(collection);
@@ -75,6 +81,11 @@ namespace IsabelDb
 		public IMultiValueDictionary<TKey, TValue> GetMultiValueDictionary<TKey, TValue>(string name)
 		{
 			return _objectStores.GetMultiValueDictionary<TKey, TValue>(name);
+		}
+
+		public IPoint2DCollection<T> GetPoint2DCollection<T>(string name)
+		{
+			return _objectStores.GetPoint2DCollection<T>(name);
 		}
 
 		public IIntervalCollection<TKey, TValue> GetIntervalCollection<TKey, TValue>(string name)

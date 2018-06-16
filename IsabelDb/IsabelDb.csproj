@@ -62,7 +62,11 @@
     <Compile Include="BagExtensions.cs" />
     <Compile Include="Collections\AbstractCollection.cs" />
     <Compile Include="Collections\IInternalCollection.cs" />
+    <Compile Include="Collections\IReadOnlyPoint2DCollection.cs" />
+    <Compile Include="Collections\IPoint2DCollection.cs" />
     <Compile Include="Collections\OrderedCollection.cs" />
+    <Compile Include="Collections\Point2DCollection.cs" />
+    <Compile Include="Point2D.cs" />
     <Compile Include="Collections\UnresolvedTypeCollection.cs" />
     <Compile Include="CollectionType.cs" />
     <Compile Include="Exceptions\BreakingChangeException.cs" />
@@ -82,6 +86,7 @@
     <Compile Include="IReadOnlyMultiValueDictionary.cs" />
     <Compile Include="IReadOnlyOrderedCollection.cs" />
     <Compile Include="IsabelDb.cs" />
+    <Compile Include="Rectangle2D.cs" />
     <Compile Include="Serializers\DateTimeSerializer.cs" />
     <Compile Include="Serializers\UInt64Serializer.cs" />
     <Compile Include="Serializers\ValueKeySerializer.cs" />

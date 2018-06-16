@@ -98,6 +98,7 @@
     <Compile Include="Collections\IntervalCollection\IntervalCollectionCompabilityTest.cs" />
     <Compile Include="Collections\MultiValueDictionary\MultiValueDictionaryCompatibilityTest.cs" />
     <Compile Include="Collections\OrderedCollection\OrderedCollectionCompatibilityTest.cs" />
+    <Compile Include="Collections\Point2DCollection\Point2DCollectionTest.cs" />
     <Compile Include="Entities\ContainsDateTime.cs" />
     <Compile Include="Entities\ContainsGuid.cs" />
     <Compile Include="Entities\MySortableKey.cs" />

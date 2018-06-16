@@ -26,7 +26,8 @@ namespace IsabelDb.TypeModels
 			{
 				typeof(object),
 				typeof(IPAddress),
-				typeof(ValueKey)
+				typeof(ValueKey),
+				typeof(Point2D)
 			};
 			foreach (var type in TypeModel.BuiltInProtobufTypes) BuiltInTypes.Add(type);
 		}

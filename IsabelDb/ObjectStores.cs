@@ -227,7 +227,35 @@ namespace IsabelDb
 
 			if (!(collection is IBag<T> target))
 				throw new
-					ArgumentException(string.Format("The bag '{0}' has a value type of '{1}': If your intent was to create a new dictionary, you have to pick a new name!",
+					ArgumentException(string.Format("The bag '{0}' has a value type of '{1}': If your intent was to create a new collection, you have to pick a new name!",
+					                                name,
+					                                collection.ValueType.FullName));
+
+			return target;
+		}
+
+		public IPoint2DCollection<T> GetPoint2DCollection<T>(string name)
+		{
+			if (!_collectionsByName.TryGetValue(name, out var collection))
+			{
+				if (_isReadOnly)
+					throw new ArgumentException(string.Format("Unable to find a collection named '{0}'", name));
+
+				if (!_typeModel.IsRegistered(typeof(T)))
+					throw new
+						ArgumentException(string.Format("The type '{0}' has not been registered when the database was created and thus may not be used as the value type in a collection",
+						                                typeof(T).FullName));
+
+				var tableName = AddTable(name, CollectionType.Point2DCollection, null, typeof(T));
+				collection = CreatePoint2DCollection<T>(name, tableName);
+				AddCollection(name, collection);
+			}
+
+			EnsureTypeSafety(collection, CollectionType.Point2DCollection, null, typeof(T));
+
+			if (!(collection is IPoint2DCollection<T> target))
+				throw new
+					ArgumentException(string.Format("The point2d collection '{0}' has a value type of '{1}': If your intent was to create a new collection, you have to pick a new name!",
 					                                name,
 					                                collection.ValueType.FullName));
 
@@ -389,6 +417,16 @@ namespace IsabelDb
 			                  _isReadOnly);
 		}
 
+		private ICollection CreatePoint2DCollection<T>(string name, string tableName)
+		{
+			var serializer = GetSerializer<T>();
+			return new Point2DCollection<T>(_connection,
+			                                name,
+			                                tableName,
+			                                serializer,
+			                                _isReadOnly);
+		}
+
 		private ISQLiteSerializer<T> GetSerializer<T>()
 		{
 			if (NativeSerializers.TryGetValue(typeof(T), out var serializer))
@@ -465,8 +503,14 @@ namespace IsabelDb
 			if (valueType == null)
 				return new UnresolvedTypeCollection(_connection, collectionType, name, tableName, keyType, keyTypeName, null, valueTypeName, _isReadOnly);
 
-			if (collectionType == CollectionType.Bag)
-				return CreateBag(name, tableName, valueType);
+			switch (collectionType)
+			{
+				case CollectionType.Bag:
+					return CreateBag(name, tableName, valueType);
+
+				case CollectionType.Point2DCollection:
+					return CreatePoint2DCollection(name, tableName, valueType);
+			}
 
 			if (keyType == null)
 				return new UnresolvedTypeCollection(_connection, collectionType, name, tableName, null, keyTypeName, valueType, valueTypeName, _isReadOnly);
@@ -532,6 +576,14 @@ namespace IsabelDb
 			var valueSerializer = CreateSerializer(valueType);
 			var bag = Activator.CreateInstance(collectionType, _connection, name, tableName, keySerializer, valueSerializer, _isReadOnly);
 			return (ICollection) bag;
+		}
+
+		private ICollection CreatePoint2DCollection(string name, string tableName, Type valueType)
+		{
+			var collectionType = typeof(Point2DCollection<>).MakeGenericType(valueType);
+			var valueSerializer = CreateSerializer(valueType);
+			var point2DCollection = Activator.CreateInstance(collectionType, _connection, name, tableName, valueSerializer, _isReadOnly);
+			return (ICollection) point2DCollection;
 		}
 
 		private ISQLiteSerializer CreateSerializer(Type type)

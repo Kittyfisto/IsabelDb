@@ -33,6 +33,10 @@ namespace IsabelDb
 
 		/// <summary>
 		/// </summary>
-		[EnumMember] OrderedCollection
+		[EnumMember] OrderedCollection,
+
+		/// <summary>
+		/// </summary>
+		[EnumMember] Point2DCollection
 	}
 }
