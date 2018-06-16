@@ -23,6 +23,7 @@ namespace IsabelDb.Collections
 		private readonly string _getWithinQuery;
 		private readonly string _putQuery;
 		private readonly string _removeQuery;
+		private readonly string _removeWithinQuery;
 
 		public Point2DCollection(SQLiteConnection connection,
 		                           string name,
@@ -44,6 +45,7 @@ namespace IsabelDb.Collections
 			_getWithinQuery = string.Format("SELECT x, y, value FROM {0} WHERE x >= @minX AND x <= @maxX AND y >= @minY AND y <= @maxY", tableName);
 			_putQuery = string.Format("INSERT INTO {0} (x, y, value) VALUES (@x, @y, @value)", tableName);
 			_removeQuery = string.Format("DELETE FROM {0} WHERE x = @x AND y = @y", tableName);
+			_removeWithinQuery = string.Format("DELETE FROM {0} WHERE x >= @minX AND x <= @maxX AND y >= @minY AND y <= @maxY", tableName);
 
 			CreateObjectTableIfNecessary();
 		}
@@ -362,6 +364,22 @@ namespace IsabelDb.Collections
 					command.ExecuteNonQuery();
 				}
 				transaction.Commit();
+			}
+		}
+
+		public void RemoveMany(Rectangle2D rectangle)
+		{
+			ThrowIfReadOnly();
+			ThrowIfDropped();
+
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = _removeWithinQuery;
+				command.Parameters.AddWithValue("@minX", rectangle.MinX);
+				command.Parameters.AddWithValue("@maxX", rectangle.MaxX);
+				command.Parameters.AddWithValue("@minY", rectangle.MinY);
+				command.Parameters.AddWithValue("@maxY", rectangle.MaxY);
+				command.ExecuteNonQuery();
 			}
 		}
 
