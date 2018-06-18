@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 using System.Runtime.Serialization;
 
 namespace IsabelDb
@@ -9,6 +10,11 @@ namespace IsabelDb
 	public struct Point2D
 		: IEquatable<Point2D>
 	{
+		static Point2D()
+		{
+			Zero = new Point2D();
+		}
+
 		#region Equality members
 
 		/// <inheritdoc />
@@ -80,5 +86,36 @@ namespace IsabelDb
 		{
 			return string.Format("X: {0}, Y: {1}", X, Y);
 		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="lhs"></param>
+		/// <param name="rhs"></param>
+		/// <returns></returns>
+		[Pure]
+		public static double SquaredDistance(Point2D lhs, Point2D rhs)
+		{
+			var x = lhs.X - rhs.X;
+			var y = lhs.Y - rhs.Y;
+			return x * x + y * y;
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="lhs"></param>
+		/// <param name="rhs"></param>
+		/// <returns></returns>
+		[Pure]
+		public static double Distance(Point2D lhs, Point2D rhs)
+		{
+			return Math.Sqrt(SquaredDistance(lhs, rhs));
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static readonly Point2D Zero;
 	}
 }
