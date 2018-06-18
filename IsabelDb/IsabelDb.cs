@@ -33,6 +33,11 @@ namespace IsabelDb
 			}
 		}
 
+		public ITransaction BeginTransaction()
+		{
+			return new Transaction(_connection.BeginTransaction());
+		}
+
 		public IEnumerable<ICollection> Collections => _objectStores.Collections;
 
 		IEnumerable<IReadOnlyCollection> IReadOnlyDatabase.Collections => Collections;

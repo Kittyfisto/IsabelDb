@@ -340,6 +340,56 @@ namespace IsabelDb.Test
 		}
 
 		[Test]
+		[Ignore("Not yet implemented")]
+		public void TestPutSomeStruct()
+		{
+			using (var db = Database.CreateInMemory(new[] {typeof(SomeStruct)}))
+			{
+				var values = db.GetDictionary<int, SomeStruct>("Values");
+				values.Put(42, new SomeStruct{Value = "Answer to the Ultimate Question of Life, the Universe, and Everything"});
+				values.Get(42).Value.Should()
+				      .Be("Answer to the Ultimate Question of Life, the Universe, and Everything");
+			}
+		}
+
+		[Test]
+		[Description("Verifies that an automatic rollback is performed if the transaction is not specifically committed")]
+		public void TestRollbackTransaction()
+		{
+			using (var db = Database.CreateInMemory(new[] {typeof(Address), typeof(Person)}))
+			{
+				var values = db.GetDictionary<int, string>("Values");
+				using (var transaction = db.BeginTransaction())
+				{
+					values.Put(1, "stuff");
+					values.Get(1).Should().Be("stuff");
+				}
+
+				values.TryGet(1, out var value).Should().BeFalse();
+				value.Should().BeNull();
+			}
+		}
+
+		[Test]
+		public void TestCommitTransaction()
+		{
+			using (var db = Database.CreateInMemory(new[] {typeof(Address), typeof(Person)}))
+			{
+				var values = db.GetDictionary<int, string>("Values");
+				using (var transaction = db.BeginTransaction())
+				{
+					values.Put(1, "a");
+					values.Put(2, "b");
+					values.Get(1).Should().Be("a");
+					transaction.Commit();
+				}
+
+				values.Get(1).Should().Be("a");
+				values.Get(2).Should().Be("b");
+			}
+		}
+
+		[Test]
 		public void TestPutMany1()
 		{
 			using (var db = Database.CreateInMemory(new []{typeof(Address), typeof(Person)}))

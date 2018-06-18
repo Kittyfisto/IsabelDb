@@ -11,6 +11,12 @@ namespace IsabelDb
 		: IReadOnlyDatabase
 	{
 		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		ITransaction BeginTransaction();
+
+		/// <summary>
 		///     Provides access to the list of collections in this database.
 		/// </summary>
 		new IEnumerable<ICollection> Collections { get; }

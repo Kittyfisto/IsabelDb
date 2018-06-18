@@ -66,6 +66,7 @@
     <Compile Include="Collections\IPoint2DCollection.cs" />
     <Compile Include="Collections\OrderedCollection.cs" />
     <Compile Include="Collections\Point2DCollection.cs" />
+    <Compile Include="ITransaction.cs" />
     <Compile Include="Point2D.cs" />
     <Compile Include="Collections\UnresolvedTypeCollection.cs" />
     <Compile Include="CollectionType.cs" />
@@ -91,6 +92,7 @@
     <Compile Include="Serializers\UInt64Serializer.cs" />
     <Compile Include="Serializers\ValueKeySerializer.cs" />
     <Compile Include="Collections\UnknownTypeCollection.cs" />
+    <Compile Include="Transaction.cs" />
     <Compile Include="ValueKey.cs" />
     <Compile Include="Collections\MultiValueDictionary.cs" />
     <Compile Include="TypeModels\CompiledTypeModel.cs" />
