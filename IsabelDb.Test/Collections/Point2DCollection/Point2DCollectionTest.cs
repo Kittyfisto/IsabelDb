@@ -618,6 +618,23 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 			}
 		}
 
+		[Test]
+		public void TestContainsRow()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var collection = db.GetPoint2DCollection<string>("Values");
+				var p0 = new Point2D(1, 2);
+				var r0 = collection.Put(p0, "a");
+				var r1 = collection.Put(p0, "b");
+
+				collection.ContainsRow(r0).Should().BeTrue();
+				collection.ContainsRow(r1).Should().BeTrue();
+				collection.ContainsRow(new RowId(long.MaxValue)).Should().BeFalse();
+			}
+		}
+
 		#region Overrides of AbstractCollectionTest<IPoint2DCollection<string>>
 
 		protected override CollectionType CollectionType => CollectionType.Point2DCollection;

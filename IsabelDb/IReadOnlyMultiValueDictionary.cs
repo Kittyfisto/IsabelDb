@@ -30,6 +30,14 @@ namespace IsabelDb
 		bool ContainsKey(TKey key);
 
 		/// <summary>
+		///     Tests if there is a value with the row id in this collection.
+		/// </summary>
+		/// <param name="row"></param>
+		/// <returns></returns>
+		[Pure]
+		bool ContainsRow(RowId row);
+
+		/// <summary>
 		///     Returns the value associated with the given row.
 		/// </summary>
 		/// <param name="row"></param>

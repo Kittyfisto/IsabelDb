@@ -16,6 +16,7 @@ namespace IsabelDb.Collections
 		private readonly ISQLiteSerializer<TValue> _valueSerializer;
 		private readonly string _getAllKeysQuery;
 		private readonly string _existsKeyQuery;
+		private readonly string _existsRowQuery;
 		private readonly string _getByExactCoordinatesQuery;
 		private readonly string _getByRowId;
 		private readonly string _getAllQuery;
@@ -41,6 +42,7 @@ namespace IsabelDb.Collections
 			_getAllQuery = string.Format("SELECT x, y, value FROM {0}", tableName);
 			_getAllKeysQuery = string.Format("SELECT x, y FROM {0}", tableName);
 			_existsKeyQuery = string.Format("SELECT EXISTS(SELECT * FROM {0} WHERE x = @x AND y = @y)", tableName);
+			_existsRowQuery = string.Format("SELECT EXISTS(SELECT * FROM {0} WHERE rowid = @rowid)", tableName);
 			_getByRowId = string.Format("SELECT value FROM {0} WHERE rowid = @rowid", tableName);
 			_getByExactCoordinatesQuery = string.Format("SELECT value FROM {0} WHERE x = @x AND y = @y", tableName);
 			_getKeysWithinQuery = string.Format("SELECT x, y FROM {0} WHERE x >= @minX AND x <= @maxX AND y >= @minY AND y <= @maxY", tableName);
@@ -90,6 +92,18 @@ namespace IsabelDb.Collections
 				command.CommandText = _existsKeyQuery;
 				command.Parameters.AddWithValue("@x", key.X);
 				command.Parameters.AddWithValue("@y", key.Y);
+
+				var value = Convert.ToInt64(command.ExecuteScalar());
+				return value != 0;
+			}
+		}
+
+		public bool ContainsRow(RowId row)
+		{
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = _existsRowQuery;
+				command.Parameters.AddWithValue("@rowid", row.Id);
 
 				var value = Convert.ToInt64(command.ExecuteScalar());
 				return value != 0;

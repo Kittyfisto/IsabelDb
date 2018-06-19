@@ -647,6 +647,22 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		}
 
 		[Test]
+		public void TestContainsRow()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var collection = db.GetMultiValueDictionary<int, string>("Values");
+				var r0 = collection.Put(0, "a");
+				var r1 = collection.Put(0, "b");
+
+				collection.ContainsRow(r0).Should().BeTrue();
+				collection.ContainsRow(r1).Should().BeTrue();
+				collection.ContainsRow(new RowId(long.MaxValue)).Should().BeFalse();
+			}
+		}
+
+		[Test]
 		public void TestStringKey()
 		{
 			using (var connection = CreateConnection())

@@ -18,6 +18,7 @@ namespace IsabelDb.Collections
 		private readonly string _putQuery;
 		private readonly string _getByKey;
 		private readonly string _existsQuery;
+		private readonly string _existsRowQuery;
 		private readonly string _getAll;
 		private readonly string _getAllKeys;
 		private readonly string _removeRowQuery;
@@ -39,6 +40,7 @@ namespace IsabelDb.Collections
 			CreateObjectTableIfNecessary();
 
 			_existsQuery = string.Format("SELECT EXISTS(SELECT * FROM {0} WHERE key = @key)", _tableName);
+			_existsRowQuery = string.Format("SELECT EXISTS(SELECT * FROM {0} WHERE rowid = @rowid)", tableName);
 			_putQuery = string.Format("INSERT INTO {0} (key, value) VALUES (@key, @value)", _tableName);
 			_getAllKeys = string.Format("SELECT key FROM {0}", _tableName);
 			_getAll = string.Format("SELECT key, value FROM {0}", _tableName);
@@ -217,6 +219,18 @@ namespace IsabelDb.Collections
 			{
 				command.CommandText = _existsQuery;
 				command.Parameters.AddWithValue("@key", _keySerializer.Serialize(key));
+				var value = Convert.ToInt64(command.ExecuteScalar());
+				return value != 0;
+			}
+		}
+
+		public bool ContainsRow(RowId row)
+		{
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = _existsRowQuery;
+				command.Parameters.AddWithValue("@rowid", row.Id);
+
 				var value = Convert.ToInt64(command.ExecuteScalar());
 				return value != 0;
 			}
