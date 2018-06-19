@@ -595,6 +595,43 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		}
 
 		[Test]
+		public void TestGetValueByRowId()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var collection = db.GetMultiValueDictionary<int, string>("Values");
+				var r0 = collection.Put(0, "a");
+				var r1 = collection.Put(0, "b");
+
+				collection.GetValue(r0).Should().Be("a");
+				collection.GetValue(r1).Should().Be("b");
+				new Action(() => collection.GetValue(new RowId(long.MaxValue))).Should().Throw<KeyNotFoundException>();
+			}
+		}
+
+		[Test]
+		public void TestTryGetValueByRowId()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var collection = db.GetMultiValueDictionary<int, string>("Values");
+				var r0 = collection.Put(0, "a");
+				var r1 = collection.Put(0, "b");
+
+				collection.TryGetValue(r0, out var value).Should().BeTrue();
+				value.Should().Be("a");
+				
+				collection.TryGetValue(r1, out value).Should().BeTrue();
+				value.Should().Be("b");
+
+				collection.TryGetValue(new RowId(long.MaxValue), out value).Should().BeFalse();
+				value.Should().BeNull();
+			}
+		}
+
+		[Test]
 		public void TestStringKey()
 		{
 			using (var connection = CreateConnection())

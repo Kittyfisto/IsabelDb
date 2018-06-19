@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
 using IsabelDb.Collections;
@@ -559,6 +560,45 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 
 				collection.RemoveMany(new []{r2, r0});
 				collection.GetAllValues().Should().BeEmpty();
+			}
+		}
+
+		[Test]
+		public void TestGetValueByRowId()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var collection = db.GetPoint2DCollection<string>("Values");
+				var p0 = new Point2D(1, 2);
+				var r0 = collection.Put(p0, "a");
+				var r1 = collection.Put(p0, "b");
+
+				collection.GetValue(r0).Should().Be("a");
+				collection.GetValue(r1).Should().Be("b");
+				new Action(() => collection.GetValue(new RowId(long.MaxValue))).Should().Throw<KeyNotFoundException>();
+			}
+		}
+
+		[Test]
+		public void TestTryGetValueByRowId()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var collection = db.GetPoint2DCollection<string>("Values");
+				var p0 = new Point2D(1, 2);
+				var r0 = collection.Put(p0, "a");
+				var r1 = collection.Put(p0, "b");
+
+				collection.TryGetValue(r0, out var value).Should().BeTrue();
+				value.Should().Be("a");
+				
+				collection.TryGetValue(r1, out value).Should().BeTrue();
+				value.Should().Be("b");
+
+				collection.TryGetValue(new RowId(long.MaxValue), out value).Should().BeFalse();
+				value.Should().BeNull();
 			}
 		}
 

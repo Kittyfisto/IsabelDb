@@ -21,12 +21,29 @@ namespace IsabelDb
 		IEnumerable<TKey> GetAllKeys();
 
 		/// <summary>
-		///    Tests if there is a value with the given key in this collection.
+		///     Tests if there is a value with the given key in this collection.
 		/// </summary>
 		/// <param name="key"></param>
 		/// <returns></returns>
 		[Pure]
 		bool ContainsKey(TKey key);
+
+		/// <summary>
+		///     Returns the value associated with the given row.
+		/// </summary>
+		/// <param name="row"></param>
+		/// <returns></returns>
+		/// <exception cref="KeyNotFoundException"></exception>
+		TValue GetValue(RowId row);
+
+		/// <summary>
+		///     Tries to retrieve the value with the given row.
+		///     Returns true if the value was retrieved, false otherwise.
+		/// </summary>
+		/// <param name="row"></param>
+		/// <param name="value"></param>
+		/// <returns></returns>
+		bool TryGetValue(RowId row, out TValue value);
 
 		/// <summary>
 		///     Returns all values associated with the given key.

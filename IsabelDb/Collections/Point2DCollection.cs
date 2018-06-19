@@ -16,7 +16,8 @@ namespace IsabelDb.Collections
 		private readonly ISQLiteSerializer<TValue> _valueSerializer;
 		private readonly string _getAllKeysQuery;
 		private readonly string _existsKeyQuery;
-		private readonly string _getByKeyQuery;
+		private readonly string _getByExactCoordinatesQuery;
+		private readonly string _getByRowId;
 		private readonly string _getAllQuery;
 		private readonly string _getKeysWithinQuery;
 		private readonly string _getValuesWithinQuery;
@@ -40,7 +41,8 @@ namespace IsabelDb.Collections
 			_getAllQuery = string.Format("SELECT x, y, value FROM {0}", tableName);
 			_getAllKeysQuery = string.Format("SELECT x, y FROM {0}", tableName);
 			_existsKeyQuery = string.Format("SELECT EXISTS(SELECT * FROM {0} WHERE x = @x AND y = @y)", tableName);
-			_getByKeyQuery = string.Format("SELECT value FROM {0} WHERE x = @x AND y = @y", tableName);
+			_getByRowId = string.Format("SELECT value FROM {0} WHERE rowid = @rowid", tableName);
+			_getByExactCoordinatesQuery = string.Format("SELECT value FROM {0} WHERE x = @x AND y = @y", tableName);
 			_getKeysWithinQuery = string.Format("SELECT x, y FROM {0} WHERE x >= @minX AND x <= @maxX AND y >= @minY AND y <= @maxY", tableName);
 			_getValuesWithinQuery = string.Format("SELECT value FROM {0} WHERE x >= @minX AND x <= @maxX AND y >= @minY AND y <= @maxY", tableName);
 			_getWithinQuery = string.Format("SELECT x, y, value FROM {0} WHERE x >= @minX AND x <= @maxX AND y >= @minY AND y <= @maxY", tableName);
@@ -94,11 +96,39 @@ namespace IsabelDb.Collections
 			}
 		}
 
+		public TValue GetValue(RowId row)
+		{
+			if (!TryGetValue(row, out var value))
+				throw new KeyNotFoundException();
+
+			return value;
+		}
+
+		public bool TryGetValue(RowId row, out TValue value)
+		{
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = _getByRowId;
+				command.Parameters.AddWithValue("@rowid", row.Id);
+
+				using (var reader = command.ExecuteReader())
+				{
+					if (!reader.Read())
+					{
+						value = default(TValue);
+						return false;
+					}
+
+					return _valueSerializer.TryDeserialize(reader, 0, out value);
+				}
+			}
+		}
+
 		public IEnumerable<TValue> GetValues(Point2D key)
 		{
 			using (var command = _connection.CreateCommand())
 			{
-				command.CommandText = _getByKeyQuery;
+				command.CommandText = _getByExactCoordinatesQuery;
 				command.Parameters.AddWithValue("@x", key.X);
 				command.Parameters.AddWithValue("@y", key.Y);
 
@@ -117,7 +147,7 @@ namespace IsabelDb.Collections
 		{
 			using (var command = _connection.CreateCommand())
 			{
-				command.CommandText = _getByKeyQuery;
+				command.CommandText = _getByExactCoordinatesQuery;
 
 				foreach (var key in keys)
 				{

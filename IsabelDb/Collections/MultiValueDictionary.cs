@@ -21,6 +21,7 @@ namespace IsabelDb.Collections
 		private readonly string _getAll;
 		private readonly string _getAllKeys;
 		private readonly string _removeRowQuery;
+		private readonly string _getByRowId;
 
 		public MultiValueDictionary(SQLiteConnection connection,
 		                            string name,
@@ -42,6 +43,7 @@ namespace IsabelDb.Collections
 			_getAllKeys = string.Format("SELECT key FROM {0}", _tableName);
 			_getAll = string.Format("SELECT key, value FROM {0}", _tableName);
 			_getByKey = string.Format("SELECT value FROM {0} where key = @key", _tableName);
+			_getByRowId = string.Format("SELECT value FROM {0} WHERE rowid = @rowid", tableName);
 			_removeRowQuery = string.Format("DELETE FROM {0} WHERE rowid = @rowid", _tableName);;
 			_removeQuery = string.Format("DELETE FROM {0} WHERE key = @key", _tableName);
 		}
@@ -217,6 +219,34 @@ namespace IsabelDb.Collections
 				command.Parameters.AddWithValue("@key", _keySerializer.Serialize(key));
 				var value = Convert.ToInt64(command.ExecuteScalar());
 				return value != 0;
+			}
+		}
+
+		public TValue GetValue(RowId row)
+		{
+			if (!TryGetValue(row, out var value))
+				throw new KeyNotFoundException();
+
+			return value;
+		}
+
+		public bool TryGetValue(RowId row, out TValue value)
+		{
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = _getByRowId;
+				command.Parameters.AddWithValue("@rowid", row.Id);
+
+				using (var reader = command.ExecuteReader())
+				{
+					if (!reader.Read())
+					{
+						value = default(TValue);
+						return false;
+					}
+
+					return _valueSerializer.TryDeserialize(reader, 0, out value);
+				}
 			}
 		}
 
