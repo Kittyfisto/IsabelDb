@@ -93,7 +93,7 @@
     <Compile Include="Serializers\ValueKeySerializer.cs" />
     <Compile Include="Collections\UnknownTypeCollection.cs" />
     <Compile Include="Transaction.cs" />
-    <Compile Include="ValueKey.cs" />
+    <Compile Include="RowId.cs" />
     <Compile Include="Collections\MultiValueDictionary.cs" />
     <Compile Include="TypeModels\CompiledTypeModel.cs" />
     <Compile Include="IBag.cs" />

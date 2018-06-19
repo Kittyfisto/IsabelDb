@@ -101,7 +101,7 @@ namespace IsabelDb.Collections
 				var maximumParameter = command.Parameters.Add("@maximum", _keySerializer.DatabaseType);
 				var valueParameter = command.Parameters.Add("@value", _valueSerializer.DatabaseType);
 
-				var ret = new List<ValueKey>();
+				var ret = new List<RowId>();
 				foreach (var pair in values)
 				{
 					var interval = pair.Key;
@@ -114,14 +114,14 @@ namespace IsabelDb.Collections
 					valueParameter.Value = _valueSerializer.Serialize(value);
 					command.ExecuteNonQuery();
 
-					ret.Add(new ValueKey(id));
+					ret.Add(new RowId(id));
 				}
 
 				transaction.Commit();
 			}
 		}
 
-		public IEnumerable<Interval<TKey>> GetManyIntervals(IEnumerable<ValueKey> keys)
+		public IEnumerable<Interval<TKey>> GetManyIntervals(IEnumerable<RowId> keys)
 		{
 			throw new NotImplementedException();
 		}

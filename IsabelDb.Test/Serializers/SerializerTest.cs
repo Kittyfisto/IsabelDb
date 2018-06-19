@@ -17,7 +17,7 @@ namespace IsabelDb.Test.Serializers
 		public static IEnumerable<int> IntValues => new[] {int.MinValue, -1, 0, 1, int.MaxValue};
 		public static IEnumerable<byte[]> ByteArrayValues => new[] {null, new byte[] {0}, ByteValues.ToArray()};
 		public static IEnumerable<int[]> IntArrayValues => new[] {null, new[] {0}, IntValues.ToArray()};
-		public static IEnumerable<ValueKey> ValueKeyValues => new[]{new ValueKey(0), new ValueKey(long.MinValue), new ValueKey(long.MaxValue) };
+		public static IEnumerable<RowId> ValueKeyValues => new[]{new RowId(0), new RowId(long.MinValue), new RowId(long.MaxValue) };
 
 		public static IEnumerable<SomeEnum> SomeEnumValues => Enum.GetValues(typeof(SomeEnum)).Cast<SomeEnum>().ToList();
 

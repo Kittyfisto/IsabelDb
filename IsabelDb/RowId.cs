@@ -4,11 +4,12 @@ using System.Runtime.Serialization;
 namespace IsabelDb
 {
 	/// <summary>
+	///    Holds the id of a specific row in a specific collection.
 	/// </summary>
 	[DataContract]
-	public struct ValueKey
-		: IEquatable<ValueKey>
-		, IComparable<ValueKey>
+	public struct RowId
+		: IEquatable<RowId>
+		, IComparable<RowId>
 	{
 		/// <summary>
 		///     The numeric value of this key: Two keys with the same value are equal.
@@ -20,7 +21,7 @@ namespace IsabelDb
 		/// 
 		/// </summary>
 		/// <param name="value"></param>
-		public ValueKey(long value)
+		public RowId(long value)
 		{
 			Value = value;
 		}
@@ -28,13 +29,13 @@ namespace IsabelDb
 		#region Equality members
 
 		/// <inheritdoc />
-		public bool Equals(ValueKey other)
+		public bool Equals(RowId other)
 		{
 			return Value == other.Value;
 		}
 
 		/// <inheritdoc />
-		public int CompareTo(ValueKey other)
+		public int CompareTo(RowId other)
 		{
 			return Value.CompareTo(other.Value);
 		}
@@ -43,7 +44,7 @@ namespace IsabelDb
 		public override bool Equals(object obj)
 		{
 			if (ReferenceEquals(objA: null, objB: obj)) return false;
-			return obj is ValueKey && Equals((ValueKey) obj);
+			return obj is RowId && Equals((RowId) obj);
 		}
 
 		#region Equality members
@@ -62,7 +63,7 @@ namespace IsabelDb
 		/// <param name="left"></param>
 		/// <param name="right"></param>
 		/// <returns></returns>
-		public static bool operator ==(ValueKey left, ValueKey right)
+		public static bool operator ==(RowId left, RowId right)
 		{
 			return left.Equals(right);
 		}
@@ -73,7 +74,7 @@ namespace IsabelDb
 		/// <param name="left"></param>
 		/// <param name="right"></param>
 		/// <returns></returns>
-		public static bool operator !=(ValueKey left, ValueKey right)
+		public static bool operator !=(RowId left, RowId right)
 		{
 			return !left.Equals(right);
 		}

@@ -15,7 +15,7 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="key"></param>
 		/// <returns></returns>
-		T GetValue(ValueKey key);
+		T GetValue(RowId key);
 
 		/// <summary>
 		///     Returns the value associated with the given key.
@@ -23,20 +23,20 @@ namespace IsabelDb
 		/// <param name="key"></param>
 		/// <param name="value"></param>
 		/// <returns></returns>
-		bool TryGetValue(ValueKey key, out T value);
+		bool TryGetValue(RowId key, out T value);
 
 		/// <summary>
 		///     Returns all values who's keys are associated with the given interval.
 		/// </summary>
 		/// <param name="interval"></param>
 		/// <returns></returns>
-		IEnumerable<T> GetValues(Interval<ValueKey> interval);
+		IEnumerable<T> GetValues(Interval<RowId> interval);
 
 		/// <summary>
 		///     Returns all values associated with the given keys.
 		/// </summary>
 		/// <param name="keys"></param>
 		/// <returns></returns>
-		IEnumerable<T> GetManyValues(IEnumerable<ValueKey> keys);
+		IEnumerable<T> GetManyValues(IEnumerable<RowId> keys);
 	}
 }

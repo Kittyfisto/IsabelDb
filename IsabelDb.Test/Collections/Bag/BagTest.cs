@@ -11,7 +11,7 @@ namespace IsabelDb.Test.Collections.Bag
 	public sealed class BagTest
 		: AbstractCollectionTest<IBag<string>>
 	{
-		private ValueKey _lastValueKey;
+		private RowId _lastRowId;
 
 		protected override CollectionType CollectionType => CollectionType.Bag;
 
@@ -22,17 +22,17 @@ namespace IsabelDb.Test.Collections.Bag
 
 		protected override void Put(IBag<string> collection, string value)
 		{
-			_lastValueKey = collection.Put(value);
+			_lastRowId = collection.Put(value);
 		}
 
 		protected override void PutMany(IBag<string> collection, params string[] values)
 		{
-			_lastValueKey = collection.PutMany(values).Last();
+			_lastRowId = collection.PutMany(values).Last();
 		}
 
 		protected override void RemoveLastPutValue(IBag<string> collection)
 		{
-			collection.Remove(_lastValueKey);
+			collection.Remove(_lastRowId);
 		}
 
 		[Test]
@@ -143,8 +143,8 @@ namespace IsabelDb.Test.Collections.Bag
 				bag.Put("D");
 				bag.Put("E");
 
-				var min = new ValueKey(42);
-				var max = new ValueKey(100);
+				var min = new RowId(42);
+				var max = new RowId(100);
 				bag.GetValues(Interval.Create(min, max)).Should().BeEmpty();
 			}
 		}
@@ -230,7 +230,7 @@ namespace IsabelDb.Test.Collections.Bag
 			{
 				var bag = db.GetBag<double>("Values");
 				bag.Put(Math.E);
-				new Action(() => bag.GetValue(new ValueKey(41421321)))
+				new Action(() => bag.GetValue(new RowId(41421321)))
 					.Should().Throw<KeyNotFoundException>();
 			}
 		}
@@ -283,7 +283,7 @@ namespace IsabelDb.Test.Collections.Bag
 		{
 			using (var connection = CreateConnection())
 			{
-				ValueKey id1, id2, id3, id4;
+				RowId id1, id2, id3, id4;
 
 				using (var db = CreateDatabase(connection, NoCustomTypes))
 				{

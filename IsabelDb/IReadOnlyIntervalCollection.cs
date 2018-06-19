@@ -21,7 +21,7 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="keys"></param>
 		/// <returns></returns>
-		IEnumerable<Interval<TKey>> GetManyIntervals(IEnumerable<ValueKey> keys);
+		IEnumerable<Interval<TKey>> GetManyIntervals(IEnumerable<RowId> keys);
 
 		/// <summary>
 		///     Returns the list of values who's intervals intersect with the given key.

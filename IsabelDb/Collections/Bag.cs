@@ -78,7 +78,7 @@ namespace IsabelDb.Collections
 
 		#region Implementation of IListObjectStore<T>
 
-		public ValueKey Put(T value)
+		public RowId Put(T value)
 		{
 			ThrowIfReadOnly();
 			ThrowIfDropped();
@@ -89,11 +89,11 @@ namespace IsabelDb.Collections
 				command.Parameters.AddWithValue("@id", id);
 				command.Parameters.AddWithValue("@value", _serializer.Serialize(value));
 				command.ExecuteNonQuery();
-				return new ValueKey(id);
+				return new RowId(id);
 			}
 		}
 
-		public IEnumerable<ValueKey> PutMany(IEnumerable<T> values)
+		public IEnumerable<RowId> PutMany(IEnumerable<T> values)
 		{
 			ThrowIfReadOnly();
 			ThrowIfDropped();
@@ -104,7 +104,7 @@ namespace IsabelDb.Collections
 				var idParameter = command.Parameters.Add("@id", DbType.Int64);
 				var valueParameter = command.Parameters.Add("@value", _serializer.DatabaseType);
 
-				var ret = new List<ValueKey>();
+				var ret = new List<RowId>();
 				foreach (var value in values)
 				{
 					var id = Interlocked.Increment(ref _lastId);
@@ -112,7 +112,7 @@ namespace IsabelDb.Collections
 					valueParameter.Value = _serializer.Serialize(value);
 					command.ExecuteNonQuery();
 
-					ret.Add(new ValueKey(id));
+					ret.Add(new RowId(id));
 				}
 
 				transaction.Commit();
@@ -120,7 +120,7 @@ namespace IsabelDb.Collections
 			}
 		}
 
-		public T GetValue(ValueKey key)
+		public T GetValue(RowId key)
 		{
 			using (var command = _connection.CreateCommand())
 			{
@@ -139,7 +139,7 @@ namespace IsabelDb.Collections
 			}
 		}
 
-		public bool TryGetValue(ValueKey key, out T value)
+		public bool TryGetValue(RowId key, out T value)
 		{
 			using (var command = _connection.CreateCommand())
 			{
@@ -159,7 +159,7 @@ namespace IsabelDb.Collections
 			}
 		}
 
-		public IEnumerable<T> GetValues(Interval<ValueKey> interval)
+		public IEnumerable<T> GetValues(Interval<RowId> interval)
 		{
 			using (var command = _connection.CreateCommand())
 			{
@@ -178,7 +178,7 @@ namespace IsabelDb.Collections
 			}
 		}
 
-		public IEnumerable<T> GetManyValues(IEnumerable<ValueKey> keys)
+		public IEnumerable<T> GetManyValues(IEnumerable<RowId> keys)
 		{
 			using (var command = _connection.CreateCommand())
 			{
@@ -200,7 +200,7 @@ namespace IsabelDb.Collections
 			}
 		}
 
-		public void Remove(ValueKey key)
+		public void Remove(RowId key)
 		{
 			ThrowIfReadOnly();
 

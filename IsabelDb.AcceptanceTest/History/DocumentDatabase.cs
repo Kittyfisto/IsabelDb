@@ -9,13 +9,13 @@ namespace IsabelDb.AcceptanceTest.History
 	{
 		private readonly IDatabase _database;
 		private readonly IBag<DocumentEntity> _documents;
-		private readonly IMultiValueDictionary<string, ValueKey> _documentIdsByName;
+		private readonly IMultiValueDictionary<string, RowId> _documentIdsByName;
 
 		public DocumentDatabase(IDatabase database)
 		{
 			_database = database;
 			_documents = database.GetBag<DocumentEntity>("Documents");
-			_documentIdsByName = database.GetMultiValueDictionary<string, ValueKey>("DocumentIdsByName");
+			_documentIdsByName = database.GetMultiValueDictionary<string, RowId>("DocumentIdsByName");
 		}
 
 		public IEnumerable<Document> Get(string fileName)

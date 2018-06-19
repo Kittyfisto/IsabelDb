@@ -22,18 +22,18 @@ namespace IsabelDb
 		///     Adds a new value to this bag.
 		/// </summary>
 		/// <param name="value"></param>
-		ValueKey Put(T value);
+		RowId Put(T value);
 
 		/// <summary>
 		///     Adds the given values to this bag.
 		/// </summary>
 		/// <param name="values"></param>
-		IEnumerable<ValueKey> PutMany(IEnumerable<T> values);
+		IEnumerable<RowId> PutMany(IEnumerable<T> values);
 
 		/// <summary>
 		///     Removes the value associated with the given key.
 		/// </summary>
 		/// <param name="key"></param>
-		void Remove(ValueKey key);
+		void Remove(RowId key);
 	}
 }
