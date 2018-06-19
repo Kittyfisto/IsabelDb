@@ -36,6 +36,7 @@ namespace IsabelDb
 		///     Returns all keys in this collection.
 		/// </summary>
 		/// <returns></returns>
+		[Pure]
 		IEnumerable<TKey> GetAllKeys();
 
 		/// <summary>
@@ -44,12 +45,14 @@ namespace IsabelDb
 		/// <param name="key"></param>
 		/// <returns></returns>
 		/// <exception cref="KeyNotFoundException"></exception>
+		[Pure]
 		TValue Get(TKey key);
 
 		/// <summary>
 		///     Retrieves all values from this database.
 		/// </summary>
 		/// <returns></returns>
+		[Pure]
 		IEnumerable<KeyValuePair<TKey, TValue>> GetAll();
 
 		/// <summary>
@@ -57,6 +60,7 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="keys"></param>
 		/// <returns></returns>
+		[Pure]
 		IEnumerable<KeyValuePair<TKey, TValue>> GetMany(IEnumerable<TKey> keys);
 
 		/// <summary>
@@ -64,6 +68,7 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="keys"></param>
 		/// <returns></returns>
+		[Pure]
 		IEnumerable<KeyValuePair<TKey, TValue>> GetMany(params TKey[] keys);
 
 		/// <summary>
@@ -71,6 +76,7 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="keys"></param>
 		/// <returns></returns>
+		[Pure]
 		IEnumerable<TValue> GetManyValues(IEnumerable<TKey> keys);
 	}
 }

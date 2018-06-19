@@ -632,6 +632,21 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		}
 
 		[Test]
+		public void TestGetValuesByRowId()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var collection = db.GetMultiValueDictionary<int, string>("Values");
+				var r0 = collection.Put(0, "a");
+				var r1 = collection.Put(0, "b");
+
+				collection.GetValues(new RowId[0]).Should().BeEmpty();
+				collection.GetValues(new[] {r0, r1}).Should().BeEquivalentTo("a", "b");
+			}
+		}
+
+		[Test]
 		public void TestStringKey()
 		{
 			using (var connection = CreateConnection())

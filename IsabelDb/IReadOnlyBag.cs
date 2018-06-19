@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 
 namespace IsabelDb
 {
@@ -15,6 +16,7 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="key"></param>
 		/// <returns></returns>
+		/// [Pure]
 		T GetValue(RowId key);
 
 		/// <summary>
@@ -30,6 +32,7 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="interval"></param>
 		/// <returns></returns>
+		[Pure]
 		IEnumerable<T> GetValues(Interval<RowId> interval);
 
 		/// <summary>
@@ -37,6 +40,7 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="keys"></param>
 		/// <returns></returns>
+		[Pure]
 		IEnumerable<T> GetManyValues(IEnumerable<RowId> keys);
 	}
 }

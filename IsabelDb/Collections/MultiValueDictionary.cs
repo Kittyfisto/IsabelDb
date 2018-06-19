@@ -250,6 +250,28 @@ namespace IsabelDb.Collections
 			}
 		}
 
+		public IEnumerable<TValue> GetValues(IEnumerable<RowId> rows)
+		{
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = _getByRowId;
+				var rowId = command.Parameters.Add("@rowid", DbType.Int64);
+
+				foreach (var row in rows)
+				{
+					rowId.Value = row.Id;
+					using (var reader = command.ExecuteReader())
+					{
+						if (reader.Read())
+						{
+							if (_valueSerializer.TryDeserialize(reader, 0, out var value))
+								yield return value;
+						}
+					}
+				}
+			}
+		}
+
 		public IEnumerable<TValue> GetValues(TKey key)
 		{
 			using (var command = _connection.CreateCommand())
