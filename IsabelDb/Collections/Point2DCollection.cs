@@ -244,7 +244,7 @@ namespace IsabelDb.Collections
 
 		#region Implementation of IMultiValueDictionary<Point2D,TValue>
 
-		public void Put(Point2D key, TValue value)
+		public RowId Put(Point2D key, TValue value)
 		{
 			ThrowIfReadOnly();
 			ThrowIfDropped();
@@ -256,13 +256,18 @@ namespace IsabelDb.Collections
 				command.Parameters.AddWithValue("@y", key.Y);
 				command.Parameters.AddWithValue("@value", _valueSerializer.Serialize(value));
 				command.ExecuteNonQuery();
+
+				var id = _connection.LastInsertRowId;
+				return new RowId(id);
 			}
 		}
 
-		public void PutMany(Point2D key, IEnumerable<TValue> values)
+		public IReadOnlyList<RowId> PutMany(Point2D key, IEnumerable<TValue> values)
 		{
 			ThrowIfReadOnly();
 			ThrowIfDropped();
+
+			var ids = new List<RowId>();
 
 			using (var transaction = _connection.BeginTransaction())
 			using (var command = _connection.CreateCommand())
@@ -275,16 +280,23 @@ namespace IsabelDb.Collections
 				{
 					parameter.Value = _valueSerializer.Serialize(value);
 					command.ExecuteNonQuery();
+
+					var id = _connection.LastInsertRowId;
+					ids.Add(new RowId(id));
 				}
 
 				transaction.Commit();
 			}
+
+			return ids;
 		}
 
-		public void PutMany(IEnumerable<KeyValuePair<Point2D, IEnumerable<TValue>>> values)
+		public IReadOnlyList<RowId> PutMany(IEnumerable<KeyValuePair<Point2D, IEnumerable<TValue>>> values)
 		{
 			ThrowIfReadOnly();
 			ThrowIfDropped();
+
+			var ids = new List<RowId>();
 
 			using (var transaction = _connection.BeginTransaction())
 			using (var command = _connection.CreateCommand())
@@ -301,17 +313,24 @@ namespace IsabelDb.Collections
 					{
 						parameter.Value = _valueSerializer.Serialize(value);
 						command.ExecuteNonQuery();
+
+						var id = _connection.LastInsertRowId;
+						ids.Add(new RowId(id));
 					}
 				}
 
 				transaction.Commit();
 			}
+
+			return ids;
 		}
 
-		public void PutMany(IEnumerable<KeyValuePair<Point2D, TValue>> values)
+		public IReadOnlyList<RowId> PutMany(IEnumerable<KeyValuePair<Point2D, TValue>> values)
 		{
 			ThrowIfReadOnly();
 			ThrowIfDropped();
+
+			var ids = new List<RowId>();
 
 			using (var transaction = _connection.BeginTransaction())
 			using (var command = _connection.CreateCommand())
@@ -326,10 +345,15 @@ namespace IsabelDb.Collections
 					y.Value = pair.Key.Y;
 					parameter.Value = _valueSerializer.Serialize(pair.Value);
 					command.ExecuteNonQuery();
+
+					var id = _connection.LastInsertRowId;
+					ids.Add(new RowId(id));
 				}
 
 				transaction.Commit();
 			}
+
+			return ids;
 		}
 
 		public void RemoveAll(Point2D key)

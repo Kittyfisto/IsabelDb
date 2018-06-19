@@ -14,23 +14,23 @@ namespace IsabelDb
 		/// <param name="key"></param>
 		/// <param name="value"></param>
 		/// <returns></returns>
-		void Put(TKey key, TValue value);
+		RowId Put(TKey key, TValue value);
 
 		/// <summary>
 		/// </summary>
 		/// <param name="key"></param>
 		/// <param name="values"></param>
-		void PutMany(TKey key, IEnumerable<TValue> values);
+		IReadOnlyList<RowId> PutMany(TKey key, IEnumerable<TValue> values);
 
 		/// <summary>
 		/// </summary>
 		/// <param name="values"></param>
-		void PutMany(IEnumerable<KeyValuePair<TKey, IEnumerable<TValue>>> values);
+		IReadOnlyList<RowId> PutMany(IEnumerable<KeyValuePair<TKey, IEnumerable<TValue>>> values);
 
 		/// <summary>
 		/// </summary>
 		/// <param name="values"></param>
-		void PutMany(IEnumerable<KeyValuePair<TKey, TValue>> values);
+		IReadOnlyList<RowId> PutMany(IEnumerable<KeyValuePair<TKey, TValue>> values);
 
 		/// <summary>
 		///     Removes the value associated with the given key.

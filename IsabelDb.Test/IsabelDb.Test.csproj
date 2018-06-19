@@ -90,6 +90,7 @@
     <Compile Include="Collections\Dictionary\EnumKeyTest.cs" />
     <Compile Include="Collections\Dictionary\UInt64KeyTest.cs" />
     <Compile Include="Collections\IntervalCollection\IntervalCollectionCompabilityTest.cs" />
+    <Compile Include="EnumerableExtensions.cs" />
     <Compile Include="Collections\MultiValueDictionary\MultiValueDictionaryCompatibilityTest.cs" />
     <Compile Include="Collections\OrderedCollection\OrderedCollectionCompatibilityTest.cs" />
     <Compile Include="Collections\Point2DCollection\Point2DCollectionTest.cs" />

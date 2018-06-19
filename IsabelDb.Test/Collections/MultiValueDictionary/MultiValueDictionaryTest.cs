@@ -432,6 +432,138 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 			}
 		}
 
+		[Test]
+		[Description("Verifies that every inserted value receives a unique row id")]
+		public void TestPut2()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var collection = db.GetMultiValueDictionary<int, string>("Values");
+				var row1Id = collection.Put(42, "A");
+				var row2Id = collection.Put(42, "B");
+
+				row2Id.Should().NotBe(row1Id);
+			}
+		}
+
+		[Test]
+		[Description("Verifies that values inserted over multiple sessions receive unique row ids")]
+		public void TestPut3()
+		{
+			using (var connection = CreateConnection())
+			{
+				var ids = new List<RowId>();
+
+				using (var db = CreateDatabase(connection))
+				{
+					var collection = db.GetMultiValueDictionary<int, string>("Values");
+					ids.Add(collection.Put(42, "A"));
+					ids.Add(collection.Put(42, "B"));
+				}
+				using (var db = CreateDatabase(connection))
+				{
+					var collection = db.GetMultiValueDictionary<int, string>("Values");
+					ids.Add(collection.Put(42, "C"));
+					ids.Add(collection.Put(42, "D"));
+				}
+
+				ids.ShouldBeUnique();
+			}
+		}
+
+		[Test]
+		[Description("Verifies that every inserted value receives a unique row id")]
+		public void TestPutMany1()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var collection = db.GetMultiValueDictionary<int, string>("Values");
+				var ids = collection.PutMany(1, new[] {"a", "b"});
+				ids.Should().HaveCount(2, "because we inserted 2 values");
+				ids.ShouldBeUnique();
+			}
+		}
+
+		[Test]
+		[Description("Verifies that every inserted value receives a unique row id")]
+		public void TestPutMany2()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var collection = db.GetMultiValueDictionary<int, string>("Values");
+				var ids1 = collection.PutMany(1, new[] {"a", "b"});
+				ids1.Should().HaveCount(2, "because we inserted 2 values");
+
+				var ids2 = collection.PutMany(2, new[] {"c", "d", "e"});
+				ids2.Should().HaveCount(3, "because we inserted 3 values");
+
+				var ids = new List<RowId>(ids1);
+				ids.AddRange(ids2);
+				ids.ShouldBeUnique();
+			}
+		}
+
+		[Test]
+		[Description("Verifies that every inserted value receives a unique row id")]
+		public void TestPutMany3()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var collection = db.GetMultiValueDictionary<int, string>("Values");
+				var values = new List<KeyValuePair<int, string>>
+				{
+					new KeyValuePair<int, string>(0, "A"),
+					new KeyValuePair<int, string>(0, "B"),
+					new KeyValuePair<int, string>(0, "C")
+				};
+				var ids = collection.PutMany(values);
+				ids.Should().HaveCount(3, "because we inserted 3 values");
+				ids.ShouldBeUnique();
+			}
+		}
+
+		[Test]
+		[Description("Verifies that every inserted value receives a unique row id")]
+		public void TestPutMany4()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var collection = db.GetMultiValueDictionary<int, string>("Values");
+				var values = new List<KeyValuePair<int, IEnumerable<string>>>
+				{
+					new KeyValuePair<int, IEnumerable<string>>(0, new[]{"A", "B"}),
+					new KeyValuePair<int, IEnumerable<string>>(0, new[]{"C", "D"}),
+					new KeyValuePair<int, IEnumerable<string>>(0, new []{"E", "F"})
+				};
+				var ids = collection.PutMany(values);
+				ids.Should().HaveCount(6, "because we inserted 6 values");
+				ids.ShouldBeUnique();
+			}
+		}
+
+		[Test]
+		public void TestStringKey()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var collection = db.GetMultiValueDictionary<string, string>("Values");
+				var ids = collection.PutMany("Simpson", new []{"Homer", "Marge", "Maggie", "Lisa", "Bart"});
+				ids.ShouldBeUnique();
+
+				collection.Put("Poe", "Edgar Allan");
+
+				collection.GetValues("Simpson").Should()
+				          .BeEquivalentTo(new[] {"Homer", "Marge", "Maggie", "Lisa", "Bart"});
+				collection.GetValues("Poe").Should().BeEquivalentTo(new[] {"Edgar Allan"});
+			}
+		}
+
 		protected override CollectionType CollectionType => CollectionType.MultiValueDictionary;
 
 		protected override IMultiValueDictionary<int, string> GetCollection(IDatabase db, string name)

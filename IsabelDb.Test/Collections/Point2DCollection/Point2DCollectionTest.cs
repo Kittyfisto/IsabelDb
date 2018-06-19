@@ -396,6 +396,120 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 			}
 		}
 
+		[Test]
+		[Description("Verifies that every inserted value receives a unique row id")]
+		public void TestPut2()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var collection = db.GetPoint2DCollection<string>("Values");
+				var row1Id = collection.Put(Point2D.Zero, "A");
+				var row2Id = collection.Put(Point2D.Zero, "B");
+
+				row2Id.Should().NotBe(row1Id);
+			}
+		}
+
+		[Test]
+		[Description("Verifies that values inserted over multiple sessions receive unique row ids")]
+		public void TestPut3()
+		{
+			using (var connection = CreateConnection())
+			{
+				var ids = new List<RowId>();
+
+				using (var db = CreateDatabase(connection))
+				{
+					var collection = db.GetPoint2DCollection<string>("Values");
+					ids.Add(collection.Put(Point2D.Zero, "A"));
+					ids.Add(collection.Put(Point2D.Zero, "B"));
+				}
+				using (var db = CreateDatabase(connection))
+				{
+					var collection = db.GetPoint2DCollection<string>("Values");
+					ids.Add(collection.Put(Point2D.Zero, "C"));
+					ids.Add(collection.Put(Point2D.Zero, "D"));
+				}
+
+				ids.ShouldBeUnique();
+			}
+		}
+
+		[Test]
+		[Description("Verifies that every inserted value receives a unique row id")]
+		public void TestPutMany5()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var collection = db.GetPoint2DCollection<string>("Values");
+				var ids = collection.PutMany(Point2D.Zero, new[] {"a", "b"});
+				ids.Should().HaveCount(2, "because we inserted 2 values");
+				ids.ShouldBeUnique();
+			}
+		}
+
+		[Test]
+		[Description("Verifies that every inserted value receives a unique row id")]
+		public void TestPutMany6()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var collection = db.GetPoint2DCollection<string>("Values");
+				var ids1 = collection.PutMany(Point2D.Zero, new[] {"a", "b"});
+				ids1.Should().HaveCount(2, "because we inserted 2 values");
+
+				var ids2 = collection.PutMany(new Point2D(1, 1), new[] {"c", "d", "e"});
+				ids2.Should().HaveCount(3, "because we inserted 3 values");
+
+				var ids = new List<RowId>(ids1);
+				ids.AddRange(ids2);
+				ids.ShouldBeUnique();
+			}
+		}
+
+		[Test]
+		[Description("Verifies that every inserted value receives a unique row id")]
+		public void TestPutMany7()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var collection = db.GetPoint2DCollection<string>("Values");
+				var values = new List<KeyValuePair<Point2D, string>>
+				{
+					new KeyValuePair<Point2D, string>(Point2D.Zero, "A"),
+					new KeyValuePair<Point2D, string>(Point2D.Zero, "B"),
+					new KeyValuePair<Point2D, string>(Point2D.Zero, "C")
+				};
+				var ids = collection.PutMany(values);
+				ids.Should().HaveCount(3, "because we inserted 3 values");
+				ids.ShouldBeUnique();
+			}
+		}
+
+		[Test]
+		[Description("Verifies that every inserted value receives a unique row id")]
+		public void TestPutMany8()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var collection = db.GetPoint2DCollection<string>("Values");
+				var values = new List<KeyValuePair<Point2D, IEnumerable<string>>>
+				{
+					new KeyValuePair<Point2D, IEnumerable<string>>(Point2D.Zero, new[]{"A", "B"}),
+					new KeyValuePair<Point2D, IEnumerable<string>>(Point2D.Zero, new[]{"C", "D"}),
+					new KeyValuePair<Point2D, IEnumerable<string>>(Point2D.Zero, new []{"E", "F"})
+				};
+				var ids = collection.PutMany(values);
+				ids.Should().HaveCount(6, "because we inserted 6 values");
+				ids.ShouldBeUnique();
+			}
+		}
+
 		#region Overrides of AbstractCollectionTest<IPoint2DCollection<string>>
 
 		protected override CollectionType CollectionType => CollectionType.Point2DCollection;

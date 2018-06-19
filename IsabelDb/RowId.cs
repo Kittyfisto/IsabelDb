@@ -47,6 +47,16 @@ namespace IsabelDb
 			return obj is RowId && Equals((RowId) obj);
 		}
 
+		#region Overrides of ValueType
+
+		/// <inheritdoc />
+		public override string ToString()
+		{
+			return string.Format("#{0}", Value);
+		}
+
+		#endregion
+
 		#region Equality members
 
 		/// <inheritdoc />

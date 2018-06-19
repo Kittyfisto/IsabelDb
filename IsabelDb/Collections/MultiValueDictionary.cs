@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Data.SQLite;
-using System.Threading;
 using IsabelDb.Serializers;
 
 namespace IsabelDb.Collections
@@ -21,7 +19,6 @@ namespace IsabelDb.Collections
 		private readonly string _existsQuery;
 		private readonly string _getAll;
 		private readonly string _getAllKeys;
-		private long _lastId;
 
 		public MultiValueDictionary(SQLiteConnection connection,
 		                            string name,
@@ -39,26 +36,16 @@ namespace IsabelDb.Collections
 			CreateObjectTableIfNecessary();
 
 			_existsQuery = string.Format("SELECT EXISTS(SELECT * FROM {0} WHERE key = @key)", _tableName);
-			_putQuery = string.Format("INSERT INTO {0} (id, key, value) VALUES (@id, @key, @value)", _tableName);
+			_putQuery = string.Format("INSERT INTO {0} (key, value) VALUES (@key, @value)", _tableName);
 			_getAllKeys = string.Format("SELECT key FROM {0}", _tableName);
 			_getAll = string.Format("SELECT key, value FROM {0}", _tableName);
 			_getByKey = string.Format("SELECT value FROM {0} where key = @key", _tableName);
 			_removeQuery = string.Format("DELETE FROM {0} WHERE key = @key", _tableName);
-
-			using (var command = _connection.CreateCommand())
-			{
-				command.CommandText = string.Format("SELECT MAX(id) FROM {0}", _tableName);
-				var value = command.ExecuteScalar();
-				if (!Convert.IsDBNull(value))
-				{
-					_lastId = Convert.ToInt64(value);
-				}
-			}
 		}
 
 		#region Implementation of IMultiValueDictionary<TKey,TValue>
 
-		public void Put(TKey key, TValue value)
+		public RowId Put(TKey key, TValue value)
 		{
 			ThrowIfReadOnly();
 			ThrowIfDropped();
@@ -67,50 +54,57 @@ namespace IsabelDb.Collections
 			{
 				command.CommandText = _putQuery;
 
-				var id = Interlocked.Increment(ref _lastId);
-				command.Parameters.AddWithValue("@id", id);
 				command.Parameters.AddWithValue("@key", _keySerializer.Serialize(key));
 				command.Parameters.AddWithValue("@value", _valueSerializer.Serialize(value));
 				command.ExecuteNonQuery();
+
+				var id = _connection.LastInsertRowId;
+				return new RowId(id);
 			}
 		}
 
-		public void PutMany(TKey key, IEnumerable<TValue> values)
+		public IReadOnlyList<RowId> PutMany(TKey key, IEnumerable<TValue> values)
 		{
 			ThrowIfReadOnly();
 			ThrowIfDropped();
+
+			var ids = new List<RowId>();
 
 			using (var transaction = _connection.BeginTransaction())
 			using (var command = _connection.CreateCommand())
 			{
 				command.CommandText = _putQuery;
 
-				var idParameter = command.Parameters.Add("@id", DbType.Int64);
 				command.Parameters.AddWithValue("@key", _keySerializer.Serialize(key));
 				var valueParameter = command.Parameters.Add("@value", _valueSerializer.DatabaseType);
 
 				foreach (var value in values)
 				{
-					idParameter.Value = Interlocked.Increment(ref _lastId);
 					valueParameter.Value = _valueSerializer.Serialize(value);
 					command.ExecuteNonQuery();
+
+					var id = _connection.LastInsertRowId;
+					ids.Add(new RowId(id));
 				}
 
 				transaction.Commit();
 			}
+
+			return ids;
 		}
 
-		public void PutMany(IEnumerable<KeyValuePair<TKey, IEnumerable<TValue>>> values)
+		public IReadOnlyList<RowId> PutMany(IEnumerable<KeyValuePair<TKey, IEnumerable<TValue>>> values)
 		{
 			ThrowIfReadOnly();
 			ThrowIfDropped();
+
+			var ids = new List<RowId>();
 
 			using (var transaction = _connection.BeginTransaction())
 			using (var command = _connection.CreateCommand())
 			{
 				command.CommandText = _putQuery;
 
-				var idParameter = command.Parameters.Add("@id", DbType.Int64);
 				var keyParameter = command.Parameters.Add("@key", _keySerializer.DatabaseType);
 				var valueParameter = command.Parameters.Add("@value", _valueSerializer.DatabaseType);
 
@@ -120,40 +114,49 @@ namespace IsabelDb.Collections
 
 					foreach (var value in pair.Value)
 					{
-						idParameter.Value = Interlocked.Increment(ref _lastId);
 						valueParameter.Value = _valueSerializer.Serialize(value);
 						command.ExecuteNonQuery();
+
+						var id = _connection.LastInsertRowId;
+						ids.Add(new RowId(id));
 					}
 				}
 
 				transaction.Commit();
 			}
+
+			return ids;
 		}
 
-		public void PutMany(IEnumerable<KeyValuePair<TKey, TValue>> values)
+		public IReadOnlyList<RowId> PutMany(IEnumerable<KeyValuePair<TKey, TValue>> values)
 		{
 			ThrowIfReadOnly();
 			ThrowIfDropped();
+
+			var ids = new List<RowId>();
 
 			using (var transaction = _connection.BeginTransaction())
 			using (var command = _connection.CreateCommand())
 			{
 				command.CommandText = _putQuery;
 
-				var idParameter = command.Parameters.Add("@id", DbType.Int64);
 				var keyParameter = command.Parameters.Add("@key", _keySerializer.DatabaseType);
 				var valueParameter = command.Parameters.Add("@value", _valueSerializer.DatabaseType);
 
 				foreach (var pair in values)
 				{
 					keyParameter.Value = _keySerializer.Serialize(pair.Key);
-					idParameter.Value = Interlocked.Increment(ref _lastId);
 					valueParameter.Value = _valueSerializer.Serialize(pair.Value);
 					command.ExecuteNonQuery();
+
+					var id = _connection.LastInsertRowId;
+					ids.Add(new RowId(id));
 				}
 
 				transaction.Commit();
 			}
+
+			return ids;
 		}
 
 		public IEnumerable<TKey> GetAllKeys()
@@ -310,7 +313,7 @@ namespace IsabelDb.Collections
 			using (var command = _connection.CreateCommand())
 			{
 				command.CommandText = 
-					string.Format("CREATE TABLE IF NOT EXISTS {0} (id INTEGER PRIMARY KEY NOT NULL, " +
+					string.Format("CREATE TABLE IF NOT EXISTS {0} (rowid INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
 					              "key {1} NOT NULL, " +
 					              "value {2} NOT NULL);" +
 					              "CREATE INDEX IF NOT EXISTS {0}_keys ON {0}(key)",
