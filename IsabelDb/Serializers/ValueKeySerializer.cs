@@ -10,7 +10,7 @@ namespace IsabelDb.Serializers
 
 		public object Serialize(RowId value)
 		{
-			return value.Value;
+			return value.Id;
 		}
 
 		public bool TryDeserialize(SQLiteDataReader reader, int valueOrdinal, out RowId value)

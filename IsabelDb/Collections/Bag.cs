@@ -125,7 +125,7 @@ namespace IsabelDb.Collections
 			using (var command = _connection.CreateCommand())
 			{
 				command.CommandText = string.Format("SELECT value FROM {0} WHERE id = @id", _tableName);
-				command.Parameters.AddWithValue("@id", key.Value);
+				command.Parameters.AddWithValue("@id", key.Id);
 				using (var reader = command.ExecuteReader())
 				{
 					if (!reader.Read())
@@ -144,7 +144,7 @@ namespace IsabelDb.Collections
 			using (var command = _connection.CreateCommand())
 			{
 				command.CommandText = string.Format("SELECT value FROM {0} WHERE id = @id", _tableName);
-				command.Parameters.AddWithValue("@id", key.Value);
+				command.Parameters.AddWithValue("@id", key.Id);
 				using (var reader = command.ExecuteReader())
 				{
 					if (reader.Read())
@@ -164,8 +164,8 @@ namespace IsabelDb.Collections
 			using (var command = _connection.CreateCommand())
 			{
 				command.CommandText = string.Format("SELECT value FROM {0} WHERE id >= @minimum AND id <= @maximum", _tableName);
-				command.Parameters.AddWithValue("@minimum", interval.Minimum.Value);
-				command.Parameters.AddWithValue("@maximum", interval.Maximum.Value);
+				command.Parameters.AddWithValue("@minimum", interval.Minimum.Id);
+				command.Parameters.AddWithValue("@maximum", interval.Maximum.Id);
 
 				using (var reader = command.ExecuteReader())
 				{
@@ -187,7 +187,7 @@ namespace IsabelDb.Collections
 
 				foreach (var key in keys)
 				{
-					idParameter.Value = key.Value;
+					idParameter.Value = key.Id;
 					using (var reader = command.ExecuteReader())
 					{
 						while (reader.Read())
@@ -207,7 +207,7 @@ namespace IsabelDb.Collections
 			using (var command = _connection.CreateCommand())
 			{
 				command.CommandText = string.Format("DELETE FROM {0} WHERE id = @id", _tableName);
-				command.Parameters.AddWithValue("@id", key.Value);
+				command.Parameters.AddWithValue("@id", key.Id);
 				command.ExecuteNonQuery();
 			}
 		}

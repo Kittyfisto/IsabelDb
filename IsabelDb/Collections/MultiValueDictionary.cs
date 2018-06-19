@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SQLite;
 using IsabelDb.Serializers;
 
@@ -19,6 +20,7 @@ namespace IsabelDb.Collections
 		private readonly string _existsQuery;
 		private readonly string _getAll;
 		private readonly string _getAllKeys;
+		private readonly string _removeRowQuery;
 
 		public MultiValueDictionary(SQLiteConnection connection,
 		                            string name,
@@ -40,6 +42,7 @@ namespace IsabelDb.Collections
 			_getAllKeys = string.Format("SELECT key FROM {0}", _tableName);
 			_getAll = string.Format("SELECT key, value FROM {0}", _tableName);
 			_getByKey = string.Format("SELECT value FROM {0} where key = @key", _tableName);
+			_removeRowQuery = string.Format("DELETE FROM {0} WHERE rowid = @rowid", _tableName);;
 			_removeQuery = string.Format("DELETE FROM {0} WHERE key = @key", _tableName);
 		}
 
@@ -157,6 +160,36 @@ namespace IsabelDb.Collections
 			}
 
 			return ids;
+		}
+
+		public void Remove(RowId row)
+		{
+			ThrowIfReadOnly();
+			ThrowIfDropped();
+
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = _removeRowQuery;
+				command.Parameters.AddWithValue("@rowid", row.Id);
+				command.ExecuteNonQuery();
+			}
+		}
+
+		public void RemoveMany(IEnumerable<RowId> rows)
+		{
+			ThrowIfReadOnly();
+			ThrowIfDropped();
+
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = _removeRowQuery;
+				var rowId = command.Parameters.Add("@rowid", DbType.Int64);
+				foreach (var row in rows)
+				{
+					rowId.Value = row.Id;
+					command.ExecuteNonQuery();
+				}
+			}
 		}
 
 		public IEnumerable<TKey> GetAllKeys()

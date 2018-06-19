@@ -510,6 +510,58 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 			}
 		}
 
+		[Test]
+		[Description("Verifies that removing an individual row is possible")]
+		public void TestRemoveByRowId()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var collection = db.GetPoint2DCollection<string>("Values");
+				var p0 = new Point2D(1, 2);
+				var p1 = new Point2D(-1, -1);
+				var r0 = collection.Put(p0, "a");
+				var r1 = collection.Put(p0, "b");
+				var r2 = collection.Put(p1, "c");
+
+				collection.GetAllValues().Should().BeEquivalentTo("a", "b", "c");
+
+				collection.Remove(r1);
+				collection.GetAllValues().Should().BeEquivalentTo("a", "c");
+
+				collection.Remove(r2);
+				collection.GetAllValues().Should().BeEquivalentTo("a");
+
+				collection.Remove(r0);
+				collection.GetAllValues().Should().BeEmpty();
+			}
+		}
+
+		[Test]
+		[Description("Verifies that removing an individual row is possible")]
+		public void TestRemoveManyByRowId()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var collection = db.GetPoint2DCollection<string>("Values");
+				var p0 = new Point2D(1, 2);
+				var p1 = new Point2D(-1, -1);
+				var r0 = collection.Put(p0, "a");
+				var r1 = collection.Put(p0, "b");
+				var r2 = collection.Put(p1, "c");
+				var r3 = collection.Put(p1, "d");
+
+				collection.GetAllValues().Should().BeEquivalentTo("a", "b", "c", "d");
+
+				collection.RemoveMany(new []{r1, r3});
+				collection.GetAllValues().Should().BeEquivalentTo("a", "c");
+
+				collection.RemoveMany(new []{r2, r0});
+				collection.GetAllValues().Should().BeEmpty();
+			}
+		}
+
 		#region Overrides of AbstractCollectionTest<IPoint2DCollection<string>>
 
 		protected override CollectionType CollectionType => CollectionType.Point2DCollection;

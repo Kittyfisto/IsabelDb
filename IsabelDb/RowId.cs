@@ -15,15 +15,15 @@ namespace IsabelDb
 		///     The numeric value of this key: Two keys with the same value are equal.
 		/// </summary>
 		[DataMember]
-		public long Value { get; set; }
+		public long Id { get; set; }
 
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="value"></param>
-		public RowId(long value)
+		/// <param name="id"></param>
+		public RowId(long id)
 		{
-			Value = value;
+			Id = id;
 		}
 
 		#region Equality members
@@ -31,13 +31,13 @@ namespace IsabelDb
 		/// <inheritdoc />
 		public bool Equals(RowId other)
 		{
-			return Value == other.Value;
+			return Id == other.Id;
 		}
 
 		/// <inheritdoc />
 		public int CompareTo(RowId other)
 		{
-			return Value.CompareTo(other.Value);
+			return Id.CompareTo(other.Id);
 		}
 
 		/// <inheritdoc />
@@ -52,7 +52,7 @@ namespace IsabelDb
 		/// <inheritdoc />
 		public override string ToString()
 		{
-			return string.Format("#{0}", Value);
+			return string.Format("#{0}", Id);
 		}
 
 		#endregion
@@ -62,7 +62,7 @@ namespace IsabelDb
 		/// <inheritdoc />
 		public override int GetHashCode()
 		{
-			return Value.GetHashCode();
+			return Id.GetHashCode();
 		}
 
 		#endregion

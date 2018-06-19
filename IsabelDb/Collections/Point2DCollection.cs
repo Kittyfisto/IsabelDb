@@ -23,6 +23,7 @@ namespace IsabelDb.Collections
 		private readonly string _getWithinQuery;
 		private readonly string _putQuery;
 		private readonly string _removeQuery;
+		private readonly string _removeRowQuery;
 		private readonly string _removeWithinQuery;
 
 		public Point2DCollection(SQLiteConnection connection,
@@ -45,6 +46,7 @@ namespace IsabelDb.Collections
 			_getWithinQuery = string.Format("SELECT x, y, value FROM {0} WHERE x >= @minX AND x <= @maxX AND y >= @minY AND y <= @maxY", tableName);
 			_putQuery = string.Format("INSERT INTO {0} (x, y, value) VALUES (@x, @y, @value)", tableName);
 			_removeQuery = string.Format("DELETE FROM {0} WHERE x = @x AND y = @y", tableName);
+			_removeRowQuery = string.Format("DELETE FROM {0} WHERE rowid = @rowid", tableName);
 			_removeWithinQuery = string.Format("DELETE FROM {0} WHERE x >= @minX AND x <= @maxX AND y >= @minY AND y <= @maxY", tableName);
 
 			CreateObjectTableIfNecessary();
@@ -356,6 +358,36 @@ namespace IsabelDb.Collections
 			return ids;
 		}
 
+		public void Remove(RowId row)
+		{
+			ThrowIfReadOnly();
+			ThrowIfDropped();
+
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = _removeRowQuery;
+				command.Parameters.AddWithValue("@rowid", row.Id);
+				command.ExecuteNonQuery();
+			}
+		}
+
+		public void RemoveMany(IEnumerable<RowId> rows)
+		{
+			ThrowIfReadOnly();
+			ThrowIfDropped();
+
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = _removeRowQuery;
+				var rowId = command.Parameters.Add("@rowid", DbType.Int64);
+				foreach (var row in rows)
+				{
+					rowId.Value = row.Id;
+					command.ExecuteNonQuery();
+				}
+			}
+		}
+
 		public void RemoveAll(Point2D key)
 		{
 			ThrowIfReadOnly();
@@ -415,7 +447,7 @@ namespace IsabelDb.Collections
 			{
 				var builder = new StringBuilder();
 				builder.AppendFormat("CREATE TABLE IF NOT EXISTS {0} (", _tableName);
-				builder.AppendFormat("key INTEGER PRIMARY KEY NOT NULL, ");
+				builder.AppendFormat("rowid INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, ");
 				builder.AppendFormat("x REAL NOT NULL, ");
 				builder.AppendFormat("y REAL NOT NULL, ");
 				builder.AppendFormat("value {0} NOT NULL", SQLiteHelper.GetAffinity(_valueSerializer.DatabaseType));

@@ -547,6 +547,54 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		}
 
 		[Test]
+		[Description("Verifies that removing an individual row is possible")]
+		public void TestRemoveByRowId()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var collection = db.GetMultiValueDictionary<int, string>("Values");
+				var r0 = collection.Put(0, "a");
+				var r1 = collection.Put(0, "b");
+				var r2 = collection.Put(1, "c");
+
+				collection.GetAllValues().Should().BeEquivalentTo("a", "b", "c");
+
+				collection.Remove(r1);
+				collection.GetAllValues().Should().BeEquivalentTo("a", "c");
+
+				collection.Remove(r2);
+				collection.GetAllValues().Should().BeEquivalentTo("a");
+
+				collection.Remove(r0);
+				collection.GetAllValues().Should().BeEmpty();
+			}
+		}
+
+		[Test]
+		[Description("Verifies that removing an individual row is possible")]
+		public void TestRemoveManyByRowId()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var collection = db.GetMultiValueDictionary<int, string>("Values");
+				var r0 = collection.Put(0, "a");
+				var r1 = collection.Put(0, "b");
+				var r2 = collection.Put(1, "c");
+				var r3 = collection.Put(1, "d");
+
+				collection.GetAllValues().Should().BeEquivalentTo("a", "b", "c", "d");
+
+				collection.RemoveMany(new []{r1, r3});
+				collection.GetAllValues().Should().BeEquivalentTo("a", "c");
+
+				collection.RemoveMany(new []{r2, r0});
+				collection.GetAllValues().Should().BeEmpty();
+			}
+		}
+
+		[Test]
 		public void TestStringKey()
 		{
 			using (var connection = CreateConnection())

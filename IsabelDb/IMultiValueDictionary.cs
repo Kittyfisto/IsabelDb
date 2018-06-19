@@ -33,6 +33,18 @@ namespace IsabelDb
 		IReadOnlyList<RowId> PutMany(IEnumerable<KeyValuePair<TKey, TValue>> values);
 
 		/// <summary>
+		///     Removes the row associated with the given id.
+		/// </summary>
+		/// <param name="row"></param>
+		void Remove(RowId row);
+
+		/// <summary>
+		///     Removes the row associated with the given id.
+		/// </summary>
+		/// <param name="rows"></param>
+		void RemoveMany(IEnumerable<RowId> rows);
+
+		/// <summary>
 		///     Removes the value associated with the given key.
 		/// </summary>
 		/// <param name="key"></param>
