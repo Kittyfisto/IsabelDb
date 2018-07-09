@@ -1,4 +1,6 @@
-﻿namespace IsabelDb.Collections
+﻿using IsabelDb.Collections;
+
+namespace IsabelDb
 {
 	/// <summary>
 	/// 

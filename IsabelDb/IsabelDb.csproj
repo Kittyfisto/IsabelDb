@@ -64,8 +64,8 @@
     <Compile Include="BagExtensions.cs" />
     <Compile Include="Collections\AbstractCollection.cs" />
     <Compile Include="Collections\IInternalCollection.cs" />
-    <Compile Include="Collections\IReadOnlyPoint2DCollection.cs" />
-    <Compile Include="Collections\IPoint2DCollection.cs" />
+    <Compile Include="IReadOnlyPoint2DCollection.cs" />
+    <Compile Include="IPoint2DCollection.cs" />
     <Compile Include="Collections\OrderedCollection.cs" />
     <Compile Include="Collections\Point2DCollection.cs" />
     <Compile Include="ITransaction.cs" />
