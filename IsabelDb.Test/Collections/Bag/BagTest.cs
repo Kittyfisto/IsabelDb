@@ -132,6 +132,58 @@ namespace IsabelDb.Test.Collections.Bag
 		}
 
 		[Test]
+		[Description("Verifies that values inserted over multiple sessions receive unique row ids")]
+		public void TestPutMultipleSessions()
+		{
+			using (var connection = CreateConnection())
+			{
+				var ids = new List<RowId>();
+
+				using (var db = CreateDatabase(connection))
+				{
+					var collection = db.GetBag<string>("Values");
+					ids.Add(collection.Put("A"));
+					ids.Add(collection.Put("B"));
+				}
+
+				using (var db = CreateDatabase(connection))
+				{
+					var collection = db.GetBag<string>("Values");
+					ids.Add(collection.Put("C"));
+					ids.Add(collection.Put("D"));
+				}
+
+				ids.ShouldBeUnique();
+			}
+		}
+
+		[Test]
+		[Description("Verifies that values inserted over multiple sessions receive unique row ids")]
+		public void TestPutManyMultipleSessions()
+		{
+			using (var connection = CreateConnection())
+			{
+				var ids = new List<RowId>();
+
+				using (var db = CreateDatabase(connection))
+				{
+					var collection = db.GetBag<string>("Values");
+					ids.AddRange(collection.PutMany("A", "B"));
+					ids.Add(collection.Put("C"));
+				}
+
+				using (var db = CreateDatabase(connection))
+				{
+					var collection = db.GetBag<string>("Values");
+					ids.AddRange(collection.PutMany("D", "E"));
+					ids.Add(collection.Put("F"));
+				}
+
+				ids.ShouldBeUnique();
+			}
+		}
+
+		[Test]
 		public void TestGetEmptyRange()
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))

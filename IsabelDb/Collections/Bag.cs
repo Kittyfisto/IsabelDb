@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
-using System.Threading;
 using IsabelDb.Serializers;
 
 namespace IsabelDb.Collections
@@ -16,7 +15,6 @@ namespace IsabelDb.Collections
 		private readonly ISQLiteSerializer<T> _serializer;
 		private readonly string _table;
 		private readonly string _tableName;
-		private long _lastId;
 
 		public Bag(SQLiteConnection connection,
 		           string name,
@@ -83,13 +81,12 @@ namespace IsabelDb.Collections
 			ThrowIfReadOnly();
 			ThrowIfDropped();
 
-			using (var command = CreateCommand(_put))
+			using (var command = _connection.CreateCommand())
 			{
-				var id = Interlocked.Increment(ref _lastId);
-				command.Parameters.AddWithValue("@id", id);
+				command.CommandText = _put;
 				command.Parameters.AddWithValue("@value", _serializer.Serialize(value));
 				command.ExecuteNonQuery();
-				return new RowId(id);
+				return new RowId(_connection.LastInsertRowId);
 			}
 		}
 
@@ -101,18 +98,14 @@ namespace IsabelDb.Collections
 			using (var transaction = _connection.BeginTransaction())
 			using (var command = CreateCommand(_put))
 			{
-				var idParameter = command.Parameters.Add("@id", DbType.Int64);
 				var valueParameter = command.Parameters.Add("@value", _serializer.DatabaseType);
 
 				var ret = new List<RowId>();
 				foreach (var value in values)
 				{
-					var id = Interlocked.Increment(ref _lastId);
-					idParameter.Value = id;
 					valueParameter.Value = _serializer.Serialize(value);
 					command.ExecuteNonQuery();
-
-					ret.Add(new RowId(id));
+					ret.Add(new RowId(_connection.LastInsertRowId));
 				}
 
 				transaction.Commit();
