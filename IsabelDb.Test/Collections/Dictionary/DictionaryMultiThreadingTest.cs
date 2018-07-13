@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using NUnit.Framework;
@@ -21,8 +22,8 @@ namespace IsabelDb.Test.Collections.Dictionary
 				var values2 = db.GetDictionary<int, string>("Values1");
 
 				const int count = 10000;
-				var task1 = WriteValuesAsync(values1, count);
-				var task2 = WriteValuesAsync(values2, count);
+				var task1 = PutValuesAsync(values1, count);
+				var task2 = PutValuesAsync(values2, count);
 
 				EnsureWritten(values1, task1.Result);
 				EnsureWritten(values2, task2.Result);
@@ -37,8 +38,8 @@ namespace IsabelDb.Test.Collections.Dictionary
 				var values = db.GetDictionary<int, string>("Values");
 
 				const int count = 10000;
-				var task1 = WriteValuesAsync(values, 0, count);
-				var task2 = WriteValuesAsync(values, count, count);
+				var task1 = PutValuesAsync(values, 0, count);
+				var task2 = PutValuesAsync(values, count, count);
 
 				EnsureWritten(values, task1.Result);
 				EnsureWritten(values, task2.Result);
@@ -58,8 +59,8 @@ namespace IsabelDb.Test.Collections.Dictionary
 				values.PutMany(values1);
 				values.PutMany(values2);
 
-				var task1 = RemoveValuesAsync(values, values1);
-				var task2 = RemoveValuesAsync(values, values2);
+				var task1 = RemoveValuesAsync(values, values1.Select(x => x.Key));
+				var task2 = RemoveValuesAsync(values, values2.Select(x => x.Key));
 				Task.WaitAll(task1, task2);
 
 				EnsureRemoved(values, values1);
@@ -67,35 +68,78 @@ namespace IsabelDb.Test.Collections.Dictionary
 			}
 		}
 
-		private static Task RemoveValuesAsync<TKey, TValue>(IDictionary<TKey, TValue> values, IReadOnlyList<KeyValuePair<TKey, TValue>> valuesToRemove)
+		[Test]
+		public void TestConcurrentPutReadSameCollection()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				var dictionary = db.GetDictionary<int, string>("Values");
+
+				const int count = 10000;
+				var values1 = GenerateValues(count);
+				var values2 = GenerateValues(values1.Count, count);
+
+				dictionary.PutMany(values1);
+
+				var task1 = GetValuesAsync(dictionary, values1.Select(x => x.Key));
+				var task2 = PutValuesAsync(dictionary, values2);
+
+				Task.WaitAll(task1, task2);
+
+				EnsureWritten(dictionary, values2);
+			}
+		}
+
+		private static Task<IReadOnlyList<KeyValuePair<TKey, TValue>>> GetValuesAsync<TKey, TValue>(IDictionary<TKey, TValue> dictionary, IEnumerable<TKey> keys)
 		{
 			return Task.Factory.StartNew(() =>
 			{
-				foreach (var pair in valuesToRemove)
+				var values = new List<KeyValuePair<TKey,TValue>>();
+				foreach (var key in keys)
 				{
-					values.Remove(pair.Key);
+					if (dictionary.TryGet(key, out var value))
+					{
+						values.Add(new KeyValuePair<TKey, TValue>(key, value));
+					}
+				}
+
+				return (IReadOnlyList<KeyValuePair<TKey, TValue>>)values;
+			});
+		}
+
+		private static Task RemoveValuesAsync<TKey, TValue>(IDictionary<TKey, TValue> values, IEnumerable<TKey> keysToRemove)
+		{
+			return Task.Factory.StartNew(() =>
+			{
+				foreach (var key in keysToRemove)
+				{
+					values.Remove(key);
 				}
 			});
 		}
 
-		private static Task<IReadOnlyList<KeyValuePair<int, string>>> WriteValuesAsync(IDictionary<int, string> dictionary, int count)
+		private static Task<IReadOnlyList<KeyValuePair<int, string>>> PutValuesAsync(IDictionary<int, string> dictionary, int count)
 		{
-			return WriteValuesAsync(dictionary, 0, count);
+			return PutValuesAsync(dictionary, 0, count);
 		}
 
-		private static Task<IReadOnlyList<KeyValuePair<int, string>>> WriteValuesAsync(IDictionary<int, string> dictionary, int startIndex, int count)
+		private static async Task<IReadOnlyList<KeyValuePair<int, string>>> PutValuesAsync(IDictionary<int, string> dictionary, int startIndex, int count)
+		{
+			var values = GenerateValues(startIndex, count);
+			await PutValuesAsync(dictionary, values);
+			return values;
+		}
+
+		private static Task PutValuesAsync<TKey, TValue>(IDictionary<TKey, TValue> dictionary, IEnumerable<KeyValuePair<TKey, TValue>> values)
 		{
 			return Task.Factory.StartNew(() =>
 			{
-				var values = GenerateValues(startIndex, count);
 				foreach(var pair in values)
 				{
 					var key = pair.Key;
 					var value = pair.Value;
 					dictionary.Put(key, value);
 				}
-
-				return values;
 			});
 		}
 
@@ -129,11 +173,11 @@ namespace IsabelDb.Test.Collections.Dictionary
 			}
 		}
 
-		private void EnsureRemoved<TKey, TValue>(IDictionary<TKey, TValue> values, IReadOnlyList<KeyValuePair<TKey, TValue>> removedValues)
+		private void EnsureRemoved<TKey, TValue>(IDictionary<TKey, TValue> dictionary, IReadOnlyList<KeyValuePair<TKey, TValue>> removedValues)
 		{
 			foreach (var pair in removedValues)
 			{
-				values.ContainsKey(pair.Key).Should().BeFalse();
+				dictionary.ContainsKey(pair.Key).Should().BeFalse();
 			}
 		}
 	}
