@@ -225,14 +225,10 @@ namespace IsabelDb.Collections
 
 			ThrowIfReadOnly();
 
-			using (var transaction = BeginTransaction())
+			using (var command = CreateCommand(_deleteQuery))
 			{
-				using (var command = CreateCommand(_deleteQuery))
-				{
-					command.Parameters.AddWithValue("@key", _keySerializer.Serialize(key));
-					command.ExecuteNonQuery();
-					transaction.Commit();
-				}
+				command.Parameters.AddWithValue("@key", _keySerializer.Serialize(key));
+				command.ExecuteNonQuery();
 			}
 		}
 
@@ -270,18 +266,14 @@ namespace IsabelDb.Collections
 
 		private void InsertOrReplace(TKey key, TValue value)
 		{
-			using (var transaction = BeginTransaction())
+			using (var command = CreateCommand(_putQuery))
 			{
-				using (var command = CreateCommand(_putQuery))
-				{
-					var serializedKey = _keySerializer.Serialize(key);
-					command.Parameters.AddWithValue("@key", serializedKey);
-					var serializedValue = _valueSerializer.Serialize(value);
-					command.Parameters.AddWithValue("@value", serializedValue);
+				var serializedKey = _keySerializer.Serialize(key);
+				command.Parameters.AddWithValue("@key", serializedKey);
+				var serializedValue = _valueSerializer.Serialize(value);
+				command.Parameters.AddWithValue("@value", serializedValue);
 
-					command.ExecuteNonQuery();
-					transaction.Commit();
-				}
+				command.ExecuteNonQuery();
 			}
 		}
 

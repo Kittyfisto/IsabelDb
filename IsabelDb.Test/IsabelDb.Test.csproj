@@ -159,6 +159,7 @@
     <Compile Include="Collections\Bag\BagMessageTest.cs" />
     <Compile Include="Collections\Bag\BagTest.cs" />
     <Compile Include="Collections\MultiValueDictionary\MultiValueDictionaryTest.cs" />
+    <Compile Include="Collections\Dictionary\DictionaryMultiThreadingTest.cs" />
     <Compile Include="Point2DTest.cs" />
     <Compile Include="Rectangle2DTest.cs" />
     <Compile Include="RequriedBehaviourAttribute.cs" />
