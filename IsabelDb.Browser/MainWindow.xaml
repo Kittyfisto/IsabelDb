@@ -1,0 +1,59 @@
+﻿<Window x:Class="IsabelDb.Browser.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:browser="clr-namespace:IsabelDb.Browser"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <TextBlock Text="Collections"
+                       Margin="8"/>
+            <ListView ItemsSource="{Binding Database.Collections}"
+                      SelectedItem="{Binding Database.SelectedCollection}"
+                      Grid.Row="1">
+                <ListView.ItemTemplate>
+                    <DataTemplate DataType="{x:Type browser:CollectionViewModel}">
+                        <Grid>
+                            <TextBlock>
+                                <Run Text="{Binding Name, Mode=OneWay}" />
+                                <Run Text=" [" />
+                                <Run Text="{Binding CollectionType, Mode=OneWay}" />
+                                <Run Text="]" />
+                            </TextBlock>
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Grid>
+
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Content"
+                           Margin="8" />
+                <TextBlock Margin="8">
+                    <Run Text="# Values: " />
+                    <Run Text="{Binding Database.SelectedCollectionInspector.Count, Mode=OneWay}" />
+                </TextBlock>
+            </StackPanel>
+            <ListView Grid.Row="1" ItemsSource="{Binding Database.SelectedCollectionInspector.Values}">
+            
+            </ListView>
+        </Grid>
+
+    </Grid>
+</Window>

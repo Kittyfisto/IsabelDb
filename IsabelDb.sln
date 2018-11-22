@@ -26,6 +26,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsabelDb.Benchmarks.Seriali
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsabelDb.AcceptanceTest", "IsabelDb.AcceptanceTest\IsabelDb.AcceptanceTest.csproj", "{46B11958-19D7-4BC8-98EE-308618FFB124}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsabelDb.Browser", "IsabelDb.Browser\IsabelDb.Browser.csproj", "{5DFA6087-EA8A-480C-A50E-24D052EA0661}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -56,6 +58,10 @@ Global
 		{46B11958-19D7-4BC8-98EE-308618FFB124}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{46B11958-19D7-4BC8-98EE-308618FFB124}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{46B11958-19D7-4BC8-98EE-308618FFB124}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5DFA6087-EA8A-480C-A50E-24D052EA0661}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5DFA6087-EA8A-480C-A50E-24D052EA0661}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5DFA6087-EA8A-480C-A50E-24D052EA0661}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5DFA6087-EA8A-480C-A50E-24D052EA0661}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

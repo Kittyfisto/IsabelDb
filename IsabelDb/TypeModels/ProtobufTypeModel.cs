@@ -14,7 +14,7 @@ namespace IsabelDb.TypeModels
 	/// </summary>
 	internal sealed class ProtobufTypeModel
 	{
-		private static readonly HashSet<Type> BuiltInTypes;
+		internal static readonly HashSet<Type> BuiltInTypes;
 
 		private readonly TypeModel _typeModel;
 		private readonly RuntimeTypeModel _runtimeTypeModel;
@@ -77,14 +77,18 @@ namespace IsabelDb.TypeModels
 
 		private void ConfigureMetaType(MetaType metaType, TypeDescription typeDescription)
 		{
-			foreach (var member in typeDescription.Fields)
+			foreach (var fieldDescription in typeDescription.Fields)
 			{
-				var field = metaType.AddField(member.MemberId, member.Member.Name);
-				field.IsRequired = true;
+				var member = fieldDescription.Member;
+				if (member != null)
+				{
+					var field = metaType.AddField(fieldDescription.MemberId, member.Name);
+					field.IsRequired = true;
 
-				var fieldType = member.FieldTypeDescription.Type;
-				if (IsPrimitiveArray(fieldType))
-					field.IsPacked = true;
+					var fieldType = fieldDescription.FieldTypeDescription.Type;
+					if (IsPrimitiveArray(fieldType))
+						field.IsPacked = true;
+				}
 			}
 		}
 

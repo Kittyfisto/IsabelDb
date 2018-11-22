@@ -47,6 +47,12 @@ namespace IsabelDb.TypeModels
 			return type;
 		}
 
+		public void Register(string name, Type type)
+		{
+			_typesByName.Add(name, type);
+			_namesByType.Add(type, name);
+		}
+
 		[Pure]
 		public bool IsRegistered(Type type)
 		{

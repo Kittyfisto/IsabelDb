@@ -132,7 +132,7 @@ namespace IsabelDb
 			}
 		}
 
-		private static void EnsureTableSchema(SQLiteConnection connection)
+		internal static void EnsureTableSchema(SQLiteConnection connection)
 		{
 			if (!TypeModel.DoesTableExist(connection))
 				throw new NotImplementedException();
@@ -140,7 +140,7 @@ namespace IsabelDb
 				throw new NotImplementedException();
 		}
 
-		private static string CreateConnectionString(string databaseIsdb)
+		internal static string CreateConnectionString(string databaseIsdb)
 		{
 			var builder = new SQLiteConnectionStringBuilder();
 			builder.DataSource = databaseIsdb;

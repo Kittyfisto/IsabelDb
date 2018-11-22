@@ -54,6 +54,9 @@ namespace IsabelDb.TypeModels
 		[Pure]
 		public static IReadOnlyList<FieldInfo> FindSerializableFields(Type type)
 		{
+			if (type == null)
+				return new FieldInfo[0];
+
 			return type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
 			           .Where(HasDataMemberAttribute)
 			           .ToList();
@@ -62,6 +65,9 @@ namespace IsabelDb.TypeModels
 		[Pure]
 		public static IReadOnlyList<PropertyInfo> FindSerializableProperties(Type type)
 		{
+			if (type == null)
+				return new PropertyInfo[0];
+
 			return type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
 			           .Where(HasDataMemberAttribute)
 			           .ToList();

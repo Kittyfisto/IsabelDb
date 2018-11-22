@@ -119,11 +119,14 @@ namespace IsabelDb.TypeModels
 		[Pure]
 		public TypeDescription TryGetTypeDescription(int typeId)
 		{
-			var type = TryGetType(typeId);
+			_typeDescriptionsById.TryGetValue(typeId, out var typeDescription);
+			return typeDescription;
+
+			/*var type = TryGetType(typeId);
 			if (type == null)
 				return null;
 
-			return _typeDescriptions[type];
+			return _typeDescriptions[type];*/
 		}
 
 		/// <summary>
@@ -175,6 +178,14 @@ namespace IsabelDb.TypeModels
 								var memberDescription = FieldDescription.Create(memberInfo,
 								                                                fieldType,
 								                                                memberId);
+								declaringType.Add(memberDescription);
+							}
+							else
+							{
+								var memberDescription = new FieldDescription(fieldType,
+								                                             fieldName,
+								                                             null,
+								                                             memberId);
 								declaringType.Add(memberDescription);
 							}
 						}

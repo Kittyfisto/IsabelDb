@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Linq;
-using IsabelDb.Collections;
 
 namespace IsabelDb
 {
