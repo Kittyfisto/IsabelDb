@@ -6,7 +6,7 @@ using NUnit.Framework;
 namespace IsabelDb.Test.Collections.Dictionary
 {
 	[TestFixture]
-	[Ignore("Not yet implemented")]
+	//[Ignore("Not yet implemented")]
 	public sealed class EnumKeyTest
 		: AbstractDictionaryObjectStoreTest<SomeEnum>
 	{

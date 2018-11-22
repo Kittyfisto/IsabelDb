@@ -340,7 +340,6 @@ namespace IsabelDb.Test
 		}
 
 		[Test]
-		[Ignore("Not yet implemented")]
 		public void TestPutSomeStruct()
 		{
 			using (var db = Database.CreateInMemory(new[] {typeof(SomeStruct)}))
