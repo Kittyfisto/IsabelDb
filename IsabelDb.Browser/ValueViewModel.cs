@@ -4,17 +4,24 @@
 		: IValueViewModel
 	{
 		private readonly T _value;
-		private readonly string _preview;
+		private string _preview;
 
 		public ValueViewModel(T value)
 		{
 			_value = value;
-			_preview = value.ToString();
 		}
 
 		#region Implementation of IValueViewModel
 
-		public string Preview => _preview;
+		public string Preview
+		{
+			get
+			{
+				if (_preview == null)
+					_preview = new ObjectFormatter().Preview(_value, maximumLength: 128);
+				return _preview;
+			}
+		}
 
 		#endregion
 	}
