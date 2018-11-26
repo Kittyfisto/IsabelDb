@@ -73,15 +73,15 @@ namespace IsabelDb.Browser.Test
 		{
 			var formatter = new ObjectFormatter();
 			formatter.Preview(new List<int>{1, 2, 3})
-			         .Should().Be("{1, 2, 3}");
+			         .Should().Be("{Count: 3, 1, 2, 3}");
 		}
-		
+
 		[Test]
 		public void TestPreviewIntArray()
 		{
 			var formatter = new ObjectFormatter();
-			formatter.Preview(new []{1, 2, 3})
-			         .Should().Be("{1, 2, 3}");
+			formatter.Preview(new []{1, 2, 3, 4})
+			         .Should().Be("{Count: 4, 1, 2, 3, 4}");
 		}
 
 		[Test]
@@ -90,7 +90,7 @@ namespace IsabelDb.Browser.Test
 		{
 			var formatter = new ObjectFormatter();
 			formatter.Preview(new Dictionary<int, int>{{1, 42}, {2, 1337}})
-			         .Should().Be("{{Key: 1, Value: 42}, {Key: 2, Value: 1337}}");
+			         .Should().Be("{Count: 2, {Key: 1, Value: 42}, {Key: 2, Value: 1337}}");
 		}
 
 		[Test]

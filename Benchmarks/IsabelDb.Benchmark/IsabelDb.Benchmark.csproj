@@ -34,8 +34,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FluentAssertions, Version=5.3.0.0, Culture=neutral, PublicKeyToken=33f2691a05b67b6a, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\FluentAssertions.5.3.0\lib\net45\FluentAssertions.dll</HintPath>
+    <Reference Include="FluentAssertions, Version=5.5.3.0, Culture=neutral, PublicKeyToken=33f2691a05b67b6a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\FluentAssertions.5.5.3\lib\net45\FluentAssertions.dll</HintPath>
     </Reference>
     <Reference Include="LiteDB, Version=4.1.2.0, Culture=neutral, PublicKeyToken=4ee40123013c9f27, processorArchitecture=MSIL">
       <HintPath>..\..\packages\LiteDB.4.1.2\lib\net40\LiteDB.dll</HintPath>
@@ -43,8 +43,8 @@
     <Reference Include="nunit.framework, Version=3.10.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
       <HintPath>..\..\packages\NUnit.3.10.1\lib\net45\nunit.framework.dll</HintPath>
     </Reference>
-    <Reference Include="protobuf-net, Version=2.3.7.0, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\protobuf-net.2.3.7\lib\net40\protobuf-net.dll</HintPath>
+    <Reference Include="protobuf-net, Version=2.4.0.0, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\protobuf-net.2.4.0\lib\net40\protobuf-net.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -80,11 +80,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\..\packages\System.Data.SQLite.Core.1.0.108.0\build\net45\x64\SQLite.Interop.dll">
+    <Content Include="..\..\packages\System.Data.SQLite.Core.1.0.109.2\build\net45\x64\SQLite.Interop.dll">
       <Link>x64\SQLite.Interop.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\..\packages\System.Data.SQLite.Core.1.0.108.0\build\net45\x86\SQLite.Interop.dll">
+    <Content Include="..\..\packages\System.Data.SQLite.Core.1.0.109.2\build\net45\x86\SQLite.Interop.dll">
       <Link>x86\SQLite.Interop.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

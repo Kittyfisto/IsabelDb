@@ -154,6 +154,14 @@ namespace IsabelDb.Browser
 
 			return new ObjectModel
 			{
+				Properties = new []
+				{
+					new Property
+					{
+						Name = "Count",
+						Value = CreateModel(values.Count)
+					}
+				},
 				Values = values
 			};
 		}
@@ -178,34 +186,39 @@ namespace IsabelDb.Browser
 				{
 					FormatValue(model.Value);
 				}
-				else if (model.Values != null)
-				{
-					_builder.Append("{");
-					for (int i = 0; i < model.Values.Count; ++i)
-					{
-						var property = model.Values[i];
-						if (i > 0)
-							_builder.Append(", ");
-						FormatPreview(property);
-
-						if (_appendedEllipses)
-							return;
-					}
-					_builder.Append("}");
-				}
 				else
 				{
 					_builder.Append("{");
-					for (int i = 0; i < model.Properties.Count; ++i)
+					if (model.Properties != null)
 					{
-						var property = model.Properties[i];
-						if (i > 0)
-							_builder.Append(", ");
-						_builder.AppendFormat("{0}: ", property.Name);
-						FormatPreview(property.Value);
+						for (int i = 0; i < model.Properties.Count; ++i)
+						{
+							var property = model.Properties[i];
+							if (i > 0)
+								_builder.Append(", ");
+							_builder.AppendFormat("{0}: ", property.Name);
+							FormatPreview(property.Value);
 
-						if (_appendedEllipses)
-							return;
+							if (_appendedEllipses)
+								return;
+						}
+					}
+
+					if (model.Values != null)
+					{
+						if (model.Properties != null && model.Properties.Count > 0)
+							_builder.Append(", ");
+
+						for (int i = 0; i < model.Values.Count; ++i)
+						{
+							var property = model.Values[i];
+							if (i > 0)
+								_builder.Append(", ");
+							FormatPreview(property);
+
+							if (_appendedEllipses)
+								return;
+						}
 					}
 					_builder.Append("}");
 				}

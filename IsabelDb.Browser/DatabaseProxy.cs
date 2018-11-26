@@ -14,9 +14,12 @@ namespace IsabelDb.Browser
 	{
 		private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 		private readonly IDatabase _database;
+		private readonly string _fileName;
 
 		public DatabaseProxy(string fileName)
 		{
+			_fileName = fileName;
+
 			var connectionString = global::IsabelDb.Database.CreateConnectionString(fileName);
 			var connection = new SQLiteConnection(connectionString);
 			try
@@ -36,8 +39,8 @@ namespace IsabelDb.Browser
 			catch (Exception e)
 			{
 				Log.ErrorFormat("Caught unexpected exception:\r\n{0}", e);
-
 				connection.Dispose();
+				throw;
 			}
 		}
 

@@ -20,7 +20,7 @@ namespace IsabelDb.Browser
 
 		public MainWindowViewModel()
 		{
-			Open(@"C:\Users\Simon\Documents\GitHub\IsabelDb\IsabelDb.Browser\Test.isdb");
+			Open(@"C:\Users\Simon\Documents\GitHub\IsabelDb\LocalTestData\Test.isdb");
 		}
 
 		public void Open(string fileName)
