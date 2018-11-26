@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using IsabelDb.Collections;
 
 namespace IsabelDb
 {
@@ -26,6 +25,14 @@ namespace IsabelDb
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
 		IReadOnlyBag<T> GetBag<T>(string name);
+		
+		/// <summary>
+		///     Returns an object store in which acts as a queue.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="name"></param>
+		/// <returns></returns>
+		IReadOnlyQueue<T> GetQueue<T>(string name);
 
 		/// <summary>
 		///     Returns an object store in which each object is identified by a key of the given type

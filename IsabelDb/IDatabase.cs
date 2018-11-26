@@ -27,6 +27,14 @@ namespace IsabelDb
 		new IBag<T> GetBag<T>(string name);
 
 		/// <summary>
+		///     Returns an object store in which acts as a queue.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="name"></param>
+		/// <returns></returns>
+		new IQueue<T> GetQueue<T>(string name);
+
+		/// <summary>
 		///     Returns an object store in which each object is identified by a key of the given type
 		///     <typeparamref name="TKey" />.
 		/// </summary>

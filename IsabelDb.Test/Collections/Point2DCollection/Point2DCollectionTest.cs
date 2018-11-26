@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
-using IsabelDb.Collections;
 using NUnit.Framework;
 
 namespace IsabelDb.Test.Collections.Point2DCollection

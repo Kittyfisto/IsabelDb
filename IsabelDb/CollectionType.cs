@@ -37,6 +37,10 @@ namespace IsabelDb
 
 		/// <summary>
 		/// </summary>
-		[EnumMember] Point2DCollection
+		[EnumMember] Point2DCollection,
+
+		/// <summary>
+		/// </summary>
+		[EnumMember] Queue
 	}
 }

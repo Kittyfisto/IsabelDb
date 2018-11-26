@@ -234,6 +234,34 @@ namespace IsabelDb
 			return target;
 		}
 
+		public IQueue<T> GetQueue<T>(string name)
+		{
+			if (!_collectionsByName.TryGetValue(name, out var collection))
+			{
+				if (_isReadOnly)
+					throw new ArgumentException(string.Format("Unable to find a collection named '{0}'", name));
+
+				if (!_typeModel.IsRegistered(typeof(T)))
+					throw new
+						ArgumentException(string.Format("The type '{0}' has not been registered when the database was created and thus may not be used as the value type in a collection",
+						                                typeof(T).FullName));
+
+				var tableName = AddTable(name, CollectionType.Queue, keyType: null, valueType: typeof(T));
+				collection = CreateQueue<T>(name, tableName);
+				AddCollection(name, collection);
+			}
+
+			EnsureTypeSafety(collection, CollectionType.Queue, null, typeof(T));
+
+			if (!(collection is IQueue<T> target))
+				throw new
+					ArgumentException(string.Format("The queue '{0}' has a value type of '{1}': If your intent was to create a new collection, you have to pick a new name!",
+					                                name,
+					                                collection.ValueType.FullName));
+
+			return target;
+		}
+
 		public IPoint2DCollection<T> GetPoint2DCollection<T>(string name)
 		{
 			if (!_collectionsByName.TryGetValue(name, out var collection))
@@ -417,6 +445,16 @@ namespace IsabelDb
 			                  _isReadOnly);
 		}
 
+		private ICollection CreateQueue<T>(string name, string tableName)
+		{
+			var serializer = GetSerializer<T>();
+			return new Collections.Queue<T>(_connection,
+			                                name,
+			                                tableName,
+			                                serializer,
+			                                _isReadOnly);
+		}
+
 		private ICollection CreatePoint2DCollection<T>(string name, string tableName)
 		{
 			var serializer = GetSerializer<T>();
@@ -508,6 +546,9 @@ namespace IsabelDb
 				case CollectionType.Bag:
 					return CreateBag(name, tableName, valueType);
 
+				case CollectionType.Queue:
+					return CreateQueue(name, tableName, valueType);
+
 				case CollectionType.Point2DCollection:
 					return CreatePoint2DCollection(name, tableName, valueType);
 			}
@@ -537,6 +578,14 @@ namespace IsabelDb
 		private ICollection CreateBag(string name, string tableName, Type valueType)
 		{
 			var collectionType = typeof(Bag<>).MakeGenericType(valueType);
+			var serializer = CreateSerializer(valueType);
+			var bag = Activator.CreateInstance(collectionType, _connection, name, tableName, serializer, _isReadOnly);
+			return (ICollection) bag;
+		}
+
+		private ICollection CreateQueue(string name, string tableName, Type valueType)
+		{
+			var collectionType = typeof(Collections.Queue<>).MakeGenericType(valueType);
 			var serializer = CreateSerializer(valueType);
 			var bag = Activator.CreateInstance(collectionType, _connection, name, tableName, serializer, _isReadOnly);
 			return (ICollection) bag;

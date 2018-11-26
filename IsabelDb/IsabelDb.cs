@@ -46,6 +46,11 @@ namespace IsabelDb
 			return GetBag<T>(name);
 		}
 
+		IReadOnlyQueue<T> IReadOnlyDatabase.GetQueue<T>(string name)
+		{
+			return GetQueue<T>(name);
+		}
+
 		IReadOnlyDictionary<TKey, TValue> IReadOnlyDatabase.GetDictionary<TKey, TValue>(string name)
 		{
 			return GetDictionary<TKey, TValue>(name);
@@ -108,5 +113,9 @@ namespace IsabelDb
 			return _objectStores.GetBag<T>(name);
 		}
 
+		public IQueue<T> GetQueue<T>(string name)
+		{
+			return _objectStores.GetQueue<T>(name);
+		}
 	}
 }
