@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows;
+using IsabelDb.Browser.Settings;
 
 namespace IsabelDb.Browser
 {
@@ -10,11 +11,16 @@ namespace IsabelDb.Browser
 		{
 			try
 			{
+				ApplicationSettings settings = ApplicationSettings.Create();
+				settings.Restore();
+
 				var application = new Application();
-				var mainWindow = new MainWindow
+				var mainWindow = new MainWindow(settings)
 				{
 					DataContext = new MainWindowViewModel()
 				};
+
+				settings.MainWindow.RestoreTo(mainWindow);
 				mainWindow.Show();
 				return application.Run();
 			}

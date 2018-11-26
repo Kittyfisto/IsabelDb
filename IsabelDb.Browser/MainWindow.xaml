@@ -5,7 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:browser="clr-namespace:IsabelDb.Browser"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        d:DataContext="{d:DesignInstance browser:MainWindowViewModel}"
+        Title="{Binding WindowTitle}"
+        MinWidth="640"
+        MinHeight="480"
+        Width="800"
+        Height="450"
+        >
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />

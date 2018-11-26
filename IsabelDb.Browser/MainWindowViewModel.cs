@@ -11,21 +11,46 @@ namespace IsabelDb.Browser
 		private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
 		private DatabaseViewModel _database;
+		private string _windowTitle;
+
+		public string WindowTitle
+		{
+			get { return _windowTitle; }
+			private set
+			{
+				if (value == _windowTitle)
+					return;
+
+				_windowTitle = value;
+				EmitPropertyChanged();
+			}
+		}
 
 		public DatabaseViewModel Database
 		{
 			get { return _database; }
-			set { _database = value; EmitPropertyChanged(); }
+			set
+			{
+				if (value == _database)
+					return;
+
+				_database = value;
+				EmitPropertyChanged();
+
+				if (value != null)
+				{
+					WindowTitle = string.Format("{0} - {1}", Constants.ApplicationTitle, value.Filename);
+				}
+				else
+				{
+					WindowTitle = Constants.ApplicationTitle;
+				}
+			}
 		}
 
 		public MainWindowViewModel()
 		{
-			Open(@"C:\Users\Simon\Documents\GitHub\IsabelDb\LocalTestData\Test.isdb");
-		}
-
-		public void Open(string fileName)
-		{
-			Database = new DatabaseViewModel(new DatabaseProxy(fileName));
+			OpenFile(@"C:\Users\Simon\Documents\GitHub\IsabelDb\LocalTestData\Test.isdb");
 		}
 
 		public event PropertyChangedEventHandler PropertyChanged;
@@ -33,6 +58,11 @@ namespace IsabelDb.Browser
 		private void EmitPropertyChanged([CallerMemberName] string propertyName = null)
 		{
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+		}
+
+		public void OpenFile(string fileName)
+		{
+			Database = new DatabaseViewModel(new DatabaseProxy(fileName));
 		}
 	}
 }

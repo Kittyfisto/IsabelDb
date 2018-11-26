@@ -13,10 +13,14 @@ namespace IsabelDb.Browser
 		private readonly DatabaseProxy _database;
 		private CollectionViewModel _selectedCollection;
 		private ICollectionInspectorViewModel _selectedCollectionInspectorViewModel;
+		private string _filename;
+
+		public string Filename => _filename;
 
 		public DatabaseViewModel(DatabaseProxy database)
 		{
 			_database = database;
+			_filename = database.FileName;
 			_collections= new List<CollectionViewModel>();
 			foreach (var collection in database.Database.Collections)
 			{

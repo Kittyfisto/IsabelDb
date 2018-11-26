@@ -44,6 +44,8 @@ namespace IsabelDb.Browser
 			}
 		}
 
+		public string FileName => _fileName;
+
 		private IReadOnlyList<Type> CompileCustomTypes(TypeModel typeModel, TypeResolver typeResolver)
 		{
 			var assemblyName = new AssemblyName("IsabelDb.Browser.GeneratedCode");
