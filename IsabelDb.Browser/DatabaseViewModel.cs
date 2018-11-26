@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Reflection;
 using System.Runtime.CompilerServices;
+using IsabelDb.Browser.Inspectors;
 
 namespace IsabelDb.Browser
 {
@@ -12,8 +14,8 @@ namespace IsabelDb.Browser
 
 		private readonly DatabaseProxy _database;
 		private CollectionViewModel _selectedCollection;
-		private ICollectionInspectorViewModel _selectedCollectionInspectorViewModel;
-		private string _filename;
+		private ICollectionInspectionViewModel _selectedCollectionInspectionViewModel;
+		private readonly string _filename;
 
 		public string Filename => _filename;
 
@@ -28,15 +30,15 @@ namespace IsabelDb.Browser
 			}
 		}
 
-		public ICollectionInspectorViewModel SelectedCollectionInspector
+		public ICollectionInspectionViewModel SelectedCollectionInspection
 		{
-			get { return _selectedCollectionInspectorViewModel;}
+			get { return _selectedCollectionInspectionViewModel;}
 			private set
 			{
-				if (_selectedCollectionInspectorViewModel == value)
+				if (_selectedCollectionInspectionViewModel == value)
 					return;
 
-				_selectedCollectionInspectorViewModel = value;
+				_selectedCollectionInspectionViewModel = value;
 				EmitPropertyChanged();
 			}
 		}
@@ -52,11 +54,11 @@ namespace IsabelDb.Browser
 				_selectedCollection = value;
 				EmitPropertyChanged();
 
-				SelectedCollectionInspector = CreateInspectionViewModel(value.Collection);
+				SelectedCollectionInspection = CreateInspectionViewModel(value.Collection);
 			}
 		}
 
-		private ICollectionInspectorViewModel CreateInspectionViewModel(ICollection collection)
+		private ICollectionInspectionViewModel CreateInspectionViewModel(ICollection collection)
 		{
 			if (collection == null)
 				return null;
@@ -64,17 +66,30 @@ namespace IsabelDb.Browser
 			switch (collection.Type)
 			{
 				case CollectionType.Bag:
-					return CreateBag(collection);
+				case CollectionType.Queue:
+					return CreateValueCollectionInspector(collection);
+
+				case CollectionType.Dictionary:
+					return CreateDictionary(collection);
 
 				default:
 					throw new NotImplementedException();
 			}
 		}
 
-		private ICollectionInspectorViewModel CreateBag(ICollection bag)
+		private ICollectionInspectionViewModel CreateDictionary(ICollection collection)
 		{
-			var type = typeof(BagInspectorViewModel<>).MakeGenericType(bag.ValueType);
-			var viewModel = (ICollectionInspectorViewModel) Activator.CreateInstance(type, bag);
+			var method = typeof(DictionaryInspectorViewModel).GetMethod("Create", BindingFlags.Public | BindingFlags.Static)
+			                                           .MakeGenericMethod(collection.KeyType, collection.ValueType);
+			var viewModel = (ICollectionInspectionViewModel) method.Invoke(null, new object[] {collection});
+			return viewModel;
+		}
+
+		private ICollectionInspectionViewModel CreateValueCollectionInspector(ICollection collection)
+		{
+			var methodName = nameof(ValueCollectionInspectionViewModel.Create);
+			var method = typeof(ValueCollectionInspectionViewModel).GetMethod(methodName, BindingFlags.Public | BindingFlags.Static).MakeGenericMethod(collection.ValueType);
+			var viewModel = (ICollectionInspectionViewModel) method.Invoke(null, new object[] {collection});
 			return viewModel;
 		}
 

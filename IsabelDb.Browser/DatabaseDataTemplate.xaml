@@ -1,0 +1,78 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:IsabelDb.Browser"
+                    xmlns:inspectors="clr-namespace:IsabelDb.Browser.Inspectors"
+                    xmlns:converters="clr-namespace:Metrolib.Converters;assembly=Metrolib">
+
+    <converters:BoolFalseToCollapsedConverter x:Key="BoolFalseToCollapsedConverter" />
+    <converters:BoolTrueToCollapsedConverter x:Key="BoolTrueToCollapsedConverter" />
+
+    <DataTemplate DataType="{x:Type inspectors:ValueCollectionInspectionViewModel}">
+        <Grid>
+            <ListView ItemsSource="{Binding Values}">
+                <ListView.ItemTemplate>
+                    <DataTemplate DataType="{x:Type local:IValueViewModel}">
+                        <TextBlock Text="{Binding Preview}" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <TextBlock Visibility="{Binding HasValues, Converter={StaticResource BoolTrueToCollapsedConverter}}"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center"
+                       FontSize="20"
+                       Text="This collection is empty"/>
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type local:DatabaseViewModel}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <TextBlock Text="Collections"
+                           Margin="8" />
+                <ListView ItemsSource="{Binding Collections}"
+                          SelectedItem="{Binding SelectedCollection}"
+                          Grid.Row="1">
+                    <ListView.ItemTemplate>
+                        <DataTemplate DataType="{x:Type local:CollectionViewModel}">
+                            <Grid>
+                                <TextBlock>
+                                    <Run Text="{Binding Name, Mode=OneWay}" />
+                                    <Run Text=" [" />
+                                    <Run Text="{Binding CollectionType, Mode=OneWay}" />
+                                    <Run Text="]" />
+                                </TextBlock>
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Grid>
+
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Content"
+                               Margin="8" />
+                    <TextBlock Margin="8">
+                        <Run Text="# Values: " />
+                        <Run Text="{Binding SelectedCollectionInspection.Count, Mode=OneWay}" />
+                    </TextBlock>
+                </StackPanel>
+                <ContentPresenter Grid.Row="1" Content="{Binding SelectedCollectionInspection}" />
+            </Grid>
+
+        </Grid>
+    </DataTemplate>
+
+</ResourceDictionary>

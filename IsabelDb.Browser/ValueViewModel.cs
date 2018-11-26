@@ -1,12 +1,12 @@
 ﻿namespace IsabelDb.Browser
 {
-	public sealed class ValueViewModel<T>
+	public sealed class ValueViewModel
 		: IValueViewModel
 	{
-		private readonly T _value;
+		private readonly object _value;
 		private string _preview;
 
-		public ValueViewModel(T value)
+		public ValueViewModel(object value)
 		{
 			_value = value;
 		}

@@ -12,58 +12,12 @@
         Width="800"
         Height="450"
         >
+    
+    <Window.Resources>
+        <ResourceDictionary Source="DatabaseDataTemplate.xaml" />
+    </Window.Resources>
+
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition />
-        </Grid.ColumnDefinitions>
-
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition />
-            </Grid.RowDefinitions>
-            <TextBlock Text="Collections"
-                       Margin="8"/>
-            <ListView ItemsSource="{Binding Database.Collections}"
-                      SelectedItem="{Binding Database.SelectedCollection}"
-                      Grid.Row="1">
-                <ListView.ItemTemplate>
-                    <DataTemplate DataType="{x:Type browser:CollectionViewModel}">
-                        <Grid>
-                            <TextBlock>
-                                <Run Text="{Binding Name, Mode=OneWay}" />
-                                <Run Text=" [" />
-                                <Run Text="{Binding CollectionType, Mode=OneWay}" />
-                                <Run Text="]" />
-                            </TextBlock>
-                        </Grid>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
-        </Grid>
-
-        <Grid Grid.Column="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition />
-            </Grid.RowDefinitions>
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Content"
-                           Margin="8" />
-                <TextBlock Margin="8">
-                    <Run Text="# Values: " />
-                    <Run Text="{Binding Database.SelectedCollectionInspector.Count, Mode=OneWay}" />
-                </TextBlock>
-            </StackPanel>
-            <ListView Grid.Row="1" ItemsSource="{Binding Database.SelectedCollectionInspector.Values}">
-                <ListView.ItemTemplate>
-                    <DataTemplate DataType="{x:Type browser:IValueViewModel}">
-                        <TextBlock Text="{Binding Preview}" />
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
-        </Grid>
-
+        <ContentPresenter Content="{Binding Database}" />
     </Grid>
 </Window>

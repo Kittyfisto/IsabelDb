@@ -16,6 +16,12 @@ namespace IsabelDb.Browser
 		private readonly IDatabase _database;
 		private readonly string _fileName;
 
+		public DatabaseProxy(IDatabase database)
+		{
+			_fileName = "<Unknown>";
+			_database = database;
+		}
+
 		public DatabaseProxy(string fileName)
 		{
 			_fileName = fileName;

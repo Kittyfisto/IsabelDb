@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using log4net;
@@ -50,7 +51,17 @@ namespace IsabelDb.Browser
 
 		public MainWindowViewModel()
 		{
-			OpenFile(@"C:\Users\Simon\Documents\GitHub\IsabelDb\LocalTestData\Test.isdb");
+			//OpenFile(@"C:\Users\Simon\Documents\GitHub\IsabelDb\LocalTestData\Test.isdb");
+			var database = global::IsabelDb.Database.CreateInMemory(new Type[0]);
+			var bag = database.GetBag<string>("A");
+			bag.Put("Stuff");
+
+			var queue = database.GetQueue<int>("B");
+			queue.Enqueue(42);
+			queue.Enqueue(9001);
+			queue.Enqueue(1337);
+
+			Database = new DatabaseViewModel(new DatabaseProxy(database));
 		}
 
 		public event PropertyChangedEventHandler PropertyChanged;
