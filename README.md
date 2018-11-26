@@ -65,6 +65,18 @@ items.PutMany(new[]{1, 42, "Hello", "World!");
 Console.WriteLine(string.Join(", ", items.GetAll()); //< Prints '1, 42, Hello, World!'
 ```
 
+### Queue
+
+A collection which stores values and allows them to be retrieved in the same order in which they were added (FIFO). You can enqueue, dequeue values as well as peek on the value which would be retrieved next.
+
+```csharp
+var items = database.GetQueue<object>("Tasks");
+items.Enqueue("Do your homework");
+
+if (items.TryDequeue(out var nextTask))
+   Console.WriteLine("Next task: {0}", nextTask);
+```
+
 ### Dictionary
 
 A collection which maps values to non-null keys. There can never be more than one value for the same key. If you put a new key / value pair into
