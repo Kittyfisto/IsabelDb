@@ -2,7 +2,8 @@
 
 [![Build status](https://ci.appveyor.com/api/projects/status/mqcvw9ouvh2xi12u?svg=true)](https://ci.appveyor.com/project/Kittyfisto/isabeldb)
 
-IsabelDb is a key value store which allows you to persist .NET objects on disk and read them back again.
+IsabelDb is a key value store which allows you to persist .NET objects on disk and read them back again.  
+Is is particularly suited for on-disk caches and is intended to be used for long term storage as well, but currently backwards compatibility cannot be guaranteed just yet.
 
 # Introduction
 
