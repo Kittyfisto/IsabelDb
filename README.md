@@ -102,6 +102,18 @@ items.Put("foo", "World!");
 Console.WriteLine(string.Join(", ", items.Get("foo"))); //< Prints 'Hello, World!'
 ```
 
+### OrderedCollection
+
+Very similar to a dictionary, but requires its keys to be sortable and allows range queries:
+
+```csharp
+var items = database.GetOrderedCollection<int, object>("Items");
+items.Put(1, "Hello");
+items.Put(2, "World!");
+items.Put(4, "What's up?");
+Console.WriteLine(string.Join(", ", items.GetValues(Interval.Create(0, 3))); //< Prints 'Hello, World!'
+```
+
 ## Defining Serializable Types
 
 IsabelDb works with every custom type if it follows these rules:
