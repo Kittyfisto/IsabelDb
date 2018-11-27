@@ -10,12 +10,14 @@ namespace IsabelDb
 		: Exception
 	{
 		/// <summary>
+		///     Initializes this object.
 		/// </summary>
 		public TypeCouldNotBeResolvedException()
 		{
 		}
 
 		/// <summary>
+		///     Initializes this object.
 		/// </summary>
 		/// <param name="message"></param>
 		public TypeCouldNotBeResolvedException(string message)
@@ -24,6 +26,7 @@ namespace IsabelDb
 		}
 
 		/// <summary>
+		///     Initializes this object.
 		/// </summary>
 		/// <param name="message"></param>
 		/// <param name="innerException"></param>

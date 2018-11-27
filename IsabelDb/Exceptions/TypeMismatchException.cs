@@ -11,12 +11,14 @@ namespace IsabelDb
 		: Exception
 	{
 		/// <summary>
+		///     Initializes this object.
 		/// </summary>
 		public TypeMismatchException()
 		{
 		}
 
 		/// <summary>
+		///     Initializes this object.
 		/// </summary>
 		/// <param name="message"></param>
 		public TypeMismatchException(string message)
@@ -25,6 +27,7 @@ namespace IsabelDb
 		}
 
 		/// <summary>
+		///     Initializes this object.
 		/// </summary>
 		/// <param name="message"></param>
 		/// <param name="innerException"></param>

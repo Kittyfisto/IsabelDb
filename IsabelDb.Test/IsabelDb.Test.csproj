@@ -137,6 +137,13 @@
     <Compile Include="Entities\V2\TooManyInterfaces.cs" />
     <Compile Include="Entities\V3\Cpu.cs" />
     <Compile Include="Entities\V3\CpuModel.cs" />
+    <Compile Include="Exceptions\AbstractExceptionTest.cs" />
+    <Compile Include="Exceptions\BreakingChangeExceptionTest.cs" />
+    <Compile Include="Exceptions\NoSuchCollectionExceptionTest.cs" />
+    <Compile Include="Exceptions\TypeCouldNotBeResolvedExceptionTest.cs" />
+    <Compile Include="Exceptions\TypeMismatchExceptionTest.cs" />
+    <Compile Include="Exceptions\TypeNotRegisteredExceptionTest.cs" />
+    <Compile Include="Exceptions\WrongCollectionTypeExceptionTest.cs" />
     <Compile Include="ExplicitNameAndNamespace.cs" />
     <Compile Include="ExplicitNameNoNamespace.cs" />
     <Compile Include="ExplicitNamespaceNoName.cs" />

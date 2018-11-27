@@ -12,11 +12,19 @@ namespace IsabelDb
 		: ArgumentException
 	{
 		/// <summary>
-		/// Initializes this object.
+		///     Initializes this object.
+		/// </summary>
+		public TypeNotRegisteredException()
+		{
+		}
+
+		/// <summary>
+		///     Initializes this object.
 		/// </summary>
 		/// <param name="message"></param>
 		public TypeNotRegisteredException(string message)
 			: base(message)
-		{}
+		{
+		}
 	}
 }

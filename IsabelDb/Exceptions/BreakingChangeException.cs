@@ -12,13 +12,13 @@ namespace IsabelDb
 		: Exception
 	{
 		/// <summary>
-		/// 
+		///     Initializes this object.
 		/// </summary>
 		public BreakingChangeException()
 		{}
 
 		/// <summary>
-		/// 
+		///     Initializes this object.
 		/// </summary>
 		/// <param name="message"></param>
 		public BreakingChangeException(string message)
@@ -26,7 +26,7 @@ namespace IsabelDb
 		{}
 
 		/// <summary>
-		/// 
+		///     Initializes this object.
 		/// </summary>
 		/// <param name="message"></param>
 		/// <param name="innerException"></param>

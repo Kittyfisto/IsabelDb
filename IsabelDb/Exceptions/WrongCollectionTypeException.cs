@@ -15,6 +15,12 @@ namespace IsabelDb
 		/// <summary>
 		///     Initializes this object.
 		/// </summary>
+		public WrongCollectionTypeException()
+		{}
+
+		/// <summary>
+		///     Initializes this object.
+		/// </summary>
 		/// <param name="message"></param>
 		public WrongCollectionTypeException(string message)
 			: base(message)
