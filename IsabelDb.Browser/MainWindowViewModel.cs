@@ -61,6 +61,9 @@ namespace IsabelDb.Browser
 			queue.Enqueue(9001);
 			queue.Enqueue(1337);
 
+			var dictionary = database.GetDictionary<int, string>("C");
+			dictionary.Put(42, "Answer to the Ultimate Question of Life, the Universe, and Everything");
+
 			Database = new DatabaseViewModel(new DatabaseProxy(database));
 		}
 

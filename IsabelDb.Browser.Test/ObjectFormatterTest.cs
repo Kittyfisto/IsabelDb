@@ -9,11 +9,27 @@ namespace IsabelDb.Browser.Test
 	public sealed class ObjectFormatterTest
 	{
 		[Test]
+		public void TestFormatString()
+		{
+			var formatter = new ObjectFormatter();
+			formatter.Format("Hello, World!")
+			         .Should().Be("\"Hello, World!\"");
+		}
+
+		[Test]
 		public void TestPreviewString()
 		{
 			var formatter = new ObjectFormatter();
 			formatter.Preview("Hello, World!")
 			         .Should().Be("\"Hello, World!\"");
+		}
+
+		[Test]
+		public void TestFormatInt32()
+		{
+			var formatter = new ObjectFormatter();
+			formatter.Format(42)
+			         .Should().Be("42");
 		}
 
 		[Test]
@@ -25,11 +41,28 @@ namespace IsabelDb.Browser.Test
 		}
 
 		[Test]
+		public void TestFormatInt64()
+		{
+			var formatter = new ObjectFormatter();
+			formatter.Format(-123456789)
+			         .Should().Be("-123456789");
+		}
+
+		[Test]
 		public void TestPreviewInt64()
 		{
 			var formatter = new ObjectFormatter();
 			formatter.Preview(-123456789)
 			         .Should().Be("-123456789");
+		}
+
+		[Test]
+		[SetUICulture("en-US")]
+		public void TestFormatFloat()
+		{
+			var formatter = new ObjectFormatter();
+			formatter.Format((float)Math.PI)
+			         .Should().Be("3.141593");
 		}
 
 		[Test]
@@ -52,6 +85,15 @@ namespace IsabelDb.Browser.Test
 
 		[Test]
 		[SetUICulture("en-US")]
+		public void TestFormatDouble()
+		{
+			var formatter = new ObjectFormatter();
+			formatter.Format(Math.E)
+			         .Should().Be("2.71828182845905");
+		}
+
+		[Test]
+		[SetUICulture("en-US")]
 		public void TestPreviewDouble()
 		{
 			var formatter = new ObjectFormatter();
@@ -60,7 +102,14 @@ namespace IsabelDb.Browser.Test
 		}
 
 		[Test]
-		[SetUICulture("en-US")]
+		public void TestFormatKeyValuePair()
+		{
+			var formatter = new ObjectFormatter();
+			formatter.Format(new KeyValuePair<int, int>(42, 1))
+			         .Should().Be("{\r\n\tKey: 42,\r\n\tValue: 1\r\n}");
+		}
+
+		[Test]
 		public void TestPreviewKeyValuePair()
 		{
 			var formatter = new ObjectFormatter();

@@ -23,6 +23,8 @@
 			}
 		}
 
+		public object Value => _value;
+
 		#endregion
 	}
 }

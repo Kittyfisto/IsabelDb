@@ -70,10 +70,12 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Inspectors\AbstractInspectionViewModel.cs" />
+    <Compile Include="Inspectors\AbstractCollectionViewModel.cs" />
     <Compile Include="Constants.cs" />
-    <Compile Include="Inspectors\DictionaryInspectorViewModel.cs" />
-    <Compile Include="Inspectors\ICollectionInspectionViewModel.cs" />
+    <Compile Include="Inspectors\BagViewModel.cs" />
+    <Compile Include="Inspectors\DictionaryViewModel.cs" />
+    <Compile Include="Inspectors\ICollectionViewModel.cs" />
+    <Compile Include="Inspectors\ObjectInspectorViewModel.cs" />
     <Compile Include="IValueViewModel.cs" />
     <Compile Include="ObjectFormatter.cs" />
     <Compile Include="Settings\ApplicationSettings.cs" />
@@ -83,12 +85,32 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Inspectors\BagDataTemplate.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Inspectors\CollectionDataTemplate.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Inspectors\DictionaryDataTemplate.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Inspectors\ObjectInspectorDataTemplate.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Inspectors\QueueDataTemplate.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
     <Compile Include="Bootstrapper.cs" />
-    <Compile Include="Inspectors\ValueCollectionInspectionViewModel.cs" />
+    <Compile Include="Inspectors\QueueViewModel.cs" />
     <Compile Include="CollectionViewModel.cs" />
     <Compile Include="DatabaseProxy.cs" />
     <Compile Include="DatabaseViewModel.cs" />

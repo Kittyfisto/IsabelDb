@@ -132,6 +132,24 @@ namespace IsabelDb.Collections
 			}
 		}
 
+		public IEnumerable<KeyValuePair<RowId, T>> GetAll()
+		{
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = string.Format("SELECT rowid, value FROM {0}", _tableName);
+				using (var reader = command.ExecuteReader())
+				{
+					while (reader.Read())
+					{
+						var rowId = new RowId(reader.GetInt64(0));
+
+						if (_serializer.TryDeserialize(reader, 1, out var value))
+							yield return new KeyValuePair<RowId, T>(rowId, value);
+					}
+				}
+			}
+		}
+
 		public bool TryGetValue(RowId key, out T value)
 		{
 			using (var command = _connection.CreateCommand())

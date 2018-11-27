@@ -40,9 +40,22 @@ namespace IsabelDb.Browser
 		public string Preview(IFormatProvider formatProvider, object value, int maximumLength = Int32.MaxValue)
 		{
 			var model = CreateModel(value);
-			var builder = new JsonBuilder(maximumLength);
-			builder.FormatPreview(model);
+			var builder = new JsonBuilder(FormatOptions.SingleLine, maximumLength);
+			builder.Format(model);
 			return builder.ToString();
+		}
+
+		public string Format(object value)
+		{
+			return Format(CultureInfo.CurrentUICulture, value);
+		}
+
+		public string Format(IFormatProvider formatProvider, object value)
+		{
+			var model = CreateModel(value);
+			var builder = new JsonBuilder(FormatOptions.MultiLine | FormatOptions.Indented, Int32.MaxValue);
+			builder.Format(model);
+			return builder.ToString().TrimEnd();
 		}
 
 		ObjectModel CreateModel(object value)
@@ -166,21 +179,33 @@ namespace IsabelDb.Browser
 			};
 		}
 
+		[Flags]
+		enum FormatOptions
+		{
+			SingleLine = 0,
+
+			MultiLine = 0x01,
+			Indented  = 0x02,
+		}
+
 		sealed class JsonBuilder
 		{
+			private readonly FormatOptions _formatOptions;
 			private readonly int _maximumLength;
 			private readonly StringBuilder _builder;
 			private bool _appendedEllipses;
+			private int _indent;
 
 			private const int EllipsisLength = 3;
 
-			public JsonBuilder(int maximumLength)
+			public JsonBuilder(FormatOptions formatOptions, int maximumLength)
 			{
+				_formatOptions = formatOptions;
 				_maximumLength = maximumLength;
 				_builder = new StringBuilder();
 			}
 
-			public void FormatPreview(ObjectModel model)
+			public void Format(ObjectModel model)
 			{
 				if (model.Value != null)
 				{
@@ -188,16 +213,22 @@ namespace IsabelDb.Browser
 				}
 				else
 				{
-					_builder.Append("{");
+					BeginObject();
+
+					int numValues = 0;
+
 					if (model.Properties != null)
 					{
-						for (int i = 0; i < model.Properties.Count; ++i)
+						for (int i = 0; i < model.Properties.Count; ++i, ++numValues)
 						{
 							var property = model.Properties[i];
 							if (i > 0)
-								_builder.Append(", ");
+							{
+								AddSeparator();
+							}
+
 							_builder.AppendFormat("{0}: ", property.Name);
-							FormatPreview(property.Value);
+							Format(property.Value);
 
 							if (_appendedEllipses)
 								return;
@@ -209,21 +240,94 @@ namespace IsabelDb.Browser
 						if (model.Properties != null && model.Properties.Count > 0)
 							_builder.Append(", ");
 
-						for (int i = 0; i < model.Values.Count; ++i)
+						for (int i = 0; i < model.Values.Count; ++i, ++numValues)
 						{
 							var property = model.Values[i];
 							if (i > 0)
+							{
 								_builder.Append(", ");
-							FormatPreview(property);
+							}
+
+							Format(property);
 
 							if (_appendedEllipses)
 								return;
 						}
 					}
-					_builder.Append("}");
+
+					if (numValues > 0)
+						AppendNewLineIfNecessary();
+
+					EndObject();
 				}
 
 				AppendEllipsesIfNecessary();
+			}
+
+			private void BeginObject()
+			{
+				_builder.Append("{");
+				if (_formatOptions.HasFlag(FormatOptions.MultiLine))
+				{
+					_builder.AppendLine();
+					if (_formatOptions.HasFlag(FormatOptions.Indented))
+					{
+						++_indent;
+						_builder.Append('\t', _indent);
+					}
+				}
+			}
+
+			private void EndObject()
+			{
+				_builder.Append("}");
+				if (_formatOptions.HasFlag(FormatOptions.MultiLine))
+				{
+					_builder.AppendLine();
+					if (_formatOptions.HasFlag(FormatOptions.Indented))
+					{
+						--_indent;
+						_builder.Append('\t', _indent);
+					}
+				}
+			}
+
+			private void AddSeparator()
+			{
+				_builder.Append(',');
+				if (_formatOptions == FormatOptions.SingleLine)
+				{
+					_builder.Append(' ');
+				}
+				else
+				{
+					AppendNewLineAndIndentIfNecessary();
+				}
+			}
+
+			private void AppendNewLineIfNecessary()
+			{
+				if (_formatOptions.HasFlag(FormatOptions.MultiLine))
+				{
+					_builder.AppendLine();
+				}
+			}
+
+			private void AppendNewLineAndIndentIfNecessary()
+			{
+				if (_formatOptions.HasFlag(FormatOptions.MultiLine))
+				{
+					_builder.AppendLine();
+					IndentIfNecessary();
+				}
+			}
+
+			private void IndentIfNecessary()
+			{
+				if (_formatOptions.HasFlag(FormatOptions.Indented))
+				{
+					_builder.Append('\t', _indent);
+				}
 			}
 
 			private void FormatValue(object value)

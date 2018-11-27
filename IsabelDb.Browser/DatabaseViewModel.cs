@@ -14,7 +14,7 @@ namespace IsabelDb.Browser
 
 		private readonly DatabaseProxy _database;
 		private CollectionViewModel _selectedCollection;
-		private ICollectionInspectionViewModel _selectedCollectionInspectionViewModel;
+		private ICollectionViewModel _selectedCollectionInspectorViewModel;
 		private readonly string _filename;
 
 		public string Filename => _filename;
@@ -30,15 +30,18 @@ namespace IsabelDb.Browser
 			}
 		}
 
-		public ICollectionInspectionViewModel SelectedCollectionInspection
+		public ICollectionViewModel SelectedCollectionInspector
 		{
-			get { return _selectedCollectionInspectionViewModel;}
+			get
+			{
+				return _selectedCollectionInspectorViewModel;
+			}
 			private set
 			{
-				if (_selectedCollectionInspectionViewModel == value)
+				if (_selectedCollectionInspectorViewModel == value)
 					return;
 
-				_selectedCollectionInspectionViewModel = value;
+				_selectedCollectionInspectorViewModel = value;
 				EmitPropertyChanged();
 			}
 		}
@@ -54,11 +57,11 @@ namespace IsabelDb.Browser
 				_selectedCollection = value;
 				EmitPropertyChanged();
 
-				SelectedCollectionInspection = CreateInspectionViewModel(value.Collection);
+				SelectedCollectionInspector = CreateInspectionViewModel(value.Collection);
 			}
 		}
 
-		private ICollectionInspectionViewModel CreateInspectionViewModel(ICollection collection)
+		private ICollectionViewModel CreateInspectionViewModel(ICollection collection)
 		{
 			if (collection == null)
 				return null;
@@ -66,30 +69,40 @@ namespace IsabelDb.Browser
 			switch (collection.Type)
 			{
 				case CollectionType.Bag:
+					return CreateBagViewModel(collection);
+
 				case CollectionType.Queue:
 					return CreateValueCollectionInspector(collection);
 
 				case CollectionType.Dictionary:
-					return CreateDictionary(collection);
+					return CreateDictionaryViewModel(collection);
 
 				default:
 					throw new NotImplementedException();
 			}
 		}
 
-		private ICollectionInspectionViewModel CreateDictionary(ICollection collection)
+		private ICollectionViewModel CreateBagViewModel(ICollection collection)
 		{
-			var method = typeof(DictionaryInspectorViewModel).GetMethod("Create", BindingFlags.Public | BindingFlags.Static)
-			                                           .MakeGenericMethod(collection.KeyType, collection.ValueType);
-			var viewModel = (ICollectionInspectionViewModel) method.Invoke(null, new object[] {collection});
+			var methodName = nameof(BagViewModel.Create);
+			var method = typeof(BagViewModel).GetMethod(methodName, BindingFlags.Public | BindingFlags.Static).MakeGenericMethod(collection.ValueType);
+			var viewModel = (BagViewModel) method.Invoke(null, new object[] {collection});
 			return viewModel;
 		}
 
-		private ICollectionInspectionViewModel CreateValueCollectionInspector(ICollection collection)
+		private ICollectionViewModel CreateValueCollectionInspector(ICollection collection)
 		{
-			var methodName = nameof(ValueCollectionInspectionViewModel.Create);
-			var method = typeof(ValueCollectionInspectionViewModel).GetMethod(methodName, BindingFlags.Public | BindingFlags.Static).MakeGenericMethod(collection.ValueType);
-			var viewModel = (ICollectionInspectionViewModel) method.Invoke(null, new object[] {collection});
+			var methodName = nameof(QueueViewModel.Create);
+			var method = typeof(QueueViewModel).GetMethod(methodName, BindingFlags.Public | BindingFlags.Static).MakeGenericMethod(collection.ValueType);
+			var viewModel = (ICollectionViewModel) method.Invoke(null, new object[] {collection});
+			return viewModel;
+		}
+
+		private ICollectionViewModel CreateDictionaryViewModel(ICollection collection)
+		{
+			var method = typeof(DictionaryViewModel).GetMethod("Create", BindingFlags.Public | BindingFlags.Static)
+			                                                 .MakeGenericMethod(collection.KeyType, collection.ValueType);
+			var viewModel = (ICollectionViewModel) method.Invoke(null, new object[] {collection});
 			return viewModel;
 		}
 

@@ -14,7 +14,12 @@
         >
     
     <Window.Resources>
-        <ResourceDictionary Source="DatabaseDataTemplate.xaml" />
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="DatabaseDataTemplate.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+        
     </Window.Resources>
 
     <Grid>

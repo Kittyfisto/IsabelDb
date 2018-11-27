@@ -18,7 +18,7 @@ namespace IsabelDb.Browser
 
 		public DatabaseProxy(IDatabase database)
 		{
-			_fileName = "<Unknown>";
+			_fileName = "<In Memory>";
 			_database = database;
 		}
 

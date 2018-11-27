@@ -16,8 +16,15 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="key"></param>
 		/// <returns></returns>
-		/// [Pure]
+		[Pure]
 		T GetValue(RowId key);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		[Pure]
+		IEnumerable<KeyValuePair<RowId, T>> GetAll();
 
 		/// <summary>
 		///     Returns the value associated with the given key.
