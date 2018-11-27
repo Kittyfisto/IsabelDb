@@ -535,7 +535,7 @@ namespace IsabelDb.Test.Collections
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				new Action(() => db.Remove(null)).Should().NotThrow();
+				new Action(() => db.Remove((ICollection)null)).Should().NotThrow();
 			}
 		}
 

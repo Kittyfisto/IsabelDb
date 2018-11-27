@@ -81,6 +81,15 @@ namespace IsabelDb
 			_objectStores.Drop(collection);
 		}
 
+		public void Remove(string collectionName)
+		{
+			var collection = Collections.FirstOrDefault(x => string.Equals(x.Name, collectionName));
+			if (collection != null)
+			{
+				Remove(collection);
+			}
+		}
+
 		/// <inheritdoc />
 		public IDictionary<TKey, TValue> GetDictionary<TKey, TValue>(string name)
 		{

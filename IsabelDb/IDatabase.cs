@@ -87,5 +87,17 @@ namespace IsabelDb
 		/// </remarks>
 		/// <param name="collection"></param>
 		void Remove(ICollection collection);
+
+		/// <summary>
+		///     Drops the collection with the given name from this database.
+		///     Doesn't do anything when this collection isn't part of this database.
+		/// </summary>
+		/// <remarks>
+		///     THIS OPERATION IMMEDIATELY REMOVES ALL OBJECTS FROM THE GIVEN COLLECTION FROM STORAGE.
+		///     THIS OPERATION IS NOT REVERSIBLE.
+		///     USE WITH CARE.
+		/// </remarks>
+		/// <param name="collectionName"></param>
+		void Remove(string collectionName);
 	}
 }

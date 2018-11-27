@@ -12,42 +12,6 @@ namespace IsabelDb.Test
 	{
 		private static IEnumerable<Type> NoCustomTypes => new Type[0];
 
-		private static void PutAndGetObjectTable<T>(IDatabase db, T value1, T value2)
-		{
-			var store = db.GetDictionary<string, object>("ObjectTable");
-
-			store.Put("foo", value1);
-			store.Put("bar", value2);
-
-			var persons = store.GetMany("foo", "bar");
-			persons.Should().HaveCount(2);
-			var actualValue1 = persons.ElementAt(index: 0);
-			actualValue1.Key.Should().Be("foo");
-			actualValue1.Value.Should().Be(value1);
-
-			var actualValue2 = persons.ElementAt(index: 1);
-			actualValue2.Key.Should().Be("bar");
-			actualValue2.Value.Should().Be(value2);
-		}
-
-		private static void PutAndGetValueTable<T>(IDatabase db, T value1, T value2)
-		{
-			var store = db.GetDictionary<string, T>("ValueTable");
-
-			store.Put("foo", value1);
-			store.Put("bar", value2);
-
-			var persons = store.GetMany("foo", "bar");
-			persons.Should().HaveCount(2);
-			var actualValue1 = persons.ElementAt(index: 0);
-			actualValue1.Key.Should().Be("foo");
-			actualValue1.Value.Should().Be(value1);
-
-			var actualValue2 = persons.ElementAt(index: 1);
-			actualValue2.Key.Should().Be("bar");
-			actualValue2.Value.Should().Be(value2);
-		}
-
 		[Test]
 		public void TestCreateInMemory()
 		{
@@ -448,8 +412,8 @@ namespace IsabelDb.Test
 		}
 
 		[Test]
-		[Description("Verifies that data removed from one table doesn't interact with others")]
-		public void TestRemoveMultipleTables()
+		[Description("Verifies that data removed from one collection doesn't interact with others")]
+		public void TestRemoveMultipleCollections()
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
@@ -461,6 +425,45 @@ namespace IsabelDb.Test
 
 				customers.Remove("1");
 				people.Get("1").Should().Be("Kitty");
+			}
+		}
+
+		[Test]
+		public void TestRemoveCollectionByName()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				db.GetDictionary<string, object>("Customers");
+				db.Collections.Should().HaveCount(1);
+
+				db.Remove("Customers");
+				db.Collections.Should().BeEmpty();
+			}
+		}
+
+		[Test]
+		public void TestRemoveNonExistingCollectionByName()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				var collection = db.GetDictionary<string, object>("Customers");
+				db.Collections.Should().Equal(collection);
+
+				db.Remove("Some other collection");
+				db.Collections.Should().Equal(collection);
+			}
+		}
+
+		[Test]
+		public void TestRemoveNullName()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				var collection = db.GetDictionary<string, object>("Customers");
+				db.Collections.Should().Equal(collection);
+
+				db.Remove((string)null);
+				db.Collections.Should().Equal(collection);
 			}
 		}
 
@@ -555,6 +558,42 @@ namespace IsabelDb.Test
 				message.Value.Should().BeOfType<Dog>();
 				((Dog) message.Value).Name.Should().Be("Goofy");
 			}
+		}
+
+		private static void PutAndGetObjectTable<T>(IDatabase db, T value1, T value2)
+		{
+			var store = db.GetDictionary<string, object>("ObjectTable");
+
+			store.Put("foo", value1);
+			store.Put("bar", value2);
+
+			var persons = store.GetMany("foo", "bar");
+			persons.Should().HaveCount(2);
+			var actualValue1 = persons.ElementAt(index: 0);
+			actualValue1.Key.Should().Be("foo");
+			actualValue1.Value.Should().Be(value1);
+
+			var actualValue2 = persons.ElementAt(index: 1);
+			actualValue2.Key.Should().Be("bar");
+			actualValue2.Value.Should().Be(value2);
+		}
+
+		private static void PutAndGetValueTable<T>(IDatabase db, T value1, T value2)
+		{
+			var store = db.GetDictionary<string, T>("ValueTable");
+
+			store.Put("foo", value1);
+			store.Put("bar", value2);
+
+			var persons = store.GetMany("foo", "bar");
+			persons.Should().HaveCount(2);
+			var actualValue1 = persons.ElementAt(index: 0);
+			actualValue1.Key.Should().Be("foo");
+			actualValue1.Value.Should().Be(value1);
+
+			var actualValue2 = persons.ElementAt(index: 1);
+			actualValue2.Key.Should().Be("bar");
+			actualValue2.Value.Should().Be(value2);
 		}
 	}
 }
