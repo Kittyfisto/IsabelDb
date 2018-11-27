@@ -214,7 +214,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 				using (var db = CreateDatabase(connection, NoCustomTypes))
 				{
 					new Action(() => db.GetDictionary<CustomKey, string>("Pies"))
-						.Should().Throw<TypeResolveException>()
+						.Should().Throw<TypeCouldNotBeResolvedException>()
 						.WithMessage("A Dictionary named 'Pies' already exists but it's key type could not be resolved: If your intent is to re-use this existing collection, then you need to add 'IsabelDb.Test.Entities.CustomKey' to the list of supported types upon creating the database. If your intent is to create a new collection, then you need to pick a different name!");
 
 					var collection = db.Collections.First();
@@ -250,7 +250,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 				using (var db = CreateDatabase(connection, NoCustomTypes))
 				{
 					new Action(() => db.GetDictionary<int, CustomKey>("MoreKeys"))
-						.Should().Throw<TypeResolveException>()
+						.Should().Throw<TypeCouldNotBeResolvedException>()
 						.WithMessage("A Dictionary named 'MoreKeys' already exists but it's value type could not be resolved: If your intent is to re-use this existing collection, then you need to add 'IsabelDb.Test.Entities.CustomKey' to the list of supported types upon creating the database. If your intent is to create a new collection, then you need to pick a different name!");
 
 					var collection = db.Collections.First();

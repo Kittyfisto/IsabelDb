@@ -287,7 +287,7 @@ namespace IsabelDb.Test.Collections
 			using (var db = new IsabelDb(connection, NoCustomTypes, false, isReadOnly: true))
 			{
 				new Action(() => GetCollection((IDatabase) db, "Stuff"))
-					.Should().Throw<ArgumentException>()
+					.Should().Throw<NoSuchCollectionException>()
 					.WithMessage("Unable to find a collection named 'Stuff'");
 			}
 		}

@@ -19,38 +19,186 @@ namespace IsabelDb.Test
 		}
 
 		[Test]
-		[Description("Verifies that creating a collection for a non-registered custom type is not allowed")]
-		public void TestGetCollectionNonRegisteredType1()
+		public void TestGetWrongBag()
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-					new Action(() => db.GetDictionary<string, CustomKey>("SomeTable"))
-					.Should().Throw<ArgumentException>()
-					.WithMessage("The type 'IsabelDb.Test.Entities.CustomKey' has not been registered when the database was created and thus may not be used as the value type in a collection");
+				db.GetDictionary<int, int>("Stuff");
+				new Action(() => db.GetBag<int>("Stuff"))
+					.Should().Throw<WrongCollectionTypeException>()
+					.WithMessage("The collection 'Stuff' is a Dictionary and cannot be treated as a Bag");
 			}
 		}
 
 		[Test]
-		[Description("Verifies that creating a collection for a non-registered custom type is not allowed")]
-		public void TestGetCollectionNonRegisteredType2()
+		public void TestGetWrongQueue()
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				new Action(() => db.GetDictionary<CustomKey, string>("SomeTable"))
-					.Should().Throw<ArgumentException>()
-					.WithMessage("The type 'IsabelDb.Test.Entities.CustomKey' has not been registered when the database was created and thus may not be used as the key type in a collection");
+				db.GetDictionary<int, int>("Stuff");
+				new Action(() => db.GetQueue<int>("Stuff"))
+					.Should().Throw<WrongCollectionTypeException>()
+					.WithMessage("The collection 'Stuff' is a Dictionary and cannot be treated as a Queue");
 			}
 		}
 
 		[Test]
-		[Description("Verifies that creating a collection for a non-registered custom type is not allowed")]
-		public void TestGetCollectionNonRegisteredType3()
+		public void TestGetWrongDictionary()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				db.GetBag<int>("Stuff");
+				new Action(() => db.GetDictionary<int, int>("Stuff"))
+					.Should().Throw<WrongCollectionTypeException>()
+					.WithMessage("The collection 'Stuff' is a Bag and cannot be treated as a Dictionary");
+			}
+		}
+		
+		[Test]
+		public void TestGetWrongMultiValueDictionary()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				db.GetDictionary<int, int>("Stuff");
+				new Action(() => db.GetMultiValueDictionary<int, int>("Stuff"))
+					.Should().Throw<WrongCollectionTypeException>()
+					.WithMessage("The collection 'Stuff' is a Dictionary and cannot be treated as a MultiValueDictionary");
+			}
+		}
+
+		[Test]
+		public void TestGetWrongOrderedCollection()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				db.GetDictionary<int, int>("Stuff");
+				new Action(() => db.GetOrderedCollection<int, int>("Stuff"))
+					.Should().Throw<WrongCollectionTypeException>()
+					.WithMessage("The collection 'Stuff' is a Dictionary and cannot be treated as a OrderedCollection");
+			}
+		}
+
+		[Test]
+		public void TestGetWrongIntervalCollection()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				db.GetDictionary<int, int>("Stuff");
+				new Action(() => db.GetIntervalCollection<int, int>("Stuff"))
+					.Should().Throw<WrongCollectionTypeException>()
+					.WithMessage("The collection 'Stuff' is a Dictionary and cannot be treated as a IntervalCollection");
+			}
+		}
+
+		[Test]
+		public void TestGetWrongPoint2DCollection()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				db.GetDictionary<int, int>("Stuff");
+				new Action(() => db.GetPoint2DCollection<int>("Stuff"))
+					.Should().Throw<WrongCollectionTypeException>()
+					.WithMessage("The collection 'Stuff' is a Dictionary and cannot be treated as a Point2DCollection");
+			}
+		}
+
+		[Test]
+		[Description("Verifies that creating a bag for a non-registered custom type is not allowed")]
+		public void TestGetBagNonRegisteredType()
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
 				new Action(() => db.GetBag<CustomKey>("SomeTable"))
-					.Should().Throw<ArgumentException>()
+					.Should().Throw<TypeNotRegisteredException>()
 					.WithMessage("The type 'IsabelDb.Test.Entities.CustomKey' has not been registered when the database was created and thus may not be used as the value type in a collection");
+			}
+		}
+
+		[Test]
+		[Description("Verifies that creating a queue for a non-registered custom type is not allowed")]
+		public void TestGetQueueNonRegisteredType()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				new Action(() => db.GetQueue<CustomKey>("SomeTable"))
+					.Should().Throw<TypeNotRegisteredException>()
+					.WithMessage("The type 'IsabelDb.Test.Entities.CustomKey' has not been registered when the database was created and thus may not be used as the value type in a collection");
+			}
+		}
+
+		[Test]
+		[Description("Verifies that creating a 2d point collection for a non-registered custom type is not allowed")]
+		public void TestGetPoint2DCollectionNonRegisteredType()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				new Action(() => db.GetPoint2DCollection<Message>("SomeTable"))
+					.Should().Throw<TypeNotRegisteredException>()
+					.WithMessage("The type 'IsabelDb.Test.Entities.Message' has not been registered when the database was created and thus may not be used as the value type in a collection");
+			}
+		}
+
+		[Test]
+		[Description("Verifies that creating a dictionary for a non-registered custom type is not allowed")]
+		public void TestGetDictionaryNonRegisteredType()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				new Action(() => db.GetDictionary<CustomKey, string>("SomeTable"))
+					.Should().Throw<TypeNotRegisteredException>()
+					.WithMessage("The type 'IsabelDb.Test.Entities.CustomKey' has not been registered when the database was created and thus may not be used as the value type in a collection");
+
+				new Action(() => db.GetDictionary<string, Point>("SomeTable"))
+					.Should().Throw<TypeNotRegisteredException>()
+					.WithMessage("The type 'IsabelDb.Test.Entities.Point' has not been registered when the database was created and thus may not be used as the value type in a collection");
+			}
+		}
+
+		[Test]
+		[Description("Verifies that creating a multi value dictionary for a non-registered custom type is not allowed")]
+		public void TestGetMultiValueDictionaryNonRegisteredType()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				new Action(() => db.GetMultiValueDictionary<CustomKey, string>("SomeTable"))
+					.Should().Throw<TypeNotRegisteredException>()
+					.WithMessage("The type 'IsabelDb.Test.Entities.CustomKey' has not been registered when the database was created and thus may not be used as the value type in a collection");
+
+				new Action(() => db.GetMultiValueDictionary<string, Point>("SomeTable"))
+					.Should().Throw<TypeNotRegisteredException>()
+					.WithMessage("The type 'IsabelDb.Test.Entities.Point' has not been registered when the database was created and thus may not be used as the value type in a collection");
+			}
+		}
+
+		[Test]
+		[Description("Verifies that creating an ordered collection for a non-registered custom type is not allowed")]
+		public void TestGetOrderedCollectionNonRegisteredType()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				new Action(() => db.GetOrderedCollection<MySortableKey, string>("SomeTable"))
+					.Should().Throw<TypeNotRegisteredException>()
+					.WithMessage("The type 'IsabelDb.Test.Entities.MySortableKey' has not been registered when the database was created and thus may not be used as the value type in a collection");
+
+				new Action(() => db.GetDictionary<string, Point>("SomeTable"))
+					.Should().Throw<TypeNotRegisteredException>()
+					.WithMessage("The type 'IsabelDb.Test.Entities.Point' has not been registered when the database was created and thus may not be used as the value type in a collection");
+			}
+		}
+
+		[Test]
+		[Description("Verifies that creating an interval collection for a non-registered custom type is not allowed")]
+		public void TestGetIntervalCollectionNonRegisteredType()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				new Action(() => db.GetIntervalCollection<MySortableKey, string>("SomeTable"))
+					.Should().Throw<TypeNotRegisteredException>()
+					.WithMessage("The type 'IsabelDb.Test.Entities.MySortableKey' has not been registered when the database was created and thus may not be used as the value type in a collection");
+
+				new Action(() => db.GetIntervalCollection<string, Point>("SomeTable"))
+					.Should().Throw<TypeNotRegisteredException>()
+					.WithMessage("The type 'IsabelDb.Test.Entities.Point' has not been registered when the database was created and thus may not be used as the value type in a collection");
 			}
 		}
 

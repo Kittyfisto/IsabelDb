@@ -75,18 +75,9 @@ namespace IsabelDb
 		{
 			if (!_collectionsByName.TryGetValue(name, out var collection))
 			{
-				if (_isReadOnly)
-					throw new ArgumentException(string.Format("Unable to find a collection named '{0}'", name));
-
-				if (!_typeModel.IsRegistered(typeof(TKey)))
-					throw new
-						ArgumentException(string.Format("The type '{0}' has not been registered when the database was created and thus may not be used as the key type in a collection",
-						                                typeof(TKey).FullName));
-
-				if (!_typeModel.IsRegistered(typeof(TValue)))
-					throw new
-						ArgumentException(string.Format("The type '{0}' has not been registered when the database was created and thus may not be used as the value type in a collection",
-						                                typeof(TValue).FullName));
+				ThrowIfReadOnly(name);
+				ThrowIfNotRegistered<TKey>();
+				ThrowIfNotRegistered<TValue>();
 
 				IntervalCollection<TKey, TValue>.ThrowIfInvalidKey();
 				var tableName = AddTable(name, CollectionType.IntervalCollection, typeof(TKey), typeof(TValue));
@@ -109,18 +100,9 @@ namespace IsabelDb
 		{
 			if (!_collectionsByName.TryGetValue(name, out var collection))
 			{
-				if (_isReadOnly)
-					throw new ArgumentException(string.Format("Unable to find a collection named '{0}'", name));
-
-				if (!_typeModel.IsRegistered(typeof(TKey)))
-					throw new
-						ArgumentException(string.Format("The type '{0}' has not been registered when the database was created and thus may not be used as the key type in a collection",
-						                                typeof(TKey).FullName));
-
-				if (!_typeModel.IsRegistered(typeof(TValue)))
-					throw new
-						ArgumentException(string.Format("The type '{0}' has not been registered when the database was created and thus may not be used as the value type in a collection",
-						                                typeof(TValue).FullName));
+				ThrowIfReadOnly(name);
+				ThrowIfNotRegistered<TKey>();
+				ThrowIfNotRegistered<TValue>();
 
 				var tableName = AddTable(name, CollectionType.Dictionary, typeof(TKey), typeof(TValue));
 				collection = CreateDictionary<TKey, TValue>(name, tableName);
@@ -142,18 +124,9 @@ namespace IsabelDb
 		{
 			if (!_collectionsByName.TryGetValue(name, out var collection))
 			{
-				if (_isReadOnly)
-					throw new ArgumentException(string.Format("Unable to find a collection named '{0}'", name));
-
-				if (!_typeModel.IsRegistered(typeof(TKey)))
-					throw new
-						ArgumentException(string.Format("The type '{0}' has not been registered when the database was created and thus may not be used as the key type in a collection",
-						                                typeof(TKey).FullName));
-
-				if (!_typeModel.IsRegistered(typeof(TValue)))
-					throw new
-						ArgumentException(string.Format("The type '{0}' has not been registered when the database was created and thus may not be used as the value type in a collection",
-						                                typeof(TValue).FullName));
+				ThrowIfReadOnly(name);
+				ThrowIfNotRegistered<TKey>();
+				ThrowIfNotRegistered<TValue>();
 
 				var tableName = AddTable(name, CollectionType.MultiValueDictionary, typeof(TKey), typeof(TValue));
 				collection = CreateMultiValueDictionary<TKey, TValue>(name, tableName);
@@ -175,18 +148,9 @@ namespace IsabelDb
 		{
 			if (!_collectionsByName.TryGetValue(name, out var collection))
 			{
-				if (_isReadOnly)
-					throw new ArgumentException(string.Format("Unable to find a collection named '{0}'", name));
-
-				if (!_typeModel.IsRegistered(typeof(TKey)))
-					throw new
-						ArgumentException(string.Format("The type '{0}' has not been registered when the database was created and thus may not be used as the key type in a collection",
-						                                typeof(TKey).FullName));
-
-				if (!_typeModel.IsRegistered(typeof(TValue)))
-					throw new
-						ArgumentException(string.Format("The type '{0}' has not been registered when the database was created and thus may not be used as the value type in a collection",
-						                                typeof(TValue).FullName));
+				ThrowIfReadOnly(name);
+				ThrowIfNotRegistered<TKey>();
+				ThrowIfNotRegistered<TValue>();
 
 				OrderedCollection<TKey, TValue>.ThrowIfUnsupportedKeyType();
 
@@ -210,13 +174,8 @@ namespace IsabelDb
 		{
 			if (!_collectionsByName.TryGetValue(name, out var collection))
 			{
-				if (_isReadOnly)
-					throw new ArgumentException(string.Format("Unable to find a collection named '{0}'", name));
-
-				if (!_typeModel.IsRegistered(typeof(T)))
-					throw new
-						ArgumentException(string.Format("The type '{0}' has not been registered when the database was created and thus may not be used as the value type in a collection",
-						                                typeof(T).FullName));
+				ThrowIfReadOnly(name);
+				ThrowIfNotRegistered<T>();
 
 				var tableName = AddTable(name, CollectionType.Bag, keyType: null, valueType: typeof(T));
 				collection = CreateBag<T>(name, tableName);
@@ -238,13 +197,8 @@ namespace IsabelDb
 		{
 			if (!_collectionsByName.TryGetValue(name, out var collection))
 			{
-				if (_isReadOnly)
-					throw new ArgumentException(string.Format("Unable to find a collection named '{0}'", name));
-
-				if (!_typeModel.IsRegistered(typeof(T)))
-					throw new
-						ArgumentException(string.Format("The type '{0}' has not been registered when the database was created and thus may not be used as the value type in a collection",
-						                                typeof(T).FullName));
+				ThrowIfReadOnly(name);
+				ThrowIfNotRegistered<T>();
 
 				var tableName = AddTable(name, CollectionType.Queue, keyType: null, valueType: typeof(T));
 				collection = CreateQueue<T>(name, tableName);
@@ -266,13 +220,8 @@ namespace IsabelDb
 		{
 			if (!_collectionsByName.TryGetValue(name, out var collection))
 			{
-				if (_isReadOnly)
-					throw new ArgumentException(string.Format("Unable to find a collection named '{0}'", name));
-
-				if (!_typeModel.IsRegistered(typeof(T)))
-					throw new
-						ArgumentException(string.Format("The type '{0}' has not been registered when the database was created and thus may not be used as the value type in a collection",
-						                                typeof(T).FullName));
+				ThrowIfReadOnly(name);
+				ThrowIfNotRegistered<T>();
 
 				var tableName = AddTable(name, CollectionType.Point2DCollection, null, typeof(T));
 				collection = CreatePoint2DCollection<T>(name, tableName);
@@ -346,17 +295,34 @@ namespace IsabelDb
 			_collectionsByName.Add(name, collection);
 		}
 
+		private void ThrowIfReadOnly(string name)
+		{
+			if (_isReadOnly)
+				throw new NoSuchCollectionException(string.Format("Unable to find a collection named '{0}'", name));
+		}
+
+		private void ThrowIfNotRegistered<T>()
+		{
+			if (!_typeModel.IsRegistered(typeof(T)))
+				throw new
+					TypeNotRegisteredException(string.Format("The type '{0}' has not been registered when the database was created and thus may not be used as the value type in a collection",
+					                                         typeof(T).FullName));
+		}
+
 		private void EnsureTypeSafety(ICollection collection,
 		                              CollectionType expectedCollectionType,
 		                              Type expectedKeyType,
 		                              Type expectedValueType)
 		{
 			if (collection.Type != expectedCollectionType)
-				throw new NotImplementedException();
+				throw new WrongCollectionTypeException(string.Format("The collection '{0}' is a {1} and cannot be treated as a {2}",
+				                                                     collection.Name,
+				                                                     collection.Type,
+				                                                     expectedCollectionType));
 
 			if (collection.ValueType == null)
 				throw new
-					TypeResolveException(string.Format("A {0} named '{1}' already exists but it's value type could not be resolved: If your intent is to re-use this existing collection, then you need to add '{2}' to the list of supported types upon creating the database. If your intent is to create a new collection, then you need to pick a different name!",
+					TypeCouldNotBeResolvedException(string.Format("A {0} named '{1}' already exists but it's value type could not be resolved: If your intent is to re-use this existing collection, then you need to add '{2}' to the list of supported types upon creating the database. If your intent is to create a new collection, then you need to pick a different name!",
 					                                   collection.Type,
 					                                   collection.Name,
 					                                   collection.ValueTypeName));
@@ -364,7 +330,7 @@ namespace IsabelDb
 			if (expectedKeyType != null)
 				if (collection.KeyType == null)
 					throw new
-						TypeResolveException(string.Format("A {0} named '{1}' already exists but it's key type could not be resolved: If your intent is to re-use this existing collection, then you need to add '{2}' to the list of supported types upon creating the database. If your intent is to create a new collection, then you need to pick a different name!",
+						TypeCouldNotBeResolvedException(string.Format("A {0} named '{1}' already exists but it's key type could not be resolved: If your intent is to re-use this existing collection, then you need to add '{2}' to the list of supported types upon creating the database. If your intent is to create a new collection, then you need to pick a different name!",
 						                                   collection.Type,
 						                                   collection.Name,
 						                                   collection.KeyTypeName));

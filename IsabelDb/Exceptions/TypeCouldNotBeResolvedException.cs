@@ -6,19 +6,19 @@ namespace IsabelDb
 	/// <summary>
 	///     This exception is thrown when a type stored in a database could not be resolved.
 	/// </summary>
-	public class TypeResolveException
+	public class TypeCouldNotBeResolvedException
 		: Exception
 	{
 		/// <summary>
 		/// </summary>
-		public TypeResolveException()
+		public TypeCouldNotBeResolvedException()
 		{
 		}
 
 		/// <summary>
 		/// </summary>
 		/// <param name="message"></param>
-		public TypeResolveException(string message)
+		public TypeCouldNotBeResolvedException(string message)
 			: base(message)
 		{
 		}
@@ -27,7 +27,7 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="message"></param>
 		/// <param name="innerException"></param>
-		public TypeResolveException(string message, Exception innerException)
+		public TypeCouldNotBeResolvedException(string message, Exception innerException)
 		{
 		}
 	}

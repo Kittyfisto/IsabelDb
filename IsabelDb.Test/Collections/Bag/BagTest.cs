@@ -51,7 +51,7 @@ namespace IsabelDb.Test.Collections.Bag
 				using (var db = CreateDatabase(connection))
 				{
 					new Action(() => db.GetBag<CustomKey>("Keys"))
-						.Should().Throw<TypeResolveException>()
+						.Should().Throw<TypeCouldNotBeResolvedException>()
 						.WithMessage("A Bag named 'Keys' already exists but it's value type could not be resolved: If your intent is to re-use this existing collection, then you need to add 'IsabelDb.Test.Entities.CustomKey' to the list of supported types upon creating the database. If your intent is to create a new collection, then you need to pick a different name!");
 
 					var collection = db.Collections.First();

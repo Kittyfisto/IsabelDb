@@ -72,6 +72,9 @@
     <Compile Include="Collections\AbstractCollection.cs" />
     <Compile Include="Collections\IInternalCollection.cs" />
     <Compile Include="Collections\Queue.cs" />
+    <Compile Include="Exceptions\NoSuchCollectionException.cs" />
+    <Compile Include="Exceptions\TypeNotRegisteredException.cs" />
+    <Compile Include="Exceptions\WrongCollectionTypeException.cs" />
     <Compile Include="IQueue.cs" />
     <Compile Include="IReadOnlyPoint2DCollection.cs" />
     <Compile Include="IPoint2DCollection.cs" />
@@ -84,7 +87,7 @@
     <Compile Include="CollectionType.cs" />
     <Compile Include="Exceptions\BreakingChangeException.cs" />
     <Compile Include="Exceptions\TypeMismatchException.cs" />
-    <Compile Include="Exceptions\TypeResolveException.cs" />
+    <Compile Include="Exceptions\TypeCouldNotBeResolvedException.cs" />
     <Compile Include="IDatabase.cs" />
     <Compile Include="IIntervalCollection.cs" />
     <Compile Include="IMultiValueDictionary.cs" />
