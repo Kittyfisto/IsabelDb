@@ -61,8 +61,9 @@ namespace IsabelDb.Collections
 
 			using (var command = _connection.CreateCommand())
 			{
-				command.CommandText = string.Format("INSERT INTO {0} (key, value) VALUES (@key, @value)",
+				command.CommandText = string.Format("INSERT OR REPLACE INTO {0} (key, value) VALUES (@key, @value)",
 				                                    _tableName);
+
 				command.Parameters.AddWithValue("@key", _keySerializer.Serialize(key));
 				command.Parameters.AddWithValue("@value", _valueSerializer.Serialize(value));
 

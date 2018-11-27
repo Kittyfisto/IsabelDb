@@ -60,6 +60,21 @@ namespace IsabelDb.Test.Collections.OrderedCollection
 		}
 
 		[Test]
+		[Description("Verifies that Puts overwrite existing values with the same key")]
+		public void TestPutSameKey()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				var collection = db.GetOrderedCollection<double, string>("Values");
+				collection.Put(Math.PI, "1");
+				collection.Put(Math.PI, "2");
+
+				collection.GetValues(Interval.Create(Math.PI))
+				          .Should().Equal(new object[] {"2"});
+			}
+		}
+
+		[Test]
 		public void TestPutMany()
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
