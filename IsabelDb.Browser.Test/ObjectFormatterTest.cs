@@ -9,6 +9,32 @@ namespace IsabelDb.Browser.Test
 	public sealed class ObjectFormatterTest
 	{
 		[Test]
+		public void TestPreviewByteArray()
+		{
+			var formatter = new ObjectFormatter();
+			formatter.Preview(new byte[0]).Should().Be("{}");
+			formatter.Preview(new byte[]{0}).Should().Be("{0x00}");
+			formatter.Preview(new byte[]{255}).Should().Be("{0xFF}");
+			formatter.Preview(new byte[]{1, 2, 3}).Should().Be("{0x01, 0x02, 0x03}");
+		}
+
+		[Test]
+		public void TestFormatDateTime()
+		{
+			var formatter = new ObjectFormatter();
+			formatter.Format(new DateTime(2018, 11, 28, 19, 38, 31)).Should().Be("2018-11-28T19:38:31.0000000");
+			formatter.Format(new DateTime(2018, 11, 28, 19, 38, 31, DateTimeKind.Utc)).Should().Be("2018-11-28T19:38:31.0000000Z");
+		}
+
+		[Test]
+		public void TestPreviewDateTime()
+		{
+			var formatter = new ObjectFormatter();
+			formatter.Preview(new DateTime(2018, 11, 28, 19, 38, 31)).Should().Be("2018-11-28T19:38:31.0000000");
+			formatter.Preview(new DateTime(2018, 11, 28, 19, 38, 31, DateTimeKind.Utc)).Should().Be("2018-11-28T19:38:31.0000000Z");
+		}
+
+		[Test]
 		public void TestFormatString()
 		{
 			var formatter = new ObjectFormatter();
@@ -25,6 +51,30 @@ namespace IsabelDb.Browser.Test
 		}
 
 		[Test]
+		public void TestPreviewSByte()
+		{
+			var formatter = new ObjectFormatter();
+			formatter.Preview((sbyte)-42)
+			         .Should().Be("-42");
+		}
+
+		[Test]
+		public void TestPreviewInt16()
+		{
+			var formatter = new ObjectFormatter();
+			formatter.Preview((short)-42)
+			         .Should().Be("-42");
+		}
+
+		[Test]
+		public void TestPreviewUInt16()
+		{
+			var formatter = new ObjectFormatter();
+			formatter.Preview((ushort)42)
+			         .Should().Be("42");
+		}
+
+		[Test]
 		public void TestFormatInt32()
 		{
 			var formatter = new ObjectFormatter();
@@ -36,8 +86,16 @@ namespace IsabelDb.Browser.Test
 		public void TestPreviewInt32()
 		{
 			var formatter = new ObjectFormatter();
-			formatter.Preview(42)
-			         .Should().Be("42");
+			formatter.Preview(-42)
+			         .Should().Be("-42");
+		}
+
+		[Test]
+		public void TestPreviewUInt32()
+		{
+			var formatter = new ObjectFormatter();
+			formatter.Preview(UInt32.MaxValue)
+			         .Should().Be("4294967295");
 		}
 
 		[Test]
@@ -54,6 +112,14 @@ namespace IsabelDb.Browser.Test
 			var formatter = new ObjectFormatter();
 			formatter.Preview(-123456789)
 			         .Should().Be("-123456789");
+		}
+
+		[Test]
+		public void TestPreviewUInt64()
+		{
+			var formatter = new ObjectFormatter();
+			formatter.Preview(UInt64.MaxValue)
+			         .Should().Be("18446744073709551615");
 		}
 
 		[Test]
@@ -122,7 +188,7 @@ namespace IsabelDb.Browser.Test
 		{
 			var formatter = new ObjectFormatter();
 			formatter.Preview(new List<int>{1, 2, 3})
-			         .Should().Be("{Count: 3, 1, 2, 3}");
+			         .Should().Be("{1, 2, 3}");
 		}
 
 		[Test]
@@ -130,7 +196,7 @@ namespace IsabelDb.Browser.Test
 		{
 			var formatter = new ObjectFormatter();
 			formatter.Preview(new []{1, 2, 3, 4})
-			         .Should().Be("{Count: 4, 1, 2, 3, 4}");
+			         .Should().Be("{1, 2, 3, 4}");
 		}
 
 		[Test]
@@ -139,7 +205,7 @@ namespace IsabelDb.Browser.Test
 		{
 			var formatter = new ObjectFormatter();
 			formatter.Preview(new Dictionary<int, int>{{1, 42}, {2, 1337}})
-			         .Should().Be("{Count: 2, {Key: 1, Value: 42}, {Key: 2, Value: 1337}}");
+			         .Should().Be("{{Key: 1, Value: 42}, {Key: 2, Value: 1337}}");
 		}
 
 		[Test]

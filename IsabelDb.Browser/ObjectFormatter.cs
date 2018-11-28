@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -18,11 +19,18 @@ namespace IsabelDb.Browser
 		{
 			_nativeTypes = new HashSet<Type>
 			{
+				typeof(byte),
+				typeof(sbyte),
 				typeof(string),
+				typeof(Int16),
+				typeof(UInt16),
 				typeof(Int32),
+				typeof(UInt32),
 				typeof(Int64),
+				typeof(UInt64),
 				typeof(float),
-				typeof(double)
+				typeof(double),
+				typeof(DateTime)
 			};
 
 			_builtInTypes = new Dictionary<Type, Func<object, ObjectModel>>
@@ -167,14 +175,6 @@ namespace IsabelDb.Browser
 
 			return new ObjectModel
 			{
-				Properties = new []
-				{
-					new Property
-					{
-						Name = "Count",
-						Value = CreateModel(values.Count)
-					}
-				},
 				Values = values
 			};
 		}
@@ -209,7 +209,8 @@ namespace IsabelDb.Browser
 			{
 				if (model.Value != null)
 				{
-					FormatValue(model.Value);
+					_builder.Append(FormatValue(model.Value));
+					AppendEllipsesIfNecessary();
 				}
 				else
 				{
@@ -330,18 +331,25 @@ namespace IsabelDb.Browser
 				}
 			}
 
-			private void FormatValue(object value)
+			[Pure]
+			private object FormatValue(object value)
 			{
 				if (value is string)
 				{
-					_builder.AppendFormat("\"{0}\"", value);
-				}
-				else
-				{
-					_builder.Append(value);
+					return string.Format("\"{0}\"", value);
 				}
 
-				AppendEllipsesIfNecessary();
+				if (value is byte b)
+				{
+					return string.Format("0x{0:X2}", b);
+				}
+
+				if (value is DateTime datetime)
+				{
+					return datetime.ToString("O", CultureInfo.InvariantCulture);
+				}
+
+				return value;
 			}
 
 			private void AppendEllipsesIfNecessary()
