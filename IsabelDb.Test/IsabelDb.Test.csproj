@@ -180,6 +180,7 @@
     <Compile Include="Serializers\SerializerTest.cs" />
     <Compile Include="Serializers\UInt64SerializerTest.cs" />
     <Compile Include="TypeModels\ProtobufTypeModelTest.cs" />
+    <Compile Include="TypeModels\Surrogates\VersionSurrogateTest.cs" />
     <Compile Include="TypeModels\TypeModelTest.cs" />
     <Compile Include="TypeModels\TypeResolverTest.cs" />
   </ItemGroup>

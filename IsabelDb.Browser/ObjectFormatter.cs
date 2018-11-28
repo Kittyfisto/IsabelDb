@@ -32,7 +32,8 @@ namespace IsabelDb.Browser
 				typeof(float),
 				typeof(double),
 				typeof(DateTime),
-				typeof(IPAddress)
+				typeof(IPAddress),
+				typeof(Version)
 			};
 
 			_builtInTypes = new Dictionary<Type, Func<object, ObjectModel>>

@@ -21,7 +21,6 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="bin\Release\IsabelDb.XML" target="lib\net45\" />
     <file src="bin\Release\IsabelDb.pdb" target="lib\net45\" />
   </files>
 </package>

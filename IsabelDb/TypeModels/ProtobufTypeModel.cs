@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Linq;
 using System.Net;
+using IsabelDb.TypeModels.Surrogates;
 using ProtoBuf.Meta;
 
 namespace IsabelDb.TypeModels
@@ -26,6 +27,7 @@ namespace IsabelDb.TypeModels
 			{
 				typeof(object),
 				typeof(IPAddress),
+				//typeof(VersionSurrogate),
 				typeof(RowId),
 				typeof(Point2D)
 			};

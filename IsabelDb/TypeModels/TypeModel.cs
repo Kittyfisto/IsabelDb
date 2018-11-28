@@ -51,33 +51,27 @@ namespace IsabelDb.TypeModels
 			typeof(Guid)
 		};
 
-		public static readonly System.Collections.Generic.IReadOnlyDictionary<Type, Type> BuiltInSurrogates =
-			new Dictionary<Type, Type>
-			{
-				{ typeof(IPAddress), typeof(IPAddressSurrogate) }
-			};
-
 		private readonly Dictionary<int, TypeDescription> _typeDescriptionsById;
 		private readonly Dictionary<int, Type> _idToTypes;
-		private readonly Dictionary<Type, TypeDescription> _typeDescriptions;
 		private readonly Dictionary<Type, int> _typesToId;
+		private readonly HashSet<Type> _typesWithSurrogates;
 
 		private int _nextId;
 
 		public TypeModel()
 		{
 			_typeDescriptionsById = new Dictionary<int, TypeDescription>();
-			_typeDescriptions = new Dictionary<Type, TypeDescription>();
 			_idToTypes = new Dictionary<int, Type>();
 			_typesToId = new Dictionary<Type, int>();
+			_typesWithSurrogates = new HashSet<Type>();
 			_nextId = 1;
 		}
 
-		public IEnumerable<Type> Types => _typeDescriptions.Keys;
+		public IEnumerable<Type> Types => _typesToId.Keys;
 
 		public IEnumerable<TypeDescription> TypeDescriptions => _typeDescriptionsById.Values;
 
-		public TypeDescription this[Type key] => _typeDescriptions[key];
+		public TypeDescription this[Type key] => _typeDescriptionsById[_typesToId[key]];
 
 		[Pure]
 		public bool IsTypeRegistered(Type type)
@@ -88,7 +82,7 @@ namespace IsabelDb.TypeModels
 		[Pure]
 		public string GetTypeName(Type type)
 		{
-			if (!_typeDescriptions.TryGetValue(type, out var typeDescription))
+			if (!TryGetTypeDescription(type, out var typeDescription))
 				throw new ArgumentException(string.Format("The type '{0}' has not been registered with this type model!", type));
 			return typeDescription.FullTypeName;
 		}
@@ -120,7 +114,20 @@ namespace IsabelDb.TypeModels
 		[Pure]
 		public TypeDescription GetTypeDescription(Type type)
 		{
-			return _typeDescriptions[type];
+			return _typeDescriptionsById[_typesToId[type]];
+		}
+
+		[Pure]
+		public bool TryGetTypeDescription(Type type, out TypeDescription typeDescription)
+		{
+			if (_typesToId.TryGetValue(type, out var typeId))
+			{
+				typeDescription = TryGetTypeDescription(typeId);
+				return typeDescription != null;
+			}
+
+			typeDescription = null;
+			return false;
 		}
 
 		[Pure]
@@ -128,12 +135,6 @@ namespace IsabelDb.TypeModels
 		{
 			_typeDescriptionsById.TryGetValue(typeId, out var typeDescription);
 			return typeDescription;
-
-			/*var type = TryGetType(typeId);
-			if (type == null)
-				return null;
-
-			return _typeDescriptions[type];*/
 		}
 
 		/// <summary>
@@ -222,7 +223,7 @@ namespace IsabelDb.TypeModels
 		private void AddOrMerge(TypeDescription currentDescription)
 		{
 			var type = currentDescription.Type;
-			if (!_typeDescriptions.TryGetValue(type, out var previousDescription))
+			if (!TryGetTypeDescription(type, out var previousDescription))
 			{
 				AddType(type);
 			}
@@ -232,7 +233,7 @@ namespace IsabelDb.TypeModels
 					? GetTypeDescription(currentDescription.BaseType.TypeId)
 					: null;
 				var surrogateType = currentDescription.SurrogateType != null
-					? GetTypeDescription(currentDescription.SurrogateType.TypeId)
+					? GetTypeDescription(currentDescription.SurrogateType.Type)
 					: null;
 
 				var mergedDescription = TypeDescription.Merge(previousDescription,
@@ -245,14 +246,13 @@ namespace IsabelDb.TypeModels
 					surrogateType.SurrogatedType = mergedDescription;
 				}
 
-				_typeDescriptions[type] = mergedDescription;
 				_typeDescriptionsById[mergedDescription.TypeId] = mergedDescription;
 			}
 		}
 
 		public TypeDescription Add(Type type)
 		{
-			if (!_typeDescriptions.TryGetValue(type, out var typeDescription))
+			if (!TryGetTypeDescription(type, out var typeDescription))
 			{
 				typeDescription = AddType(type);
 			}
@@ -262,17 +262,20 @@ namespace IsabelDb.TypeModels
 
 		public static TypeModel Create(IEnumerable<Type> supportedTypes)
 		{
-			var model = new TypeModel();
-
-			var actuallySupportedTypes = new List<Type>();
-			foreach (var type in supportedTypes.OrderBy(IsSurrogate))
+			var types = new List<Type>();
+			foreach (var type in supportedTypes)
 			{
-				if (BuiltInSurrogates.TryGetValue(type, out var surrogateType))
-					actuallySupportedTypes.Add(surrogateType);
-				actuallySupportedTypes.Add(type);
+				if (IsSurrogate(type))
+					types.Add(type);
+			}
+			foreach (var type in supportedTypes)
+			{
+				if (!IsSurrogate(type))
+					types.Add(type);
 			}
 
-			foreach (var type in actuallySupportedTypes)
+			var model = new TypeModel();
+			foreach (var type in types)
 			{
 				model.Add(type);
 			}
@@ -292,12 +295,12 @@ namespace IsabelDb.TypeModels
 					var baseIdParameter = command.Parameters.Add("@baseId", DbType.Int32);
 					var surrogateIdParameter = command.Parameters.Add("@surrogateId", DbType.Int32);
 
-					foreach (var pair in _typeDescriptions)
+					foreach (var typeDescription in _typeDescriptionsById.Values)
 					{
-						var type = pair.Key;
-						var typeDescription = pair.Value;
-						var typeName = pair.Value.FullTypeName;
-						var typeId = _typesToId[type];
+						//var type = typeDescription.Type;
+						var typeName = typeDescription.FullTypeName;
+						//var typeid = _typesToId[type];
+						var typeId = typeDescription.TypeId;
 						var baseTypeId = GetBaseTypeId(typeDescription);
 						var surrogateId = GetSurrogateTypeId(typeDescription);
 
@@ -320,7 +323,7 @@ namespace IsabelDb.TypeModels
 					var name = command.Parameters.Add("@name", DbType.String);
 					var fieldTypeIdParameter = command.Parameters.Add("@fieldTypeId", DbType.Int32);
 
-					foreach (var description in _typeDescriptions.Values)
+					foreach (var description in _typeDescriptionsById.Values)
 					{
 						foreach (var memberDescription in description.Fields)
 						{
@@ -430,11 +433,9 @@ namespace IsabelDb.TypeModels
 
 			var id = _nextId;
 			++_nextId;
-			var typeDescription = TypeDescription.Create(type, id, baseTypeDescription, members);
-			_typeDescriptionsById.Add(id, typeDescription);
-			_typeDescriptions.Add(type, typeDescription);
-			_typesToId.Add(type, id);
-			_idToTypes.Add(id, type);
+			var typeDescription = TypeDescription.Create(type, id, baseTypeDescription, members,
+			                                             hasSurrogate: HasSurrogate(type));
+			AddTypeDescription(typeDescription);
 
 			var surrogateAttribute = type.GetCustomAttribute<DataContractSurrogateForAttribute>();
 			if (surrogateAttribute != null)
@@ -443,12 +444,32 @@ namespace IsabelDb.TypeModels
 					throw new NotImplementedException();
 
 				var surrogatedType = surrogateAttribute.ActualType;
+
 				var surrogatedDescription = Add(surrogatedType);
 				surrogatedDescription.SurrogateType = typeDescription;
 				typeDescription.SurrogatedType = surrogatedDescription;
 			}
 
 			return typeDescription;
+		}
+
+		private void AddTypeDescription(TypeDescription typeDescription)
+		{
+			var id = typeDescription.TypeId;
+			var type = typeDescription.Type;
+
+			_typeDescriptionsById.Add(id, typeDescription);
+			if (type != null)
+			{
+				_typesToId.Add(type, id);
+				_idToTypes.Add(id, type);
+
+				var surrogateAttribute = type.GetCustomAttribute<DataContractSurrogateForAttribute>();
+				if (surrogateAttribute != null)
+				{
+					_typesWithSurrogates.Add(surrogateAttribute.ActualType);
+				}
+			}
 		}
 
 		private void TryAddType(int typeId, string typeName, int? baseId, int? surrogateId, TypeResolver typeResolver)
@@ -534,13 +555,7 @@ namespace IsabelDb.TypeModels
 			                                             baseTypeDescription,
 			                                             fields);
 
-			_typeDescriptionsById.Add(typeId, typeDescription);
-			if (type != null)
-			{
-				_typeDescriptions.Add(type, typeDescription);
-				_typesToId.Add(type, typeId);
-				_idToTypes.Add(typeId, type);
-			}
+			AddTypeDescription(typeDescription);
 
 			if (surrogateId != null)
 			{
@@ -560,6 +575,12 @@ namespace IsabelDb.TypeModels
 				return null;
 
 			return baseType.TypeId;
+		}
+
+		[Pure]
+		private bool HasSurrogate(Type type)
+		{
+			return _typesWithSurrogates.Contains(type);
 		}
 
 		private int? GetSurrogateTypeId(TypeDescription typeDescription)

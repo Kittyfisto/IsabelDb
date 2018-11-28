@@ -92,7 +92,25 @@ namespace IsabelDb.Test.TypeModels
 		}
 
 		[Test]
-		public void TestSurrogateType()
+		public void TestRegisterVersion()
+		{
+			var typeModel = TypeModel.Create(new[] {typeof(VersionSurrogate)});
+			var version = typeModel.GetTypeDescription(typeof(Version));
+			var surrogate = typeModel.GetTypeDescription(typeof(VersionSurrogate));
+
+			version.Should().NotBeNull();
+			version.Fields.Should().BeEmpty();
+			version.SurrogateType.Should().NotBeNull("Because we've added a type which acts as a surrogate for Version");
+			version.SurrogateType.Should().BeSameAs(surrogate);
+			version.SurrogatedType.Should().BeNull("Because Version isn't a surrogate for anything");
+
+			surrogate.SurrogateType.Should().BeNull();
+			surrogate.SurrogatedType.Should().Be(version);
+			surrogate.Fields.Should().HaveCount(4);
+		}
+
+		[Test]
+		public void TestRegisterIpAddress()
 		{
 			var typeModel = TypeModel.Create(new[] {typeof(IPAddressSurrogate)});
 			var ipAddress = typeModel.GetTypeDescription(typeof(IPAddress));
@@ -111,7 +129,7 @@ namespace IsabelDb.Test.TypeModels
 		}
 
 		[Test]
-		public void TestRoundtripSurrogates()
+		public void TestRoundtripIpAddress()
 		{
 			var typeModel = Roundtrip(TypeModel.Create(new[] {typeof(IPAddressSurrogate)}));
 			var ipAddress = typeModel.GetTypeDescription(typeof(IPAddress));

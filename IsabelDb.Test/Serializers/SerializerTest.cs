@@ -6,6 +6,7 @@ using FluentAssertions;
 using IsabelDb.Serializers;
 using IsabelDb.Test.Entities;
 using IsabelDb.TypeModels;
+using IsabelDb.TypeModels.Surrogates;
 using NUnit.Framework;
 
 namespace IsabelDb.Test.Serializers
@@ -36,10 +37,18 @@ namespace IsabelDb.Test.Serializers
 
 		public static IEnumerable<double> DoubleValues => new[] {double.MinValue, -1.4, 0, Math.E, Math.PI, double.MaxValue};
 
-		public static IEnumerable<IPAddress> IPAddresses => new[]
+		public static IEnumerable<IPAddress> IpAddresses => new[]
 		{
 			IPAddress.Loopback, IPAddress.Any, IPAddress.IPv6Any, IPAddress.IPv6Loopback, IPAddress.Broadcast,
 			IPAddress.IPv6None, IPAddress.None, IPAddress.Parse("192.168.0.1")
+		};
+
+		public static IEnumerable<Version> Versions => new[]
+		{
+			new Version(),
+			new Version(1, 0),
+			new Version(1, 2, 3),
+			new Version(1, 2, 3, 4)
 		};
 
 		[Test]
@@ -205,13 +214,16 @@ namespace IsabelDb.Test.Serializers
 		}
 
 		[Test]
-		public void TestRoundtripIpAddress([ValueSource(nameof(IPAddresses))] IPAddress value)
+		public void TestRoundtripIpAddress([ValueSource(nameof(IpAddresses))] IPAddress value)
 		{
-			var obj = new TypeWithObject
-			{
-				Value = value
-			};
-			var actualObj = Roundtrip(value);
+			var actualObj = Roundtrip(value, typeof(IPAddressSurrogate));
+			actualObj.Should().Be(value);
+		}
+
+		[Test]
+		public void TestRoundtripVersion([ValueSource(nameof(Versions))] Version value)
+		{
+			var actualObj = Roundtrip(value, typeof(VersionSurrogate));
 			actualObj.Should().Be(value);
 		}
 

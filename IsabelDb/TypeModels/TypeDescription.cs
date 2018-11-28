@@ -81,9 +81,10 @@ namespace IsabelDb.TypeModels
 		public static TypeDescription Create(Type type,
 		                                     int typeId,
 		                                     TypeDescription baseTypeDescription,
-		                                     IReadOnlyList<FieldDescription> fields)
+		                                     IReadOnlyList<FieldDescription> fields,
+		                                     bool hasSurrogate = false)
 		{
-			ExtractTypename(type, out var @namespace, out var name, out var fullTypeName);
+			ExtractTypename(type, out var @namespace, out var name, out var fullTypeName, hasSurrogate);
 			return new TypeDescription(name, @namespace, fullTypeName, type, typeId, baseTypeDescription, fields);
 		}
 
@@ -109,8 +110,6 @@ namespace IsabelDb.TypeModels
 			var type = previousDescription.Type;
 			var typename = currentDescription.FullTypeName;
 			var typeId = currentDescription.TypeId;
-			//var surrogateTypeDescription = currentDescription.SurrogateType;
-			//var surrogatedTypeDescription = currentDescription.SurrogatedType;
 			var fields = FieldDescription.Merge(previousDescription.Fields, currentDescription.Fields);
 
 			var description = new TypeDescription(type,
@@ -118,15 +117,14 @@ namespace IsabelDb.TypeModels
 			                                      typeId,
 			                                      baseTypeDescription,
 			                                      fields);
-			//description.SurrogateType = surrogateTypeDescription;
-			//description.SurrogatedType = surrogatedTypeDescription;
 			return description;
 		}
 
 		private static void ExtractTypename(Type type,
 		                                    out string @namespace,
 		                                    out string name,
-		                                    out string fullTypeName)
+		                                    out string fullTypeName,
+		                                    bool hasSurrogate = false)
 		{
 			var dataContractAttributes = type.GetCustomAttribute(typeof(DataContractAttribute), inherit: false);
 			if (dataContractAttributes != null)
@@ -151,7 +149,7 @@ namespace IsabelDb.TypeModels
 						var interfaces = type.GetInterfaces();
 						if (!interfaces.Contains(typeof(ISerializable)))
 						{
-							if (!TypeModel.IsWellKnown(type))
+							if (!TypeModel.IsWellKnown(type) && !hasSurrogate)
 								throw new
 									ArgumentException(string.Format("The type '{0}' is not serializable: It should have the DataContractAttribute applied",
 									                                type));

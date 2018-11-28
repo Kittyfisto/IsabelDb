@@ -63,6 +63,9 @@ namespace IsabelDb.Browser
 			bag.Put(IPAddress.Any);
 			bag.Put(IPAddress.IPv6Loopback);
 			bag.Put(IPAddress.IPv6Any);
+			bag.Put(new Version(1, 0));
+			bag.Put(new Version(1, 2, 3));
+			bag.Put(new Version(1, 2, 3, 4));
 			bag.Put("Stuff");
 
 			var queue = database.GetQueue<int>("B");

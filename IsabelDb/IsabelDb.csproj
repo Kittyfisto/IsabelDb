@@ -138,6 +138,7 @@
     <Compile Include="SQLiteHelper.cs" />
     <Compile Include="TypeModels\FieldDescription.cs" />
     <Compile Include="TypeModels\Surrogates\IPAddressSurrogate.cs" />
+    <Compile Include="TypeModels\Surrogates\VersionSurrogate.cs" />
     <Compile Include="TypeModels\TypeDescription.cs" />
     <Compile Include="TypeModels\ProtobufTypeModel.cs" />
     <Compile Include="TypeModels\TypeModel.cs" />

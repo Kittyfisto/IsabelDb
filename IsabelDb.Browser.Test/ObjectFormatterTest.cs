@@ -10,6 +10,15 @@ namespace IsabelDb.Browser.Test
 	public sealed class ObjectFormatterTest
 	{
 		[Test]
+		public void TestPreviewVersion()
+		{
+			var formatter = new ObjectFormatter();
+			formatter.Preview(new Version(1, 0)).Should().Be("1.0");
+			formatter.Preview(new Version(1, 2, 3)).Should().Be("1.2.3");
+			formatter.Preview(new Version(1, 2, 3, 4)).Should().Be("1.2.3.4");
+		}
+
+		[Test]
 		public void TestPreviewIpAddress()
 		{
 			var formatter = new ObjectFormatter();
