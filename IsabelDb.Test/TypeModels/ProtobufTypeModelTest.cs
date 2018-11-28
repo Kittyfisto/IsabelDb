@@ -6,6 +6,7 @@ using System.Data.SQLite;
 using System.Net;
 using System.Threading;
 using IsabelDb.Test.Entities;
+using IsabelDb.TypeModels.Surrogates;
 
 namespace IsabelDb.Test.TypeModels
 {
@@ -70,6 +71,17 @@ namespace IsabelDb.Test.TypeModels
 			typeModel.IsRegistered(typeof(IPolymorphicCustomKey)).Should().BeTrue();
 			var id = typeModel.GetTypeId(typeof(IPolymorphicCustomKey));
 			typeModel.GetType(id).Should().Be<IPolymorphicCustomKey>();
+		}
+
+		[Test]
+		public void TestRegisterSurrogateType()
+		{
+			var typeModel = ProtobufTypeModel.Create(_connection, new[] { typeof(IPAddressSurrogate) });
+			typeModel.IsRegistered(typeof(IPAddressSurrogate)).Should().BeTrue();
+			typeModel.IsRegistered(typeof(IPAddress)).Should().BeTrue();
+
+			var id = typeModel.GetTypeId(typeof(IPAddressSurrogate));
+			typeModel.GetType(id).Should().Be<IPAddressSurrogate>();
 		}
 
 		[Test]

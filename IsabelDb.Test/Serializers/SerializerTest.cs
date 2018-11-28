@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using FluentAssertions;
 using IsabelDb.Serializers;
 using IsabelDb.Test.Entities;
@@ -34,6 +35,12 @@ namespace IsabelDb.Test.Serializers
 			{double.MinValue, -1.4, 0, Math.E, Math.PI, double.MaxValue, null};
 
 		public static IEnumerable<double> DoubleValues => new[] {double.MinValue, -1.4, 0, Math.E, Math.PI, double.MaxValue};
+
+		public static IEnumerable<IPAddress> IPAddresses => new[]
+		{
+			IPAddress.Loopback, IPAddress.Any, IPAddress.IPv6Any, IPAddress.IPv6Loopback, IPAddress.Broadcast,
+			IPAddress.IPv6None, IPAddress.None, IPAddress.Parse("192.168.0.1")
+		};
 
 		[Test]
 		[RequriedBehaviour]
@@ -197,17 +204,29 @@ namespace IsabelDb.Test.Serializers
 			actualObj.Value.Should().Be(value);
 		}
 
-		private static T Roundtrip<T>(T value)
+		[Test]
+		public void TestRoundtripIpAddress([ValueSource(nameof(IPAddresses))] IPAddress value)
 		{
-			var serializer = CreateSerializerFor<T>();
+			var obj = new TypeWithObject
+			{
+				Value = value
+			};
+			var actualObj = Roundtrip(value);
+			actualObj.Should().Be(value);
+		}
+
+		private static T Roundtrip<T>(T value, params Type[] additionalTypes)
+		{
+			var serializer = CreateSerializerFor<T>(additionalTypes);
 			var serializedValue = serializer.Serialize(value);
 			var actualValue = serializer.Deserialize((byte[]) serializedValue);
 			return (T) actualValue;
 		}
 
-		private static GenericSerializer<T> CreateSerializerFor<T>()
+		private static GenericSerializer<T> CreateSerializerFor<T>(params Type[] additionalTypes)
 		{
-			var typeModel = TypeModel.Create(new[] {typeof(T)});
+			var types = new List<Type>(additionalTypes) {typeof(T)};
+			var typeModel = TypeModel.Create(types);
 			var protoBufTypeModel = ProtobufTypeModel.Compile(typeModel);
 			var serializer = new Serializer(new CompiledTypeModel(protoBufTypeModel, typeModel));
 			return new GenericSerializer<T>(serializer);

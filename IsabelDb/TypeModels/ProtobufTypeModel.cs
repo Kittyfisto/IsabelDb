@@ -67,6 +67,7 @@ namespace IsabelDb.TypeModels
 			if (!TypeModel.IsBuiltIn(type) && !_metaTypes.TryGetValue(type, out var metaType))
 			{
 				metaType = _runtimeTypeModel.Add(type, applyDefaultBehaviour: false);
+
 				ConfigureMetaType(metaType, typeDescription);
 				_metaTypes.Add(type, metaType);
 
@@ -77,17 +78,28 @@ namespace IsabelDb.TypeModels
 
 		private void ConfigureMetaType(MetaType metaType, TypeDescription typeDescription)
 		{
-			foreach (var fieldDescription in typeDescription.Fields)
+			if (typeDescription.SurrogateType != null)
 			{
-				var member = fieldDescription.Member;
-				if (member != null)
-				{
-					var field = metaType.AddField(fieldDescription.MemberId, member.Name);
-					field.IsRequired = true;
+				var surrogateType = typeDescription.SurrogateType.Type;
+				if (surrogateType == null)
+					throw new NotImplementedException();
 
-					var fieldType = fieldDescription.FieldTypeDescription.Type;
-					if (IsPrimitiveArray(fieldType))
-						field.IsPacked = true;
+				metaType.SetSurrogate(surrogateType);
+			}
+			else
+			{
+				foreach (var fieldDescription in typeDescription.Fields)
+				{
+					var member = fieldDescription.Member;
+					if (member != null)
+					{
+						var field = metaType.AddField(fieldDescription.MemberId, member.Name);
+						field.IsRequired = true;
+
+						var fieldType = fieldDescription.FieldTypeDescription.Type;
+						if (IsPrimitiveArray(fieldType))
+							field.IsPacked = true;
+					}
 				}
 			}
 		}

@@ -95,6 +95,7 @@
     <Compile Include="Collections\IntervalCollection\IntervalCollectionCompabilityTest.cs" />
     <Compile Include="Collections\Queue\QueueTest.cs" />
     <Compile Include="CollectionTypeTest.cs" />
+    <Compile Include="Entities\TypeWithObject.cs" />
     <Compile Include="EnumerableExtensions.cs" />
     <Compile Include="Collections\MultiValueDictionary\MultiValueDictionaryCompatibilityTest.cs" />
     <Compile Include="Collections\OrderedCollection\OrderedCollectionCompatibilityTest.cs" />

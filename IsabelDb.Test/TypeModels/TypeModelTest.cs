@@ -5,8 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Linq;
+using System.Net;
 using IsabelDb.Test.Entities;
 using IsabelDb.Test.Entities.V2;
+using IsabelDb.TypeModels.Surrogates;
 using Cpu = IsabelDb.Test.Entities.V1.Cpu;
 
 namespace IsabelDb.Test.TypeModels
@@ -48,7 +50,28 @@ namespace IsabelDb.Test.TypeModels
 			var typeRegistry = new TypeResolver(availableTypes);
 			var otherModel = TypeModel.Read(connection, typeRegistry);
 			otherModel.Add(TypeModel.Create(availableTypes));
+
+			EnsureReferencialIntegrity(otherModel);
+
 			return otherModel;
+		}
+
+		private static void EnsureReferencialIntegrity(TypeModel typeModel)
+		{
+			var descriptions = new HashSet<TypeDescription>(typeModel.TypeDescriptions);
+			foreach (var description in descriptions)
+			{
+				const string reason = "because type descriptions should reference only objects of the same type model";
+				if (description.BaseType != null)
+					descriptions.Should().Contain(description.BaseType, reason);
+				if (description.SurrogateType != null)
+					descriptions.Should().Contain(description.SurrogateType, reason);
+				if (description.SurrogatedType != null)
+					descriptions.Should().Contain(description.SurrogatedType, reason);
+
+				typeModel.GetTypeDescription(description.TypeId).Should().BeSameAs(description, reason);
+				typeModel.GetTypeDescription(description.Type).Should().BeSameAs(description);
+			}
 		}
 
 		private static TypeModel Roundtrip(TypeModel model)
@@ -66,6 +89,44 @@ namespace IsabelDb.Test.TypeModels
 				TypeModel.CreateTable(connection);
 				TypeModel.DoesTableExist(connection).Should().BeTrue();
 			}
+		}
+
+		[Test]
+		public void TestSurrogateType()
+		{
+			var typeModel = TypeModel.Create(new[] {typeof(IPAddressSurrogate)});
+			var ipAddress = typeModel.GetTypeDescription(typeof(IPAddress));
+			var surrogate = typeModel.GetTypeDescription(typeof(IPAddressSurrogate));
+
+			ipAddress.Should().NotBeNull();
+			ipAddress.Fields.Should().BeEmpty();
+			ipAddress.SurrogateType.Should().NotBeNull("Because we've added a type which acts as a surrogate for IPAddress");
+			ipAddress.SurrogateType.Should().BeSameAs(surrogate);
+			ipAddress.SurrogatedType.Should().BeNull("Because IPAddress isn't a surrogate for anything");
+
+			surrogate.SurrogateType.Should().BeNull();
+			surrogate.SurrogatedType.Should().Be(ipAddress);
+			surrogate.Fields.Should().HaveCount(1);
+			surrogate.Fields.First().Name.Should().Be(nameof(IPAddressSurrogate.Data));
+		}
+
+		[Test]
+		public void TestRoundtripSurrogates()
+		{
+			var typeModel = Roundtrip(TypeModel.Create(new[] {typeof(IPAddressSurrogate)}));
+			var ipAddress = typeModel.GetTypeDescription(typeof(IPAddress));
+			var surrogate = typeModel.GetTypeDescription(typeof(IPAddressSurrogate));
+
+			ipAddress.Should().NotBeNull();
+			ipAddress.Fields.Should().BeEmpty();
+			ipAddress.SurrogateType.Should().NotBeNull("Because we've added a type which acts as a surrogate for IPAddress");
+			ipAddress.SurrogateType.Should().BeSameAs(surrogate);
+			ipAddress.SurrogatedType.Should().BeNull("Because IPAddress isn't a surrogate for anything");
+
+			surrogate.SurrogateType.Should().BeNull();
+			surrogate.SurrogatedType.Should().Be(ipAddress);
+			surrogate.Fields.Should().HaveCount(1);
+			surrogate.Fields.First().Name.Should().Be(nameof(IPAddressSurrogate.Data));
 		}
 
 		[Test]

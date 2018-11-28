@@ -11,7 +11,10 @@ namespace IsabelDb.TypeModels
 	internal sealed class TypeDescription
 	{
 		private readonly List<FieldDescription> _fields;
+
 		public readonly TypeDescription BaseType;
+		public TypeDescription SurrogateType { get; internal set; }
+		public TypeDescription SurrogatedType { get; internal set; }
 		public readonly string FullTypeName;
 		public readonly string Name;
 		public readonly string Namespace;
@@ -97,20 +100,26 @@ namespace IsabelDb.TypeModels
 			                           fields);
 		}
 
-		public static TypeDescription Merge(TypeDescription previousDescription, TypeDescription currentDescription)
+		public static TypeDescription Merge(TypeDescription previousDescription,
+		                                    TypeDescription currentDescription,
+		                                    TypeDescription baseTypeDescription)
 		{
 			previousDescription.ThrowOnBreakingChanges(currentDescription);
 
 			var type = previousDescription.Type;
 			var typename = currentDescription.FullTypeName;
 			var typeId = currentDescription.TypeId;
-			var baseTypeDescription = currentDescription.BaseType;
+			//var surrogateTypeDescription = currentDescription.SurrogateType;
+			//var surrogatedTypeDescription = currentDescription.SurrogatedType;
 			var fields = FieldDescription.Merge(previousDescription.Fields, currentDescription.Fields);
+
 			var description = new TypeDescription(type,
 			                                      typename,
 			                                      typeId,
 			                                      baseTypeDescription,
 			                                      fields);
+			//description.SurrogateType = surrogateTypeDescription;
+			//description.SurrogatedType = surrogatedTypeDescription;
 			return description;
 		}
 

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
@@ -30,7 +31,8 @@ namespace IsabelDb.Browser
 				typeof(UInt64),
 				typeof(float),
 				typeof(double),
-				typeof(DateTime)
+				typeof(DateTime),
+				typeof(IPAddress)
 			};
 
 			_builtInTypes = new Dictionary<Type, Func<object, ObjectModel>>

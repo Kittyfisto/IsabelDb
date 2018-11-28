@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using FluentAssertions;
 using NUnit.Framework;
 
@@ -8,6 +9,15 @@ namespace IsabelDb.Browser.Test
 	[TestFixture]
 	public sealed class ObjectFormatterTest
 	{
+		[Test]
+		public void TestPreviewIpAddress()
+		{
+			var formatter = new ObjectFormatter();
+			formatter.Preview(IPAddress.Loopback).Should().Be("127.0.0.1");
+			formatter.Preview(IPAddress.IPv6Loopback).Should().Be("::1");
+			formatter.Preview(IPAddress.IPv6Any).Should().Be("::");
+		}
+
 		[Test]
 		public void TestPreviewByteArray()
 		{

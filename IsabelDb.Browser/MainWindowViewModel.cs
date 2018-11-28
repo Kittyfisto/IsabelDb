@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Net;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using log4net;
@@ -53,7 +54,15 @@ namespace IsabelDb.Browser
 		{
 			//OpenFile(@"C:\Users\Simon\Documents\GitHub\IsabelDb\LocalTestData\Test.isdb");
 			var database = global::IsabelDb.Database.CreateInMemory(new Type[0]);
-			var bag = database.GetBag<string>("A");
+			var bag = database.GetBag<object>("A");
+			bag.Put(1337);
+			bag.Put(9001);
+			bag.Put(DateTime.Now);
+			bag.Put(DateTime.UtcNow);
+			bag.Put(IPAddress.Loopback);
+			bag.Put(IPAddress.Any);
+			bag.Put(IPAddress.IPv6Loopback);
+			bag.Put(IPAddress.IPv6Any);
 			bag.Put("Stuff");
 
 			var queue = database.GetQueue<int>("B");

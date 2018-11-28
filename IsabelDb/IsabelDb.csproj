@@ -67,6 +67,7 @@
     <Reference Include="System.ServiceModel" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Attributes\DataContractSurrogateForAttribute.cs" />
     <Compile Include="Attributes\SerializableContractAttribute.cs" />
     <Compile Include="BagExtensions.cs" />
     <Compile Include="Collections\AbstractCollection.cs" />
@@ -136,6 +137,7 @@
     <Compile Include="Collections\Bag.cs" />
     <Compile Include="SQLiteHelper.cs" />
     <Compile Include="TypeModels\FieldDescription.cs" />
+    <Compile Include="TypeModels\Surrogates\IPAddressSurrogate.cs" />
     <Compile Include="TypeModels\TypeDescription.cs" />
     <Compile Include="TypeModels\ProtobufTypeModel.cs" />
     <Compile Include="TypeModels\TypeModel.cs" />
