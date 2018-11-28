@@ -92,6 +92,16 @@ namespace IsabelDb.Test.TypeModels
 		}
 
 		[Test]
+		[Description("Verifies that for well known surrogate types, it doesn't matter if the type or its surrogate is registered, the type model ends up identical")]
+		public void TestCreateFromVersion()
+		{
+			var typeModel1 = TypeModel.Create(new[] {typeof(Version)});
+			var typeModel2 = TypeModel.Create(new[] {typeof(VersionSurrogate)});
+
+			typeModel1.Types.Should().BeEquivalentTo(typeModel2.Types, "because the type model should be aware of type surrogates for well known types and add them itself");
+		}
+
+		[Test]
 		public void TestRegisterVersion()
 		{
 			var typeModel = TypeModel.Create(new[] {typeof(VersionSurrogate)});

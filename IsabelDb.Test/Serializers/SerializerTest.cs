@@ -94,24 +94,6 @@ namespace IsabelDb.Test.Serializers
 			actualObj.Values.Should().Equal(IntValues);
 		}
 
-		//[Test]
-		//public void Test()
-		//{
-		//	var typeModel = ProtoBuf.Meta.TypeModel.Create();
-		//	var type = typeModel.Add(typeof(IntArray), applyDefaultBehaviour: false);
-		//	var field = type.AddField(1, "Values", typeof(int), typeof(int[]));
-		//	field.IsPacked = true;
-
-		//	var value = new IntArray {Values = new int[10000]};
-		//	using (var stream = new MemoryStream())
-		//	{
-		//		typeModel.Serialize(stream, value);
-		//		stream.Position = 0;
-		//		var actualValue = typeModel.Deserialize(stream, null, typeof(IntArray));
-		//		int n = 0;
-		//	}
-		//}
-
 		[Test]
 		public void TestRoundtripIntArray([ValueSource(nameof(IntArrayValues))] int[] values)
 		{

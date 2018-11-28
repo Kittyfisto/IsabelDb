@@ -27,7 +27,7 @@ namespace IsabelDb.TypeModels
 			{
 				typeof(object),
 				typeof(IPAddress),
-				//typeof(VersionSurrogate),
+				typeof(Version),
 				typeof(RowId),
 				typeof(Point2D)
 			};

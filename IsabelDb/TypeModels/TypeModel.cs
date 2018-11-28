@@ -51,6 +51,13 @@ namespace IsabelDb.TypeModels
 			typeof(Guid)
 		};
 
+		private static readonly System.Collections.Generic.IReadOnlyDictionary<Type, Type> BuiltInSurrogates =
+			new Dictionary<Type, Type>
+			{
+				{typeof(Version), typeof(VersionSurrogate)},
+				{typeof(IPAddress), typeof(IPAddressSurrogate)}
+			};
+
 		private readonly Dictionary<int, TypeDescription> _typeDescriptionsById;
 		private readonly Dictionary<int, Type> _idToTypes;
 		private readonly Dictionary<Type, int> _typesToId;
@@ -263,16 +270,22 @@ namespace IsabelDb.TypeModels
 		public static TypeModel Create(IEnumerable<Type> supportedTypes)
 		{
 			var types = new List<Type>();
+			var nonSurrogates = new List<Type>();
 			foreach (var type in supportedTypes)
 			{
 				if (IsSurrogate(type))
+				{
 					types.Add(type);
+				}
+				else
+				{
+					if (BuiltInSurrogates.TryGetValue(type, out var surrogateType))
+						types.Add(surrogateType);
+					nonSurrogates.Add(type);
+				}
 			}
-			foreach (var type in supportedTypes)
-			{
-				if (!IsSurrogate(type))
-					types.Add(type);
-			}
+
+			types.AddRange(nonSurrogates);
 
 			var model = new TypeModel();
 			foreach (var type in types)
