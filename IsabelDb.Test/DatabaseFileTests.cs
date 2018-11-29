@@ -35,6 +35,34 @@ namespace IsabelDb.Test
 		private string _databaseName;
 
 		[Test]
+		public void TestCompactEmpty()
+		{
+			using (var db = Database.OpenOrCreate(_databaseName, NoCustomTypes))
+			{
+				db.Compact();
+			}
+		}
+
+		[Test]
+		public void TestCompactAfterDeletion()
+		{
+			using (var db = Database.OpenOrCreate(_databaseName, NoCustomTypes))
+			{
+				var bag = db.GetBag<object>("Stuff");
+				bag.PutMany(Enumerable.Range(0, 10000).Cast<object>());
+
+				var fileSize = new FileInfo(_databaseName).Length;
+				fileSize.Should().BeGreaterThan(180000);
+
+				db.Remove(bag);
+				new FileInfo(_databaseName).Length.Should().BeGreaterThan(180000);
+
+				db.Compact();
+				new FileInfo(_databaseName).Length.Should().BeLessThan(30000);
+			}
+		}
+
+		[Test]
 		public void TestGetDictionaryAfterReopen()
 		{
 			using (var db = Database.OpenOrCreate(_databaseName, NoCustomTypes))
@@ -266,7 +294,7 @@ namespace IsabelDb.Test
 			using (var db = Database.OpenOrCreate(filename, NoCustomTypes))
 			{
 				var collection = db.GetBag<string>("Values");
-				collection.PutMany("a", "b", "c");
+				collection.PutMany(new []{"a", "b", "c"});
 			}
 
 			File.SetAttributes(filename, FileAttributes.ReadOnly);

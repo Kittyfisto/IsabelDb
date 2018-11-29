@@ -90,6 +90,15 @@ namespace IsabelDb
 			}
 		}
 
+		public void Compact()
+		{
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = "VACUUM";
+				command.ExecuteNonQuery();
+			}
+		}
+
 		/// <inheritdoc />
 		public IDictionary<TKey, TValue> GetDictionary<TKey, TValue>(string name)
 		{

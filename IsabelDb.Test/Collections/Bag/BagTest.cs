@@ -137,7 +137,7 @@ namespace IsabelDb.Test.Collections.Bag
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
 				var bag = db.GetBag<int>("foo");
-				bag.PutMany(1, 2, 3, 4);
+				bag.PutMany(new[]{1, 2, 3, 4});
 				bag.Count().Should().Be(4);
 				bag.GetAllValues().Should().BeEquivalentTo(1, 2, 3, 4);
 			}
@@ -180,14 +180,14 @@ namespace IsabelDb.Test.Collections.Bag
 				using (var db = CreateDatabase(connection))
 				{
 					var collection = db.GetBag<string>("Values");
-					ids.AddRange(collection.PutMany("A", "B"));
+					ids.AddRange(collection.PutMany(new[]{"A", "B"}));
 					ids.Add(collection.Put("C"));
 				}
 
 				using (var db = CreateDatabase(connection))
 				{
 					var collection = db.GetBag<string>("Values");
-					ids.AddRange(collection.PutMany("D", "E"));
+					ids.AddRange(collection.PutMany(new []{"D", "E"}));
 					ids.Add(collection.Put("F"));
 				}
 

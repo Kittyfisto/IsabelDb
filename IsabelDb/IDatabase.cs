@@ -145,5 +145,10 @@ namespace IsabelDb
 		/// </remarks>
 		/// <param name="collectionName"></param>
 		void Remove(string collectionName);
+
+		/// <summary>
+		///    Rebuilds the database file, repacking it into a minimal amount of disk space.
+		/// </summary>
+		void Compact();
 	}
 }
