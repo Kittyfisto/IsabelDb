@@ -279,6 +279,30 @@ namespace IsabelDb.Test.Serializers
 			actualObj.Should().Be(value);
 		}
 
+		[Test]
+		[Ignore("This is unfortunately not supported yet")]
+		public void TestRoundtripStringAsObject([ValueSource(nameof(StringValues))] string value)
+		{
+			var actualObj = Roundtrip(new ClassWithObject
+			{
+				Value = value
+			});
+			actualObj.Should().NotBeNull();
+			actualObj.Value.Should().Be(value);
+		}
+
+		[Test]
+		[Ignore("This is unfortunately not supported yet")]
+		public void TestRoundtripIntAsObject([ValueSource(nameof(IntValues))] int value)
+		{
+			var actualObj = Roundtrip(new ClassWithObject
+			{
+				Value = value
+			});
+			actualObj.Should().NotBeNull();
+			actualObj.Value.Should().Be(value);
+		}
+
 		private static T Roundtrip<T>(T value, params Type[] additionalTypes)
 		{
 			var serializer = CreateSerializerFor<T>(additionalTypes);
