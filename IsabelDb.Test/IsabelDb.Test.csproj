@@ -95,7 +95,11 @@
     <Compile Include="Collections\IntervalCollection\IntervalCollectionCompabilityTest.cs" />
     <Compile Include="Collections\Queue\QueueTest.cs" />
     <Compile Include="CollectionTypeTest.cs" />
+    <Compile Include="Entities\ClassWithObject.cs" />
+    <Compile Include="Entities\Int64Enum.cs" />
+    <Compile Include="Entities\SomeClass.cs" />
     <Compile Include="Entities\TypeWithObject.cs" />
+    <Compile Include="Entities\UInt64Enum.cs" />
     <Compile Include="EnumerableExtensions.cs" />
     <Compile Include="Collections\MultiValueDictionary\MultiValueDictionaryCompatibilityTest.cs" />
     <Compile Include="Collections\OrderedCollection\OrderedCollectionCompatibilityTest.cs" />

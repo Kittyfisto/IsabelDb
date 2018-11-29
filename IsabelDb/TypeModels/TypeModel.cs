@@ -160,7 +160,7 @@ namespace IsabelDb.TypeModels
 			var model = new TypeModel();
 			using (var command = connection.CreateCommand())
 			{
-				command.CommandText = string.Format("SELECT id, typename, baseId, surrogateId FROM {0}", TypeTableName);
+				command.CommandText = string.Format("SELECT id, typename, baseId, surrogateId, underlyingEnumTypeId, classification FROM {0}", TypeTableName);
 				using (var reader = command.ExecuteReader())
 				{
 					while (reader.Read())
@@ -177,7 +177,13 @@ namespace IsabelDb.TypeModels
 							surrogateId = reader.GetInt32(3);
 						else
 							surrogateId = null;
-						model.TryAddType(id, typeName, baseId, surrogateId, typeResolver);
+						int? underlyingEnumTypeId;
+						if (!reader.IsDBNull(4))
+							underlyingEnumTypeId = reader.GetInt32(4);
+						else
+							underlyingEnumTypeId = null;
+						var type = (TypeClassification) reader.GetInt32(5);
+						model.TryAddType(id, typeName, baseId, surrogateId, underlyingEnumTypeId, type, typeResolver);
 					}
 				}
 			}
@@ -308,25 +314,29 @@ namespace IsabelDb.TypeModels
 				using (var command = connection.CreateCommand())
 				{
 					command.CommandText =
-						string.Format("INSERT OR IGNORE INTO {0} (id, typename, baseId, surrogateId) VALUES (@id, @typename, @baseId, @surrogateId)", TypeTableName);
+						string.Format("INSERT OR IGNORE INTO {0} (id, typename, baseId, surrogateId, underlyingEnumTypeId, classification) VALUES (@id, @typename, @baseId, @surrogateId, @underlyingEnumTypeId, @classification)", TypeTableName);
 					var idParameter = command.Parameters.Add("@id", DbType.Int32);
 					var typename = command.Parameters.Add("@typename", DbType.String);
 					var baseIdParameter = command.Parameters.Add("@baseId", DbType.Int32);
 					var surrogateIdParameter = command.Parameters.Add("@surrogateId", DbType.Int32);
+					var underlyingEnumIdParameter = command.Parameters.Add("@underlyingEnumTypeId", DbType.Int32);
+					var classificationParameter = command.Parameters.Add("@classification", DbType.Int32);
 
 					foreach (var typeDescription in _typeDescriptionsById.Values)
 					{
-						//var type = typeDescription.Type;
 						var typeName = typeDescription.FullTypeName;
-						//var typeid = _typesToId[type];
 						var typeId = typeDescription.TypeId;
 						var baseTypeId = GetBaseTypeId(typeDescription);
 						var surrogateId = GetSurrogateTypeId(typeDescription);
+						var underlyingEnumTypeId = GetUnderlyingEnumTypeId(typeDescription);
+						var type = typeDescription.Classification;
 
 						typename.Value = typeName;
 						idParameter.Value = typeId;
 						baseIdParameter.Value = baseTypeId;
 						surrogateIdParameter.Value = surrogateId;
+						underlyingEnumIdParameter.Value = underlyingEnumTypeId;
+						classificationParameter.Value = type;
 						command.ExecuteNonQuery();
 					}
 				}
@@ -403,8 +413,11 @@ namespace IsabelDb.TypeModels
 				                                    "typename TEXT NOT NULL," +
 				                                    "baseId INTEGER," +
 				                                    "surrogateId INTEGER," +
+				                                    "underlyingEnumTypeId INTEGER," +
+				                                    "classification INTEGER NOT NULL," +
 				                                    "FOREIGN KEY(baseId) REFERENCES {0}(id)," +
 				                                    "FOREIGN KEY(surrogateId) REFERENCES {0}(id)" +
+				                                    "FOREIGN KEY(underlyingEnumTypeId) REFERENCES {0}(id)" +
 				                                    ")", TypeTableName);
 				command.ExecuteNonQuery();
 			}
@@ -432,6 +445,7 @@ namespace IsabelDb.TypeModels
 		private TypeDescription AddType(Type type)
 		{
 			var baseTypeDescription = AddBaseTypeOf(type);
+			var underlyingEnumTypeDescription = AddEnumTypeOf(type);
 
 			var fields = FieldDescription.FindSerializableFields(type);
 			var properties = FieldDescription.FindSerializableProperties(type);
@@ -452,7 +466,10 @@ namespace IsabelDb.TypeModels
 
 			var id = _nextId;
 			++_nextId;
-			var typeDescription = TypeDescription.Create(type, id, baseTypeDescription, members,
+			var typeDescription = TypeDescription.Create(type, id,
+			                                             baseTypeDescription,
+			                                             underlyingEnumTypeDescription,
+			                                             members,
 			                                             hasSurrogate: HasSurrogate(type));
 			AddTypeDescription(typeDescription);
 
@@ -491,13 +508,19 @@ namespace IsabelDb.TypeModels
 			}
 		}
 
-		private void TryAddType(int typeId, string typeName, int? baseId, int? surrogateId, TypeResolver typeResolver)
+		private void TryAddType(int typeId,
+		                        string typeName,
+		                        int? baseId,
+		                        int? surrogateId,
+		                        int? underlyingEnumTypeId,
+		                        TypeClassification classification,
+		                        TypeResolver typeResolver)
 		{
 			try
 			{
 				_nextId = Math.Max(_nextId, typeId + 1);
 				var type = typeResolver.Resolve(typeName);
-				Add(typeName, type, typeId, baseId, surrogateId, fields: null);
+				Add(typeName, type, typeId, baseId, surrogateId, underlyingEnumTypeId, classification, fields: null);
 
 				if (type == null)
 				{
@@ -565,13 +588,19 @@ namespace IsabelDb.TypeModels
 		                     int typeId,
 		                     int? baseTypeId,
 		                     int? surrogateId,
+		                     int? underlyingEnumTypeId,
+		                     TypeClassification classification,
 		                     IEnumerable<FieldDescription> fields)
 		{
 			var baseTypeDescription = baseTypeId != null ? _typeDescriptionsById[baseTypeId.Value] : null;
+			var underlyingEnumTypeDescription = underlyingEnumTypeId != null ? _typeDescriptionsById[underlyingEnumTypeId.Value] : null;
+
 			var typeDescription = TypeDescription.Create(type,
 			                                             typename,
 			                                             typeId,
 			                                             baseTypeDescription,
+			                                             underlyingEnumTypeDescription,
+			                                             classification,
 			                                             fields);
 
 			AddTypeDescription(typeDescription);
@@ -590,10 +619,7 @@ namespace IsabelDb.TypeModels
 				return null;
 
 			var baseType = typeDescription.BaseType;
-			if (baseType == null)
-				return null;
-
-			return baseType.TypeId;
+			return baseType?.TypeId;
 		}
 
 		[Pure]
@@ -602,13 +628,18 @@ namespace IsabelDb.TypeModels
 			return _typesWithSurrogates.Contains(type);
 		}
 
+		[Pure]
 		private int? GetSurrogateTypeId(TypeDescription typeDescription)
 		{
 			var surrogateType = typeDescription.SurrogateType;
-			if (surrogateType == null)
-				return null;
+			return surrogateType?.TypeId;
+		}
 
-			return surrogateType.TypeId;
+		[Pure]
+		private int? GetUnderlyingEnumTypeId(TypeDescription typeDescription)
+		{
+			var surrogateType = typeDescription.UnderlyingEnumTypeDescription;
+			return surrogateType?.TypeId;
 		}
 
 		private TypeDescription AddBaseTypeOf(Type type)
@@ -632,6 +663,16 @@ namespace IsabelDb.TypeModels
 				return Add(serializable);
 
 			return Add(baseType);
+		}
+
+		private TypeDescription AddEnumTypeOf(Type type)
+		{
+			if (!type.IsEnum)
+				return null;
+
+			var underlyingType = type.GetEnumUnderlyingType();
+			var description = Add(underlyingType);
+			return description;
 		}
 
 		private static Type FindSerializableInterface(Type type, List<Type> interfaces)

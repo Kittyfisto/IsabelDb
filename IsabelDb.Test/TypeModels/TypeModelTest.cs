@@ -102,6 +102,143 @@ namespace IsabelDb.Test.TypeModels
 		}
 
 		[Test]
+		public void TestRegisterByte()
+		{
+			var typeModel = TypeModel.Create(new[] {typeof(byte)});
+			var description = typeModel.GetTypeDescription<byte>();
+			description.Classification.Should().Be(TypeClassification.Struct);
+			description.SurrogateType.Should().BeNull();
+			description.UnderlyingEnumTypeDescription.Should().BeNull();
+			description.BaseType.Should().BeNull("because at least for now, integer types cannot inherit from System.Value type due to a protobuf constraint");
+		}
+
+		[Test]
+		public void TestRoundtripByte()
+		{
+			var typeModel = Roundtrip(TypeModel.Create(new[] {typeof(byte)}));
+			var description = typeModel.GetTypeDescription<byte>();
+			description.Classification.Should().Be(TypeClassification.Struct);
+			description.SurrogateType.Should().BeNull();
+			description.UnderlyingEnumTypeDescription.Should().BeNull();
+			description.BaseType.Should().BeNull("because at least for now, integer types cannot inherit from System.Value type due to a protobuf constraint");
+		}
+
+		[Test]
+		public void TestRegisterInterface()
+		{
+			var typeModel = TypeModel.Create(new[] {typeof(IPolymorphicCustomKey)});
+			var description = typeModel.GetTypeDescription<IPolymorphicCustomKey>();
+			description.Classification.Should().Be(TypeClassification.Interface);
+			description.SurrogateType.Should().BeNull();
+			description.UnderlyingEnumTypeDescription.Should().BeNull();
+			description.BaseType.Should().NotBeNull();
+			var baseTypeDescription = description.BaseType;
+			baseTypeDescription.ResolvedType.Should().Be<object>();
+		}
+
+		[Test]
+		public void TestRoundtripInterface()
+		{
+			var typeModel = Roundtrip(TypeModel.Create(new[] {typeof(IPolymorphicCustomKey)}));
+			var description = typeModel.GetTypeDescription<IPolymorphicCustomKey>();
+			description.Classification.Should().Be(TypeClassification.Interface);
+			description.SurrogateType.Should().BeNull();
+			description.UnderlyingEnumTypeDescription.Should().BeNull();
+			description.BaseType.Should().NotBeNull();
+			var baseTypeDescription = description.BaseType;
+			baseTypeDescription.ResolvedType.Should().Be<object>();
+		}
+
+		[Test]
+		public void TestRegisterClass()
+		{
+			var typeModel = TypeModel.Create(new[] {typeof(SomeClass)});
+			var description = typeModel.GetTypeDescription<SomeClass>();
+			description.Classification.Should().Be(TypeClassification.Class);
+			description.SurrogateType.Should().BeNull();
+			description.UnderlyingEnumTypeDescription.Should().BeNull();
+			description.BaseType.Should().NotBeNull();
+			var baseTypeDescription = description.BaseType;
+			baseTypeDescription.ResolvedType.Should().Be<object>();
+		}
+
+		[Test]
+		public void TestRoundripClass()
+		{
+			var typeModel = Roundtrip(TypeModel.Create(new[] {typeof(SomeClass)}));
+			var description = typeModel.GetTypeDescription<SomeClass>();
+			description.Classification.Should().Be(TypeClassification.Class);
+			description.SurrogateType.Should().BeNull();
+			description.UnderlyingEnumTypeDescription.Should().BeNull();
+			description.BaseType.Should().NotBeNull();
+			var baseTypeDescription = description.BaseType;
+			baseTypeDescription.ResolvedType.Should().Be<object>();
+		}
+
+		[Test]
+		public void TestRegisterStruct()
+		{
+			var typeModel = TypeModel.Create(new[] {typeof(SomeStruct)});
+			var description = typeModel.GetTypeDescription<SomeStruct>();
+			description.Classification.Should().Be(TypeClassification.Struct);
+		}
+
+		[Test]
+		public void TestRoundtripStruct()
+		{
+			var typeModel = Roundtrip(TypeModel.Create(new[] {typeof(SomeStruct)}));
+			var description = typeModel.GetTypeDescription<SomeStruct>();
+			description.Classification.Should().Be(TypeClassification.Struct);
+		}
+
+		[Test]
+		public void TestRegisterEnum()
+		{
+			var typeModel = TypeModel.Create(new[] {typeof(SomeEnum)});
+			var description = typeModel.GetTypeDescription<SomeEnum>();
+			description.ResolvedType.Should().Be<SomeEnum>();
+			description.Classification.Should().Be(TypeClassification.Enum);
+			var other = description.UnderlyingEnumTypeDescription;
+			other.Should().NotBeNull();
+			other.ResolvedType.Should().Be<int>();
+		}
+
+		[Test]
+		public void TestRoundtripEnum()
+		{
+			var typeModel = Roundtrip(TypeModel.Create(new[] {typeof(SomeEnum)}));
+			var description = typeModel.GetTypeDescription<SomeEnum>();
+			description.Classification.Should().Be(TypeClassification.Enum);
+			var other = description.UnderlyingEnumTypeDescription;
+			other.Should().NotBeNull();
+			other.ResolvedType.Should().Be<int>();
+		}
+
+		[Test]
+		public void TestRegisterInt64Enum()
+		{
+			var typeModel = TypeModel.Create(new[] {typeof(Int64Enum)});
+			var description = typeModel.GetTypeDescription<Int64Enum>();
+			description.ResolvedType.Should().Be<Int64Enum>();
+			description.Classification.Should().Be(TypeClassification.Enum);
+			var other = description.UnderlyingEnumTypeDescription;
+			other.Should().NotBeNull();
+			other.ResolvedType.Should().Be<long>();
+		}
+
+		[Test]
+		public void TestRegisterUInt64Enum()
+		{
+			var typeModel = TypeModel.Create(new[] {typeof(UInt64Enum)});
+			var description = typeModel.GetTypeDescription<UInt64Enum>();
+			description.ResolvedType.Should().Be<UInt64Enum>();
+			description.Classification.Should().Be(TypeClassification.Enum);
+			var other = description.UnderlyingEnumTypeDescription;
+			other.Should().NotBeNull();
+			other.ResolvedType.Should().Be<ulong>();
+		}
+
+		[Test]
 		public void TestRegisterVersion()
 		{
 			var typeModel = TypeModel.Create(new[] {typeof(VersionSurrogate)});
@@ -226,20 +363,6 @@ namespace IsabelDb.Test.TypeModels
 			actualModel.GetTypeName(type).Should().Be(description.FullTypeName, reason2);
 			actualModel.TryGetType(description.TypeId).Should().Be(type, reason2);
 			actualModel.GetTypeId(type).Should().Be(description.TypeId, reason2);
-		}
-
-		[Test]
-		public void TestRoundtripInterface()
-		{
-			var model = TypeModel.Create(new[] { typeof(IPolymorphicCustomKey) });
-			var description = model.GetTypeDescription(typeof(IPolymorphicCustomKey));
-			description.BaseType.Should().NotBeNull();
-			description.BaseType.ResolvedType.Should().Be<object>();
-
-			model = Roundtrip(model);
-			description = model.GetTypeDescription(typeof(IPolymorphicCustomKey));
-			description.BaseType.Should().NotBeNull();
-			description.BaseType.ResolvedType.Should().Be<object>();
 		}
 
 		[Test]

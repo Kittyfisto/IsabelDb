@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using FluentAssertions;
@@ -8,6 +9,8 @@ using IsabelDb.Test.Entities;
 using IsabelDb.TypeModels;
 using IsabelDb.TypeModels.Surrogates;
 using NUnit.Framework;
+using ProtoBuf.Meta;
+using TypeModel = IsabelDb.TypeModels.TypeModel;
 
 namespace IsabelDb.Test.Serializers
 {
@@ -50,6 +53,28 @@ namespace IsabelDb.Test.Serializers
 			new Version(1, 2, 3),
 			new Version(1, 2, 3, 4)
 		};
+
+		//[Test]
+		//public void Test([Values(SomeEnum.A, SomeEnum.B, SomeEnum.C)] SomeEnum enumValue)
+		//{
+		//	var tm = ProtoBuf.Meta.TypeModel.Create();
+		//	var objectType = tm.Add(typeof(object), false);
+		//	tm.Add(typeof(SomeClass), true);
+		//	tm.Add(typeof(SomeEnum), true);
+		//	tm.Add(typeof(ClassWithObject), true);
+
+		//	objectType.AddSubType(300, typeof(SomeClass));
+		//	objectType.AddSubType(200, typeof(SomeEnum));
+
+		//	var stream = new MemoryStream();
+		//	tm.Serialize(stream, new ClassWithObject{Value = enumValue});
+		//	stream.Position = 0;
+
+		//	var actualValue = tm.Deserialize(stream, null, typeof(ClassWithObject));
+		//	actualValue.Should().NotBeNull();
+		//	actualValue.Should().BeOfType<ClassWithObject>();
+		//	((ClassWithObject) actualValue).Value.Should().Be(enumValue);
+		//}
 
 		[Test]
 		[RequriedBehaviour]

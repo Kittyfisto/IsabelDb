@@ -21,11 +21,25 @@ namespace IsabelDb.TypeModels
 		public readonly Type ResolvedType;
 		public readonly int TypeId;
 
+		/// <summary>
+		/// Describes if this type is a class, interface enum or struct.
+		/// </summary>
+		public readonly TypeClassification Classification;
+
+		/// <summary>
+		/// When this type is an enum (<see cref="Classification"/> == <see cref="TypeClassification.Enum"/>),
+		/// then this is a description of the underlying enum type, i.e. <see cref="System.Int32"/>, etc...
+		/// Otherwise is null.
+		/// </summary>
+		public readonly TypeDescription UnderlyingEnumTypeDescription;
+
 		private TypeDescription(string name, string @namespace,
-								string fullTypeName,
-								Type resolvedType,
-								int typeId,
+		                        string fullTypeName,
+		                        Type resolvedType,
+		                        int typeId,
 		                        TypeDescription baseType,
+		                        TypeDescription underlyingEnumTypeDescription,
+		                        TypeClassification classification,
 		                        IReadOnlyList<FieldDescription> fields)
 		{
 			Name = name;
@@ -36,12 +50,16 @@ namespace IsabelDb.TypeModels
 
 			BaseType = baseType;
 			_fields = fields.ToList();
+			Classification = classification;
+			UnderlyingEnumTypeDescription = underlyingEnumTypeDescription;
 		}
 
 		private TypeDescription(Type resolvedType,
 		                        string typename,
 		                        int typeId,
 		                        TypeDescription baseTypeDescription,
+		                        TypeDescription underlyingEnumTypeDescription,
+		                        TypeClassification classification,
 		                        IEnumerable<FieldDescription> fields)
 		{
 			ResolvedType = resolvedType;
@@ -51,8 +69,10 @@ namespace IsabelDb.TypeModels
 			Namespace = typename.Substring(startIndex: 0, length: idx);
 			Name = typename.Substring(idx + 1);
 			FullTypeName = typename;
+			Classification = classification;
 
 			BaseType = baseTypeDescription;
+			UnderlyingEnumTypeDescription = underlyingEnumTypeDescription;
 			_fields = fields?.ToList() ?? new List<FieldDescription>();
 		}
 
@@ -81,23 +101,47 @@ namespace IsabelDb.TypeModels
 		public static TypeDescription Create(Type type,
 		                                     int typeId,
 		                                     TypeDescription baseTypeDescription,
+		                                     TypeDescription underlyingEnumTypeDescription,
 		                                     IReadOnlyList<FieldDescription> fields,
 		                                     bool hasSurrogate = false)
 		{
 			ExtractTypename(type, out var @namespace, out var name, out var fullTypeName, hasSurrogate);
-			return new TypeDescription(name, @namespace, fullTypeName, type, typeId, baseTypeDescription, fields);
+			var classification = GetClassification(type);
+			return new TypeDescription(name, @namespace, fullTypeName, type, typeId,
+			                           baseTypeDescription,
+			                           underlyingEnumTypeDescription,
+			                           classification, fields);
+		}
+
+		[Pure]
+		private static TypeClassification GetClassification(Type type)
+		{
+			if (type.IsEnum)
+				return TypeClassification.Enum;
+			if (type.IsValueType)
+				return TypeClassification.Struct;
+			if (type.IsInterface)
+				return TypeClassification.Interface;
+			if (type.IsClass)
+				return TypeClassification.Class;
+
+			throw new NotImplementedException(string.Format("Unable to classfiy the given type: {0}", type.AssemblyQualifiedName));
 		}
 
 		public static TypeDescription Create(Type type,
 		                                     string typename,
 		                                     int typeId,
 		                                     TypeDescription baseTypeDescription,
+		                                     TypeDescription underlyingEnumTypeDescription,
+		                                     TypeClassification classification,
 		                                     IEnumerable<FieldDescription> fields)
 		{
 			return new TypeDescription(type,
 			                           typename,
 			                           typeId,
 			                           baseTypeDescription,
+			                           underlyingEnumTypeDescription,
+			                           classification,
 			                           fields);
 		}
 
@@ -110,12 +154,16 @@ namespace IsabelDb.TypeModels
 			var type = previousDescription.ResolvedType;
 			var typename = currentDescription.FullTypeName;
 			var typeId = currentDescription.TypeId;
+			var classification = currentDescription.Classification;
+			var underlying = currentDescription.UnderlyingEnumTypeDescription;
 			var fields = FieldDescription.Merge(previousDescription.Fields, currentDescription.Fields);
 
 			var description = new TypeDescription(type,
 			                                      typename,
 			                                      typeId,
 			                                      baseTypeDescription,
+			                                      underlying,
+			                                      classification,
 			                                      fields);
 			return description;
 		}
@@ -203,6 +251,9 @@ namespace IsabelDb.TypeModels
 
 		private void ThrowOnBreakingChanges(TypeDescription otherDescription)
 		{
+			if (Classification != otherDescription.Classification)
+				throw new BreakingChangeException();
+
 			foreach (var field in _fields)
 			{
 				var otherField = otherDescription._fields.FirstOrDefault(x => Equals(x.Name, field.Name));
@@ -210,6 +261,17 @@ namespace IsabelDb.TypeModels
 				{
 					field.ThrowOnBreakingChanges(otherField);
 				}
+			}
+
+			var otherUnderlyingType = otherDescription.UnderlyingEnumTypeDescription;
+			if (UnderlyingEnumTypeDescription == null && otherUnderlyingType != null)
+				throw new BreakingChangeException();
+			if (UnderlyingEnumTypeDescription != null && otherUnderlyingType == null)
+				throw new BreakingChangeException();
+			if (UnderlyingEnumTypeDescription != null && otherUnderlyingType != null)
+			{
+				if (!AreSameType(UnderlyingEnumTypeDescription, otherUnderlyingType))
+					throw new BreakingChangeException();
 			}
 
 			var otherBaseType = otherDescription.BaseType;

@@ -146,6 +146,7 @@
     <Compile Include="TypeModels\TypeModel.cs" />
     <Compile Include="TypeModels\TypeResolver.cs" />
     <Compile Include="Serializer.cs" />
+    <Compile Include="TypeModels\TypeClassification.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
