@@ -20,8 +20,8 @@ namespace IsabelDb.TypeModels
 
 			foreach (var description in supportedTypes)
 			{
-				_typesByName.Add(description.FullTypeName, description.Type);
-				_namesByType.Add(description.Type, description.FullTypeName);
+				_typesByName.Add(description.FullTypeName, description.ResolvedType);
+				_namesByType.Add(description.ResolvedType, description.FullTypeName);
 			}
 		}
 

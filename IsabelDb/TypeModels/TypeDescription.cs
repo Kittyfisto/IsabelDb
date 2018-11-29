@@ -18,12 +18,12 @@ namespace IsabelDb.TypeModels
 		public readonly string FullTypeName;
 		public readonly string Name;
 		public readonly string Namespace;
-		public readonly Type Type;
+		public readonly Type ResolvedType;
 		public readonly int TypeId;
 
 		private TypeDescription(string name, string @namespace,
 								string fullTypeName,
-								Type type,
+								Type resolvedType,
 								int typeId,
 		                        TypeDescription baseType,
 		                        IReadOnlyList<FieldDescription> fields)
@@ -31,20 +31,20 @@ namespace IsabelDb.TypeModels
 			Name = name;
 			Namespace = @namespace;
 			FullTypeName = fullTypeName;
-			Type = type;
+			ResolvedType = resolvedType;
 			TypeId = typeId;
 
 			BaseType = baseType;
 			_fields = fields.ToList();
 		}
 
-		private TypeDescription(Type type,
+		private TypeDescription(Type resolvedType,
 		                        string typename,
 		                        int typeId,
 		                        TypeDescription baseTypeDescription,
 		                        IEnumerable<FieldDescription> fields)
 		{
-			Type = type;
+			ResolvedType = resolvedType;
 			TypeId = typeId;
 
 			var idx = typename.LastIndexOf(".", StringComparison.InvariantCulture);
@@ -107,7 +107,7 @@ namespace IsabelDb.TypeModels
 		{
 			previousDescription.ThrowOnBreakingChanges(currentDescription);
 
-			var type = previousDescription.Type;
+			var type = previousDescription.ResolvedType;
 			var typename = currentDescription.FullTypeName;
 			var typeId = currentDescription.TypeId;
 			var fields = FieldDescription.Merge(previousDescription.Fields, currentDescription.Fields);

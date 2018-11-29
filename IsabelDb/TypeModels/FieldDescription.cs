@@ -94,7 +94,7 @@ namespace IsabelDb.TypeModels
 
 		public void ThrowOnBreakingChanges(FieldDescription otherField)
 		{
-			if (FieldTypeDescription.Type != otherField.FieldTypeDescription.Type)
+			if (FieldTypeDescription.ResolvedType != otherField.FieldTypeDescription.ResolvedType)
 				throw new
 					BreakingChangeException(string.Format("The type of field '{0}' changed from '{1}' to '{2}' which is a breaking change!",
 					                                      Name,

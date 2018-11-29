@@ -65,7 +65,7 @@ namespace IsabelDb.TypeModels
 
 			// Protobuf doesn't allow us to register built-in types
 			// (such as System.String), hence don't try to add those.
-			var type = typeDescription.Type;
+			var type = typeDescription.ResolvedType;
 			if (!TypeModel.IsBuiltIn(type) && !_metaTypes.TryGetValue(type, out var metaType))
 			{
 				metaType = _runtimeTypeModel.Add(type, applyDefaultBehaviour: false);
@@ -82,7 +82,7 @@ namespace IsabelDb.TypeModels
 		{
 			if (typeDescription.SurrogateType != null)
 			{
-				var surrogateType = typeDescription.SurrogateType.Type;
+				var surrogateType = typeDescription.SurrogateType.ResolvedType;
 				if (surrogateType == null)
 					throw new NotImplementedException();
 
@@ -98,7 +98,7 @@ namespace IsabelDb.TypeModels
 						var field = metaType.AddField(fieldDescription.MemberId, member.Name);
 						field.IsRequired = true;
 
-						var fieldType = fieldDescription.FieldTypeDescription.Type;
+						var fieldType = fieldDescription.FieldTypeDescription.ResolvedType;
 						if (IsPrimitiveArray(fieldType))
 							field.IsPacked = true;
 					}
@@ -108,8 +108,8 @@ namespace IsabelDb.TypeModels
 
 		private void AddSubTypeTo(TypeDescription baseType, TypeDescription typeDescription)
 		{
-			var baseMetaType = _metaTypes[baseType.Type];
-			baseMetaType.AddSubType(typeDescription.TypeId, typeDescription.Type);
+			var baseMetaType = _metaTypes[baseType.ResolvedType];
+			baseMetaType.AddSubType(typeDescription.TypeId, typeDescription.ResolvedType);
 		}
 
 		/// <summary>

@@ -119,6 +119,12 @@ namespace IsabelDb.TypeModels
 		}
 
 		[Pure]
+		public TypeDescription GetTypeDescription<T>()
+		{
+			return GetTypeDescription(typeof(T));
+		}
+
+		[Pure]
 		public TypeDescription GetTypeDescription(Type type)
 		{
 			return _typeDescriptionsById[_typesToId[type]];
@@ -192,7 +198,7 @@ namespace IsabelDb.TypeModels
 						if (declaringType != null)
 						{
 							var fieldType = model.TryGetTypeDescription(fieldTypeId);
-							var memberInfo = FieldDescription.TryGetMemberInfo(declaringType.Type, fieldName);
+							var memberInfo = FieldDescription.TryGetMemberInfo(declaringType.ResolvedType, fieldName);
 							if (memberInfo != null)
 							{
 								var memberDescription = FieldDescription.Create(memberInfo,
@@ -229,7 +235,7 @@ namespace IsabelDb.TypeModels
 
 		private void AddOrMerge(TypeDescription currentDescription)
 		{
-			var type = currentDescription.Type;
+			var type = currentDescription.ResolvedType;
 			if (!TryGetTypeDescription(type, out var previousDescription))
 			{
 				AddType(type);
@@ -240,7 +246,7 @@ namespace IsabelDb.TypeModels
 					? GetTypeDescription(currentDescription.BaseType.TypeId)
 					: null;
 				var surrogateType = currentDescription.SurrogateType != null
-					? GetTypeDescription(currentDescription.SurrogateType.Type)
+					? GetTypeDescription(currentDescription.SurrogateType.ResolvedType)
 					: null;
 
 				var mergedDescription = TypeDescription.Merge(previousDescription,
@@ -469,7 +475,7 @@ namespace IsabelDb.TypeModels
 		private void AddTypeDescription(TypeDescription typeDescription)
 		{
 			var id = typeDescription.TypeId;
-			var type = typeDescription.Type;
+			var type = typeDescription.ResolvedType;
 
 			_typeDescriptionsById.Add(id, typeDescription);
 			if (type != null)
@@ -580,7 +586,7 @@ namespace IsabelDb.TypeModels
 
 		private int? GetBaseTypeId(TypeDescription typeDescription)
 		{
-			if (BuiltInProtobufTypes.Contains(typeDescription.Type))
+			if (BuiltInProtobufTypes.Contains(typeDescription.ResolvedType))
 				return null;
 
 			var baseType = typeDescription.BaseType;

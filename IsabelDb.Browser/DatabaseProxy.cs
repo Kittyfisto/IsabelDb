@@ -62,7 +62,7 @@ namespace IsabelDb.Browser
 			var types = new List<Type>();
 			foreach (var typeDescription in typeModel.TypeDescriptions)
 			{
-				if (typeDescription.Type == null)
+				if (typeDescription.ResolvedType == null)
 				{
 					var type = CreateCustomType(moduleBuilder, typeDescription, typeResolver);
 					types.Add(type);
@@ -77,7 +77,7 @@ namespace IsabelDb.Browser
 		                              TypeDescription typeDescription,
 		                              TypeResolver typeResolver)
 		{
-			var baseType = typeDescription.BaseType.Type;
+			var baseType = typeDescription.BaseType.ResolvedType;
 			if (baseType == null)
 			{
 				var name = typeDescription.BaseType.FullTypeName;
@@ -94,7 +94,7 @@ namespace IsabelDb.Browser
 			foreach (var fieldDescription in typeDescription.Fields)
 			{
 				var field = typeBuilder.DefineField(fieldDescription.Name,
-				                                    fieldDescription.FieldTypeDescription.Type,
+				                                    fieldDescription.FieldTypeDescription.ResolvedType,
 				                                    FieldAttributes.Public);
 
 				var attribute = typeof(DataMemberAttribute);

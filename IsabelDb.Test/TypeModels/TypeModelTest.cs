@@ -70,7 +70,7 @@ namespace IsabelDb.Test.TypeModels
 					descriptions.Should().Contain(description.SurrogatedType, reason);
 
 				typeModel.GetTypeDescription(description.TypeId).Should().BeSameAs(description, reason);
-				typeModel.GetTypeDescription(description.Type).Should().BeSameAs(description);
+				typeModel.GetTypeDescription(description.ResolvedType).Should().BeSameAs(description);
 			}
 		}
 
@@ -212,7 +212,7 @@ namespace IsabelDb.Test.TypeModels
 			actualDescription.Name.Should().Be(description.Name, reason);
 			actualDescription.Namespace.Should().Be(description.Namespace, reason);
 			actualDescription.FullTypeName.Should().Be(description.FullTypeName, reason);
-			actualDescription.Type.Should().Be(description.Type, reason);
+			actualDescription.ResolvedType.Should().Be(description.ResolvedType, reason);
 			actualDescription.TypeId.Should().Be(description.TypeId, reason);
 			actualDescription.Fields.Should().HaveCount(description.Fields.Count, reason);
 			for (int i = 0; i < actualDescription.Fields.Count; ++i)
@@ -234,12 +234,12 @@ namespace IsabelDb.Test.TypeModels
 			var model = TypeModel.Create(new[] { typeof(IPolymorphicCustomKey) });
 			var description = model.GetTypeDescription(typeof(IPolymorphicCustomKey));
 			description.BaseType.Should().NotBeNull();
-			description.BaseType.Type.Should().Be<object>();
+			description.BaseType.ResolvedType.Should().Be<object>();
 
 			model = Roundtrip(model);
 			description = model.GetTypeDescription(typeof(IPolymorphicCustomKey));
 			description.BaseType.Should().NotBeNull();
-			description.BaseType.Type.Should().Be<object>();
+			description.BaseType.ResolvedType.Should().Be<object>();
 		}
 
 		[Test]
@@ -269,7 +269,7 @@ namespace IsabelDb.Test.TypeModels
 			model.IsTypeRegistered(typeof(object)).Should().BeTrue();
 			model.GetTypeId(typeof(object)).Should().BeGreaterThan(0);
 			model.GetTypeName(typeof(object)).Should().Be("System.Object");
-			model.GetTypeDescription(typeof(object)).Type.Should().Be<object>();
+			model.GetTypeDescription(typeof(object)).ResolvedType.Should().Be<object>();
 			model.GetTypeDescription(typeof(object)).TypeId.Should().Be(model.GetTypeId(typeof(object)));
 			model.TryGetType(model.GetTypeId(typeof(object))).Should().Be<object>();
 
@@ -278,7 +278,7 @@ namespace IsabelDb.Test.TypeModels
 		}
 
 		[Test]
-		public void TestRegisterClass()
+		public void TestRegisterClassWithInterfaces()
 		{
 			var model = TypeModel.Create(new[] { typeof(KeyA) });
 
@@ -430,7 +430,7 @@ namespace IsabelDb.Test.TypeModels
 		{
 			var model = TypeModel.Create(new[] {typeof(SomeEnum)});
 			var description = model.GetTypeDescription(typeof(SomeEnum));
-			description.Type.Should().Be<SomeEnum>();
+			description.ResolvedType.Should().Be<SomeEnum>();
 			description.BaseType.Should().BeNull();
 			description.Name.Should().Be("SomeEnum");
 			description.Namespace.Should().Be("IsabelDb.Test.Entities");
