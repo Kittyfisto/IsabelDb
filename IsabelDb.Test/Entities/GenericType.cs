@@ -3,9 +3,9 @@
 namespace IsabelDb.Test.Entities
 {
 	[DataContract]
-	public sealed class TypeWithEnum
+	public sealed class GenericType<T>
 	{
 		[DataMember]
-		public Int32Enum Value { get; set; }
+		public T Value { get; set; }
 	}
 }

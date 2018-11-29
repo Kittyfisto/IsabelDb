@@ -194,10 +194,20 @@ namespace IsabelDb.Test.TypeModels
 		[Test]
 		public void TestRegisterEnum()
 		{
-			var typeModel = TypeModel.Create(new[] {typeof(SomeEnum)});
-			var description = typeModel.GetTypeDescription<SomeEnum>();
-			description.ResolvedType.Should().Be<SomeEnum>();
+			var typeModel = TypeModel.Create(new[] {typeof(Int32Enum)});
+			var description = typeModel.GetTypeDescription<Int32Enum>();
+			description.ResolvedType.Should().Be<Int32Enum>();
 			description.Classification.Should().Be(TypeClassification.Enum);
+			description.Name.Should().Be("Int32Enum");
+			description.Namespace.Should().Be("IsabelDb.Test.Entities");
+			description.Fields.Should().HaveCount(3, "because the enum has 3 members");
+			description.Fields[0].Name.Should().Be("A");
+			description.Fields[0].MemberId.Should().Be(0);
+			description.Fields[1].Name.Should().Be("B");
+			description.Fields[1].MemberId.Should().Be(1);
+			description.Fields[2].Name.Should().Be("C");
+			description.Fields[2].MemberId.Should().Be(2);
+
 			var other = description.UnderlyingEnumTypeDescription;
 			other.Should().NotBeNull();
 			other.ResolvedType.Should().Be<int>();
@@ -206,36 +216,46 @@ namespace IsabelDb.Test.TypeModels
 		[Test]
 		public void TestRoundtripEnum()
 		{
-			var typeModel = Roundtrip(TypeModel.Create(new[] {typeof(SomeEnum)}));
-			var description = typeModel.GetTypeDescription<SomeEnum>();
+			var typeModel = Roundtrip(TypeModel.Create(new[] {typeof(Int32Enum)}));
+			var description = typeModel.GetTypeDescription<Int32Enum>();
 			description.Classification.Should().Be(TypeClassification.Enum);
+			description.Name.Should().Be("Int32Enum");
+			description.Namespace.Should().Be("IsabelDb.Test.Entities");
+			description.Fields.Should().HaveCount(3, "because the enum has 3 members");
+			description.Fields[0].Name.Should().Be("A");
+			description.Fields[0].MemberId.Should().Be(0);
+			description.Fields[1].Name.Should().Be("B");
+			description.Fields[1].MemberId.Should().Be(1);
+			description.Fields[2].Name.Should().Be("C");
+			description.Fields[2].MemberId.Should().Be(2);
+
 			var other = description.UnderlyingEnumTypeDescription;
 			other.Should().NotBeNull();
 			other.ResolvedType.Should().Be<int>();
 		}
 
 		[Test]
+		public void TestRegisterUInt32Enum()
+		{
+			new Action(() => TypeModel.Create(new[] {typeof(UInt32Enum)}))
+				.Should().Throw<NotSupportedException>()
+				.WithMessage("The type 'IsabelDb.Test.Entities.UInt32Enum' uses 'System.UInt32' as its underlying type, but this is unfortunately not supported.");
+		}
+
+		[Test]
 		public void TestRegisterInt64Enum()
 		{
-			var typeModel = TypeModel.Create(new[] {typeof(Int64Enum)});
-			var description = typeModel.GetTypeDescription<Int64Enum>();
-			description.ResolvedType.Should().Be<Int64Enum>();
-			description.Classification.Should().Be(TypeClassification.Enum);
-			var other = description.UnderlyingEnumTypeDescription;
-			other.Should().NotBeNull();
-			other.ResolvedType.Should().Be<long>();
+			new Action(() => TypeModel.Create(new[] {typeof(Int64Enum)}))
+				.Should().Throw<NotSupportedException>()
+				.WithMessage("The type 'IsabelDb.Test.Entities.Int64Enum' uses 'System.Int64' as its underlying type, but this is unfortunately not supported.");
 		}
 
 		[Test]
 		public void TestRegisterUInt64Enum()
 		{
-			var typeModel = TypeModel.Create(new[] {typeof(UInt64Enum)});
-			var description = typeModel.GetTypeDescription<UInt64Enum>();
-			description.ResolvedType.Should().Be<UInt64Enum>();
-			description.Classification.Should().Be(TypeClassification.Enum);
-			var other = description.UnderlyingEnumTypeDescription;
-			other.Should().NotBeNull();
-			other.ResolvedType.Should().Be<ulong>();
+			new Action(() => TypeModel.Create(new[] {typeof(UInt64Enum)}))
+				.Should().Throw<NotSupportedException>()
+				.WithMessage("The type 'IsabelDb.Test.Entities.UInt64Enum' uses 'System.UInt64' as its underlying type, but this is unfortunately not supported.");
 		}
 
 		[Test]
@@ -546,18 +566,6 @@ namespace IsabelDb.Test.TypeModels
 		{
 			var model = TypeModel.Create(new Type[0]);
 			model.TryGetType(42).Should().BeNull();
-		}
-
-		[Test]
-		public void TestEnum()
-		{
-			var model = TypeModel.Create(new[] {typeof(SomeEnum)});
-			var description = model.GetTypeDescription(typeof(SomeEnum));
-			description.ResolvedType.Should().Be<SomeEnum>();
-			description.BaseType.Should().BeNull();
-			description.Name.Should().Be("SomeEnum");
-			description.Namespace.Should().Be("IsabelDb.Test.Entities");
-			description.Fields.Should().BeEmpty();
 		}
 	}
 }

@@ -8,14 +8,14 @@ namespace IsabelDb.Test.Collections.Dictionary
 	[TestFixture]
 	//[Ignore("Not yet implemented")]
 	public sealed class EnumKeyTest
-		: AbstractDictionaryObjectStoreTest<SomeEnum>
+		: AbstractDictionaryObjectStoreTest<Int32Enum>
 	{
-		protected override IEnumerable<Type> CustomTypes => new []{typeof(SomeEnum)};
+		protected override IEnumerable<Type> CustomTypes => new []{typeof(Int32Enum)};
 
-		protected override SomeEnum SomeKey => SomeEnum.A;
+		protected override Int32Enum SomeKey => Int32Enum.A;
 
-		protected override SomeEnum DifferentKey => SomeEnum.B;
+		protected override Int32Enum DifferentKey => Int32Enum.B;
 
-		protected override IReadOnlyList<SomeEnum> ManyKeys => new SomeEnum[] { SomeEnum.A, SomeEnum.B, SomeEnum.C };
+		protected override IReadOnlyList<Int32Enum> ManyKeys => new Int32Enum[] { Int32Enum.A, Int32Enum.B, Int32Enum.C };
 	}
 }

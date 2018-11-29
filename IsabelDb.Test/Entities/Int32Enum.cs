@@ -1,6 +1,6 @@
 ﻿namespace IsabelDb.Test.Entities
 {
-	public enum SomeEnum
+	public enum Int32Enum
 	{
 		A,
 		B,

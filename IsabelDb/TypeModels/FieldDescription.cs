@@ -31,6 +31,12 @@ namespace IsabelDb.TypeModels
 		public MemberInfo Member => _member;
 
 		[Pure]
+		public static FieldDescription Create(string name, int id, TypeDescription underlyingEnumTypeDescription)
+		{
+			return new FieldDescription(underlyingEnumTypeDescription, name, null, id);
+		}
+
+		[Pure]
 		public static FieldDescription Create(MemberInfo member, TypeDescription typeDescription, int memberId)
 		{
 			var name = GetName(member);
@@ -72,7 +78,24 @@ namespace IsabelDb.TypeModels
 			           .Where(HasDataMemberAttribute)
 			           .ToList();
 		}
-		
+
+		[Pure]
+		public static IReadOnlyList<KeyValuePair<string, int>> FindSerializableEnumMembers(Type type)
+		{
+			if (type == null || !type.IsEnum)
+				return new KeyValuePair<string, int>[0];
+
+			var names = type.GetEnumNames();
+			var values = type.GetEnumValues();
+			var ret = new List<KeyValuePair<string, int>>(names.Length);
+			for (int i = 0; i < names.Length; ++i)
+			{
+				ret.Add(new KeyValuePair<string, int>(names[i], Convert.ToInt32(values.GetValue(i))));
+			}
+
+			return ret;
+		}
+
 		[Pure]
 		private static bool HasDataMemberAttribute(MemberInfo field)
 		{

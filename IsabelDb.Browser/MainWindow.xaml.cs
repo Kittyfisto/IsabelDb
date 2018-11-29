@@ -15,6 +15,7 @@ namespace IsabelDb.Browser
 			_settings = settings;
 			InitializeComponent();
 
+			AllowDrop = true;
 			SizeChanged += OnSizeChanged;
 			LocationChanged += OnLocationChanged;
 			Closing += OnClosing;

@@ -77,6 +77,11 @@ namespace IsabelDb.Browser
 		                              TypeDescription typeDescription,
 		                              TypeResolver typeResolver)
 		{
+			if (typeDescription.Classification == TypeClassification.Enum)
+			{
+				return CreateEnum(moduleBuilder, typeDescription);
+			}
+
 			var baseType = typeDescription.BaseType.ResolvedType;
 			if (baseType == null)
 			{
@@ -84,11 +89,36 @@ namespace IsabelDb.Browser
 				baseType = typeResolver.Resolve(name);
 			}
 
+			return CreateCustomClass(moduleBuilder, typeDescription, baseType);
+		}
+
+		private static Type CreateEnum(ModuleBuilder moduleBuilder, TypeDescription typeDescription)
+		{
+			var typeBuilder = moduleBuilder.DefineEnum(typeDescription.FullTypeName,
+			                                           TypeAttributes.Public,
+			                                           typeDescription.UnderlyingEnumTypeDescription.ResolvedType);
+
+			var attributeBuilder =
+				new CustomAttributeBuilder(typeof(DataContractAttribute).GetConstructor(new Type[0]), new object[0]);
+			typeBuilder.SetCustomAttribute(attributeBuilder);
+
+			foreach (var fieldDescription in typeDescription.Fields)
+			{
+				var fieldBuilder = typeBuilder.DefineLiteral(fieldDescription.Name, fieldDescription.MemberId);
+				fieldBuilder.SetCustomAttribute(new CustomAttributeBuilder(typeof(EnumMemberAttribute).GetConstructor(new Type[0]), new object[0]));
+			}
+
+			return typeBuilder.CreateType();
+		}
+
+		private static Type CreateCustomClass(ModuleBuilder moduleBuilder, TypeDescription typeDescription, Type baseType)
+		{
 			var typeBuilder = moduleBuilder.DefineType(typeDescription.FullTypeName,
 			                                           TypeAttributes.Class | TypeAttributes.Public,
 			                                           baseType);
 
-			var attributeBuilder = new CustomAttributeBuilder(typeof(DataContractAttribute).GetConstructor(new Type[0]), new object[0]);
+			var attributeBuilder =
+				new CustomAttributeBuilder(typeof(DataContractAttribute).GetConstructor(new Type[0]), new object[0]);
 			typeBuilder.SetCustomAttribute(attributeBuilder);
 
 			foreach (var fieldDescription in typeDescription.Fields)

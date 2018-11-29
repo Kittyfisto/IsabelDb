@@ -72,7 +72,7 @@ namespace IsabelDb.Browser
 		ObjectModel CreateModel(object value)
 		{
 			var type = value.GetType();
-			if (_nativeTypes.Contains(type))
+			if (IsNativeType(type))
 			{
 				return new ObjectModel
 				{
@@ -93,6 +93,18 @@ namespace IsabelDb.Browser
 			                             .Where(x => x.GetCustomAttribute<DataMemberAttribute>() != null),
 			                         type.GetFields(BindingFlags.Public | BindingFlags.Instance)
 			                             .Where(x => x.GetCustomAttribute<DataMemberAttribute>() != null));
+		}
+
+		[Pure]
+		private bool IsNativeType(Type type)
+		{
+			if (_nativeTypes.Contains(type))
+				return true;
+
+			if (type.IsEnum)
+				return true;
+
+			return false;
 		}
 
 		private bool TryCreateModel(object value, Type type, out ObjectModel objectModel)

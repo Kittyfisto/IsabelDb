@@ -18,7 +18,16 @@ namespace IsabelDb.TypeModels
 		public readonly string FullTypeName;
 		public readonly string Name;
 		public readonly string Namespace;
+
+		/// <summary>
+		/// The .NET <see cref="Type"/> represented by this description, IF it could be resolved.
+		/// null otherwise.
+		/// </summary>
 		public readonly Type ResolvedType;
+
+		/// <summary>
+		/// The numeric value identifying this values of this type when serialized.
+		/// </summary>
 		public readonly int TypeId;
 
 		/// <summary>
@@ -29,7 +38,7 @@ namespace IsabelDb.TypeModels
 		/// <summary>
 		/// When this type is an enum (<see cref="Classification"/> == <see cref="TypeClassification.Enum"/>),
 		/// then this is a description of the underlying enum type, i.e. <see cref="System.Int32"/>, etc...
-		/// Otherwise is null.
+		/// null otherwise.
 		/// </summary>
 		public readonly TypeDescription UnderlyingEnumTypeDescription;
 

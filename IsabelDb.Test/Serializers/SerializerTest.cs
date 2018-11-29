@@ -9,7 +9,6 @@ using IsabelDb.Test.Entities;
 using IsabelDb.TypeModels;
 using IsabelDb.TypeModels.Surrogates;
 using NUnit.Framework;
-using ProtoBuf.Meta;
 using TypeModel = IsabelDb.TypeModels.TypeModel;
 
 namespace IsabelDb.Test.Serializers
@@ -24,7 +23,11 @@ namespace IsabelDb.Test.Serializers
 		public static IEnumerable<int[]> IntArrayValues => new[] {null, new[] {0}, IntValues.ToArray()};
 		public static IEnumerable<RowId> ValueKeyValues => new[]{new RowId(0), new RowId(long.MinValue), new RowId(long.MaxValue) };
 
-		public static IEnumerable<SomeEnum> SomeEnumValues => Enum.GetValues(typeof(SomeEnum)).Cast<SomeEnum>().ToList();
+		public static IEnumerable<SByteEnum> SByteEnumValues => Enum.GetValues(typeof(SByteEnum)).Cast<SByteEnum>().ToList();
+		public static IEnumerable<ByteEnum> ByteEnumValues => Enum.GetValues(typeof(ByteEnum)).Cast<ByteEnum>().ToList();
+		public static IEnumerable<UInt16Enum> UInt16EnumValues => Enum.GetValues(typeof(UInt16Enum)).Cast<UInt16Enum>().ToList();
+		public static IEnumerable<Int16Enum> Int16EnumValues => Enum.GetValues(typeof(Int16Enum)).Cast<Int16Enum>().ToList();
+		public static IEnumerable<Int32Enum> Int32EnumValues => Enum.GetValues(typeof(Int32Enum)).Cast<Int32Enum>().ToList();
 
 		public static IEnumerable<short?> NullableShortValues =>
 			new short?[] {short.MinValue, -1, 0, 1, short.MaxValue, null};
@@ -54,27 +57,34 @@ namespace IsabelDb.Test.Serializers
 			new Version(1, 2, 3, 4)
 		};
 
-		//[Test]
-		//public void Test([Values(SomeEnum.A, SomeEnum.B, SomeEnum.C)] SomeEnum enumValue)
-		//{
-		//	var tm = ProtoBuf.Meta.TypeModel.Create();
-		//	var objectType = tm.Add(typeof(object), false);
-		//	tm.Add(typeof(SomeClass), true);
-		//	tm.Add(typeof(SomeEnum), true);
-		//	tm.Add(typeof(ClassWithObject), true);
+		[Test]
+		public void Test([Values(Int32Enum.A, Int32Enum.B, Int32Enum.C)] Int32Enum enumValue)
+		{
+			var tm = ProtoBuf.Meta.TypeModel.Create();
+			var objectType = tm.Add(typeof(object), false);
+			tm.Add(typeof(SomeClass), true);
+			var someEnumType = tm.Add(typeof(Int32Enum), false);
+			someEnumType.Add(0, "A");
+			someEnumType.Add(1, "B");
+			someEnumType.Add(2, "C");
 
-		//	objectType.AddSubType(300, typeof(SomeClass));
-		//	objectType.AddSubType(200, typeof(SomeEnum));
+			tm.Add(typeof(ClassWithObject), true);
 
-		//	var stream = new MemoryStream();
-		//	tm.Serialize(stream, new ClassWithObject{Value = enumValue});
-		//	stream.Position = 0;
+			//objectType.AddSubType(300, typeof(SomeClass));
+			//objectType.AddSubType(200, typeof(SomeEnum));
 
-		//	var actualValue = tm.Deserialize(stream, null, typeof(ClassWithObject));
-		//	actualValue.Should().NotBeNull();
-		//	actualValue.Should().BeOfType<ClassWithObject>();
-		//	((ClassWithObject) actualValue).Value.Should().Be(enumValue);
-		//}
+			var stream = new MemoryStream();
+			//tm.Serialize(stream, new ClassWithObject{Value = enumValue});
+			tm.Serialize(stream, enumValue);
+			stream.Position = 0;
+
+			var actualValue = tm.Deserialize(stream, null, typeof(Int32Enum));
+			actualValue.Should().Be(enumValue);
+			//var actualValue = tm.Deserialize(stream, null, typeof(ClassWithObject));
+			//actualValue.Should().NotBeNull();
+			//actualValue.Should().BeOfType<ClassWithObject>();
+			//((ClassWithObject) actualValue).Value.Should().Be(enumValue);
+		}
 
 		[Test]
 		[RequriedBehaviour]
@@ -209,7 +219,42 @@ namespace IsabelDb.Test.Serializers
 		}
 
 		[Test]
-		public void TestRoundtripTypeWithEnum([ValueSource(nameof(SomeEnumValues))] SomeEnum value)
+		public void TestRoundtripByteEnum([ValueSource(nameof(ByteEnumValues))] ByteEnum value)
+		{
+			Roundtrip(value).Should().Be(value);
+			Roundtrip(new GenericType<ByteEnum> {Value = value}).Value.Should().Be(value);
+		}
+
+		[Test]
+		public void TestRoundtripSByteEnum([ValueSource(nameof(SByteEnumValues))] SByteEnum value)
+		{
+			Roundtrip(value).Should().Be(value);
+			Roundtrip(new GenericType<SByteEnum> {Value = value}).Value.Should().Be(value);
+		}
+
+		[Test]
+		public void TestRoundtripUInt16Enum([ValueSource(nameof(UInt16EnumValues))] UInt16Enum value)
+		{
+			Roundtrip(value).Should().Be(value);
+			Roundtrip(new GenericType<UInt16Enum> {Value = value}).Value.Should().Be(value);
+		}
+
+		[Test]
+		public void TestRoundtripInt16Enum([ValueSource(nameof(Int16EnumValues))] Int16Enum value)
+		{
+			Roundtrip(value).Should().Be(value);
+			Roundtrip(new GenericType<Int16Enum> {Value = value}).Value.Should().Be(value);
+		}
+
+		[Test]
+		public void TestRoundtripInt32Enum([ValueSource(nameof(Int32EnumValues))] Int32Enum value)
+		{
+			Roundtrip(value).Should().Be(value);
+			Roundtrip(new GenericType<Int32Enum> {Value = value}).Value.Should().Be(value);
+		}
+
+		[Test]
+		public void TestRoundtripTypeWithEnum([ValueSource(nameof(Int32EnumValues))] Int32Enum value)
 		{
 			var obj = new TypeWithEnum
 			{

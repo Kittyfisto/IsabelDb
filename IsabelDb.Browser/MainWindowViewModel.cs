@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.IO;
 using System.Net;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -52,31 +53,34 @@ namespace IsabelDb.Browser
 
 		public MainWindowViewModel()
 		{
-			//OpenFile(@"C:\Users\Simon\Documents\GitHub\IsabelDb\LocalTestData\Test.isdb");
-			var database = global::IsabelDb.Database.CreateInMemory(new Type[0]);
-			var bag = database.GetBag<object>("A");
-			bag.Put(1337);
-			bag.Put(9001);
-			bag.Put(DateTime.Now);
-			bag.Put(DateTime.UtcNow);
-			bag.Put(IPAddress.Loopback);
-			bag.Put(IPAddress.Any);
-			bag.Put(IPAddress.IPv6Loopback);
-			bag.Put(IPAddress.IPv6Any);
-			bag.Put(new Version(1, 0));
-			bag.Put(new Version(1, 2, 3));
-			bag.Put(new Version(1, 2, 3, 4));
-			bag.Put("Stuff");
+			var path = Path.GetTempFileName();
+			using (var database = global::IsabelDb.Database.OpenOrCreate(path, new[] {typeof(ProcessorArchitecture)}))
+			{
+				var bag = database.GetBag<object>("A");
+				bag.Put(1337);
+				bag.Put(9001);
+				bag.Put(DateTime.Now);
+				bag.Put(DateTime.UtcNow);
+				bag.Put(IPAddress.Loopback);
+				bag.Put(IPAddress.Any);
+				bag.Put(IPAddress.IPv6Loopback);
+				bag.Put(IPAddress.IPv6Any);
+				bag.Put(new Version(1, 0));
+				bag.Put(new Version(1, 2, 3));
+				bag.Put(new Version(1, 2, 3, 4));
+				bag.Put(ProcessorArchitecture.Amd64);
+				bag.Put("Stuff");
 
-			var queue = database.GetQueue<int>("B");
-			queue.Enqueue(42);
-			queue.Enqueue(9001);
-			queue.Enqueue(1337);
+				var queue = database.GetQueue<int>("B");
+				queue.Enqueue(42);
+				queue.Enqueue(9001);
+				queue.Enqueue(1337);
 
-			var dictionary = database.GetDictionary<int, string>("C");
-			dictionary.Put(42, "Answer to the Ultimate Question of Life, the Universe, and Everything");
+				var dictionary = database.GetDictionary<int, string>("C");
+				dictionary.Put(42, "Answer to the Ultimate Question of Life, the Universe, and Everything");
+			}
 
-			Database = new DatabaseViewModel(new DatabaseProxy(database));
+			Database = new DatabaseViewModel(new DatabaseProxy(path));
 		}
 
 		public event PropertyChangedEventHandler PropertyChanged;

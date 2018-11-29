@@ -449,7 +449,8 @@ namespace IsabelDb.TypeModels
 
 			var fields = FieldDescription.FindSerializableFields(type);
 			var properties = FieldDescription.FindSerializableProperties(type);
-			var members = CreateFieldDescriptions(fields, properties, baseTypeDescription);
+			var enumMembers = FieldDescription.FindSerializableEnumMembers(type);
+			var members = CreateFieldDescriptions(fields, properties, enumMembers, baseTypeDescription, underlyingEnumTypeDescription);
 
 			if (type.IsArray && type.GetArrayRank() == 1)
 			{
@@ -539,8 +540,10 @@ namespace IsabelDb.TypeModels
 		}
 
 		private IReadOnlyList<FieldDescription> CreateFieldDescriptions(IReadOnlyList<FieldInfo> fields,
-		                                                                  IReadOnlyList<PropertyInfo> properties,
-		                                                                  TypeDescription baseTypeDescription)
+		                                                                IReadOnlyList<PropertyInfo> properties,
+		                                                                IReadOnlyList<KeyValuePair<string, int>> enumMembers,
+		                                                                TypeDescription baseTypeDescription,
+		                                                                TypeDescription underlyingEnumTypeDescription)
 		{
 			int nextId = 1;
 
@@ -577,6 +580,12 @@ namespace IsabelDb.TypeModels
 				var typeDescription = Add(property.PropertyType);
 				var id = GetNextId();
 				var description = FieldDescription.Create(property, typeDescription, id);
+				members.Add(description);
+			}
+
+			foreach (var pair in enumMembers)
+			{
+				var description = FieldDescription.Create(pair.Key, pair.Value, underlyingEnumTypeDescription);
 				members.Add(description);
 			}
 
@@ -671,6 +680,13 @@ namespace IsabelDb.TypeModels
 				return null;
 
 			var underlyingType = type.GetEnumUnderlyingType();
+			if (underlyingType == typeof(long) ||
+			    underlyingType == typeof(ulong) ||
+			    underlyingType == typeof(uint))
+				throw new NotSupportedException(string.Format("The type '{0}' uses '{1}' as its underlying type, but this is unfortunately not supported.",
+				                                              type.FullName,
+				                                              underlyingType.FullName));
+
 			var description = Add(underlyingType);
 			return description;
 		}

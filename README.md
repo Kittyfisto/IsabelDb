@@ -121,7 +121,9 @@ IsabelDb works with every custom type if it follows these rules:
 - Fields/Properties which are to be serialized must be marked with the [DataMember] attribute
 - The field/property types which are marked with the [DataMember] attribute must themselves be serializable
 
-These rules are pretty much aligned to what Microsoft expects from a data contract. You may head over to [docs.microsoft.com](https://docs.microsoft.com/en-us/dotnet/framework/wcf/feature-details/how-to-create-a-basic-data-contract-for-a-class-or-structure) for a more detailed explanation.
+These rules are pretty much aligned to what Microsoft expects from a data contract. You may head over to [docs.microsoft.com](https://docs.microsoft.com/en-us/dotnet/framework/wcf/feature-details/how-to-create-a-basic-data-contract-for-a-class-or-structure) for a more detailed explanation.  
+If you're interested in the limits of serialization in this database, head over to the [serialization constraints page](SerializationConstraints.md) for a
+detailed explanation of what isn't possible.
 
 ## Backward compatibility
 
