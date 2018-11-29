@@ -127,6 +127,15 @@ namespace IsabelDb.Collections
 			}
 		}
 
+		#region Overrides of Object
+
+		public override string ToString()
+		{
+			return string.Format("OrderedCollection<{0}, {1}>(\"{2}\")", KeyType.FullName, ValueType.FullName, Name);
+		}
+
+		#endregion
+
 		#endregion
 
 		private void CreateObjectTableIfNecessary()

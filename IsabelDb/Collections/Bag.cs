@@ -13,7 +13,6 @@ namespace IsabelDb.Collections
 		private readonly SQLiteConnection _connection;
 		private readonly string _put;
 		private readonly ISQLiteSerializer<T> _serializer;
-		private readonly string _table;
 		private readonly string _tableName;
 
 		public Bag(SQLiteConnection connection,
@@ -27,7 +26,7 @@ namespace IsabelDb.Collections
 			_serializer = serializer;
 			_tableName = tableName;
 
-			CreateTableIfNecessary(connection, serializer, tableName, out _table);
+			CreateTableIfNecessary(connection, serializer, tableName);
 
 			_put = string.Format("INSERT INTO {0} (value) VALUES (@value)", tableName);
 		}
@@ -46,7 +45,7 @@ namespace IsabelDb.Collections
 
 		public override string ToString()
 		{
-			return _table;
+			return string.Format("Bag<{0}>(\"{1}\")", ValueType.FullName, Name);
 		}
 
 		#endregion
@@ -60,12 +59,11 @@ namespace IsabelDb.Collections
 
 		private static void CreateTableIfNecessary(SQLiteConnection connection,
 		                                           ISQLiteSerializer serializer,
-		                                           string tableName,
-		                                           out string table)
+		                                           string tableName)
 		{
 			using (var command = connection.CreateCommand())
 			{
-				command.CommandText = table =
+				command.CommandText =
 					string.Format("CREATE TABLE IF NOT EXISTS {0} (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, value {1} NOT NULL)",
 					              tableName,
 					              SQLiteHelper.GetAffinity(serializer.DatabaseType));

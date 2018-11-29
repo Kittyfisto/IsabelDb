@@ -235,6 +235,15 @@ namespace IsabelDb.Collections
 			}
 		}
 
+		#region Overrides of Object
+
+		public override string ToString()
+		{
+			return string.Format("Point2DCollection<{0}, {1}>(\"{2}\")", typeof(Point2D).FullName, ValueType.FullName, Name);
+		}
+
+		#endregion
+
 		#endregion
 
 		#region Implementation of IReadOnlySpatial2DCollection<TValue>

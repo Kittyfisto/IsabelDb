@@ -46,7 +46,7 @@ namespace IsabelDb.Collections
 			_getAll = string.Format("SELECT key, value FROM {0}", _tableName);
 			_getByKey = string.Format("SELECT value FROM {0} where key = @key", _tableName);
 			_getByRowId = string.Format("SELECT value FROM {0} WHERE rowid = @rowid", tableName);
-			_removeRowQuery = string.Format("DELETE FROM {0} WHERE rowid = @rowid", _tableName);;
+			_removeRowQuery = string.Format("DELETE FROM {0} WHERE rowid = @rowid", _tableName);
 			_removeQuery = string.Format("DELETE FROM {0} WHERE key = @key", _tableName);
 		}
 
@@ -394,6 +394,15 @@ namespace IsabelDb.Collections
 				transaction.Commit();
 			}
 		}
+
+		#region Overrides of Object
+
+		public override string ToString()
+		{
+			return string.Format("MultiValueDictionary<{0}, {1}>(\"{2}\")", KeyType.FullName, ValueType.FullName, Name);
+		}
+
+		#endregion
 
 		#endregion
 

@@ -11,9 +11,7 @@ namespace IsabelDb.Collections
 	{
 		private readonly SQLiteConnection _connection;
 		private readonly ISQLiteSerializer<T> _serializer;
-		private readonly string _tableName;
 		private readonly string _put;
-		private string _table;
 		private readonly string _tryPeek;
 		private readonly string _remove;
 
@@ -26,13 +24,12 @@ namespace IsabelDb.Collections
 		{
 			_connection = connection;
 			_serializer = serializer;
-			_tableName = tableName;
 
-			CreateTableIfNecessary(connection, serializer, tableName, out _table);
+			CreateTableIfNecessary(connection, serializer, tableName);
 
 			_put = string.Format("INSERT INTO {0} (value) VALUES (@value)", tableName);
 			_tryPeek = string.Format("SELECT id, value FROM {0} LIMIT 0, 1", tableName);
-			_remove = string.Format("DELETE FROM {0} WHERE id = @id", _tableName);
+			_remove = string.Format("DELETE FROM {0} WHERE id = @id", tableName);
 		}
 
 		#region Overrides of AbstractCollection
@@ -95,6 +92,15 @@ namespace IsabelDb.Collections
 			return TryPeek(out var unused, out value);
 		}
 
+		#region Overrides of Object
+
+		public override string ToString()
+		{
+			return string.Format("Queue<{0}>(\"{1}\")", ValueType.FullName, Name);
+		}
+
+		#endregion
+
 		#endregion
 
 		private void Remove(RowId rowId)
@@ -132,12 +138,11 @@ namespace IsabelDb.Collections
 
 		private static void CreateTableIfNecessary(SQLiteConnection connection,
 		                                           ISQLiteSerializer serializer,
-		                                           string tableName,
-		                                           out string table)
+		                                           string tableName)
 		{
 			using (var command = connection.CreateCommand())
 			{
-				command.CommandText = table =
+				command.CommandText =
 					string.Format("CREATE TABLE IF NOT EXISTS {0} (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, value {1} NOT NULL)",
 					              tableName,
 					              SQLiteHelper.GetAffinity(serializer.DatabaseType));

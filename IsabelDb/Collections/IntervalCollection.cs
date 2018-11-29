@@ -101,7 +101,6 @@ namespace IsabelDb.Collections
 				var maximumParameter = command.Parameters.Add("@maximum", _keySerializer.DatabaseType);
 				var valueParameter = command.Parameters.Add("@value", _valueSerializer.DatabaseType);
 
-				var ret = new List<RowId>();
 				foreach (var pair in values)
 				{
 					var interval = pair.Key;
@@ -113,8 +112,6 @@ namespace IsabelDb.Collections
 					maximumParameter.Value = _keySerializer.Serialize(interval.Maximum);
 					valueParameter.Value = _valueSerializer.Serialize(value);
 					command.ExecuteNonQuery();
-
-					ret.Add(new RowId(id));
 				}
 
 				transaction.Commit();
@@ -214,6 +211,15 @@ namespace IsabelDb.Collections
 				command.ExecuteNonQuery();
 			}
 		}
+
+		#region Overrides of Object
+
+		public override string ToString()
+		{
+			return string.Format("IntervalCollection<{0}, {1}>(\"{2}\")", KeyType.FullName, ValueType.FullName, Name);
+		}
+
+		#endregion
 
 		#endregion
 

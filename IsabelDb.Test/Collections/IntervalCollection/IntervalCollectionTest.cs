@@ -43,6 +43,18 @@ namespace IsabelDb.Test.Collections.IntervalCollection
 		}
 
 		[Test]
+		public void TestToString()
+		{
+			using (var connection = CreateConnection())
+			{
+				using (var db = CreateDatabase(connection))
+				{
+					db.GetIntervalCollection<int, string>("Stuff").ToString().Should().Be("IntervalCollection<System.Int32, System.String>(\"Stuff\")");
+				}
+			}
+		}
+
+		[Test]
 		public void TestByteKey()
 		{
 			TestKeyLimits(byte.MinValue, byte.MaxValue);

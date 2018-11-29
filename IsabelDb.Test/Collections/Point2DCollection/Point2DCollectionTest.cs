@@ -24,6 +24,18 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 		}
 
 		[Test]
+		public void TestToString()
+		{
+			using (var connection = CreateConnection())
+			{
+				using (var db = CreateDatabase(connection))
+				{
+					db.GetPoint2DCollection<string>("Stuff").ToString().Should().Be("Point2DCollection<IsabelDb.Point2D, System.String>(\"Stuff\")");
+				}
+			}
+		}
+
+		[Test]
 		public void TestGetAllKeys1()
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))

@@ -21,6 +21,18 @@ namespace IsabelDb.Test.Collections.Dictionary
 		}
 
 		[Test]
+		public void TestToString()
+		{
+			using (var connection = CreateConnection())
+			{
+				using (var db = CreateDatabase(connection))
+				{
+					db.GetDictionary<int, string>("Stuff").ToString().Should().Be("Dictionary<System.Int32, System.String>(\"Stuff\")");
+				}
+			}
+		}
+
+		[Test]
 		public void TestMove1()
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))

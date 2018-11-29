@@ -36,6 +36,18 @@ namespace IsabelDb.Test.Collections.Bag
 		}
 
 		[Test]
+		public void TestToString()
+		{
+			using (var connection = CreateConnection())
+			{
+				using (var db = CreateDatabase(connection))
+				{
+					db.GetBag<string>("Stuff").ToString().Should().Be("Bag<System.String>(\"Stuff\")");
+				}
+			}
+		}
+
+		[Test]
 		[Description("Verifies that the database refuses to return an IBag object for bags who's value type cannot be resolved")]
 		public void TestUnresolvableBagType()
 		{

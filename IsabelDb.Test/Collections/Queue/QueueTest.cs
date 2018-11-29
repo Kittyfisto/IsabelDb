@@ -10,6 +10,18 @@ namespace IsabelDb.Test.Collections.Queue
 		: AbstractCollectionTest<IQueue<string>>
 	{
 		[Test]
+		public void TestToString()
+		{
+			using (var connection = CreateConnection())
+			{
+				using (var db = CreateDatabase(connection))
+				{
+					db.GetQueue<string>("Stuff").ToString().Should().Be("Queue<System.String>(\"Stuff\")");
+				}
+			}
+		}
+
+		[Test]
 		public void TestEnqueueDequeue()
 		{
 			using (var connection = CreateConnection())

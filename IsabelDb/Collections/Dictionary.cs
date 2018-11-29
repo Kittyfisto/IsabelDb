@@ -15,12 +15,6 @@ namespace IsabelDb.Collections
 
 		private readonly ISQLiteSerializer<TKey> _keySerializer;
 
-		#region Table
-
-		private readonly string _table;
-
-		#endregion
-
 		private readonly string _tableName;
 		private readonly ISQLiteSerializer<TValue> _valueSerializer;
 
@@ -37,7 +31,7 @@ namespace IsabelDb.Collections
 			_keySerializer = keySerializer;
 			_valueSerializer = valueSerializer;
 
-			CreateObjectTableIfNecessary(out _table);
+			CreateObjectTableIfNecessary();
 
 			_getAllQuery = string.Format("SELECT key, value FROM {0}", tableName);
 			_getAllKeysQuery = string.Format("SELECT key FROM {0}", tableName);
@@ -259,7 +253,7 @@ namespace IsabelDb.Collections
 
 		public override string ToString()
 		{
-			return _table;
+			return string.Format("Dictionary<{0}, {1}>(\"{2}\")", KeyType.FullName, ValueType.FullName, Name);
 		}
 
 		#endregion
@@ -289,7 +283,7 @@ namespace IsabelDb.Collections
 			return _connection.BeginTransaction();
 		}
 
-		private void CreateObjectTableIfNecessary(out string table)
+		private void CreateObjectTableIfNecessary()
 		{
 			using (var command = _connection.CreateCommand())
 			{
@@ -299,7 +293,7 @@ namespace IsabelDb.Collections
 				builder.AppendFormat("key {0} PRIMARY KEY NOT NULL", SQLiteHelper.GetAffinity(_keySerializer.DatabaseType));
 				builder.AppendFormat(",value {0} NOT NULL", SQLiteHelper.GetAffinity(_valueSerializer.DatabaseType));
 				builder.Append(")");
-				command.CommandText = table = builder.ToString();
+				command.CommandText = builder.ToString();
 				command.ExecuteNonQuery();
 			}
 		}

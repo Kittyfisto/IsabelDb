@@ -20,6 +20,18 @@ namespace IsabelDb.Test.Collections.OrderedCollection
 		}
 
 		[Test]
+		public void TestToString()
+		{
+			using (var connection = CreateConnection())
+			{
+				using (var db = CreateDatabase(connection))
+				{
+					db.GetOrderedCollection<int, string>("Stuff").ToString().Should().Be("OrderedCollection<System.Int32, System.String>(\"Stuff\")");
+				}
+			}
+		}
+
+		[Test]
 		public void TestGetGetOrderedCollectionDifferentKeyTypes()
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))

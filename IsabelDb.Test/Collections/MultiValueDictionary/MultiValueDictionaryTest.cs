@@ -20,6 +20,18 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		}
 
 		[Test]
+		public void TestToString()
+		{
+			using (var connection = CreateConnection())
+			{
+				using (var db = CreateDatabase(connection))
+				{
+					db.GetMultiValueDictionary<int, string>("Stuff").ToString().Should().Be("MultiValueDictionary<System.Int32, System.String>(\"Stuff\")");
+				}
+			}
+		}
+
+		[Test]
 		public void TestGetGetMultiValueDictionaryDifferentKeyTypes()
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))

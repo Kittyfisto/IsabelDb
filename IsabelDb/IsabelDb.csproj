@@ -76,7 +76,9 @@
     <Compile Include="Exceptions\NoSuchCollectionException.cs" />
     <Compile Include="Exceptions\TypeNotRegisteredException.cs" />
     <Compile Include="Exceptions\WrongCollectionTypeException.cs" />
+    <Compile Include="IHashSet.cs" />
     <Compile Include="IQueue.cs" />
+    <Compile Include="IReadOnlyHashSet.cs" />
     <Compile Include="IReadOnlyPoint2DCollection.cs" />
     <Compile Include="IPoint2DCollection.cs" />
     <Compile Include="Collections\OrderedCollection.cs" />
