@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.IO;
+using System.Reflection;
 using IsabelDb.TypeModels;
+using log4net;
 
 namespace IsabelDb
 {
@@ -11,6 +13,8 @@ namespace IsabelDb
 	/// </summary>
 	public static class Database
 	{
+		private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+
 		/// <summary>
 		///     Creates a new database which is backed by memory.
 		/// </summary>
@@ -21,12 +25,14 @@ namespace IsabelDb
 		/// <returns></returns>
 		public static IDatabase CreateInMemory(IEnumerable<Type> supportedTypes)
 		{
+			Log.DebugFormat("Creating in memory database...");
+
 			var connection = new SQLiteConnection("Data Source=:memory:");
 			try
 			{
 				connection.Open();
 				CreateTables(connection);
-				return new IsabelDb(connection, supportedTypes, true, false);
+				return new IsabelDb(connection, null, supportedTypes, true, false);
 			}
 			catch (Exception)
 			{
@@ -43,7 +49,16 @@ namespace IsabelDb
 		/// <returns></returns>
 		public static IDatabase OpenOrCreate(string databasePath, IEnumerable<Type> supportedTypes)
 		{
-			if (!File.Exists(databasePath)) SQLiteConnection.CreateFile(databasePath);
+			if (!File.Exists(databasePath))
+			{
+				Log.DebugFormat("Creating new database '{0}'...", databasePath);
+
+				SQLiteConnection.CreateFile(databasePath);
+			}
+			else
+			{
+				Log.DebugFormat("Opening database '{0}'...", databasePath);
+			}
 
 			var connectionString = CreateConnectionString(databasePath);
 			var connection = new SQLiteConnection(connectionString);
@@ -51,7 +66,11 @@ namespace IsabelDb
 			{
 				connection.Open();
 				CreateTablesIfNecessary(connection);
-				return new IsabelDb(connection, supportedTypes, true, false);
+				var database = new IsabelDb(connection, databasePath, supportedTypes, true, false);
+
+				Log.DebugFormat("Successfully openeing database '{0}'!", databasePath);
+
+				return database;
 			}
 			catch (Exception)
 			{
@@ -93,8 +112,7 @@ namespace IsabelDb
 			try
 			{
 				connection.Open();
-				EnsureTableSchema(connection);
-				return new IsabelDb(connection, supportedTypes, true, isReadOnly);
+				return Open(connection, databaseFilePath, supportedTypes, isReadOnly);
 			}
 			catch (Exception)
 			{
@@ -103,10 +121,16 @@ namespace IsabelDb
 			}
 		}
 
+		internal static IDatabase Open(SQLiteConnection connection, string databaseFilePath, IEnumerable<Type> supportedTypes, bool isReadOnly)
+		{
+			EnsureTableSchema(connection);
+			return new IsabelDb(connection, databaseFilePath, supportedTypes, true, isReadOnly);
+		}
+
 		private static void CreateTablesIfNecessary(SQLiteConnection connection)
 		{
-			var hasTypesTable = TypeModel.DoesTableExist(connection);
-			var hasStoresTable = ObjectStores.DoesTableExist(connection);
+			var hasTypesTable = TypeModel.DoesTypeTableExist(connection);
+			var hasStoresTable = CollectionsTable.DoesTableExist(connection);
 			if (hasTypesTable && hasStoresTable)
 				return;
 			if (hasTypesTable != hasStoresTable)
@@ -117,8 +141,10 @@ namespace IsabelDb
 
 		internal static void CreateTables(SQLiteConnection connection)
 		{
+			VariablesTable.CreateTable(connection);
+
 			TypeModel.CreateTable(connection);
-			ObjectStores.CreateTable(connection);
+			CollectionsTable.CreateTable(connection);
 		}
 
 		internal static bool TableExists(SQLiteConnection connection, string tableName)
@@ -134,10 +160,12 @@ namespace IsabelDb
 
 		internal static void EnsureTableSchema(SQLiteConnection connection)
 		{
-			if (!TypeModel.DoesTableExist(connection))
-				throw new NotImplementedException();
-			if (!ObjectStores.DoesTableExist(connection))
-				throw new NotImplementedException();
+			if (!VariablesTable.DoesTableExist(connection))
+				throw new IncompatibleDatabaseSchemaException(string.Format("The database is missing the '{0}' table. It may have been created with an early vesion of IsabelDb or it may not even be an IsabelDb file. Are you sure the path is correct?", VariablesTable.TableName));
+			if (!TypeModel.DoesTypeTableExist(connection))
+				throw new IncompatibleDatabaseSchemaException(string.Format("The database is missing the '{0}' table. The table may have been deleted or this may not even be an IsabelDb file. Are you sure the path is correct?", TypeModel.TypeTableName));
+			if (!CollectionsTable.DoesTableExist(connection))
+				throw new IncompatibleDatabaseSchemaException(string.Format("The database is missing the '{0}' table. The table may have been deleted or this may not even be an IsabelDb file. Are you sure the path is correct?", CollectionsTable.TableName));
 		}
 
 		internal static string CreateConnectionString(string databaseIsdb)

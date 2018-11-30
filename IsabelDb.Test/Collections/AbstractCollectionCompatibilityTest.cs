@@ -20,12 +20,12 @@ namespace IsabelDb.Test.Collections
 
 		protected IDatabase CreateDatabase(SQLiteConnection connection, params Type[] types)
 		{
-			return new IsabelDb(connection, types, disposeConnection: false, isReadOnly: false);
+			return new IsabelDb(connection, null, types, disposeConnection: false, isReadOnly: false);
 		}
 
 		protected IDatabase CreateReadOnlyDatabase(SQLiteConnection connection, params Type[] types)
 		{
-			return new IsabelDb(connection, types, disposeConnection: false, isReadOnly: true);
+			return new IsabelDb(connection, null, types, disposeConnection: false, isReadOnly: true);
 		}
 
 		protected abstract ICollection<T> GetCollection<T>(IDatabase db, string name);

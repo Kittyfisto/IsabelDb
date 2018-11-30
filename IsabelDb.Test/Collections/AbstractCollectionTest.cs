@@ -186,7 +186,7 @@ namespace IsabelDb.Test.Collections
 		{
 			using (var connection = CreateConnection())
 			{
-				using (var db = new IsabelDb(connection, NoCustomTypes, false, false))
+				using (var db = new IsabelDb(connection, null, NoCustomTypes, false, false))
 				{
 					db.Collections.Should().BeEmpty();
 					var collection = GetCollection(db, "Stuff");
@@ -200,7 +200,7 @@ namespace IsabelDb.Test.Collections
 		{
 			using (var connection = CreateConnection())
 			{
-				using (var db = new IsabelDb(connection, NoCustomTypes, false, false))
+				using (var db = new IsabelDb(connection, null, NoCustomTypes, false, false))
 				{
 					var collection = GetCollection(db, "For The Fallen Dreams");
 					collection.Name.Should().Be("For The Fallen Dreams");
@@ -284,7 +284,7 @@ namespace IsabelDb.Test.Collections
 		public void TestGetNonExistantCollectionInReadOnlyDatabase()
 		{
 			using (var connection = CreateConnection())
-			using (var db = new IsabelDb(connection, NoCustomTypes, false, isReadOnly: true))
+			using (var db = new IsabelDb(connection, null, NoCustomTypes, false, isReadOnly: true))
 			{
 				new Action(() => GetCollection((IDatabase) db, "Stuff"))
 					.Should().Throw<NoSuchCollectionException>()
@@ -297,13 +297,13 @@ namespace IsabelDb.Test.Collections
 		{
 			using (var connection = CreateConnection())
 			{
-				using (var db = new IsabelDb(connection, NoCustomTypes, false, false))
+				using (var db = new IsabelDb(connection, null, NoCustomTypes, false, false))
 				{
 					var collection = GetCollection(db, "Stuff");
 					Put(collection, "One");
 				}
 
-				using (var db = new IsabelDb(connection, NoCustomTypes, false, isReadOnly: true))
+				using (var db = new IsabelDb(connection, null, NoCustomTypes, false, isReadOnly: true))
 				{
 					var stuff = GetCollection(db, "Stuff");
 					stuff.GetAllValues().Should().Equal("One");
@@ -322,13 +322,13 @@ namespace IsabelDb.Test.Collections
 		{
 			using (var connection = CreateConnection())
 			{
-				using (var db = new IsabelDb(connection, NoCustomTypes, false, false))
+				using (var db = new IsabelDb(connection, null, NoCustomTypes, false, false))
 				{
 					var collection = GetCollection(db, "Stuff");
 					Put(collection, "One");
 				}
 
-				using (var db = new IsabelDb(connection, NoCustomTypes, false, isReadOnly: true))
+				using (var db = new IsabelDb(connection, null, NoCustomTypes, false, isReadOnly: true))
 				{
 					var collection = GetCollection(db, "Stuff");
 					collection.GetAllValues().Should().Equal("One");
@@ -347,13 +347,13 @@ namespace IsabelDb.Test.Collections
 		{
 			using (var connection = CreateConnection())
 			{
-				using (var db = new IsabelDb(connection, NoCustomTypes, false, false))
+				using (var db = new IsabelDb(connection, null, NoCustomTypes, false, false))
 				{
 					var collection = GetCollection(db, "Stuff");
 					Put(collection, "One");
 				}
 
-				using (var db = new IsabelDb(connection, NoCustomTypes, false, isReadOnly: true))
+				using (var db = new IsabelDb(connection, null, NoCustomTypes, false, isReadOnly: true))
 				{
 					var collection = GetCollection(db, "Stuff");
 					collection.GetAllValues().Should().Equal("One");
@@ -372,13 +372,13 @@ namespace IsabelDb.Test.Collections
 		{
 			using (var connection = CreateConnection())
 			{
-				using (var db = new IsabelDb(connection, NoCustomTypes, false, false))
+				using (var db = new IsabelDb(connection, null, NoCustomTypes, false, false))
 				{
 					var collection = GetCollection(db, "Stuff");
 					Put(collection, "One");
 				}
 
-				using (var db = new IsabelDb(connection, NoCustomTypes, false, isReadOnly: true))
+				using (var db = new IsabelDb(connection, null, NoCustomTypes, false, isReadOnly: true))
 				{
 					var collection = GetCollection(db, "Stuff");
 					collection.GetAllValues().Should().Equal("One");
@@ -397,14 +397,14 @@ namespace IsabelDb.Test.Collections
 		{
 			using (var connection = CreateConnection())
 			{
-				using (var db = new IsabelDb(connection, NoCustomTypes, false, false))
+				using (var db = new IsabelDb(connection, null, NoCustomTypes, false, false))
 				{
 					db.Collections.Should().BeEmpty();
 					var collection = GetCollection(db, "Stuff");
 					db.Collections.Should().Equal(collection);
 				}
 
-				using (var db = new IsabelDb(connection, NoCustomTypes, false, isReadOnly: true))
+				using (var db = new IsabelDb(connection, null, NoCustomTypes, false, isReadOnly: true))
 				{
 					db.Collections.Should().HaveCount(1);
 					var collection = db.Collections.First();
@@ -642,12 +642,12 @@ namespace IsabelDb.Test.Collections
 
 		protected IDatabase CreateDatabase(SQLiteConnection connection, params Type[] types)
 		{
-			return new IsabelDb(connection, types, disposeConnection: false, isReadOnly: false);
+			return new IsabelDb(connection, null, types, disposeConnection: false, isReadOnly: false);
 		}
 
 		protected IReadOnlyDatabase CreateReadOnlyDatabase(SQLiteConnection connection, params Type[] types)
 		{
-			return new IsabelDb(connection, types, disposeConnection: false, isReadOnly: true);
+			return new IsabelDb(connection, null, types, disposeConnection: false, isReadOnly: true);
 		}
 	}
 }

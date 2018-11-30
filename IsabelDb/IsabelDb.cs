@@ -10,16 +10,22 @@ namespace IsabelDb
 	{
 		private readonly SQLiteConnection _connection;
 		private readonly bool _disposeConnection;
-		private readonly ObjectStores _objectStores;
+		private readonly string _fileName;
+		private readonly CollectionsTable _objectStores;
+		private readonly VariablesTable _variables;
 
-		internal IsabelDb(SQLiteConnection connection, IEnumerable<Type> supportedTypes,
-			bool disposeConnection,
-			bool isReadOnly)
+		internal IsabelDb(SQLiteConnection connection,
+		                  string fileName,
+		                  IEnumerable<Type> supportedTypes,
+		                  bool disposeConnection,
+		                  bool isReadOnly)
 		{
 			_connection = connection;
+			_fileName = fileName;
 			_disposeConnection = disposeConnection;
 
-			_objectStores = new ObjectStores(connection, supportedTypes.ToList(), isReadOnly);
+			_variables = new VariablesTable(connection);
+			_objectStores = new CollectionsTable(connection, supportedTypes.ToList(), isReadOnly);
 		}
 
 		/// <inheritdoc />
@@ -84,10 +90,7 @@ namespace IsabelDb
 		public void Remove(string collectionName)
 		{
 			var collection = Collections.FirstOrDefault(x => string.Equals(x.Name, collectionName));
-			if (collection != null)
-			{
-				Remove(collection);
-			}
+			if (collection != null) Remove(collection);
 		}
 
 		public void Compact()
@@ -121,7 +124,8 @@ namespace IsabelDb
 			return _objectStores.GetIntervalCollection<TKey, TValue>(name);
 		}
 
-		public IOrderedCollection<TKey, TValue> GetOrderedCollection<TKey, TValue>(string name) where TKey : IComparable<TKey>
+		public IOrderedCollection<TKey, TValue> GetOrderedCollection<TKey, TValue>(string name)
+			where TKey : IComparable<TKey>
 		{
 			return _objectStores.GetOrderedCollection<TKey, TValue>(name);
 		}
@@ -135,5 +139,21 @@ namespace IsabelDb
 		{
 			return _objectStores.GetQueue<T>(name);
 		}
+
+		#region Overrides of Object
+
+		public override string ToString()
+		{
+			if (_fileName != null)
+				return string.Format("IsabelDb: File '{0}' ({1} collection(s))",
+				                     _fileName,
+				                     _objectStores.Collections.Count()
+				                    );
+
+			return string.Format("IsabelDb: In memory ({0} collection(s))",
+			                     _objectStores.Collections.Count());
+		}
+
+		#endregion
 	}
 }

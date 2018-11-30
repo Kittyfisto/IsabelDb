@@ -153,7 +153,7 @@ namespace IsabelDb.Test
 
 		private IDatabase CreateDatabase(params Type[] type)
 		{
-			return new IsabelDb(_connection, type, disposeConnection: false, isReadOnly: false);
+			return new IsabelDb(_connection, null, type, disposeConnection: false, isReadOnly: false);
 		}
 	}
 }

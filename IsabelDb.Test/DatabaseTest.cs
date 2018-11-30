@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SQLite;
 using System.Linq;
 using FluentAssertions;
 using IsabelDb.Test.Entities;
+using IsabelDb.TypeModels;
 using NUnit.Framework;
 
 namespace IsabelDb.Test
@@ -11,6 +13,117 @@ namespace IsabelDb.Test
 	public sealed class DatabaseTest
 	{
 		private static IEnumerable<Type> NoCustomTypes => new Type[0];
+
+		[Test]
+		public void TestToStringInMemory()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				database.ToString().Should().Be("IsabelDb: In memory (0 collection(s))");
+			}
+		}
+
+		#region Incompatible Versions
+
+		[Test]
+		public void TestMissingVariablesTable()
+		{
+			using (var connection = new SQLiteConnection("Data Source=:memory:"))
+			{
+				connection.Open();
+
+				TypeModel.CreateTable(connection);
+				CollectionsTable.CreateTable(connection);
+
+				new Action(() => Database.Open(connection, null, new Type[0], false))
+					.Should().Throw<IncompatibleDatabaseSchemaException>()
+					.WithMessage("The database is missing the 'isabel_variables' table. It may have been created with an early vesion of IsabelDb or it may not even be an IsabelDb file. Are you sure the path is correct?");
+			}
+		}
+
+		[Test]
+		public void TestMissingTypeModelTable()
+		{
+			using (var connection = new SQLiteConnection("Data Source=:memory:"))
+			{
+				connection.Open();
+
+				VariablesTable.CreateTable(connection);
+				CollectionsTable.CreateTable(connection);
+
+				new Action(() => Database.Open(connection, null, new Type[0], false))
+					.Should().Throw<IncompatibleDatabaseSchemaException>()
+					.WithMessage("The database is missing the 'isabel_types' table. The table may have been deleted or this may not even be an IsabelDb file. Are you sure the path is correct?");
+			}
+		}
+
+		[Test]
+		public void TestMissingCollectionsTable()
+		{
+			using (var connection = new SQLiteConnection("Data Source=:memory:"))
+			{
+				connection.Open();
+				
+				VariablesTable.CreateTable(connection);
+				TypeModel.CreateTable(connection);
+
+				new Action(() => Database.Open(connection, null, new Type[0], false))
+					.Should().Throw<IncompatibleDatabaseSchemaException>()
+					.WithMessage("The database is missing the 'isabel_collections' table. The table may have been deleted or this may not even be an IsabelDb file. Are you sure the path is correct?");
+			}
+		}
+
+		[Test]
+		public void TestOldDatabaseSchema()
+		{
+			using (var connection = new SQLiteConnection("Data Source=:memory:"))
+			{
+				connection.Open();
+
+				VariablesTable.CreateTable(connection);
+				TypeModel.CreateTable(connection);
+				CollectionsTable.CreateTable(connection);
+
+				using (var command = connection.CreateCommand())
+				{
+					command.CommandText = string.Format("INSERT OR REPLACE INTO {0} (key, value) VALUES (@key, @value)", VariablesTable.TableName);
+					command.Parameters.AddWithValue("@key", VariablesTable.IsabelSchemaVersionKey);
+					command.Parameters.AddWithValue("@value", 0);
+					command.ExecuteNonQuery();
+				}
+
+				new Action(() => Database.Open(connection, null, new Type[0], false))
+					.Should().Throw<IncompatibleDatabaseSchemaException>()
+					.WithMessage("The database was created with an earlier version of IsabelDb (Schema version: 0) and its schema is incompatible to this version.");
+			}
+		}
+
+		[Test]
+		public void TestNewerDatabaseSchema()
+		{
+			using (var connection = new SQLiteConnection("Data Source=:memory:"))
+			{
+				connection.Open();
+
+				VariablesTable.CreateTable(connection);
+				TypeModel.CreateTable(connection);
+				CollectionsTable.CreateTable(connection);
+
+				using (var command = connection.CreateCommand())
+				{
+					command.CommandText = string.Format("INSERT OR REPLACE INTO {0} (key, value) VALUES (@key, @value)", VariablesTable.TableName);
+					command.Parameters.AddWithValue("@key", VariablesTable.IsabelSchemaVersionKey);
+					command.Parameters.AddWithValue("@value", 101);
+					command.ExecuteNonQuery();
+				}
+
+				new Action(() => Database.Open(connection, null, new Type[0], false))
+					.Should().Throw<IncompatibleDatabaseSchemaException>()
+					.WithMessage("The database was created with a newer version of IsabelDb (Schema version: 101) and its schema is incompatible to this version.");
+			}
+		}
+
+		#endregion
 
 		[Test]
 		public void TestCreateInMemory()

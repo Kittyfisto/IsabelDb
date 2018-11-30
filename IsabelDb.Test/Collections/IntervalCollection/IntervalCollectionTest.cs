@@ -283,13 +283,13 @@ namespace IsabelDb.Test.Collections.IntervalCollection
 		{
 			using (var connection = CreateConnection())
 			{
-				using (var db = new IsabelDb(connection, NoCustomTypes, false, false))
+				using (var db = new IsabelDb(connection, null, NoCustomTypes, false, false))
 				{
 					var collection = db.GetIntervalCollection<int, string>("Stuff");
 					collection.Put(Interval.Create(1), "One");
 				}
 
-				using (var db = new IsabelDb(connection, NoCustomTypes, false, isReadOnly: true))
+				using (var db = new IsabelDb(connection, null, NoCustomTypes, false, isReadOnly: true))
 				{
 					var collection = db.GetIntervalCollection<int, string>("Stuff");
 					collection.GetAllValues().Should().Equal("One");

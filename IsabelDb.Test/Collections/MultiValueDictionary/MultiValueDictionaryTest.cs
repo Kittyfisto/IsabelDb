@@ -330,14 +330,14 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var connection = CreateConnection())
 			{
-				using (var db = new IsabelDb(connection, NoCustomTypes, false, false))
+				using (var db = new IsabelDb(connection, null, NoCustomTypes, false, false))
 				{
 					var collection = db.GetMultiValueDictionary<int, string>("Stuff");
 					collection.Put(1, "One");
 					collection.Put(1, "Two");
 				}
 
-				using (var db = new IsabelDb(connection, NoCustomTypes, false, isReadOnly: true))
+				using (var db = new IsabelDb(connection, null, NoCustomTypes, false, isReadOnly: true))
 				{
 					var collection = db.GetMultiValueDictionary<int, string>("Stuff");
 					collection.GetAllValues().Should().Equal("One", "Two");
@@ -356,14 +356,14 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var connection = CreateConnection())
 			{
-				using (var db = new IsabelDb(connection, NoCustomTypes, false, false))
+				using (var db = new IsabelDb(connection, null, NoCustomTypes, false, false))
 				{
 					var collection = db.GetMultiValueDictionary<int, string>("Stuff");
 					collection.Put(1, "One");
 					collection.Put(1, "Two");
 				}
 
-				using (var db = new IsabelDb(connection, NoCustomTypes, false, isReadOnly: true))
+				using (var db = new IsabelDb(connection, null, NoCustomTypes, false, isReadOnly: true))
 				{
 					var collection = db.GetMultiValueDictionary<int, string>("Stuff");
 					collection.GetAllValues().Should().Equal("One", "Two");
@@ -381,7 +381,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		public void TestPutManyRemoved()
 		{
 			using (var connection = CreateConnection())
-			using (var db = new IsabelDb(connection, NoCustomTypes, false, false))
+			using (var db = new IsabelDb(connection, null, NoCustomTypes, false, false))
 			{
 				var collection = db.GetMultiValueDictionary<int, string>("Blessthefall");
 				collection.Put(1, "Wishful Sinking");

@@ -85,9 +85,9 @@ namespace IsabelDb.Test.TypeModels
 			using (var connection = new SQLiteConnection("Data Source=:memory:"))
 			{
 				connection.Open();
-				TypeModel.DoesTableExist(connection).Should().BeFalse();
+				TypeModel.DoesTypeTableExist(connection).Should().BeFalse();
 				TypeModel.CreateTable(connection);
-				TypeModel.DoesTableExist(connection).Should().BeTrue();
+				TypeModel.DoesTypeTableExist(connection).Should().BeTrue();
 			}
 		}
 

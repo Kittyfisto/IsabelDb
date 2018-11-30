@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
+using System.Diagnostics.Contracts;
 using System.Net;
 using IsabelDb.Collections;
 using IsabelDb.Serializers;
@@ -12,9 +13,9 @@ namespace IsabelDb
 	///     Responsible for providing access to various (user) created stores.
 	///     Ensures type safety when opening a database again, etc...
 	/// </summary>
-	internal sealed class ObjectStores
+	internal sealed class CollectionsTable
 	{
-		private const string CollectionsTableName = "isabel_collections";
+		public const string TableName = "isabel_collections";
 
 		/// <summary>
 		///     A list of serializers for .NET types which natively map to SQLite types
@@ -30,7 +31,7 @@ namespace IsabelDb
 		private readonly Serializer _serializer;
 		private readonly CompiledTypeModel _typeModel;
 
-		static ObjectStores()
+		static CollectionsTable()
 		{
 			var nativeSerializers = new System.Collections.Generic.Dictionary<Type, ISQLiteSerializer>
 			{
@@ -53,7 +54,7 @@ namespace IsabelDb
 			NativeSerializers = nativeSerializers;
 		}
 
-		public ObjectStores(SQLiteConnection connection,
+		public CollectionsTable(SQLiteConnection connection,
 		                    IReadOnlyList<Type> supportedTypes,
 		                    bool isReadOnly)
 		{
@@ -254,7 +255,7 @@ namespace IsabelDb
 
 					using (var command = _connection.CreateCommand())
 					{
-						command.CommandText = string.Format("DELETE FROM {0} WHERE tableName = @tableName", CollectionsTableName);
+						command.CommandText = string.Format("DELETE FROM {0} WHERE tableName = @tableName", TableName);
 						command.Parameters.AddWithValue("@tableName", tableName);
 						command.ExecuteNonQuery();
 					}
@@ -268,9 +269,10 @@ namespace IsabelDb
 			}
 		}
 
+		[Pure]
 		public static bool DoesTableExist(SQLiteConnection connection)
 		{
-			return Database.TableExists(connection, CollectionsTableName);
+			return Database.TableExists(connection, TableName);
 		}
 
 		public static void CreateTable(SQLiteConnection connection)
@@ -283,7 +285,7 @@ namespace IsabelDb
 				                                    "collectionType INTEGER NOT NULL," +
 				                                    "keyType INTEGER," +
 				                                    "valueType INTEGER NOT NULL" +
-				                                    ")", CollectionsTableName);
+				                                    ")", TableName);
 
 				command.ExecuteNonQuery();
 			}
@@ -444,7 +446,7 @@ namespace IsabelDb
 			using (var command = _connection.CreateCommand())
 			{
 				command.CommandText = string.Format("INSERT INTO {0} (name, collectionType, tableName, keyType, valueType)" +
-				                                    "VALUES (@name, @collectionType, @tableName, @keyType, @valueType)", CollectionsTableName);
+				                                    "VALUES (@name, @collectionType, @tableName, @keyType, @valueType)", TableName);
 
 				var keyTypeId = keyType != null ? (int?) _typeModel.GetTypeId(keyType) : null;
 				var valueTypeId = _typeModel.GetTypeId(valueType);
@@ -467,7 +469,7 @@ namespace IsabelDb
 		{
 			using (var command = _connection.CreateCommand())
 			{
-				command.CommandText = string.Format("SELECT COUNT(*) FROM {0}", CollectionsTableName);
+				command.CommandText = string.Format("SELECT COUNT(*) FROM {0}", TableName);
 				var count = Convert.ToInt32(command.ExecuteScalar());
 				return string.Format("ObjectStore_{0}", count);
 			}
@@ -477,7 +479,7 @@ namespace IsabelDb
 		{
 			using (var command = _connection.CreateCommand())
 			{
-				command.CommandText = string.Format("SELECT name, collectionType, tableName, keyType, valueType FROM {0}", CollectionsTableName);
+				command.CommandText = string.Format("SELECT name, collectionType, tableName, keyType, valueType FROM {0}", TableName);
 				using (var reader = command.ExecuteReader())
 				{
 					while (reader.Read())

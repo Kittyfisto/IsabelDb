@@ -33,6 +33,15 @@ namespace IsabelDb.Test
 		private static IEnumerable<Type> NoCustomTypes => new Type[0];
 
 		private string _databaseName;
+		
+		[Test]
+		public void TestToStringFile()
+		{
+			using (var db = Database.OpenOrCreate(_databaseName, NoCustomTypes))
+			{
+				db.ToString().Should().Be(string.Format("IsabelDb: File '{0}' (0 collection(s))", _databaseName));
+			}
+		}
 
 		[Test]
 		public void TestCompactEmpty()
@@ -58,7 +67,7 @@ namespace IsabelDb.Test
 				new FileInfo(_databaseName).Length.Should().BeGreaterThan(180000);
 
 				db.Compact();
-				new FileInfo(_databaseName).Length.Should().BeLessThan(30000);
+				new FileInfo(_databaseName).Length.Should().BeLessThan(40000);
 			}
 		}
 

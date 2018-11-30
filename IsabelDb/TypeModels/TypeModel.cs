@@ -23,8 +23,8 @@ namespace IsabelDb.TypeModels
 	/// </remarks>
 	internal sealed class TypeModel
 	{
-		private const string TypeTableName = "isabel_types";
-		private const string FieldTableName = "isabel_fields";
+		public const string TypeTableName = "isabel_types";
+		public const string FieldTableName = "isabel_fields";
 
 		private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -399,9 +399,16 @@ namespace IsabelDb.TypeModels
 			return IsBuiltIn(type);
 		}
 
-		public static bool DoesTableExist(SQLiteConnection connection)
+		[Pure]
+		public static bool DoesTypeTableExist(SQLiteConnection connection)
 		{
 			return Database.TableExists(connection, TypeTableName);
+		}
+
+		[Pure]
+		public static bool DoesFieldTableExist(SQLiteConnection connection)
+		{
+			return Database.TableExists(connection, FieldTableName);
 		}
 
 		public static void CreateTable(SQLiteConnection connection)

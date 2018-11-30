@@ -40,7 +40,7 @@ namespace IsabelDb.Browser
 				var typeResolver = new TypeResolver(wellKnownTypes);
 				var typeModel = TypeModel.Read(connection, typeResolver);
 				var types = CompileCustomTypes(typeModel, typeResolver);
-				_database = new IsabelDb(connection, types, true, isReadOnly: true);
+				_database = new IsabelDb(connection, fileName, types, true, isReadOnly: true);
 			}
 			catch (Exception e)
 			{
