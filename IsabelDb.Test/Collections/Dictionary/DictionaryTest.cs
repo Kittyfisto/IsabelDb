@@ -21,10 +21,187 @@ namespace IsabelDb.Test.Collections.Dictionary
 		}
 
 		[Test]
+		public void TestGetCollectionRemoved()
+		{
+			using (var db = Database.CreateInMemory(new Type[0]))
+			{
+				var dictionary = db.GetDictionary<object, string>("Stuff");
+				db.Remove(dictionary);
+
+				new Action(() => dictionary.Get("Green"))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestTryGetCollectionRemoved()
+		{
+			using (var db = Database.CreateInMemory(new Type[0]))
+			{
+				var dictionary = db.GetDictionary<object, string>("Stuff");
+				db.Remove(dictionary);
+
+				new Action(() => dictionary.TryGet("dawdawwad", out var unused))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestMoveCollectionRemoved()
+		{
+			using (var db = Database.CreateInMemory(new Type[0]))
+			{
+				var dictionary = db.GetDictionary<object, string>("Stuff");
+				db.Remove(dictionary);
+
+				new Action(() => dictionary.Move("a", "b"))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestRemoveCollectionRemoved()
+		{
+			using (var db = Database.CreateInMemory(new Type[0]))
+			{
+				var dictionary = db.GetDictionary<object, string>("Stuff");
+				db.Remove(dictionary);
+
+				new Action(() => dictionary.Remove("a"))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestRemoveManyCollectionRemoved()
+		{
+			using (var db = Database.CreateInMemory(new Type[0]))
+			{
+				var dictionary = db.GetDictionary<object, string>("Stuff");
+				db.Remove(dictionary);
+
+				new Action(() => dictionary.RemoveMany(new[]{"a", "b"}))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestGetManyCollectionRemoved()
+		{
+			using (var db = Database.CreateInMemory(new Type[0]))
+			{
+				var dictionary = db.GetDictionary<object, string>("Stuff");
+				db.Remove(dictionary);
+
+				new Action(() => dictionary.GetMany(new object[] {"Green"}))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestGetManyValuesCollectionRemoved()
+		{
+			using (var db = Database.CreateInMemory(new Type[0]))
+			{
+				var dictionary = db.GetDictionary<object, string>("Stuff");
+				db.Remove(dictionary);
+
+				new Action(() => dictionary.GetManyValues(new object[] {"Green"}))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestGetAllKeysCollectionRemoved()
+		{
+			using (var db = Database.CreateInMemory(new Type[0]))
+			{
+				var dictionary = db.GetDictionary<object, string>("Stuff");
+				db.Remove(dictionary);
+
+				new Action(() => dictionary.GetManyValues(new object[] {"Green"}))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestContainsKeyCollectionRemoved()
+		{
+			using (var db = Database.CreateInMemory(new Type[0]))
+			{
+				var dictionary = db.GetDictionary<object, string>("Stuff");
+				db.Remove(dictionary);
+
+				new Action(() => dictionary.ContainsKey("dawdawwad"))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestGetAllCollectionRemoved()
+		{
+			using (var db = Database.CreateInMemory(new Type[0]))
+			{
+				var dictionary = db.GetDictionary<object, string>("Stuff");
+				db.Remove(dictionary);
+
+				new Action(() => dictionary.GetAll())
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestPutCollectionRemoved()
+		{
+			using (var db = Database.CreateInMemory(new Type[0]))
+			{
+				var dictionary = db.GetDictionary<object, string>("Stuff");
+				db.Remove(dictionary);
+
+				new Action(() => dictionary.Put("Green", "Room")).Should()
+				                                                 .Throw<InvalidOperationException>()
+				                                                 .WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestPutIfNotExistsCollectionRemoved()
+		{
+			using (var db = Database.CreateInMemory(new Type[0]))
+			{
+				var dictionary = db.GetDictionary<object, string>("Stuff");
+				db.Remove(dictionary);
+
+				new Action(() => dictionary.PutIfNotExists("Green", "Room")).Should()
+				                                                 .Throw<InvalidOperationException>()
+				                                                 .WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
 		public void TestContainsKeyNull()
 		{
-			using (var connection = CreateConnection())
-			using (var db = CreateDatabase(connection))
+			using (var db = Database.CreateInMemory(new Type[0]))
 			{
 				var dictionary = db.GetDictionary<object, string>("Stuff");
 				new Action(() => dictionary.ContainsKey(null)).Should().Throw<ArgumentNullException>();
@@ -34,8 +211,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		[Test]
 		public void TestGetNull()
 		{
-			using (var connection = CreateConnection())
-			using (var db = CreateDatabase(connection))
+			using (var db = Database.CreateInMemory(new Type[0]))
 			{
 				var dictionary = db.GetDictionary<object, string>("Stuff");
 				new Action(() => dictionary.Get(null)).Should().Throw<ArgumentNullException>();
@@ -45,8 +221,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		[Test]
 		public void TestTryGetNull()
 		{
-			using (var connection = CreateConnection())
-			using (var db = CreateDatabase(connection))
+			using (var db = Database.CreateInMemory(new Type[0]))
 			{
 				var dictionary = db.GetDictionary<object, string>("Stuff");
 				new Action(() => dictionary.TryGet(null, out var unused)).Should().Throw<ArgumentNullException>();
@@ -56,8 +231,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		[Test]
 		public void TestRemoveNull()
 		{
-			using (var connection = CreateConnection())
-			using (var db = CreateDatabase(connection))
+			using (var db = Database.CreateInMemory(new Type[0]))
 			{
 				var dictionary = db.GetDictionary<object, string>("Stuff");
 				new Action(() => dictionary.Remove(null)).Should().Throw<ArgumentNullException>();
@@ -67,8 +241,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		[Test]
 		public void TestRemoveManyNull()
 		{
-			using (var connection = CreateConnection())
-			using (var db = CreateDatabase(connection))
+			using (var db = Database.CreateInMemory(new Type[0]))
 			{
 				var dictionary = db.GetDictionary<object, string>("Stuff");
 				new Action(() => dictionary.RemoveMany(null)).Should().Throw<ArgumentNullException>();
@@ -78,8 +251,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		[Test]
 		public void TestRemoveManySomeNull()
 		{
-			using (var connection = CreateConnection())
-			using (var db = CreateDatabase(connection))
+			using (var db = Database.CreateInMemory(new Type[0]))
 			{
 				var dictionary = db.GetDictionary<object, string>("Stuff");
 				new Action(() => dictionary.RemoveMany(new object[]{1, null, 2})).Should().Throw<ArgumentException>();
@@ -87,10 +259,21 @@ namespace IsabelDb.Test.Collections.Dictionary
 		}
 
 		[Test]
+		public void TestPutIfNotExistsNullKey()
+		{
+			using (var db = Database.CreateInMemory(new Type[0]))
+			{
+				var dictionary = db.GetDictionary<object, string>("Stuff");
+				new Action(() => dictionary.PutIfNotExists(null, "Stuff")).Should().Throw<ArgumentNullException>();
+				dictionary.Count().Should().Be(0);
+				dictionary.GetAllValues().Should().BeEmpty();
+			}
+		}
+
+		[Test]
 		public void TestPutNullKey()
 		{
-			using (var connection = CreateConnection())
-			using (var db = CreateDatabase(connection))
+			using (var db = Database.CreateInMemory(new Type[0]))
 			{
 				var dictionary = db.GetDictionary<object, string>("Stuff");
 				new Action(() => dictionary.Put(null, "Stuff")).Should().Throw<ArgumentNullException>();
@@ -102,8 +285,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		[Test]
 		public void TestPutManyNull()
 		{
-			using (var connection = CreateConnection())
-			using (var db = CreateDatabase(connection))
+			using (var db = Database.CreateInMemory(new Type[0]))
 			{
 				var dictionary = db.GetDictionary<object, string>("Stuff");
 				new Action(() => dictionary.PutMany(null)).Should().Throw<ArgumentNullException>();
@@ -115,8 +297,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		[Test]
 		public void TestPutManySomeNullKeys()
 		{
-			using (var connection = CreateConnection())
-			using (var db = CreateDatabase(connection))
+			using (var db = Database.CreateInMemory(new Type[0]))
 			{
 				var dictionary = db.GetDictionary<object, string>("Stuff");
 
@@ -133,8 +314,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		[Test]
 		public void TestMoveNullSource()
 		{
-			using (var connection = CreateConnection())
-			using (var db = CreateDatabase(connection))
+			using (var db = Database.CreateInMemory(new Type[0]))
 			{
 				var dictionary = db.GetDictionary<object, string>("Stuff");
 				new Action(() => dictionary.Move(null, "42")).Should().Throw<ArgumentNullException>();
@@ -144,8 +324,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		[Test]
 		public void TestMoveNullDestination()
 		{
-			using (var connection = CreateConnection())
-			using (var db = CreateDatabase(connection))
+			using (var db = Database.CreateInMemory(new Type[0]))
 			{
 				var dictionary = db.GetDictionary<object, string>("Stuff");
 				new Action(() => dictionary.Move("42", null)).Should().Throw<ArgumentNullException>();
@@ -155,8 +334,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		[Test]
 		public void TestMoveNullSourceNullDestination()
 		{
-			using (var connection = CreateConnection())
-			using (var db = CreateDatabase(connection))
+			using (var db = Database.CreateInMemory(new Type[0]))
 			{
 				var dictionary = db.GetDictionary<object, string>("Stuff");
 				new Action(() => dictionary.Move(null, null)).Should().Throw<ArgumentNullException>();
@@ -166,12 +344,9 @@ namespace IsabelDb.Test.Collections.Dictionary
 		[Test]
 		public void TestToString()
 		{
-			using (var connection = CreateConnection())
+			using (var db = Database.CreateInMemory(new Type[0]))
 			{
-				using (var db = CreateDatabase(connection))
-				{
-					db.GetDictionary<int, string>("Stuff").ToString().Should().Be("Dictionary<System.Int32, System.String>(\"Stuff\")");
-				}
+				db.GetDictionary<int, string>("Stuff").ToString().Should().Be("Dictionary<System.Int32, System.String>(\"Stuff\")");
 			}
 		}
 
@@ -315,7 +490,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
 				db.GetDictionary<string, object>("SomeTable").TryGet("foo", out var unused).Should().BeFalse();
-				db.GetDictionary<string, object>("SomeTable").GetMany("foo", "bar").Should().BeEmpty();
+				db.GetDictionary<string, object>("SomeTable").GetMany(new []{"foo", "bar"}).Should().BeEmpty();
 			}
 		}
 

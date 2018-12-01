@@ -55,6 +55,126 @@ namespace IsabelDb.Test.Collections.IntervalCollection
 		}
 
 		[Test]
+		public void TestPutRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetIntervalCollection<int, string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.Put(new Interval<int>(1, 2), "stuff"))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestPutManyRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetIntervalCollection<int, string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.PutMany(new KeyValuePair<Interval<int>, string>[1]))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestRemoveRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetIntervalCollection<int, string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.Remove(42))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestRemoveIntervalRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetIntervalCollection<int, string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.Remove(new Interval<int>(1, 2)))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestGetAllRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetIntervalCollection<int, string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.GetAll())
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestGetValuesRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetIntervalCollection<int, string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.GetValues(1))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestGetValuesIntervalRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetIntervalCollection<int, string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.GetValues(1, 42))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestGetManyIntervalsRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetIntervalCollection<int, string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.GetManyIntervals(new RowId[0]))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
 		public void TestByteKey()
 		{
 			TestKeyLimits(byte.MinValue, byte.MaxValue);

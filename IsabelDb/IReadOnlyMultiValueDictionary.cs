@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 
 namespace IsabelDb
@@ -18,6 +19,7 @@ namespace IsabelDb
 		///     Returns all keys in this collection.
 		/// </summary>
 		/// <returns></returns>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		[Pure]
 		IEnumerable<TKey> GetAllKeys();
 
@@ -26,6 +28,7 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="key"></param>
 		/// <returns></returns>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		[Pure]
 		bool ContainsKey(TKey key);
 
@@ -34,6 +37,7 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="row"></param>
 		/// <returns></returns>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		[Pure]
 		bool ContainsRow(RowId row);
 
@@ -42,6 +46,7 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="row"></param>
 		/// <returns></returns>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		/// <exception cref="KeyNotFoundException"></exception>
 		[Pure]
 		TValue GetValue(RowId row);
@@ -53,6 +58,7 @@ namespace IsabelDb
 		/// <param name="row"></param>
 		/// <param name="value"></param>
 		/// <returns></returns>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		bool TryGetValue(RowId row, out TValue value);
 
 		/// <summary>
@@ -60,6 +66,7 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="rows"></param>
 		/// <returns></returns>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		[Pure]
 		IEnumerable<TValue> GetValues(IEnumerable<RowId> rows);
 
@@ -68,6 +75,7 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="key"></param>
 		/// <returns></returns>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		[Pure]
 		IEnumerable<TValue> GetValues(TKey key);
 
@@ -82,6 +90,7 @@ namespace IsabelDb
 		/// </example>
 		/// <param name="keys"></param>
 		/// <returns></returns>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		[Pure]
 		IEnumerable<TValue> GetValues(IEnumerable<TKey> keys);
 
@@ -89,6 +98,7 @@ namespace IsabelDb
 		///     Returns all values from this collection.
 		/// </summary>
 		/// <returns></returns>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		[Pure]
 		IEnumerable<KeyValuePair<TKey, IEnumerable<TValue>>> GetAll();
 	}

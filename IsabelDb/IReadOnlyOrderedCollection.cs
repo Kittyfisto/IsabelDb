@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 
 namespace IsabelDb
 {
@@ -13,7 +14,7 @@ namespace IsabelDb
 	/// </remarks>
 	/// <typeparam name="TKey"></typeparam>
 	/// <typeparam name="TValue"></typeparam>
-	public interface IReadOnlyOrderedCollection<TKey, TValue>
+	public interface IReadOnlyOrderedCollection<TKey, out TValue>
 		: IReadOnlyCollection<TValue>
 		where TKey : IComparable<TKey>
 	{
@@ -22,6 +23,8 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="interval"></param>
 		/// <returns></returns>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
+		[Pure]
 		IEnumerable<TValue> GetValues(Interval<TKey> interval);
 	}
 }

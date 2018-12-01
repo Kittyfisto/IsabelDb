@@ -120,30 +120,58 @@ namespace IsabelDb.Collections
 
 		public IEnumerable<Interval<TKey>> GetManyIntervals(IEnumerable<RowId> keys)
 		{
+			ThrowIfDropped();
 			throw new NotImplementedException();
 		}
 
 		public IEnumerable<TValue> GetValues(TKey key)
 		{
-			using (var command = _connection.CreateCommand())
-			{
-				command.CommandText = string.Format("SELECT value FROM {0} WHERE minimum <= @key AND maximum >= @key",
-													_tableName);
-				command.Parameters.AddWithValue("@key", _keySerializer.Serialize(key));
-				using (var reader = command.ExecuteReader())
-				{
-					while (reader.Read())
-					{
-						if (_valueSerializer.TryDeserialize(reader, 0, out var value))
-						{
-							yield return value;
-						}
-					}
-				}
-			}
+			ThrowIfDropped();
+			return GetValuesInternal(key);
 		}
 
 		public IEnumerable<TValue> GetValues(TKey minimum, TKey maximum)
+		{
+			ThrowIfDropped();
+			return GetValuesInternal(minimum, maximum);
+		}
+
+		public IEnumerable<KeyValuePair<Interval<TKey>, TValue>> GetAll()
+		{
+			ThrowIfDropped();
+			return GetAllInternal();
+		}
+
+		public void Remove(TKey key)
+		{
+			ThrowIfReadOnly();
+			ThrowIfDropped();
+
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = string.Format("DELETE FROM {0} WHERE minimum <= @key AND maximum >= @key", _tableName);
+				command.Parameters.AddWithValue("@key", _keySerializer.Serialize(key));
+				command.ExecuteNonQuery();
+			}
+		}
+
+		public void Remove(Interval<TKey> interval)
+		{
+			ThrowIfReadOnly();
+			ThrowIfDropped();
+
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = string.Format("DELETE FROM {0} WHERE NOT (@maximum < minimum OR @minimum > maximum)", _tableName);
+				command.Parameters.AddWithValue("@minimum", _keySerializer.Serialize(interval.Minimum));
+				command.Parameters.AddWithValue("@maximum", _keySerializer.Serialize(interval.Maximum));
+				command.ExecuteNonQuery();
+			}
+		}
+
+		#endregion
+
+		private IEnumerable<TValue> GetValuesInternal(TKey minimum, TKey maximum)
 		{
 			using (var command = _connection.CreateCommand())
 			{
@@ -165,7 +193,27 @@ namespace IsabelDb.Collections
 			}
 		}
 
-		public IEnumerable<KeyValuePair<Interval<TKey>, TValue>> GetAll()
+		private IEnumerable<TValue> GetValuesInternal(TKey key)
+		{
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = string.Format("SELECT value FROM {0} WHERE minimum <= @key AND maximum >= @key",
+				                                    _tableName);
+				command.Parameters.AddWithValue("@key", _keySerializer.Serialize(key));
+				using (var reader = command.ExecuteReader())
+				{
+					while (reader.Read())
+					{
+						if (_valueSerializer.TryDeserialize(reader, 0, out var value))
+						{
+							yield return value;
+						}
+					}
+				}
+			}
+		}
+
+		private IEnumerable<KeyValuePair<Interval<TKey>, TValue>> GetAllInternal()
 		{
 			using (var command = _connection.CreateCommand())
 			{
@@ -186,42 +234,6 @@ namespace IsabelDb.Collections
 				}
 			}
 		}
-
-		public void Remove(TKey key)
-		{
-			ThrowIfReadOnly();
-
-			using (var command = _connection.CreateCommand())
-			{
-				command.CommandText = string.Format("DELETE FROM {0} WHERE minimum <= @key AND maximum >= @key", _tableName);
-				command.Parameters.AddWithValue("@key", _keySerializer.Serialize(key));
-				command.ExecuteNonQuery();
-			}
-		}
-
-		public void Remove(Interval<TKey> interval)
-		{
-			ThrowIfReadOnly();
-
-			using (var command = _connection.CreateCommand())
-			{
-				command.CommandText = string.Format("DELETE FROM {0} WHERE NOT (@maximum < minimum OR @minimum > maximum)", _tableName);
-				command.Parameters.AddWithValue("@minimum", _keySerializer.Serialize(interval.Minimum));
-				command.Parameters.AddWithValue("@maximum", _keySerializer.Serialize(interval.Maximum));
-				command.ExecuteNonQuery();
-			}
-		}
-
-		#region Overrides of Object
-
-		public override string ToString()
-		{
-			return string.Format("IntervalCollection<{0}, {1}>(\"{2}\")", KeyType.FullName, ValueType.FullName, Name);
-		}
-
-		#endregion
-
-		#endregion
 
 		private void CreateObjectTableIfNecessary()
 		{

@@ -21,6 +21,7 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="key"></param>
 		/// <returns></returns>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		/// <exception cref="ArgumentNullException">When <paramref name="key"/> is null.</exception>
 		[Pure]
 		bool ContainsKey(TKey key);
@@ -32,6 +33,7 @@ namespace IsabelDb
 		/// <param name="key"></param>
 		/// <param name="value"></param>
 		/// <returns></returns>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		/// <exception cref="ArgumentNullException">When <paramref name="key"/> is null.</exception>
 		bool TryGet(TKey key, out TValue value);
 		
@@ -39,6 +41,7 @@ namespace IsabelDb
 		///     Returns all keys in this collection.
 		/// </summary>
 		/// <returns></returns>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		[Pure]
 		IEnumerable<TKey> GetAllKeys();
 
@@ -47,6 +50,7 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="key"></param>
 		/// <returns></returns>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		/// <exception cref="ArgumentNullException">When <paramref name="key"/> is null.</exception>
 		/// <exception cref="KeyNotFoundException">In case there is value value in this collection for the given <paramref name="key"/>.</exception>
 		[Pure]
@@ -56,6 +60,7 @@ namespace IsabelDb
 		///     Retrieves all values from this database.
 		/// </summary>
 		/// <returns></returns>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		[Pure]
 		IEnumerable<KeyValuePair<TKey, TValue>> GetAll();
 
@@ -64,6 +69,7 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="keys"></param>
 		/// <returns></returns>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		[Pure]
 		IEnumerable<KeyValuePair<TKey, TValue>> GetMany(IEnumerable<TKey> keys);
 
@@ -72,14 +78,7 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="keys"></param>
 		/// <returns></returns>
-		[Pure]
-		IEnumerable<KeyValuePair<TKey, TValue>> GetMany(params TKey[] keys);
-
-		/// <summary>
-		///     Finds all objects with the given keys and type.
-		/// </summary>
-		/// <param name="keys"></param>
-		/// <returns></returns>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		[Pure]
 		IEnumerable<TValue> GetManyValues(IEnumerable<TKey> keys);
 	}

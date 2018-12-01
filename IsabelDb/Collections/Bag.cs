@@ -41,15 +41,6 @@ namespace IsabelDb.Collections
 
 		#endregion
 
-		#region Overrides of Object
-
-		public override string ToString()
-		{
-			return string.Format("Bag<{0}>(\"{1}\")", ValueType.FullName, Name);
-		}
-
-		#endregion
-
 		private SQLiteCommand CreateCommand(string text)
 		{
 			var command = _connection.CreateCommand();
@@ -113,6 +104,8 @@ namespace IsabelDb.Collections
 
 		public T GetValue(RowId key)
 		{
+			ThrowIfDropped();
+
 			using (var command = _connection.CreateCommand())
 			{
 				command.CommandText = string.Format("SELECT value FROM {0} WHERE id = @id", _tableName);
@@ -132,24 +125,15 @@ namespace IsabelDb.Collections
 
 		public IEnumerable<KeyValuePair<RowId, T>> GetAll()
 		{
-			using (var command = _connection.CreateCommand())
-			{
-				command.CommandText = string.Format("SELECT rowid, value FROM {0}", _tableName);
-				using (var reader = command.ExecuteReader())
-				{
-					while (reader.Read())
-					{
-						var rowId = new RowId(reader.GetInt64(0));
+			ThrowIfDropped();
 
-						if (_serializer.TryDeserialize(reader, 1, out var value))
-							yield return new KeyValuePair<RowId, T>(rowId, value);
-					}
-				}
-			}
+			return GetAllInternal();
 		}
 
 		public bool TryGetValue(RowId key, out T value)
 		{
+			ThrowIfDropped();
+
 			using (var command = _connection.CreateCommand())
 			{
 				command.CommandText = string.Format("SELECT value FROM {0} WHERE id = @id", _tableName);
@@ -170,6 +154,53 @@ namespace IsabelDb.Collections
 
 		public IEnumerable<T> GetValues(Interval<RowId> interval)
 		{
+			ThrowIfDropped();
+
+			return GetValuesInternal(interval);
+		}
+
+		public IEnumerable<T> GetManyValues(IEnumerable<RowId> keys)
+		{
+			ThrowIfDropped();
+
+			return GetManyValuesInternal(keys);
+		}
+
+		public void Remove(RowId key)
+		{
+			ThrowIfReadOnly();
+			ThrowIfDropped();
+
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = string.Format("DELETE FROM {0} WHERE id = @id", _tableName);
+				command.Parameters.AddWithValue("@id", key.Id);
+				command.ExecuteNonQuery();
+			}
+		}
+
+		#endregion
+
+		private IEnumerable<KeyValuePair<RowId, T>> GetAllInternal()
+		{
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = string.Format("SELECT rowid, value FROM {0}", _tableName);
+				using (var reader = command.ExecuteReader())
+				{
+					while (reader.Read())
+					{
+						var rowId = new RowId(reader.GetInt64(0));
+
+						if (_serializer.TryDeserialize(reader, 1, out var value))
+							yield return new KeyValuePair<RowId, T>(rowId, value);
+					}
+				}
+			}
+		}
+
+		private IEnumerable<T> GetValuesInternal(Interval<RowId> interval)
+		{
 			using (var command = _connection.CreateCommand())
 			{
 				command.CommandText = string.Format("SELECT value FROM {0} WHERE id >= @minimum AND id <= @maximum", _tableName);
@@ -187,7 +218,7 @@ namespace IsabelDb.Collections
 			}
 		}
 
-		public IEnumerable<T> GetManyValues(IEnumerable<RowId> keys)
+		private IEnumerable<T> GetManyValuesInternal(IEnumerable<RowId> keys)
 		{
 			using (var command = _connection.CreateCommand())
 			{
@@ -208,19 +239,5 @@ namespace IsabelDb.Collections
 				}
 			}
 		}
-
-		public void Remove(RowId key)
-		{
-			ThrowIfReadOnly();
-
-			using (var command = _connection.CreateCommand())
-			{
-				command.CommandText = string.Format("DELETE FROM {0} WHERE id = @id", _tableName);
-				command.Parameters.AddWithValue("@id", key.Id);
-				command.ExecuteNonQuery();
-			}
-		}
-
-		#endregion
 	}
 }

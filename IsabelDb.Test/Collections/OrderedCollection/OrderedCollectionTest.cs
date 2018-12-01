@@ -20,6 +20,66 @@ namespace IsabelDb.Test.Collections.OrderedCollection
 		}
 
 		[Test]
+		public void TestGetAllRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetOrderedCollection<int, string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.GetValues(new Interval<int>()))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestPutRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetOrderedCollection<int, string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.Put(1, "2"))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestPutManyRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetOrderedCollection<int, string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.PutMany(new List<KeyValuePair<int, string>>()))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestRemoveRangeRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetOrderedCollection<int, string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.RemoveRange(new Interval<int>()))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
 		public void TestToString()
 		{
 			using (var connection = CreateConnection())

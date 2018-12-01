@@ -198,23 +198,15 @@ namespace IsabelDb.Collections
 
 		public IEnumerable<TKey> GetAllKeys()
 		{
-			using (var command = _connection.CreateCommand())
-			{
-				command.CommandText = _getAllKeys;
+			ThrowIfDropped();
 
-				using (var reader = command.ExecuteReader())
-				{
-					while (reader.Read())
-					{
-						if (_keySerializer.TryDeserialize(reader, 0, out var key))
-							yield return key;
-					}
-				}
-			}
+			return GetAllKeysInternal();
 		}
 
 		public bool ContainsKey(TKey key)
 		{
+			ThrowIfDropped();
+
 			using (var command = _connection.CreateCommand())
 			{
 				command.CommandText = _existsQuery;
@@ -226,6 +218,8 @@ namespace IsabelDb.Collections
 
 		public bool ContainsRow(RowId row)
 		{
+			ThrowIfDropped();
+
 			using (var command = _connection.CreateCommand())
 			{
 				command.CommandText = _existsRowQuery;
@@ -246,6 +240,8 @@ namespace IsabelDb.Collections
 
 		public bool TryGetValue(RowId row, out TValue value)
 		{
+			ThrowIfDropped();
+
 			using (var command = _connection.CreateCommand())
 			{
 				command.CommandText = _getByRowId;
@@ -266,73 +262,26 @@ namespace IsabelDb.Collections
 
 		public IEnumerable<TValue> GetValues(IEnumerable<RowId> rows)
 		{
-			using (var command = _connection.CreateCommand())
-			{
-				command.CommandText = _getByRowId;
-				var rowId = command.Parameters.Add("@rowid", DbType.Int64);
-
-				foreach (var row in rows)
-				{
-					rowId.Value = row.Id;
-					using (var reader = command.ExecuteReader())
-					{
-						if (reader.Read())
-						{
-							if (_valueSerializer.TryDeserialize(reader, 0, out var value))
-								yield return value;
-						}
-					}
-				}
-			}
+			ThrowIfDropped();
+			return GetValuesInternal(rows);
 		}
 
 		public IEnumerable<TValue> GetValues(TKey key)
 		{
-			using (var command = _connection.CreateCommand())
-			{
-				command.CommandText = _getByKey;
-				command.Parameters.AddWithValue("key", _keySerializer.Serialize(key));
-
-				using (var reader = command.ExecuteReader())
-				{
-					while (reader.Read())
-					{
-						if (_valueSerializer.TryDeserialize(reader, 0, out var value))
-						{
-							yield return value;
-						}
-					}
-				}
-			}
+			ThrowIfDropped();
+			return GetValuesInternal(key);
 		}
 
 		public IEnumerable<TValue> GetValues(IEnumerable<TKey> keys)
 		{
-			using (var command = _connection.CreateCommand())
-			{
-				command.CommandText = _getByKey;
-				var keyParameter = command.Parameters.Add("@key", _keySerializer.DatabaseType);
-
-				foreach (var key in keys)
-				{
-					keyParameter.Value = _keySerializer.Serialize(key);
-
-					using (var reader = command.ExecuteReader())
-					{
-						while (reader.Read())
-						{
-							if (_valueSerializer.TryDeserialize(reader, 0, out var value))
-							{
-								yield return value;
-							}
-						}
-					}
-				}
-			}
+			ThrowIfDropped();
+			return GetValuesInternal(keys);
 		}
 
 		public IEnumerable<KeyValuePair<TKey, IEnumerable<TValue>>> GetAll()
 		{
+			ThrowIfDropped();
+
 			using (var command = _connection.CreateCommand())
 			{
 				command.CommandText = _getAll;
@@ -367,6 +316,7 @@ namespace IsabelDb.Collections
 		public void RemoveAll(TKey key)
 		{
 			ThrowIfReadOnly();
+			ThrowIfDropped();
 
 			using (var command = _connection.CreateCommand())
 			{
@@ -379,6 +329,7 @@ namespace IsabelDb.Collections
 		public void RemoveMany(IEnumerable<TKey> keys)
 		{
 			ThrowIfReadOnly();
+			ThrowIfDropped();
 
 			using (var transaction = _connection.BeginTransaction())
 			using (var command = _connection.CreateCommand())
@@ -395,15 +346,6 @@ namespace IsabelDb.Collections
 			}
 		}
 
-		#region Overrides of Object
-
-		public override string ToString()
-		{
-			return string.Format("MultiValueDictionary<{0}, {1}>(\"{2}\")", KeyType.FullName, ValueType.FullName, Name);
-		}
-
-		#endregion
-
 		#endregion
 
 		#region Implementation of IInternalCollection
@@ -415,6 +357,90 @@ namespace IsabelDb.Collections
 		public override string KeyTypeName => null;
 
 		#endregion
+
+		private IEnumerable<TValue> GetValuesInternal(TKey key)
+		{
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = _getByKey;
+				command.Parameters.AddWithValue("key", _keySerializer.Serialize(key));
+
+				using (var reader = command.ExecuteReader())
+				{
+					while (reader.Read())
+					{
+						if (_valueSerializer.TryDeserialize(reader, 0, out var value))
+						{
+							yield return value;
+						}
+					}
+				}
+			}
+		}
+
+		private IEnumerable<TValue> GetValuesInternal(IEnumerable<TKey> keys)
+		{
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = _getByKey;
+				var keyParameter = command.Parameters.Add("@key", _keySerializer.DatabaseType);
+
+				foreach (var key in keys)
+				{
+					keyParameter.Value = _keySerializer.Serialize(key);
+
+					using (var reader = command.ExecuteReader())
+					{
+						while (reader.Read())
+						{
+							if (_valueSerializer.TryDeserialize(reader, 0, out var value))
+							{
+								yield return value;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		private IEnumerable<TValue> GetValuesInternal(IEnumerable<RowId> rows)
+		{
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = _getByRowId;
+				var rowId = command.Parameters.Add("@rowid", DbType.Int64);
+
+				foreach (var row in rows)
+				{
+					rowId.Value = row.Id;
+					using (var reader = command.ExecuteReader())
+					{
+						if (reader.Read())
+						{
+							if (_valueSerializer.TryDeserialize(reader, 0, out var value))
+								yield return value;
+						}
+					}
+				}
+			}
+		}
+
+		private IEnumerable<TKey> GetAllKeysInternal()
+		{
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = _getAllKeys;
+
+				using (var reader = command.ExecuteReader())
+				{
+					while (reader.Read())
+					{
+						if (_keySerializer.TryDeserialize(reader, 0, out var key))
+							yield return key;
+					}
+				}
+			}
+		}
 
 		private void CreateObjectTableIfNecessary()
 		{

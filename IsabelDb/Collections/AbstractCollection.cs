@@ -29,9 +29,7 @@ namespace IsabelDb.Collections
 		public void Clear()
 		{
 			ThrowIfReadOnly();
-
-			if (IsDropped)
-				return;
+			ThrowIfDropped();
 
 			using (var command = _connection.CreateCommand())
 			{
@@ -52,8 +50,7 @@ namespace IsabelDb.Collections
 
 		public long Count()
 		{
-			if (IsDropped)
-				return 0;
+			ThrowIfDropped();
 
 			using (var command = _connection.CreateCommand())
 			{
@@ -94,7 +91,7 @@ namespace IsabelDb.Collections
 		protected void ThrowIfDropped()
 		{
 			if (_isDropped)
-				throw new InvalidOperationException("This collection has been removed from the database and may no longer be modified");
+				throw new InvalidOperationException("This collection has been removed from the database and may no longer be used");
 		}
 
 		protected bool IsDropped => _isDropped;
@@ -122,6 +119,15 @@ namespace IsabelDb.Collections
 			_valueSerializer = valueSerializer;
 		}
 
+		public override string ToString()
+		{
+			var keyType = KeyType;
+			if (keyType == null)
+				return string.Format("{0}<{1}>(\"{2}\")", Type, ValueType.FullName, Name);
+
+			return string.Format("{0}<{1}, {2}>(\"{3}\")", Type, KeyType.FullName, ValueType.FullName, Name);
+		}
+
 		#region Implementation of ICollection
 
 		public override bool CanBeAccessed => true;
@@ -130,8 +136,7 @@ namespace IsabelDb.Collections
 
 		IEnumerable<TValue> IReadOnlyCollection<TValue>.GetAllValues()
 		{
-			if (IsDropped)
-				return Enumerable.Empty<TValue>();
+			ThrowIfDropped();
 
 			return GetAllValuesInternal();
 		}

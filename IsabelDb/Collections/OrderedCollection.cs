@@ -97,26 +97,14 @@ namespace IsabelDb.Collections
 
 		public IEnumerable<TValue> GetValues(Interval<TKey> interval)
 		{
-			using (var command = _connection.CreateCommand())
-			{
-				command.CommandText = string.Format("SELECT value FROM {0} WHERE key >= @minimum AND key <= @maximum", _tableName);
-				command.Parameters.AddWithValue("@minimum", _keySerializer.Serialize(interval.Minimum));
-				command.Parameters.AddWithValue("@maximum", _keySerializer.Serialize(interval.Maximum));
-
-				using (var reader = command.ExecuteReader())
-				{
-					while (reader.Read())
-					{
-						if (_valueSerializer.TryDeserialize(reader, 0, out var value))
-							yield return value;
-					}
-				}
-			}
+			ThrowIfDropped();
+			return GetValuesInternal(interval);
 		}
 
 		public void RemoveRange(Interval<TKey> interval)
 		{
 			ThrowIfReadOnly();
+			ThrowIfDropped();
 
 			using (var command = _connection.CreateCommand())
 			{
@@ -126,15 +114,6 @@ namespace IsabelDb.Collections
 				command.ExecuteNonQuery();
 			}
 		}
-
-		#region Overrides of Object
-
-		public override string ToString()
-		{
-			return string.Format("OrderedCollection<{0}, {1}>(\"{2}\")", KeyType.FullName, ValueType.FullName, Name);
-		}
-
-		#endregion
 
 		#endregion
 
@@ -169,5 +148,24 @@ namespace IsabelDb.Collections
 		public override string KeyTypeName => null;
 
 		#endregion
+
+		private IEnumerable<TValue> GetValuesInternal(Interval<TKey> interval)
+		{
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = string.Format("SELECT value FROM {0} WHERE key >= @minimum AND key <= @maximum", _tableName);
+				command.Parameters.AddWithValue("@minimum", _keySerializer.Serialize(interval.Minimum));
+				command.Parameters.AddWithValue("@maximum", _keySerializer.Serialize(interval.Maximum));
+
+				using (var reader = command.ExecuteReader())
+				{
+					while (reader.Read())
+					{
+						if (_valueSerializer.TryDeserialize(reader, 0, out var value))
+							yield return value;
+					}
+				}
+			}
+		}
 	}
 }

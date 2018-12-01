@@ -103,6 +103,7 @@ namespace IsabelDb
 		/// </remarks>
 		/// <returns></returns>
 		/// <exception cref="InvalidOperationException">When <see cref="CanBeAccessed"/> is false.</exception>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		[Pure]
 		IEnumerable GetAllValues();
 
@@ -119,6 +120,7 @@ namespace IsabelDb
 		///     In its current incarnation it is incredibly slow. I thought select count()
 		///     was fast, but alas, it requires a full table scan (great).
 		/// </remarks>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		long Count();
 	}
 }

@@ -22,11 +22,6 @@ namespace IsabelDb.Collections
 
 			CreateTableIfNecessary(connection, serializer, tableName);
 		}
-		
-		public override string ToString()
-		{
-			return string.Format("HashSet<{0}>(\"{1}\")", ValueType.FullName, Name);
-		}
 
 		#region Overrides of AbstractCollection
 

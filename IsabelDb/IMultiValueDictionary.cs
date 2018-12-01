@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace IsabelDb
 {
@@ -25,46 +26,54 @@ namespace IsabelDb
 		/// <param name="key"></param>
 		/// <param name="value"></param>
 		/// <returns></returns>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		RowId Put(TKey key, TValue value);
 
 		/// <summary>
 		/// </summary>
 		/// <param name="key"></param>
 		/// <param name="values"></param>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		IReadOnlyList<RowId> PutMany(TKey key, IEnumerable<TValue> values);
 
 		/// <summary>
 		/// </summary>
 		/// <param name="values"></param>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		IReadOnlyList<RowId> PutMany(IEnumerable<KeyValuePair<TKey, IEnumerable<TValue>>> values);
 
 		/// <summary>
 		/// </summary>
 		/// <param name="values"></param>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		IReadOnlyList<RowId> PutMany(IEnumerable<KeyValuePair<TKey, TValue>> values);
 
 		/// <summary>
 		///     Removes the row associated with the given id.
 		/// </summary>
 		/// <param name="row"></param>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		void Remove(RowId row);
 
 		/// <summary>
 		///     Removes the row associated with the given id.
 		/// </summary>
 		/// <param name="rows"></param>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		void RemoveMany(IEnumerable<RowId> rows);
 
 		/// <summary>
 		///     Removes the value associated with the given key.
 		/// </summary>
 		/// <param name="key"></param>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		void RemoveAll(TKey key);
 
 		/// <summary>
 		///     Removes all values associated with the given keys.
 		/// </summary>
 		/// <param name="keys"></param>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		void RemoveMany(IEnumerable<TKey> keys);
 	}
 }

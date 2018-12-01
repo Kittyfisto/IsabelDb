@@ -1,4 +1,6 @@
-﻿namespace IsabelDb
+﻿using System;
+
+namespace IsabelDb
 {
 	/// <summary>
 	///     The interface for a collection of an IsabelDb database.
@@ -19,6 +21,7 @@
 		/// <summary>
 		///     Removes all objects from this store.
 		/// </summary>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		void Clear();
 	}
 }

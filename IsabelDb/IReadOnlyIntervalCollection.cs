@@ -21,6 +21,8 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="keys"></param>
 		/// <returns></returns>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
+		[Pure]
 		IEnumerable<Interval<TKey>> GetManyIntervals(IEnumerable<RowId> keys);
 
 		/// <summary>
@@ -31,6 +33,7 @@ namespace IsabelDb
 		/// </remarks>
 		/// <param name="key"></param>
 		/// <returns></returns>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		[Pure]
 		IEnumerable<TValue> GetValues(TKey key);
 
@@ -40,6 +43,7 @@ namespace IsabelDb
 		/// <param name="minimum"></param>
 		/// <param name="maximum"></param>
 		/// <returns></returns>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		[Pure]
 		IEnumerable<TValue> GetValues(TKey minimum, TKey maximum);
 
@@ -47,6 +51,7 @@ namespace IsabelDb
 		///     Returns the list of all values including their intervals.
 		/// </summary>
 		/// <returns></returns>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		[Pure]
 		IEnumerable<KeyValuePair<Interval<TKey>, TValue>> GetAll();
 	}

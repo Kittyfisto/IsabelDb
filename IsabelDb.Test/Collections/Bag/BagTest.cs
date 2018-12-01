@@ -48,6 +48,126 @@ namespace IsabelDb.Test.Collections.Bag
 		}
 
 		[Test]
+		public void TestGetValueRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var bag = database.GetBag<string>("Stuff");
+				database.Remove(bag);
+
+				new Action(() => bag.GetValue(new RowId(1)))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestGetAllRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var bag = database.GetBag<string>("Stuff");
+				database.Remove(bag);
+
+				new Action(() => bag.GetAll())
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestTryGetValueRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var bag = database.GetBag<string>("Stuff");
+				database.Remove(bag);
+
+				new Action(() => bag.TryGetValue(new RowId(), out var unused))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestGetValuesRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var bag = database.GetBag<string>("Stuff");
+				database.Remove(bag);
+
+				new Action(() => bag.GetValues(new Interval<RowId>()))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestGetManyValuesRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var bag = database.GetBag<string>("Stuff");
+				database.Remove(bag);
+
+				new Action(() => bag.GetManyValues(new[]{new RowId(3)}))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestPutRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var bag = database.GetBag<string>("Stuff");
+				database.Remove(bag);
+
+				new Action(() => bag.Put("Persecution of the masses"))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestPutManyRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var bag = database.GetBag<string>("Stuff");
+				database.Remove(bag);
+
+				new Action(() => bag.PutMany(new[]{"Persecution of the masses", "Who will know (tragedy)"}))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestRemoveRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var bag = database.GetBag<string>("Stuff");
+				database.Remove(bag);
+
+				new Action(() => bag.Remove(new RowId(2)))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
 		[Description("Verifies that the database refuses to return an IBag object for bags who's value type cannot be resolved")]
 		public void TestUnresolvableBagType()
 		{

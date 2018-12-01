@@ -20,6 +20,261 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		}
 
 		[Test]
+		public void TestTryGetValueRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetMultiValueDictionary<object, string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.TryGetValue(new RowId(1), out var unused))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestGetAllRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetMultiValueDictionary<object, string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.GetAll())
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestGetValueRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetMultiValueDictionary<object, string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.GetValue(new RowId()))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestGetValuesRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetMultiValueDictionary<object, string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.GetValues("42"))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestGetValues2RemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetMultiValueDictionary<object, string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.GetValues(new object[]{"42"}))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestGetValues3RemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetMultiValueDictionary<object, string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.GetValues(new RowId[1]))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestGetAllKeysRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetMultiValueDictionary<object, string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.GetAllKeys())
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestContainsRowRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetMultiValueDictionary<object, string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.ContainsRow(new RowId()))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestContainsKeyRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetMultiValueDictionary<object, string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.ContainsKey(new RowId()))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestPutRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetMultiValueDictionary<object, string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.Put(1, "2"))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestPutManyCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetMultiValueDictionary<object, string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.PutMany(1, new[]{"2"}))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestPutMany2Collection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetMultiValueDictionary<object, string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.PutMany(new []{new KeyValuePair<object, IEnumerable<string>>()}))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestPutMany3Collection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetMultiValueDictionary<object, string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.PutMany(new []{new KeyValuePair<object, string>()}))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestRemoveCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetMultiValueDictionary<object, string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.Remove(new RowId()))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestRemoveManyCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetMultiValueDictionary<object, string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.RemoveMany(new RowId[0]))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestRemoveMany2Collection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetMultiValueDictionary<object, string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.RemoveMany(new object[0]))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestRemoveAllCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetMultiValueDictionary<object, string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.RemoveAll(new RowId[0]))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
 		public void TestToString()
 		{
 			using (var connection = CreateConnection())
@@ -388,7 +643,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 				db.Remove(collection);
 				new Action(() => collection.PutMany(2, new[] {"Find Yourself", "Sakura Blues"}))
 					.Should().Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be modified");
+					.WithMessage("This collection has been removed from the database and may no longer be used");
 			}
 		}
 

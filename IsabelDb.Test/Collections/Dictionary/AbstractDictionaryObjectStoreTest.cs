@@ -25,6 +25,34 @@ namespace IsabelDb.Test.Collections.Dictionary
 		}
 
 		[Test]
+		public void TestPutIfNotExists()
+		{
+			using (var db = Database.CreateInMemory(CustomTypes))
+			{
+				var values = db.GetDictionary<TKey, object>("Values");
+				values.PutIfNotExists(SomeKey, "Green").Should().BeTrue();
+				values.Count().Should().Be(1);
+				values.GetAllKeys().Should().BeEquivalentTo(new object[]{SomeKey});
+				values.GetAllValues().Should().Equal(new object[]{"Green"});
+			}
+		}
+
+		[Test]
+		public void TestPutIfNotExistsKeyExistsAlready()
+		{
+			using (var db = Database.CreateInMemory(CustomTypes))
+			{
+				var values = db.GetDictionary<TKey, object>("Values");
+				values.PutIfNotExists(SomeKey, "Green").Should().BeTrue();
+				values.PutIfNotExists(DifferentKey, "Room").Should().BeTrue();
+				values.Count().Should().Be(2);
+
+				values.PutIfNotExists(DifferentKey, "Lantern").Should()
+				      .BeFalse("because it wasn't a good movie (and there already exists a value with that key)");
+			}
+		}
+
+		[Test]
 		public void TestMove()
 		{
 			using (var db = Database.CreateInMemory(CustomTypes))

@@ -559,8 +559,8 @@ namespace IsabelDb.Test.Collections
 		}
 
 		[Test]
-		[Description("Verifies that reading data from a removed collection is allowed, but never returns any values")]
-		public void TestRemove8()
+		[Description("Verifies that reading data from a removed collection no longer is allowed")]
+		public void TestCountRemovedCollection()
 		{
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
@@ -569,8 +569,28 @@ namespace IsabelDb.Test.Collections
 				Put(collection, "Harry Bosch");
 				db.Remove(collection);
 
-				collection.Count().Should().Be(0);
-				collection.GetAllValues().Should().BeEmpty();
+				new Action(() => collection.Count())
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		[Description("Verifies that reading data from a removed collection no longer is allowed")]
+		public void TestGetAllValuesRemovedCollection()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var collection = GetCollection(db, "Characters");
+				Put(collection, "Harry Bosch");
+				db.Remove(collection);
+
+				new Action(() => collection.GetAllValues())
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -587,7 +607,7 @@ namespace IsabelDb.Test.Collections
 
 				new Action(() => Put(collection, "Madeline Bosch"))
 					.Should().Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be modified");
+					.WithMessage("This collection has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -604,12 +624,12 @@ namespace IsabelDb.Test.Collections
 
 				new Action(() => PutMany(collection, "Eleanor Wish", "Maddeline Bosch"))
 					.Should().Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be modified");
+					.WithMessage("This collection has been removed from the database and may no longer be used");
 			}
 		}
 
 		[Test]
-		[Description("Verifies that clearing a removed collection is allowed and is a NOP")]
+		[Description("Verifies that clearing a removed collection is NOT allowed")]
 		public void TestRemove11()
 		{
 			using (var connection = CreateConnection())
@@ -619,8 +639,10 @@ namespace IsabelDb.Test.Collections
 				Put(collection, "Harry Bosch");
 				db.Remove(collection);
 
-				new Action(() => collection.Clear()).Should().NotThrow();
-				collection.GetAllValues().Should().BeEmpty();
+				new Action(() => collection.Clear())
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
 			}
 		}
 

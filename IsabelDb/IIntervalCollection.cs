@@ -30,24 +30,28 @@ namespace IsabelDb
 		/// <param name="interval"></param>
 		/// <param name="value"></param>
 		/// <returns></returns>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		void Put(Interval<TKey> interval, TValue value);
 
 		/// <summary>
 		///     Adds the given values to this collection.
 		/// </summary>
 		/// <param name="values"></param>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		void PutMany(IEnumerable<KeyValuePair<Interval<TKey>, TValue>> values);
 
 		/// <summary>
 		///     Removes all values who's interval intersects with the given key.
 		/// </summary>
 		/// <param name="key"></param>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		void Remove(TKey key);
 
 		/// <summary>
 		///     Removes all values who's interval intersects with the given interval.
 		/// </summary>
 		/// <param name="interval"></param>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		void Remove(Interval<TKey> interval);
 	}
 }

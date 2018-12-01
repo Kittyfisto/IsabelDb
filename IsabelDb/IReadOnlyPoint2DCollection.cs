@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 
 namespace IsabelDb
@@ -15,6 +16,7 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="rectangle"></param>
 		/// <returns></returns>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		[Pure]
 		IEnumerable<Point2D> GetKeysWithin(Rectangle2D rectangle);
 
@@ -23,6 +25,7 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="rectangle"></param>
 		/// <returns></returns>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		[Pure]
 		IEnumerable<TValue> GetValuesWithin(Rectangle2D rectangle);
 
@@ -31,6 +34,7 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="rectangle"></param>
 		/// <returns></returns>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		[Pure]
 		IEnumerable<KeyValuePair<Point2D, TValue>> GetWithin(Rectangle2D rectangle);
 	}

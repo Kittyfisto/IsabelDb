@@ -150,7 +150,9 @@ namespace IsabelDb.Test
 
 			using (var db = Database.Open(_databaseName, new[] {typeof(Person), typeof(Address)}))
 			{
-				var persons = db.GetDictionary<string, object>("SomeTable").GetMany("foo", "bar");
+				var persons = db.GetDictionary<string, object>("SomeTable")
+				                .GetMany(new string[]{"foo", "bar"});
+
 				persons.Should().HaveCount(2);
 				var person = persons.ElementAt(index: 0);
 				person.Key.Should().Be("foo");

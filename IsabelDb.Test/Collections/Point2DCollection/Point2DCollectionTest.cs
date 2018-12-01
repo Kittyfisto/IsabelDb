@@ -36,6 +36,186 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 		}
 
 		[Test]
+		public void TestGetAllRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetPoint2DCollection<string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.GetAll())
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestGetAllKeysRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetPoint2DCollection<string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.GetAllKeys())
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestGetValueRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetPoint2DCollection<string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.GetValue(new RowId(1)))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestTryGetValueRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetPoint2DCollection<string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.TryGetValue(new RowId(), out _))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestGetValuesRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetPoint2DCollection<string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.GetValues(new RowId[1]))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestGetValues2RemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetPoint2DCollection<string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.GetValues(new Point2D(2, 2)))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestGetValues3RemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetPoint2DCollection<string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.GetValues(new Point2D[0]))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestGetKeysWithinRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetPoint2DCollection<string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.GetKeysWithin(new Rectangle2D()))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestGetValuesWithinRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetPoint2DCollection<string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.GetValuesWithin(new Rectangle2D()))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestGetWithinRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetPoint2DCollection<string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.GetWithin(new Rectangle2D()))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestGetContainsKeyRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetPoint2DCollection<string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.ContainsKey(new Point2D(1, 2)))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestGetContainsRowRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var values = database.GetPoint2DCollection<string>("Stuff");
+				database.Remove(values);
+
+				new Action(() => values.ContainsRow(new RowId(1)))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
 		public void TestGetAllKeys1()
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))

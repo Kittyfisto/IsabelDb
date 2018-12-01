@@ -16,6 +16,7 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="value"></param>
 		/// <returns>True if this collection contains the given value, false otherwise</returns>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		/// <exception cref="ArgumentNullException">In case <paramref name="value"/> is null</exception>
 		[Pure]
 		bool Contains(T value);

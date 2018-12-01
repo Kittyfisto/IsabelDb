@@ -92,15 +92,6 @@ namespace IsabelDb.Collections
 			return TryPeek(out var unused, out value);
 		}
 
-		#region Overrides of Object
-
-		public override string ToString()
-		{
-			return string.Format("Queue<{0}>(\"{1}\")", ValueType.FullName, Name);
-		}
-
-		#endregion
-
 		#endregion
 
 		private void Remove(RowId rowId)

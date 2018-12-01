@@ -70,23 +70,14 @@ namespace IsabelDb.Collections
 
 		public IEnumerable<Point2D> GetAllKeys()
 		{
-			using (var command = _connection.CreateCommand())
-			{
-				command.CommandText = _getAllKeysQuery;
-				using (var reader = command.ExecuteReader())
-				{
-					while (reader.Read())
-					{
-						var x = reader.GetDouble(0);
-						var y = reader.GetDouble(1);
-						yield return new Point2D(x, y);
-					}
-				}
-			}
+			ThrowIfDropped();
+			return GetAllKeysInternal();
 		}
 
 		public bool ContainsKey(Point2D key)
 		{
+			ThrowIfDropped();
+
 			using (var command = _connection.CreateCommand())
 			{
 				command.CommandText = _existsKeyQuery;
@@ -100,6 +91,7 @@ namespace IsabelDb.Collections
 
 		public bool ContainsRow(RowId row)
 		{
+			ThrowIfDropped();
 			using (var command = _connection.CreateCommand())
 			{
 				command.CommandText = _existsRowQuery;
@@ -120,6 +112,8 @@ namespace IsabelDb.Collections
 
 		public bool TryGetValue(RowId row, out TValue value)
 		{
+			ThrowIfDropped();
+
 			using (var command = _connection.CreateCommand())
 			{
 				command.CommandText = _getByRowId;
@@ -140,70 +134,26 @@ namespace IsabelDb.Collections
 
 		public IEnumerable<TValue> GetValues(IEnumerable<RowId> rows)
 		{
-			using (var command = _connection.CreateCommand())
-			{
-				command.CommandText = _getByRowId;
-				var rowId = command.Parameters.Add("@rowid", DbType.Int64);
-
-				foreach (var row in rows)
-				{
-					rowId.Value = row.Id;
-					using (var reader = command.ExecuteReader())
-					{
-						if (reader.Read())
-						{
-							if (_valueSerializer.TryDeserialize(reader, 0, out var value))
-								yield return value;
-						}
-					}
-				}
-			}
+			ThrowIfDropped();
+			return GetValuesInternal(rows);
 		}
 
 		public IEnumerable<TValue> GetValues(Point2D key)
 		{
-			using (var command = _connection.CreateCommand())
-			{
-				command.CommandText = _getByExactCoordinatesQuery;
-				command.Parameters.AddWithValue("@x", key.X);
-				command.Parameters.AddWithValue("@y", key.Y);
-
-				using (var reader = command.ExecuteReader())
-				{
-					while (reader.Read())
-					{
-						if (_valueSerializer.TryDeserialize(reader, 0, out var value))
-							yield return value;
-					}
-				}
-			}
+			ThrowIfDropped();
+			return GetValuesInternal(key);
 		}
 
 		public IEnumerable<TValue> GetValues(IEnumerable<Point2D> keys)
 		{
-			using (var command = _connection.CreateCommand())
-			{
-				command.CommandText = _getByExactCoordinatesQuery;
-
-				foreach (var key in keys)
-				{
-					command.Parameters.AddWithValue("@x", key.X);
-					command.Parameters.AddWithValue("@y", key.Y);
-
-					using (var reader = command.ExecuteReader())
-					{
-						while (reader.Read())
-						{
-							if (_valueSerializer.TryDeserialize(reader, 0, out var value))
-								yield return value;
-						}
-					}
-				}
-			}
+			ThrowIfDropped();
+			return GetValuesInternal(keys);
 		}
 
 		public IEnumerable<KeyValuePair<Point2D, IEnumerable<TValue>>> GetAll()
 		{
+			ThrowIfDropped();
+
 			using (var command = _connection.CreateCommand())
 			{
 				command.CommandText = _getAllQuery;
@@ -250,71 +200,20 @@ namespace IsabelDb.Collections
 
 		public IEnumerable<Point2D> GetKeysWithin(Rectangle2D rectangle)
 		{
-			using (var command = _connection.CreateCommand())
-			{
-				command.CommandText = _getKeysWithinQuery;
-				command.Parameters.AddWithValue("@minX", rectangle.MinX);
-				command.Parameters.AddWithValue("@maxX", rectangle.MaxX);
-				command.Parameters.AddWithValue("@minY", rectangle.MinY);
-				command.Parameters.AddWithValue("@maxY", rectangle.MaxY);
-
-				using (var reader = command.ExecuteReader())
-				{
-					while (reader.Read())
-					{
-						var x = reader.GetDouble(0);
-						var y = reader.GetDouble(1);
-						yield return new Point2D(x, y);
-					}
-				}
-			}
+			ThrowIfDropped();
+			return GetKeysWithinInternal(rectangle);
 		}
 
 		public IEnumerable<TValue> GetValuesWithin(Rectangle2D rectangle)
 		{
-			using (var command = _connection.CreateCommand())
-			{
-				command.CommandText = _getValuesWithinQuery;
-				command.Parameters.AddWithValue("@minX", rectangle.MinX);
-				command.Parameters.AddWithValue("@maxX", rectangle.MaxX);
-				command.Parameters.AddWithValue("@minY", rectangle.MinY);
-				command.Parameters.AddWithValue("@maxY", rectangle.MaxY);
-				
-				using (var reader = command.ExecuteReader())
-				{
-					while (reader.Read())
-					{
-						if (_valueSerializer.TryDeserialize(reader, 0, out var value))
-							yield return value;
-					}
-				}
-			}
+			ThrowIfDropped();
+			return GetValuesWithinInternal(rectangle);
 		}
 
 		public IEnumerable<KeyValuePair<Point2D, TValue>> GetWithin(Rectangle2D rectangle)
 		{
-			using (var command = _connection.CreateCommand())
-			{
-				command.CommandText = _getWithinQuery;
-				command.Parameters.AddWithValue("@minX", rectangle.MinX);
-				command.Parameters.AddWithValue("@maxX", rectangle.MaxX);
-				command.Parameters.AddWithValue("@minY", rectangle.MinY);
-				command.Parameters.AddWithValue("@maxY", rectangle.MaxY);
-				
-				using (var reader = command.ExecuteReader())
-				{
-					while (reader.Read())
-					{
-						if (_valueSerializer.TryDeserialize(reader, 2, out var value))
-						{
-							var x = reader.GetDouble(0);
-							var y = reader.GetDouble(1);
-							var point = new Point2D(x, y);
-							yield return new KeyValuePair<Point2D, TValue>(point, value);
-						}
-					}
-				}
-			}
+			ThrowIfDropped();
+			return GetWithinInternal(rectangle);
 		}
 
 		#endregion
@@ -515,6 +414,156 @@ namespace IsabelDb.Collections
 		}
 
 		#endregion
+
+		private IEnumerable<TValue> GetValuesInternal(IEnumerable<Point2D> keys)
+		{
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = _getByExactCoordinatesQuery;
+
+				foreach (var key in keys)
+				{
+					command.Parameters.AddWithValue("@x", key.X);
+					command.Parameters.AddWithValue("@y", key.Y);
+
+					using (var reader = command.ExecuteReader())
+					{
+						while (reader.Read())
+						{
+							if (_valueSerializer.TryDeserialize(reader, 0, out var value))
+								yield return value;
+						}
+					}
+				}
+			}
+		}
+
+		private IEnumerable<Point2D> GetAllKeysInternal()
+		{
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = _getAllKeysQuery;
+				using (var reader = command.ExecuteReader())
+				{
+					while (reader.Read())
+					{
+						var x = reader.GetDouble(0);
+						var y = reader.GetDouble(1);
+						yield return new Point2D(x, y);
+					}
+				}
+			}
+		}
+
+		private IEnumerable<TValue> GetValuesInternal(IEnumerable<RowId> rows)
+		{
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = _getByRowId;
+				var rowId = command.Parameters.Add("@rowid", DbType.Int64);
+
+				foreach (var row in rows)
+				{
+					rowId.Value = row.Id;
+					using (var reader = command.ExecuteReader())
+					{
+						if (reader.Read())
+						{
+							if (_valueSerializer.TryDeserialize(reader, 0, out var value))
+								yield return value;
+						}
+					}
+				}
+			}
+		}
+
+		private IEnumerable<TValue> GetValuesInternal(Point2D key)
+		{
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = _getByExactCoordinatesQuery;
+				command.Parameters.AddWithValue("@x", key.X);
+				command.Parameters.AddWithValue("@y", key.Y);
+
+				using (var reader = command.ExecuteReader())
+				{
+					while (reader.Read())
+					{
+						if (_valueSerializer.TryDeserialize(reader, 0, out var value))
+							yield return value;
+					}
+				}
+			}
+		}
+
+		private IEnumerable<Point2D> GetKeysWithinInternal(Rectangle2D rectangle)
+		{
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = _getKeysWithinQuery;
+				command.Parameters.AddWithValue("@minX", rectangle.MinX);
+				command.Parameters.AddWithValue("@maxX", rectangle.MaxX);
+				command.Parameters.AddWithValue("@minY", rectangle.MinY);
+				command.Parameters.AddWithValue("@maxY", rectangle.MaxY);
+
+				using (var reader = command.ExecuteReader())
+				{
+					while (reader.Read())
+					{
+						var x = reader.GetDouble(0);
+						var y = reader.GetDouble(1);
+						yield return new Point2D(x, y);
+					}
+				}
+			}
+		}
+
+		private IEnumerable<TValue> GetValuesWithinInternal(Rectangle2D rectangle)
+		{
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = _getValuesWithinQuery;
+				command.Parameters.AddWithValue("@minX", rectangle.MinX);
+				command.Parameters.AddWithValue("@maxX", rectangle.MaxX);
+				command.Parameters.AddWithValue("@minY", rectangle.MinY);
+				command.Parameters.AddWithValue("@maxY", rectangle.MaxY);
+				
+				using (var reader = command.ExecuteReader())
+				{
+					while (reader.Read())
+					{
+						if (_valueSerializer.TryDeserialize(reader, 0, out var value))
+							yield return value;
+					}
+				}
+			}
+		}
+
+		private IEnumerable<KeyValuePair<Point2D, TValue>> GetWithinInternal(Rectangle2D rectangle)
+		{
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = _getWithinQuery;
+				command.Parameters.AddWithValue("@minX", rectangle.MinX);
+				command.Parameters.AddWithValue("@maxX", rectangle.MaxX);
+				command.Parameters.AddWithValue("@minY", rectangle.MinY);
+				command.Parameters.AddWithValue("@maxY", rectangle.MaxY);
+				
+				using (var reader = command.ExecuteReader())
+				{
+					while (reader.Read())
+					{
+						if (_valueSerializer.TryDeserialize(reader, 2, out var value))
+						{
+							var x = reader.GetDouble(0);
+							var y = reader.GetDouble(1);
+							var point = new Point2D(x, y);
+							yield return new KeyValuePair<Point2D, TValue>(point, value);
+						}
+					}
+				}
+			}
+		}
 
 		private void CreateObjectTableIfNecessary()
 		{

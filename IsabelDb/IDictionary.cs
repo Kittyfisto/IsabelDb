@@ -33,6 +33,7 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="key"></param>
 		/// <param name="value"></param>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		/// <exception cref="ArgumentNullException">In case <paramref name="key"/> is null.</exception>
 		void Put(TKey key, TValue value);
 
@@ -40,9 +41,19 @@ namespace IsabelDb
 		///     Adds or replaces values with the given keys with these new values.
 		/// </summary>
 		/// <param name="values"></param>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		/// <exception cref="ArgumentNullException">In case <paramref name="values"/> is null.</exception>
 		/// <exception cref="ArgumentException">In case any key in <paramref name="values" /> is null</exception>
 		void PutMany(IEnumerable<KeyValuePair<TKey, TValue>> values);
+
+		/// <summary>
+		///    Adds the given value with the given key.
+		///    Does nothing if there already exists a value with the given key.
+		/// </summary>
+		/// <param name="key"></param>
+		/// <param name="value"></param>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
+		bool PutIfNotExists(TKey key, TValue value);
 
 		/// <summary>
 		///     Moves the value from <paramref name="oldKey"/> to <paramref name="newKey"/>.
@@ -59,6 +70,7 @@ namespace IsabelDb
 		/// </remarks>
 		/// <param name="oldKey"></param>
 		/// <param name="newKey"></param>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		/// <exception cref="ArgumentNullException">In case <paramref name="oldKey"/> is null.</exception>
 		/// <exception cref="ArgumentNullException">In case <paramref name="newKey"/> is null.</exception>
 		void Move(TKey oldKey, TKey newKey);
@@ -69,6 +81,7 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="key"></param>
 		/// <returns>True when there was a value with the given <paramref name="key"/> in this dictionary, false otherwise</returns>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		/// <exception cref="ArgumentNullException">In case <paramref name="key"/> is null.</exception>
 		bool Remove(TKey key);
 
@@ -76,6 +89,7 @@ namespace IsabelDb
 		///     Removes the values with the given keys.
 		/// </summary>
 		/// <param name="keys"></param>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		/// <exception cref="ArgumentNullException">In case <paramref name="keys"/> is null.</exception>
 		/// <exception cref="ArgumentException">In case any value of <paramref name="keys"/> is null.</exception>
 		void RemoveMany(IEnumerable<TKey> keys);

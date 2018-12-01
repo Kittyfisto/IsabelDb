@@ -39,82 +39,38 @@ namespace IsabelDb.Collections
 			_getQuery = string.Format("SELECT key, value FROM {0} WHERE key = @key", tableName);
 			_deleteQuery = string.Format("DELETE FROM {0} WHERE key = @key", _tableName);
 			_existsQuery = string.Format("SELECT EXISTS(SELECT * FROM {0} WHERE key = @key)", _tableName);
-			_putQuery = PutQuery(_tableName);
+			_putQuery = string.Format("INSERT OR REPLACE INTO {0} (key, value) VALUES (@key, @value)", tableName);
+			_putOrIgnoreQuery = string.Format("INSERT OR IGNORE INTO {0} (key, value) VALUES (@key, @value)", tableName);
 		}
 
 		public IEnumerable<KeyValuePair<TKey, TValue>> GetAll()
 		{
-			using (var command = CreateCommand(_getAllQuery))
-			using (var reader = command.ExecuteReader())
-			{
-				while (reader.Read())
-					if (_keySerializer.TryDeserialize(reader, valueOrdinal: 0, value: out var key))
-						if (_valueSerializer.TryDeserialize(reader, valueOrdinal: 1, value: out var value))
-							yield return new KeyValuePair<TKey, TValue>(key, value);
-			}
+			ThrowIfDropped();
+			return GetAllInternal();
 		}
 
 		public IEnumerable<KeyValuePair<TKey, TValue>> GetMany(IEnumerable<TKey> keys)
 		{
-			using (var command = CreateCommand(_getManyQuery))
-			{
-				var keyParameter = command.Parameters.Add("@key", DbType.String);
-				foreach (var key in keys)
-				{
-					keyParameter.Value = key;
-					using (var reader = command.ExecuteReader())
-					{
-						while (reader.Read())
-							if (_valueSerializer.TryDeserialize(reader, valueOrdinal: 1, value: out var value))
-							{
-								yield return new KeyValuePair<TKey, TValue>(key, value);
-							}
-					}
-				}
-			}
-		}
-
-		public IEnumerable<KeyValuePair<TKey, TValue>> GetMany(params TKey[] keys)
-		{
-			return GetMany((IEnumerable<TKey>) keys);
+			ThrowIfDropped();
+			return GetManyInternal(keys);
 		}
 
 		public IEnumerable<TValue> GetManyValues(IEnumerable<TKey> keys)
 		{
-			using (var command = _connection.CreateCommand())
-			{
-				command.CommandText = string.Format("SELECT value FROM {0} WHERE key = @key", _tableName);
-				var keyParameter = command.Parameters.Add("@key", _keySerializer.DatabaseType);
-				foreach (var key in keys)
-				{
-					keyParameter.Value = _keySerializer.Serialize(key);
-					using (var reader = command.ExecuteReader())
-					{
-						if (reader.Read())
-							if (_valueSerializer.TryDeserialize(reader, 0, out var value))
-								yield return value;
-					}
-				}
-			}
+			ThrowIfDropped();
+			return GetManyValuesInternal(keys);
 		}
 
 		public IEnumerable<TKey> GetAllKeys()
 		{
-			using (var command = CreateCommand(_getAllKeysQuery))
-			{
-				using (var reader = command.ExecuteReader())
-				{
-					while (reader.Read())
-					{
-						if (_keySerializer.TryDeserialize(reader, 0, out var key))
-							yield return key;
-					}
-				}
-			}
+			ThrowIfDropped();
+			return GetAllKeysInternal();
 		}
 
 		public TValue Get(TKey key)
 		{
+			ThrowIfDropped();
+
 			if (!TryGet(key, out var value))
 				throw new KeyNotFoundException();
 
@@ -123,11 +79,14 @@ namespace IsabelDb.Collections
 
 		public bool ContainsKey(TKey key)
 		{
+			ThrowIfDropped();
+
 			if (key == null)
 				throw new ArgumentNullException(nameof(key));
 
-			using (var command = CreateCommand(_existsQuery))
+			using (var command = _connection.CreateCommand())
 			{
+				command.CommandText = _existsQuery;
 				command.Parameters.AddWithValue("@key", _keySerializer.Serialize(key));
 				var value = Convert.ToInt64(command.ExecuteScalar());
 				return value != 0;
@@ -136,11 +95,14 @@ namespace IsabelDb.Collections
 
 		public bool TryGet(TKey key, out TValue value)
 		{
+			ThrowIfDropped();
+
 			if (key == null)
 				throw new ArgumentNullException(nameof(key));
 
-			using (var command = CreateCommand(_getQuery))
+			using (var command = _connection.CreateCommand())
 			{
+				command.CommandText = _getQuery;
 				command.Parameters.AddWithValue("@key", _keySerializer.Serialize(key));
 
 				using (var reader = command.ExecuteReader())
@@ -176,9 +138,10 @@ namespace IsabelDb.Collections
 			if (values == null)
 				throw new ArgumentNullException(nameof(values));
 
-			using (var transaction = BeginTransaction())
-			using (var command = CreateCommand(_putQuery))
+			using (var transaction = _connection.BeginTransaction())
+			using (var command = _connection.CreateCommand())
 			{
+				command.CommandText = _putQuery;
 				var keyParameter = command.Parameters.Add("@key", _keySerializer.DatabaseType);
 				var valueParameter = command.Parameters.Add("@value", _valueSerializer.DatabaseType);
 
@@ -196,8 +159,29 @@ namespace IsabelDb.Collections
 			}
 		}
 
+		public bool PutIfNotExists(TKey key, TValue value)
+		{
+			ThrowIfReadOnly();
+			ThrowIfDropped();
+
+			if (key == null)
+				throw new ArgumentNullException(nameof(key));
+
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = _putOrIgnoreQuery;
+				command.Parameters.AddWithValue("@key", _keySerializer.Serialize(key));
+				command.Parameters.AddWithValue("@value", _valueSerializer.Serialize(value));
+				var numRowsAffected = command.ExecuteNonQuery();
+				return numRowsAffected > 0;
+			}
+		}
+
 		public void Move(TKey oldKey, TKey newKey)
 		{
+			ThrowIfReadOnly();
+			ThrowIfDropped();
+
 			if (oldKey == null)
 				throw new ArgumentNullException(nameof(oldKey));
 			if (newKey == null)
@@ -226,13 +210,15 @@ namespace IsabelDb.Collections
 
 		public bool Remove(TKey key)
 		{
+			ThrowIfReadOnly();
+			ThrowIfDropped();
+
 			if (key == null)
 				throw new ArgumentNullException(nameof(key));
 
-			ThrowIfReadOnly();
-
-			using (var command = CreateCommand(_deleteQuery))
+			using (var command = _connection.CreateCommand())
 			{
+				command.CommandText = _deleteQuery;
 				command.Parameters.AddWithValue("@key", _keySerializer.Serialize(key));
 				var numRowsAffected = command.ExecuteNonQuery();
 				return numRowsAffected > 0;
@@ -241,13 +227,16 @@ namespace IsabelDb.Collections
 
 		public void RemoveMany(IEnumerable<TKey> keys)
 		{
+			ThrowIfDropped();
+
 			if (keys == null)
 				throw new ArgumentNullException(nameof(keys));
 
-			using (var transaction = BeginTransaction())
+			using (var transaction = _connection.BeginTransaction())
 			{
-				using (var command = CreateCommand(_deleteQuery))
+				using (var command = _connection.CreateCommand())
 				{
+					command.CommandText = _deleteQuery;
 					var parameter = command.Parameters.Add("@key", _keySerializer.DatabaseType);
 					foreach (var key in keys)
 					{
@@ -277,10 +266,84 @@ namespace IsabelDb.Collections
 
 		#endregion
 
+		private IEnumerable<KeyValuePair<TKey, TValue>> GetAllInternal()
+		{
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = _getAllQuery;
+				using (var reader = command.ExecuteReader())
+				{
+					while (reader.Read())
+						if (_keySerializer.TryDeserialize(reader, valueOrdinal: 0, value: out var key))
+							if (_valueSerializer.TryDeserialize(reader, valueOrdinal: 1, value: out var value))
+								yield return new KeyValuePair<TKey, TValue>(key, value);
+				}
+			}
+		}
+
+		private IEnumerable<KeyValuePair<TKey, TValue>> GetManyInternal(IEnumerable<TKey> keys)
+		{
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = _getManyQuery;
+
+				var keyParameter = command.Parameters.Add("@key", DbType.String);
+				foreach (var key in keys)
+				{
+					keyParameter.Value = key;
+					using (var reader = command.ExecuteReader())
+					{
+						while (reader.Read())
+							if (_valueSerializer.TryDeserialize(reader, valueOrdinal: 1, value: out var value))
+							{
+								yield return new KeyValuePair<TKey, TValue>(key, value);
+							}
+					}
+				}
+			}
+		}
+
+		private IEnumerable<TValue> GetManyValuesInternal(IEnumerable<TKey> keys)
+		{
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = string.Format("SELECT value FROM {0} WHERE key = @key", _tableName);
+				var keyParameter = command.Parameters.Add("@key", _keySerializer.DatabaseType);
+				foreach (var key in keys)
+				{
+					keyParameter.Value = _keySerializer.Serialize(key);
+					using (var reader = command.ExecuteReader())
+					{
+						if (reader.Read())
+							if (_valueSerializer.TryDeserialize(reader, 0, out var value))
+								yield return value;
+					}
+				}
+			}
+		}
+
+		private IEnumerable<TKey> GetAllKeysInternal()
+		{
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = _getAllKeysQuery;
+
+				using (var reader = command.ExecuteReader())
+				{
+					while (reader.Read())
+					{
+						if (_keySerializer.TryDeserialize(reader, 0, out var key))
+							yield return key;
+					}
+				}
+			}
+		}
+
 		private void InsertOrReplace(TKey key, TValue value)
 		{
-			using (var command = CreateCommand(_putQuery))
+			using (var command = _connection.CreateCommand())
 			{
+				command.CommandText = _putQuery;
 				var serializedKey = _keySerializer.Serialize(key);
 				command.Parameters.AddWithValue("@key", serializedKey);
 				var serializedValue = _valueSerializer.Serialize(value);
@@ -288,18 +351,6 @@ namespace IsabelDb.Collections
 
 				command.ExecuteNonQuery();
 			}
-		}
-
-		private SQLiteCommand CreateCommand(string text)
-		{
-			var command = _connection.CreateCommand();
-			command.CommandText = text;
-			return command;
-		}
-
-		private SQLiteTransaction BeginTransaction()
-		{
-			return _connection.BeginTransaction();
 		}
 
 		private void CreateObjectTableIfNecessary()
@@ -317,14 +368,6 @@ namespace IsabelDb.Collections
 			}
 		}
 
-		private static string PutQuery(string tableName)
-		{
-			var builder = new StringBuilder();
-			builder.AppendFormat("INSERT OR REPLACE INTO {0} ", tableName);
-			builder.Append("(key, value) VALUES (@key, @value)");
-			return builder.ToString();
-		}
-
 		#region Queries
 
 		private readonly string _deleteQuery;
@@ -333,6 +376,7 @@ namespace IsabelDb.Collections
 		private readonly string _getQuery;
 		private readonly string _existsQuery;
 		private readonly string _putQuery;
+		private readonly string _putOrIgnoreQuery;
 		private readonly string _getAllKeysQuery;
 
 		#endregion

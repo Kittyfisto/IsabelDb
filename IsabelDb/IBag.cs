@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace IsabelDb
 {
@@ -25,12 +26,17 @@ namespace IsabelDb
 		///     Adds a new value to this bag.
 		/// </summary>
 		/// <param name="value"></param>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
+		/// <exception cref="ArgumentNullException">In case <paramref name="value"/> is null.</exception>
 		RowId Put(T value);
 
 		/// <summary>
 		///     Adds the given values to this bag.
 		/// </summary>
 		/// <param name="values"></param>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
+		/// <exception cref="ArgumentNullException">In case <paramref name="values"/> is null.</exception>
+		/// <exception cref="ArgumentException">In case any value in <paramref name="values"/> is null.</exception>
 		IEnumerable<RowId> PutMany(IEnumerable<T> values);
 
 		/// <summary>

@@ -29,12 +29,14 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="value">The value to add to this collection</param>
 		/// <returns>True when the value wasn't previously part of this collection, false otherwise</returns>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		/// <exception cref="ArgumentNullException">In case <paramref name="value" /> is null</exception>
 		bool Add(T value);
 
 		/// <summary>
 		/// </summary>
 		/// <param name="values"></param>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		/// <exception cref="ArgumentNullException">In case <paramref name="values" /> is null</exception>
 		/// <exception cref="ArgumentException">In case any value in <paramref name="values" /> is null</exception>
 		void AddMany(IEnumerable<T> values);
@@ -45,6 +47,7 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="value"></param>
 		/// <returns>True if the value was part of this collection, false otherwise</returns>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		/// <exception cref="ArgumentNullException">In case <paramref name="value" /> is null</exception>
 		bool Remove(T value);
 	}

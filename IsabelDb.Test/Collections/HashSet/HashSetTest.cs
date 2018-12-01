@@ -13,6 +13,70 @@ namespace IsabelDb.Test.Collections.HashSet
 		private string _last;
 
 		[Test]
+		public void TestAddRemovedCollcection()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var hashSet = db.GetHashSet<int>("Stuff");
+				db.Remove(hashSet);
+
+				new Action(() => hashSet.Add(42))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestAddManyRemovedCollcection()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var hashSet = db.GetHashSet<int>("Stuff");
+				db.Remove(hashSet);
+
+				new Action(() => hashSet.AddMany(new []{42}))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestRemoveRemovedCollcection()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var hashSet = db.GetHashSet<int>("Stuff");
+				db.Remove(hashSet);
+
+				new Action(() => hashSet.Remove(42))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestContainsRemovedCollcection()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var hashSet = db.GetHashSet<int>("Stuff");
+				db.Remove(hashSet);
+
+				new Action(() => hashSet.Contains(42))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
 		public void TestAddRemoveAdd()
 		{
 			using (var connection = CreateConnection())

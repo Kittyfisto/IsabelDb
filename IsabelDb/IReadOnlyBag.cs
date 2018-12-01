@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 
 namespace IsabelDb
@@ -16,6 +17,7 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="key"></param>
 		/// <returns></returns>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		[Pure]
 		T GetValue(RowId key);
 
@@ -23,6 +25,7 @@ namespace IsabelDb
 		/// 
 		/// </summary>
 		/// <returns></returns>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		[Pure]
 		IEnumerable<KeyValuePair<RowId, T>> GetAll();
 
@@ -32,6 +35,7 @@ namespace IsabelDb
 		/// <param name="key"></param>
 		/// <param name="value"></param>
 		/// <returns></returns>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		bool TryGetValue(RowId key, out T value);
 
 		/// <summary>
@@ -39,6 +43,7 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="interval"></param>
 		/// <returns></returns>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		[Pure]
 		IEnumerable<T> GetValues(Interval<RowId> interval);
 
@@ -47,6 +52,7 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="keys"></param>
 		/// <returns></returns>
+		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
 		[Pure]
 		IEnumerable<T> GetManyValues(IEnumerable<RowId> keys);
 	}

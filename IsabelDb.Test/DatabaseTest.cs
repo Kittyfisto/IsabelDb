@@ -481,7 +481,7 @@ namespace IsabelDb.Test
 				store.Put("foo", value1);
 				store.Put("bar", value2);
 
-				var persons = store.GetMany("foo", "bar");
+				var persons = store.GetMany(new[]{"foo", "bar"});
 				persons.Should().HaveCount(2);
 				var actualValue1 = persons.ElementAt(index: 0);
 				actualValue1.Key.Should().Be("foo");
@@ -505,7 +505,7 @@ namespace IsabelDb.Test
 				store.Put("foo", value1);
 				store.Put("bar", value2);
 
-				var persons = store.GetMany("foo", "bar");
+				var persons = store.GetMany(new []{"foo", "bar"});
 				persons.Should().HaveCount(2);
 				var actualValue1 = persons.ElementAt(index: 0);
 				actualValue1.Key.Should().Be("foo");
@@ -815,7 +815,7 @@ namespace IsabelDb.Test
 			store.Put("foo", value1);
 			store.Put("bar", value2);
 
-			var persons = store.GetMany("foo", "bar");
+			var persons = store.GetMany(new []{"foo", "bar"});
 			persons.Should().HaveCount(2);
 			var actualValue1 = persons.ElementAt(index: 0);
 			actualValue1.Key.Should().Be("foo");
@@ -833,7 +833,7 @@ namespace IsabelDb.Test
 			store.Put("foo", value1);
 			store.Put("bar", value2);
 
-			var persons = store.GetMany("foo", "bar");
+			var persons = store.GetMany(new []{"foo", "bar"});
 			persons.Should().HaveCount(2);
 			var actualValue1 = persons.ElementAt(index: 0);
 			actualValue1.Key.Should().Be("foo");

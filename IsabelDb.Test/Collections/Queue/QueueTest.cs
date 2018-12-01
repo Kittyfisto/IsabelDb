@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using System;
+using FluentAssertions;
 using IsabelDb.Test.Entities;
 using NUnit.Framework;
 using System.Collections.Generic;
@@ -18,6 +19,66 @@ namespace IsabelDb.Test.Collections.Queue
 				{
 					db.GetQueue<string>("Stuff").ToString().Should().Be("Queue<System.String>(\"Stuff\")");
 				}
+			}
+		}
+
+		[Test]
+		public void TestEnqueueRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var bag = database.GetQueue<string>("Stuff");
+				database.Remove(bag);
+
+				new Action(() => bag.Enqueue("dwadwad"))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestEnqueueManyRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var bag = database.GetQueue<string>("Stuff");
+				database.Remove(bag);
+
+				new Action(() => bag.EnqueueMany(new[]{"a", "b"}))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestTryDequeueRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var bag = database.GetQueue<string>("Stuff");
+				database.Remove(bag);
+
+				new Action(() => bag.TryDequeue(out var unused))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		public void TestTryPeekRemovedCollection()
+		{
+			using (var database = Database.CreateInMemory(new Type[0]))
+			{
+				var bag = database.GetQueue<string>("Stuff");
+				database.Remove(bag);
+
+				new Action(() => bag.TryPeek(out var unused))
+					.Should()
+					.Throw<InvalidOperationException>()
+					.WithMessage("This collection has been removed from the database and may no longer be used");
 			}
 		}
 
