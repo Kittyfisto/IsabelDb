@@ -7,6 +7,9 @@ namespace IsabelDb
 	///     Values can be streamed back or queried in batches.
 	/// </summary>
 	/// <remarks>
+	///     All data is persisted in the database (which usually means a file on disk).
+	/// </remarks>
+	/// <remarks>
 	///     <see cref="Put" />, <see cref="PutMany" /> and <see cref="ICollection.Clear" />
 	///     only return once the data has been written to the disk / removed from it.
 	/// </remarks>

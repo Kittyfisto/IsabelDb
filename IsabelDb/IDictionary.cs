@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace IsabelDb
 {
@@ -20,8 +21,8 @@ namespace IsabelDb
 	///     - Your implementations of  <see cref="object.GetHashCode" /> / <see cref="object.Equals(object)" /> are irrelevant
 	///     to this database
 	///     - Two keys are equal if their serialized byte array are equal
-	///     - Once you've added a key of a particular type to the database, you may *never* modify the key type (i.e. adding
-	///     new fields is a no go)
+	///     - Once you've added a key of a particular type to the database, you may *never* modify the key type (i.e. adding/removing
+	///     fields/properties is a no go)
 	/// </remarks>
 	public interface IDictionary<TKey, TValue>
 		: IReadOnlyDictionary<TKey, TValue>
@@ -32,12 +33,15 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="key"></param>
 		/// <param name="value"></param>
+		/// <exception cref="ArgumentNullException">In case <paramref name="key"/> is null.</exception>
 		void Put(TKey key, TValue value);
 
 		/// <summary>
 		///     Adds or replaces values with the given keys with these new values.
 		/// </summary>
 		/// <param name="values"></param>
+		/// <exception cref="ArgumentNullException">In case <paramref name="values"/> is null.</exception>
+		/// <exception cref="ArgumentException">In case any key in <paramref name="values" /> is null</exception>
 		void PutMany(IEnumerable<KeyValuePair<TKey, TValue>> values);
 
 		/// <summary>
@@ -55,6 +59,8 @@ namespace IsabelDb
 		/// </remarks>
 		/// <param name="oldKey"></param>
 		/// <param name="newKey"></param>
+		/// <exception cref="ArgumentNullException">In case <paramref name="oldKey"/> is null.</exception>
+		/// <exception cref="ArgumentNullException">In case <paramref name="newKey"/> is null.</exception>
 		void Move(TKey oldKey, TKey newKey);
 
 		/// <summary>
@@ -62,12 +68,16 @@ namespace IsabelDb
 		///     Does nothing if the key is not part of this dictionary.
 		/// </summary>
 		/// <param name="key"></param>
-		void Remove(TKey key);
+		/// <returns>True when there was a value with the given <paramref name="key"/> in this dictionary, false otherwise</returns>
+		/// <exception cref="ArgumentNullException">In case <paramref name="key"/> is null.</exception>
+		bool Remove(TKey key);
 
 		/// <summary>
 		///     Removes the values with the given keys.
 		/// </summary>
 		/// <param name="keys"></param>
+		/// <exception cref="ArgumentNullException">In case <paramref name="keys"/> is null.</exception>
+		/// <exception cref="ArgumentException">In case any value of <paramref name="keys"/> is null.</exception>
 		void RemoveMany(IEnumerable<TKey> keys);
 	}
 }

@@ -1,10 +1,11 @@
-﻿using IsabelDb.Collections;
-
-namespace IsabelDb
+﻿namespace IsabelDb
 {
 	/// <summary>
 	/// 
 	/// </summary>
+	/// <remarks>
+	///     All data is persisted in the database (which usually means a file on disk).
+	/// </remarks>
 	/// <typeparam name="TValue"></typeparam>
 	public interface IPoint2DCollection<TValue>
 		: IReadOnlyPoint2DCollection<TValue>

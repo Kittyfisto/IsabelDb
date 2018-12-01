@@ -20,7 +20,9 @@ namespace IsabelDb.Test.Collections.Dictionary
 			"	", "a", "A", "Hello, World!", "휘파람",
 			"1",
 			"العَرَبِيَّة",
-			"日本語"
+			"日本語",
+			"I have a plan!",
+			"Your plan is yelling at me?!"
 		};
 	}
 }

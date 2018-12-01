@@ -7,6 +7,17 @@ namespace IsabelDb
 	///    A collection where a value can only appear once.
 	///    Two values are identical if their serialized byte arrays are identical.
 	/// </summary>
+	/// <remarks>
+	///     All data is persisted in the database (which usually means a file on disk).
+	/// </remarks>
+	/// <remarks>
+	///     You can use custom data types as values, however you should know the following:
+	///     - Your implementations of  <see cref="object.GetHashCode" /> / <see cref="object.Equals(object)" /> are irrelevant
+	///     to this database
+	///     - Two keys are equal if their serialized byte arrays are equal
+	///     - Once you've added a key of a particular type to the database, you may *never* modify the key type (i.e. adding/removing
+	///     fields/properties is a no go)
+	/// </remarks>
 	/// <typeparam name="T"></typeparam>
 	public interface IHashSet<T>
 		: ICollection<T>

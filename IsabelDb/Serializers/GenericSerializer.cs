@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
 using System.Data.SQLite;
 
 namespace IsabelDb.Serializers
@@ -17,12 +18,22 @@ namespace IsabelDb.Serializers
 
 		public object Serialize(T value)
 		{
+			if (value == null)
+				return null;
+
 			return _serializer.Serialize(value);
 		}
 
 		public bool TryDeserialize(SQLiteDataReader reader, int valueOrdinal, out T value)
 		{
-			var serializedValue = (byte[]) reader.GetValue(valueOrdinal);
+			var tmp = reader.GetValue(valueOrdinal);
+			if (Convert.IsDBNull(tmp))
+			{
+				value = default(T);
+				return true;
+			}
+
+			var serializedValue = (byte[]) tmp;
 			var deserializedValue = Deserialize(serializedValue);
 			if (deserializedValue == null)
 			{

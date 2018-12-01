@@ -37,8 +37,6 @@ namespace IsabelDb.Collections
 			_getAllKeysQuery = string.Format("SELECT key FROM {0}", tableName);
 			_getManyQuery = string.Format("SELECT key, value FROM {0} WHERE key = @key", tableName);
 			_getQuery = string.Format("SELECT key, value FROM {0} WHERE key = @key", tableName);
-			_countQuery = string.Format("SELECT COUNT(*) FROM {0}", _tableName);
-			_deleteAllQuery = string.Format("DELETE FROM {0}", _tableName);
 			_deleteQuery = string.Format("DELETE FROM {0} WHERE key = @key", _tableName);
 			_existsQuery = string.Format("SELECT EXISTS(SELECT * FROM {0} WHERE key = @key)", _tableName);
 			_putQuery = PutQuery(_tableName);
@@ -125,6 +123,9 @@ namespace IsabelDb.Collections
 
 		public bool ContainsKey(TKey key)
 		{
+			if (key == null)
+				throw new ArgumentNullException(nameof(key));
+
 			using (var command = CreateCommand(_existsQuery))
 			{
 				command.Parameters.AddWithValue("@key", _keySerializer.Serialize(key));
@@ -135,6 +136,9 @@ namespace IsabelDb.Collections
 
 		public bool TryGet(TKey key, out TValue value)
 		{
+			if (key == null)
+				throw new ArgumentNullException(nameof(key));
+
 			using (var command = CreateCommand(_getQuery))
 			{
 				command.Parameters.AddWithValue("@key", _keySerializer.Serialize(key));
@@ -155,22 +159,22 @@ namespace IsabelDb.Collections
 
 		public void Put(TKey key, TValue value)
 		{
-			if (key == null)
-				throw new ArgumentNullException(nameof(key));
-
 			ThrowIfReadOnly();
 			ThrowIfDropped();
 
-			if (value == null)
-				Remove(key);
-			else
-				InsertOrReplace(key, value);
+			if (key == null)
+				throw new ArgumentNullException(nameof(key));
+
+			InsertOrReplace(key, value);
 		}
 
 		public void PutMany(IEnumerable<KeyValuePair<TKey, TValue>> values)
 		{
 			ThrowIfReadOnly();
 			ThrowIfDropped();
+
+			if (values == null)
+				throw new ArgumentNullException(nameof(values));
 
 			using (var transaction = BeginTransaction())
 			using (var command = CreateCommand(_putQuery))
@@ -180,6 +184,9 @@ namespace IsabelDb.Collections
 
 				foreach (var pair in values)
 				{
+					if (pair.Key == null)
+						throw new ArgumentException("Null keys cannot be added to this collection");
+
 					keyParameter.Value = _keySerializer.Serialize(pair.Key);
 					valueParameter.Value = _valueSerializer.Serialize(pair.Value);
 					command.ExecuteNonQuery();
@@ -191,6 +198,11 @@ namespace IsabelDb.Collections
 
 		public void Move(TKey oldKey, TKey newKey)
 		{
+			if (oldKey == null)
+				throw new ArgumentNullException(nameof(oldKey));
+			if (newKey == null)
+				throw new ArgumentNullException(nameof(newKey));
+
 			if (Equals(oldKey, newKey))
 				return;
 
@@ -212,7 +224,7 @@ namespace IsabelDb.Collections
 			}
 		}
 
-		public void Remove(TKey key)
+		public bool Remove(TKey key)
 		{
 			if (key == null)
 				throw new ArgumentNullException(nameof(key));
@@ -222,12 +234,16 @@ namespace IsabelDb.Collections
 			using (var command = CreateCommand(_deleteQuery))
 			{
 				command.Parameters.AddWithValue("@key", _keySerializer.Serialize(key));
-				command.ExecuteNonQuery();
+				var numRowsAffected = command.ExecuteNonQuery();
+				return numRowsAffected > 0;
 			}
 		}
 
 		public void RemoveMany(IEnumerable<TKey> keys)
 		{
+			if (keys == null)
+				throw new ArgumentNullException(nameof(keys));
+
 			using (var transaction = BeginTransaction())
 			{
 				using (var command = CreateCommand(_deleteQuery))
@@ -235,7 +251,10 @@ namespace IsabelDb.Collections
 					var parameter = command.Parameters.Add("@key", _keySerializer.DatabaseType);
 					foreach (var key in keys)
 					{
-						parameter.Value = key;
+						if (key == null)
+							throw new ArgumentException("Keys are not allowed to be null.");
+
+						parameter.Value =_keySerializer.Serialize(key);
 						command.ExecuteNonQuery();
 					}
 					transaction.Commit();
@@ -291,7 +310,7 @@ namespace IsabelDb.Collections
 				builder.AppendFormat("CREATE TABLE IF NOT EXISTS {0} (", _tableName);
 
 				builder.AppendFormat("key {0} PRIMARY KEY NOT NULL", SQLiteHelper.GetAffinity(_keySerializer.DatabaseType));
-				builder.AppendFormat(",value {0} NOT NULL", SQLiteHelper.GetAffinity(_valueSerializer.DatabaseType));
+				builder.AppendFormat(",value {0}", SQLiteHelper.GetAffinity(_valueSerializer.DatabaseType));
 				builder.Append(")");
 				command.CommandText = builder.ToString();
 				command.ExecuteNonQuery();
@@ -308,8 +327,6 @@ namespace IsabelDb.Collections
 
 		#region Queries
 
-		private readonly string _countQuery;
-		private readonly string _deleteAllQuery;
 		private readonly string _deleteQuery;
 		private readonly string _getAllQuery;
 		private readonly string _getManyQuery;

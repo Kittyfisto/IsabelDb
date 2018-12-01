@@ -23,7 +23,10 @@ namespace IsabelDb
 
 			// INCREMENTING THIS VALUE MEANS DECLARING A BREAKING CHANGE OCCURED.
 			// YOU NEVER WANT TO DO THIS EXCEPT BEFORE THE INITIAL RELEASE
-			DatabaseSchemaVersion = 3;
+			//
+			// 30.11.2018 v3: First introduction of this schema
+			// 01.12.2018 v4: Removed NOT NULL constraint from value column in dictionary tables
+			DatabaseSchemaVersion = 4;
 		}
 
 		[Pure]

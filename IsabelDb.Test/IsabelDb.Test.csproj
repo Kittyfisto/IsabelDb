@@ -92,6 +92,7 @@
     <Compile Include="Collections\Dictionary\DictionaryCompatibilityTest.cs" />
     <Compile Include="Collections\Dictionary\DictionaryTest.cs" />
     <Compile Include="Collections\Dictionary\EnumKeyTest.cs" />
+    <Compile Include="Collections\Dictionary\ObjectKeyTest.cs" />
     <Compile Include="Collections\Dictionary\UInt64KeyTest.cs" />
     <Compile Include="Collections\HashSet\HashSetCompatibilityTest.cs" />
     <Compile Include="Collections\HashSet\HashSetTest.cs" />

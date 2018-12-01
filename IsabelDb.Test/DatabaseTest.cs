@@ -734,10 +734,11 @@ namespace IsabelDb.Test
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
 				var store = db.GetDictionary<string, object>("SomeTable");
-				store.TryGet("42", out var unused).Should().BeFalse();
+				store.Put("42", "Green Room");
 
-				store.Put("42", value: null);
-				store.TryGet("42", out unused).Should().BeFalse();
+				store.Remove("43").Should().BeFalse();
+				store.TryGet("42", out var value).Should().BeTrue();
+				value.Should().Be("Green Room");
 			}
 		}
 
@@ -752,29 +753,15 @@ namespace IsabelDb.Test
 		}
 
 		[Test]
-		public void TestRemoveValue()
-		{
-			using (var db = Database.CreateInMemory(NoCustomTypes))
-			{
-				var store = db.GetDictionary<string, object>("SomeTable");
-				store.Put("foo", value: 42);
-				store.Get("foo").Should().Be(42);
-
-				store.Put("foo", value: null);
-				store.TryGet("foo", out var unused).Should().BeFalse();
-			}
-		}
-
-		[Test]
 		[Description("Verifies that ONLY the value with the specified key is removed and none other")]
-		public void TestRemoveValue2()
+		public void TestRemoveValue()
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
 				var store = db.GetDictionary<string, object>("SomeTable");
 				store.Put("a", value: 1);
 				store.Put("b", value: 2);
-				store.Remove("a");
+				store.Remove("a").Should().BeTrue();
 
 				store.TryGet("a", out var unused).Should().BeFalse();
 				store.Get("b").Should().Be(2);

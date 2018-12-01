@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 
 namespace IsabelDb
@@ -20,6 +21,7 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="key"></param>
 		/// <returns></returns>
+		/// <exception cref="ArgumentNullException">When <paramref name="key"/> is null.</exception>
 		[Pure]
 		bool ContainsKey(TKey key);
 
@@ -30,6 +32,7 @@ namespace IsabelDb
 		/// <param name="key"></param>
 		/// <param name="value"></param>
 		/// <returns></returns>
+		/// <exception cref="ArgumentNullException">When <paramref name="key"/> is null.</exception>
 		bool TryGet(TKey key, out TValue value);
 		
 		/// <summary>
@@ -44,7 +47,8 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="key"></param>
 		/// <returns></returns>
-		/// <exception cref="KeyNotFoundException"></exception>
+		/// <exception cref="ArgumentNullException">When <paramref name="key"/> is null.</exception>
+		/// <exception cref="KeyNotFoundException">In case there is value value in this collection for the given <paramref name="key"/>.</exception>
 		[Pure]
 		TValue Get(TKey key);
 

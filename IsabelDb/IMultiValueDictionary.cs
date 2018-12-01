@@ -5,6 +5,17 @@ namespace IsabelDb
 	/// <summary>
 	///     A dictionary where multiple values are associated with the same key.
 	/// </summary>
+	/// <remarks>
+	///     All data is persisted in the database (which usually means a file on disk).
+	/// </remarks>
+	/// <remarks>
+	///     You can use custom data types as keys, however you should know the following:
+	///     - Your implementations of  <see cref="object.GetHashCode" /> / <see cref="object.Equals(object)" /> are irrelevant
+	///     to this database
+	///     - Two keys are equal if their serialized byte arrays are equal
+	///     - Once you've added a key of a particular type to the database, you may *never* modify the key type (i.e. adding/removing
+	///     fields/properties is a no go)
+	/// </remarks>
 	public interface IMultiValueDictionary<TKey, TValue>
 		: IReadOnlyMultiValueDictionary<TKey, TValue>
 		, ICollection<TValue>

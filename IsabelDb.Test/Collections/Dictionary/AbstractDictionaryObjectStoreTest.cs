@@ -8,6 +8,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 {
 	[TestFixture]
 	public abstract class AbstractDictionaryObjectStoreTest<TKey>
+		: AbstractTest
 	{
 		protected abstract IEnumerable<Type> CustomTypes { get; }
 		protected abstract TKey SomeKey { get; }
@@ -96,9 +97,11 @@ namespace IsabelDb.Test.Collections.Dictionary
 				values.Get(SomeKey).Should().Be("A");
 
 				values.Put(SomeKey, value: null);
-				new Action(() => values.Get(SomeKey)).Should().Throw<KeyNotFoundException>();
-				values.TryGet(SomeKey, out var unused).Should().BeFalse();
-				values.GetAll().Should().BeEmpty();
+				values.Get(SomeKey).Should().BeNull();
+
+				values.TryGet(SomeKey, out var value).Should().BeTrue();
+				value.Should().BeNull();
+				values.GetAll().Should().BeEquivalentTo(new object[] {new KeyValuePair<TKey, object>(SomeKey, null) });
 			}
 		}
 
@@ -133,6 +136,18 @@ namespace IsabelDb.Test.Collections.Dictionary
 		}
 
 		[Test]
+		public void TestPutNullValue()
+		{
+			using (var db = Database.CreateInMemory(CustomTypes))
+			{
+				var values = db.GetDictionary<TKey, object>("Values");
+				values.Put(SomeKey, null);
+				values.Count().Should().Be(1);
+				values.GetAllValues().Should().BeEquivalentTo(new object[] {null});
+			}
+		}
+
+		[Test]
 		public void TestRemoveValue()
 		{
 			using (var db = Database.CreateInMemory(CustomTypes))
@@ -141,10 +156,24 @@ namespace IsabelDb.Test.Collections.Dictionary
 				values.Put(SomeKey, "A");
 				values.Get(SomeKey).Should().Be("A");
 
-				values.Remove(SomeKey);
+				values.Remove(SomeKey).Should().BeTrue();
 				new Action(() => values.Get(SomeKey)).Should().Throw<KeyNotFoundException>();
 				values.TryGet(SomeKey, out var unused).Should().BeFalse();
 				values.GetAll().Should().BeEmpty();
+			}
+		}
+
+		[Test]
+		public void TestRemoveNonExistentKey()
+		{
+			using (var db = Database.CreateInMemory(CustomTypes))
+			{
+				var values = db.GetDictionary<TKey, object>("Values");
+				values.Put(SomeKey, "A");
+				values.Get(SomeKey).Should().Be("A");
+
+				values.Remove(DifferentKey).Should().BeFalse();
+				values.Get(SomeKey).Should().Be("A");
 			}
 		}
 

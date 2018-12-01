@@ -21,6 +21,149 @@ namespace IsabelDb.Test.Collections.Dictionary
 		}
 
 		[Test]
+		public void TestContainsKeyNull()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var dictionary = db.GetDictionary<object, string>("Stuff");
+				new Action(() => dictionary.ContainsKey(null)).Should().Throw<ArgumentNullException>();
+			}
+		}
+
+		[Test]
+		public void TestGetNull()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var dictionary = db.GetDictionary<object, string>("Stuff");
+				new Action(() => dictionary.Get(null)).Should().Throw<ArgumentNullException>();
+			}
+		}
+
+		[Test]
+		public void TestTryGetNull()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var dictionary = db.GetDictionary<object, string>("Stuff");
+				new Action(() => dictionary.TryGet(null, out var unused)).Should().Throw<ArgumentNullException>();
+			}
+		}
+
+		[Test]
+		public void TestRemoveNull()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var dictionary = db.GetDictionary<object, string>("Stuff");
+				new Action(() => dictionary.Remove(null)).Should().Throw<ArgumentNullException>();
+			}
+		}
+
+		[Test]
+		public void TestRemoveManyNull()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var dictionary = db.GetDictionary<object, string>("Stuff");
+				new Action(() => dictionary.RemoveMany(null)).Should().Throw<ArgumentNullException>();
+			}
+		}
+
+		[Test]
+		public void TestRemoveManySomeNull()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var dictionary = db.GetDictionary<object, string>("Stuff");
+				new Action(() => dictionary.RemoveMany(new object[]{1, null, 2})).Should().Throw<ArgumentException>();
+			}
+		}
+
+		[Test]
+		public void TestPutNullKey()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var dictionary = db.GetDictionary<object, string>("Stuff");
+				new Action(() => dictionary.Put(null, "Stuff")).Should().Throw<ArgumentNullException>();
+				dictionary.Count().Should().Be(0);
+				dictionary.GetAllValues().Should().BeEmpty();
+			}
+		}
+
+		[Test]
+		public void TestPutManyNull()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var dictionary = db.GetDictionary<object, string>("Stuff");
+				new Action(() => dictionary.PutMany(null)).Should().Throw<ArgumentNullException>();
+				dictionary.Count().Should().Be(0);
+				dictionary.GetAllValues().Should().BeEmpty();
+			}
+		}
+
+		[Test]
+		public void TestPutManySomeNullKeys()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var dictionary = db.GetDictionary<object, string>("Stuff");
+
+				var values = new[]
+				{
+					new KeyValuePair<object, string>(1, "1"),
+					new KeyValuePair<object, string>(null, "null"),
+					new KeyValuePair<object, string>(3, "3")
+				};
+				new Action(() => dictionary.PutMany(values)).Should().Throw<ArgumentException>();
+			}
+		}
+
+		[Test]
+		public void TestMoveNullSource()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var dictionary = db.GetDictionary<object, string>("Stuff");
+				new Action(() => dictionary.Move(null, "42")).Should().Throw<ArgumentNullException>();
+			}
+		}
+
+		[Test]
+		public void TestMoveNullDestination()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var dictionary = db.GetDictionary<object, string>("Stuff");
+				new Action(() => dictionary.Move("42", null)).Should().Throw<ArgumentNullException>();
+			}
+		}
+
+		[Test]
+		public void TestMoveNullSourceNullDestination()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var dictionary = db.GetDictionary<object, string>("Stuff");
+				new Action(() => dictionary.Move(null, null)).Should().Throw<ArgumentNullException>();
+			}
+		}
+
+		[Test]
 		public void TestToString()
 		{
 			using (var connection = CreateConnection())
