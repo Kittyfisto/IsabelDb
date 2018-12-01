@@ -57,6 +57,9 @@ namespace IsabelDb.Collections
 			ThrowIfReadOnly();
 			ThrowIfDropped();
 
+			if (key == null)
+				throw new ArgumentNullException(nameof(key));
+
 			using (var command = _connection.CreateCommand())
 			{
 				command.CommandText = _putQuery;
@@ -74,6 +77,11 @@ namespace IsabelDb.Collections
 		{
 			ThrowIfReadOnly();
 			ThrowIfDropped();
+
+			if (key == null)
+				throw new ArgumentNullException(nameof(key));
+			if (values == null)
+				throw new ArgumentNullException(nameof(values));
 
 			var ids = new List<RowId>();
 
@@ -105,6 +113,9 @@ namespace IsabelDb.Collections
 			ThrowIfReadOnly();
 			ThrowIfDropped();
 
+			if (values == null)
+				throw new ArgumentNullException(nameof(values));
+
 			var ids = new List<RowId>();
 
 			using (var transaction = _connection.BeginTransaction())
@@ -117,6 +128,9 @@ namespace IsabelDb.Collections
 
 				foreach (var pair in values)
 				{
+					if (pair.Key == null)
+						throw new ArgumentException("Keys must not be null.");
+
 					keyParameter.Value = _keySerializer.Serialize(pair.Key);
 
 					foreach (var value in pair.Value)
@@ -140,6 +154,9 @@ namespace IsabelDb.Collections
 			ThrowIfReadOnly();
 			ThrowIfDropped();
 
+			if (values == null)
+				throw new ArgumentNullException(nameof(values));
+
 			var ids = new List<RowId>();
 
 			using (var transaction = _connection.BeginTransaction())
@@ -152,6 +169,9 @@ namespace IsabelDb.Collections
 
 				foreach (var pair in values)
 				{
+					if (pair.Key == null)
+						throw new ArgumentException("Keys are not allowed to be null.");
+
 					keyParameter.Value = _keySerializer.Serialize(pair.Key);
 					valueParameter.Value = _valueSerializer.Serialize(pair.Value);
 					command.ExecuteNonQuery();
@@ -184,6 +204,9 @@ namespace IsabelDb.Collections
 			ThrowIfReadOnly();
 			ThrowIfDropped();
 
+			if (rows == null)
+				throw new ArgumentNullException(nameof(rows));
+
 			using (var command = _connection.CreateCommand())
 			{
 				command.CommandText = _removeRowQuery;
@@ -206,6 +229,9 @@ namespace IsabelDb.Collections
 		public bool ContainsKey(TKey key)
 		{
 			ThrowIfDropped();
+
+			if (key == null)
+				throw new ArgumentNullException(nameof(key));
 
 			using (var command = _connection.CreateCommand())
 			{
@@ -263,18 +289,24 @@ namespace IsabelDb.Collections
 		public IEnumerable<TValue> GetValues(IEnumerable<RowId> rows)
 		{
 			ThrowIfDropped();
+			if (rows == null)
+				throw new ArgumentNullException(nameof(rows));
 			return GetValuesInternal(rows);
 		}
 
 		public IEnumerable<TValue> GetValues(TKey key)
 		{
 			ThrowIfDropped();
+			if (key == null)
+				throw new ArgumentNullException(nameof(key));
 			return GetValuesInternal(key);
 		}
 
 		public IEnumerable<TValue> GetValues(IEnumerable<TKey> keys)
 		{
 			ThrowIfDropped();
+			if (keys == null)
+				throw new ArgumentNullException(nameof(keys));
 			return GetValuesInternal(keys);
 		}
 
@@ -387,6 +419,9 @@ namespace IsabelDb.Collections
 
 				foreach (var key in keys)
 				{
+					if (key == null)
+						throw new ArgumentException("Keys are not allowed to be null.");
+
 					keyParameter.Value = _keySerializer.Serialize(key);
 
 					using (var reader = command.ExecuteReader())

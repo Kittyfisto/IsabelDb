@@ -19,6 +19,8 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 			_lastKey = 0;
 		}
 
+		#region Usage after collection removed
+
 		[Test]
 		public void TestTryGetValueRemovedCollection()
 		{
@@ -170,7 +172,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		}
 
 		[Test]
-		public void TestPutManyCollection()
+		public void TestPutManyRemovedCollection()
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
@@ -185,7 +187,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		}
 
 		[Test]
-		public void TestPutMany2Collection()
+		public void TestPutMany2RemovedCollection()
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
@@ -200,7 +202,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		}
 
 		[Test]
-		public void TestPutMany3Collection()
+		public void TestPutMany3RemovedCollection()
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
@@ -215,7 +217,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		}
 
 		[Test]
-		public void TestRemoveCollection()
+		public void TestRemoveRemovedCollection()
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
@@ -230,7 +232,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		}
 
 		[Test]
-		public void TestRemoveManyCollection()
+		public void TestRemoveManyRemovedCollection()
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
@@ -245,7 +247,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		}
 
 		[Test]
-		public void TestRemoveMany2Collection()
+		public void TestRemoveMany2RemovedCollection()
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
@@ -260,7 +262,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		}
 
 		[Test]
-		public void TestRemoveAllCollection()
+		public void TestRemoveAllRemovedCollection()
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
@@ -273,6 +275,138 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 					.WithMessage("This collection has been removed from the database and may no longer be used");
 			}
 		}
+
+		#endregion
+
+		#region Null keys
+
+		[Test]
+		public void TestPutNullKey()
+		{
+			using (var db = Database.CreateInMemory(new Type[0]))
+			{
+				var values = db.GetMultiValueDictionary<object, string>("Stuff");
+				new Action(() => values.Put(null, "a")).Should().Throw<ArgumentNullException>();
+			}
+		}
+
+		[Test]
+		public void TestPutMany1NullKey()
+		{
+			using (var db = Database.CreateInMemory(new Type[0]))
+			{
+				var values = db.GetMultiValueDictionary<object, string>("Stuff");
+				new Action(() => values.PutMany(null, new string[0])).Should().Throw<ArgumentNullException>();
+			}
+		}
+
+		[Test]
+		public void TestPutMany2NullKey()
+		{
+			using (var db = Database.CreateInMemory(new Type[0]))
+			{
+				var values = db.GetMultiValueDictionary<object, string>("Stuff");
+				new Action(() => values.PutMany(new[]
+				{
+					new KeyValuePair<object, string>(null, "42")
+				})).Should().Throw<ArgumentException>();
+			}
+		}
+
+		[Test]
+		public void TestPutMany3NullKey()
+		{
+			using (var db = Database.CreateInMemory(new Type[0]))
+			{
+				var values = db.GetMultiValueDictionary<object, string>("Stuff");
+				new Action(() => values.PutMany(new[]
+				{
+					new KeyValuePair<object, IEnumerable<string>>(null, new string[0])
+				})).Should().Throw<ArgumentException>();
+			}
+		}
+
+		[Test]
+		public void TestPutManyNull()
+		{
+			using (var db = Database.CreateInMemory(new Type[0]))
+			{
+				var values = db.GetMultiValueDictionary<object, string>("Stuff");
+				new Action(() => values.PutMany(42, null)).Should().Throw<ArgumentException>();
+			}
+		}
+
+		[Test]
+		public void TestPutMany2Null()
+		{
+			using (var db = Database.CreateInMemory(new Type[0]))
+			{
+				var values = db.GetMultiValueDictionary<object, string>("Stuff");
+				new Action(() => values.PutMany((IEnumerable<KeyValuePair<object, IEnumerable<string>>>) null)).Should().Throw<ArgumentException>();
+			}
+		}
+
+		[Test]
+		public void TestPutMany3Null()
+		{
+			using (var db = Database.CreateInMemory(new Type[0]))
+			{
+				var values = db.GetMultiValueDictionary<object, string>("Stuff");
+				new Action(() => values.PutMany((IEnumerable<KeyValuePair<object, string>>) null)).Should().Throw<ArgumentException>();
+			}
+		}
+
+		[Test]
+		public void TestContainsKeyNullKey()
+		{
+			using (var db = Database.CreateInMemory(new Type[0]))
+			{
+				var values = db.GetMultiValueDictionary<object, string>("Stuff");
+				new Action(() => values.ContainsKey(null)).Should().Throw<ArgumentNullException>();
+			}
+		}
+
+		[Test]
+		public void TestGetValuesNullKey()
+		{
+			using (var db = Database.CreateInMemory(new Type[0]))
+			{
+				var values = db.GetMultiValueDictionary<object, string>("Stuff");
+				new Action(() => values.GetValues((object)null)).Should().Throw<ArgumentNullException>();
+			}
+		}
+
+		[Test]
+		public void TestGetValues2Null()
+		{
+			using (var db = Database.CreateInMemory(new Type[0]))
+			{
+				var values = db.GetMultiValueDictionary<object, string>("Stuff");
+				new Action(() => values.GetValues((IEnumerable<RowId>)null)).Should().Throw<ArgumentNullException>();
+			}
+		}
+
+		[Test]
+		public void TestGetValues3Null()
+		{
+			using (var db = Database.CreateInMemory(new Type[0]))
+			{
+				var values = db.GetMultiValueDictionary<object, string>("Stuff");
+				new Action(() => values.GetValues((IEnumerable<object>)null)).Should().Throw<ArgumentNullException>();
+			}
+		}
+
+		[Test]
+		public void TestGetValues4Null()
+		{
+			using (var db = Database.CreateInMemory(new Type[0]))
+			{
+				var values = db.GetMultiValueDictionary<object, string>("Stuff");
+				new Action(() => values.GetValues(new object[]{null}).ToList()).Should().Throw<ArgumentException>();
+			}
+		}
+
+		#endregion
 
 		[Test]
 		public void TestToString()

@@ -27,6 +27,7 @@ namespace IsabelDb
 		/// <param name="value"></param>
 		/// <returns></returns>
 		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
+		/// <exception cref="ArgumentNullException">In case <paramref name="key"/> is null.</exception>
 		RowId Put(TKey key, TValue value);
 
 		/// <summary>
@@ -34,18 +35,23 @@ namespace IsabelDb
 		/// <param name="key"></param>
 		/// <param name="values"></param>
 		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
+		/// <exception cref="ArgumentNullException">In case <paramref name="key"/> or <paramref name="values"/> is null.</exception>
 		IReadOnlyList<RowId> PutMany(TKey key, IEnumerable<TValue> values);
 
 		/// <summary>
 		/// </summary>
 		/// <param name="values"></param>
 		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
+		/// <exception cref="ArgumentNullException">In case <paramref name="values"/> is null.</exception>
+		/// <exception cref="ArgumentException">In case any key in <paramref name="values"/> is null.</exception>
 		IReadOnlyList<RowId> PutMany(IEnumerable<KeyValuePair<TKey, IEnumerable<TValue>>> values);
 
 		/// <summary>
 		/// </summary>
 		/// <param name="values"></param>
 		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
+		/// <exception cref="ArgumentNullException">In case <paramref name="values"/> is null.</exception>
+		/// <exception cref="ArgumentException">In case any key in <paramref name="values"/> is null.</exception>
 		IReadOnlyList<RowId> PutMany(IEnumerable<KeyValuePair<TKey, TValue>> values);
 
 		/// <summary>
@@ -60,6 +66,7 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="rows"></param>
 		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
+		/// <exception cref="ArgumentNullException">In case <paramref name="rows"/> is null.</exception>
 		void RemoveMany(IEnumerable<RowId> rows);
 
 		/// <summary>
@@ -67,6 +74,7 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="key"></param>
 		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
+		/// <exception cref="ArgumentNullException">In case <paramref name="key"/> is null.</exception>
 		void RemoveAll(TKey key);
 
 		/// <summary>
@@ -74,6 +82,7 @@ namespace IsabelDb
 		/// </summary>
 		/// <param name="keys"></param>
 		/// <exception cref="InvalidOperationException">In case this collection has been removed from its <see cref="IDatabase"/>.</exception>
+		/// <exception cref="ArgumentNullException">In case <paramref name="keys"/> is null.</exception>
 		void RemoveMany(IEnumerable<TKey> keys);
 	}
 }
