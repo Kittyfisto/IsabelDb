@@ -87,11 +87,16 @@
     <Compile Include="AssemblySetup.cs" />
     <Compile Include="Collections\AbstractCollectionCompatibilityTest.cs" />
     <Compile Include="Collections\AbstractCollectionTest.cs" />
+    <Compile Include="Collections\AbstractTest.cs" />
     <Compile Include="Collections\Bag\BagCompatibilityTest.cs" />
     <Compile Include="Collections\Dictionary\DictionaryCompatibilityTest.cs" />
     <Compile Include="Collections\Dictionary\DictionaryTest.cs" />
     <Compile Include="Collections\Dictionary\EnumKeyTest.cs" />
     <Compile Include="Collections\Dictionary\UInt64KeyTest.cs" />
+    <Compile Include="Collections\HashSet\HashSetCompatibilityTest.cs" />
+    <Compile Include="Collections\HashSet\HashSetTest.cs" />
+    <Compile Include="Collections\HashSet\HashSetVersionTest.cs" />
+    <Compile Include="Collections\HashSet\ReadOnlyHashSetTest.cs" />
     <Compile Include="Collections\IntervalCollection\IntervalCollectionCompabilityTest.cs" />
     <Compile Include="Collections\Queue\QueueTest.cs" />
     <Compile Include="CollectionTypeTest.cs" />

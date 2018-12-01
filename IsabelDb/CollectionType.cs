@@ -41,6 +41,10 @@ namespace IsabelDb
 
 		/// <summary>
 		/// </summary>
-		[EnumMember] Queue
+		[EnumMember] Queue,
+
+		/// <summary>
+		/// </summary>
+		[EnumMember] HashSet
 	}
 }

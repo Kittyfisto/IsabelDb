@@ -31,6 +31,14 @@ namespace IsabelDb
 		IReadOnlyBag<T> GetBag<T>(string name);
 
 		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="name"></param>
+		/// <returns></returns>
+		IReadOnlyHashSet<T> GetHashSet<T>(string name);
+
+		/// <summary>
 		///     Returns a readonly queue which has previously been created with <see cref="IDatabase.GetQueue{T}"/>.
 		/// </summary>
 		/// <typeparam name="T"></typeparam>

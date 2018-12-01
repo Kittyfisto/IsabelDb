@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.SQLite;
 using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
@@ -8,6 +7,7 @@ using NUnit.Framework;
 namespace IsabelDb.Test.Collections
 {
 	public abstract class AbstractCollectionTest<TCollection>
+		: AbstractTest
 		where TCollection : ICollection<string>
 	{
 		protected static readonly Type[] NoCustomTypes = new Type[0];
@@ -172,7 +172,7 @@ namespace IsabelDb.Test.Collections
 				var values = new List<string>(count);
 				for (int i = 0; i < count; ++i)
 				{
-					var value = "Stuff";
+					var value = "Stuff" + i;
 					Put(collection, value);
 					values.Add(value);
 				}
@@ -631,23 +631,5 @@ namespace IsabelDb.Test.Collections
 		protected abstract void Put(TCollection collection, string value);
 		protected abstract void PutMany(TCollection collection, params string[] values);
 		protected abstract void RemoveLastPutValue(TCollection collection);
-
-		protected SQLiteConnection CreateConnection()
-		{
-			var connection = new SQLiteConnection("Data Source=:memory:");
-			connection.Open();
-			Database.CreateTables(connection);
-			return connection;
-		}
-
-		protected IDatabase CreateDatabase(SQLiteConnection connection, params Type[] types)
-		{
-			return new IsabelDb(connection, null, types, disposeConnection: false, isReadOnly: false);
-		}
-
-		protected IReadOnlyDatabase CreateReadOnlyDatabase(SQLiteConnection connection, params Type[] types)
-		{
-			return new IsabelDb(connection, null, types, disposeConnection: false, isReadOnly: true);
-		}
 	}
 }

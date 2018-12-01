@@ -52,6 +52,16 @@ namespace IsabelDb
 			return GetBag<T>(name);
 		}
 
+		public IHashSet<T> GetHashSet<T>(string name)
+		{
+			return _objectStores.GetHashSet<T>(name);
+		}
+
+		IReadOnlyHashSet<T> IReadOnlyDatabase.GetHashSet<T>(string name)
+		{
+			return GetHashSet<T>(name);
+		}
+
 		IReadOnlyQueue<T> IReadOnlyDatabase.GetQueue<T>(string name)
 		{
 			return GetQueue<T>(name);

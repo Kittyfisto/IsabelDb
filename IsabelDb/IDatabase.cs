@@ -44,6 +44,14 @@ namespace IsabelDb
 		new IBag<T> GetBag<T>(string name);
 
 		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="name"></param>
+		/// <returns></returns>
+		new IHashSet<T> GetHashSet<T>(string name);
+
+		/// <summary>
 		///     Gets or creates a queue with the given name.
 		/// </summary>
 		/// <typeparam name="T"></typeparam>

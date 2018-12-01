@@ -63,7 +63,7 @@ namespace IsabelDb
 
 			_typeModel = ProtobufTypeModel.Create(connection, supportedTypes, isReadOnly);
 			_serializer = new Serializer(_typeModel);
-			_collections = new HashSet<ICollection>();
+			_collections = new System.Collections.Generic.HashSet<ICollection>();
 			_collectionsByName = new System.Collections.Generic.Dictionary<string, ICollection>();
 
 			CreateCollections();
@@ -188,6 +188,29 @@ namespace IsabelDb
 			if (!(collection is IBag<T> target))
 				throw new
 					ArgumentException(string.Format("The bag '{0}' has a value type of '{1}': If your intent was to create a new collection, you have to pick a new name!",
+					                                name,
+					                                collection.ValueType.FullName));
+
+			return target;
+		}
+
+		public IHashSet<T> GetHashSet<T>(string name)
+		{
+			if (!_collectionsByName.TryGetValue(name, out var collection))
+			{
+				ThrowIfReadOnly(name);
+				ThrowIfNotRegistered<T>();
+
+				var tableName = AddTable(name, CollectionType.HashSet, keyType: null, valueType: typeof(T));
+				collection = CreateHashSet<T>(name, tableName);
+				AddCollection(name, collection);
+			}
+
+			EnsureTypeSafety(collection, CollectionType.HashSet, null, typeof(T));
+
+			if (!(collection is IHashSet<T> target))
+				throw new
+					ArgumentException(string.Format("The hash set '{0}' has a value type of '{1}': If your intent was to create a new collection, you have to pick a new name!",
 					                                name,
 					                                collection.ValueType.FullName));
 
@@ -413,6 +436,16 @@ namespace IsabelDb
 			                  _isReadOnly);
 		}
 
+		private ICollection CreateHashSet<T>(string name, string tableName)
+		{
+			var serializer = GetSerializer<T>();
+			return new Collections.HashSet<T>(_connection,
+			                                  name,
+			                                  tableName,
+			                                  serializer,
+			                                  _isReadOnly);
+		}
+
 		private ICollection CreateQueue<T>(string name, string tableName)
 		{
 			var serializer = GetSerializer<T>();
@@ -514,6 +547,9 @@ namespace IsabelDb
 				case CollectionType.Bag:
 					return CreateBag(name, tableName, valueType);
 
+				case CollectionType.HashSet:
+					return CreateHashSet(name, tableName, valueType);
+
 				case CollectionType.Queue:
 					return CreateQueue(name, tableName, valueType);
 
@@ -551,12 +587,20 @@ namespace IsabelDb
 			return (ICollection) bag;
 		}
 
+		private ICollection CreateHashSet(string name, string tableName, Type valueType)
+		{
+			var collectionType = typeof(Collections.HashSet<>).MakeGenericType(valueType);
+			var serializer = CreateSerializer(valueType);
+			var hashSet = Activator.CreateInstance(collectionType, _connection, name, tableName, serializer, _isReadOnly);
+			return (ICollection) hashSet;
+		}
+
 		private ICollection CreateQueue(string name, string tableName, Type valueType)
 		{
 			var collectionType = typeof(Collections.Queue<>).MakeGenericType(valueType);
 			var serializer = CreateSerializer(valueType);
-			var bag = Activator.CreateInstance(collectionType, _connection, name, tableName, serializer, _isReadOnly);
-			return (ICollection) bag;
+			var queue = Activator.CreateInstance(collectionType, _connection, name, tableName, serializer, _isReadOnly);
+			return (ICollection) queue;
 		}
 
 		private ICollection CreateDictionary(string name, string tableName, Type keyType, Type valueType)

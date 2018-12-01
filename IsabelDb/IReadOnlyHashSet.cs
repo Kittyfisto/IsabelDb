@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.Contracts;
+﻿using System;
+using System.Diagnostics.Contracts;
 
 namespace IsabelDb
 {
@@ -14,7 +15,8 @@ namespace IsabelDb
 		/// 
 		/// </summary>
 		/// <param name="value"></param>
-		/// <returns></returns>
+		/// <returns>True if this collection contains the given value, false otherwise</returns>
+		/// <exception cref="ArgumentNullException">In case <paramref name="value"/> is null</exception>
 		[Pure]
 		bool Contains(T value);
 	}

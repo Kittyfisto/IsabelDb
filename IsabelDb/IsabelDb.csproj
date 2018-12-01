@@ -70,6 +70,7 @@
     <Compile Include="Attributes\DataContractSurrogateForAttribute.cs" />
     <Compile Include="Attributes\SerializableContractAttribute.cs" />
     <Compile Include="Collections\AbstractCollection.cs" />
+    <Compile Include="Collections\HashSet.cs" />
     <Compile Include="Collections\IInternalCollection.cs" />
     <Compile Include="Collections\Queue.cs" />
     <Compile Include="Constants.cs" />
