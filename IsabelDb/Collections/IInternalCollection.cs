@@ -6,5 +6,6 @@
 		string TableName { get; }
 
 		void MarkAsDropped();
+		void UnnmarkAsDropped();
 	}
 }

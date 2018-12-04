@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Data.SQLite;
 
 namespace IsabelDb.Collections
 {
@@ -7,15 +8,20 @@ namespace IsabelDb.Collections
 	/// A placeholder value for a collection who's type is unknown.
 	/// </summary>
 	internal sealed class UnknownTypeCollection
-		: ICollection
+		: IInternalCollection
 	{
+		private readonly SQLiteConnection _connection;
 		private readonly Type _valueType;
 		private readonly Type _keyType;
 		private readonly string _name;
+		private readonly string _tableName;
 
-		public UnknownTypeCollection(string name, string tableName, int? keyTypeId, Type keyType, int valueTypeId, Type valueType)
+		public UnknownTypeCollection(SQLiteConnection connection,
+			string name, string tableName, int? keyTypeId, Type keyType, int valueTypeId, Type valueType)
 		{
+			_connection = connection;
 			_name = name;
+			_tableName = tableName;
 			_keyType = keyType;
 			_valueType = valueType;
 		}
@@ -54,6 +60,18 @@ namespace IsabelDb.Collections
 		public string ValueTypeName => throw new NotImplementedException();
 
 		public string KeyTypeName => throw new NotImplementedException();
+
+		#endregion
+
+		#region Implementation of IInternalCollection
+
+		public string TableName => _tableName;
+
+		public void MarkAsDropped()
+		{}
+
+		public void UnnmarkAsDropped()
+		{}
 
 		#endregion
 	}

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SQLite;
 using System.Diagnostics.Contracts;
 using System.Net;
@@ -26,8 +27,8 @@ namespace IsabelDb
 		private readonly SQLiteConnection _connection;
 		private readonly bool _isReadOnly;
 
-		private readonly System.Collections.Generic.Dictionary<string, ICollection> _collectionsByName;
-		private readonly System.Collections.Generic.HashSet<ICollection> _collections;
+		private readonly System.Collections.Generic.Dictionary<string, IInternalCollection> _collectionsByName;
+		private readonly System.Collections.Generic.HashSet<IInternalCollection> _collections;
 		private readonly Serializer _serializer;
 		private readonly CompiledTypeModel _typeModel;
 
@@ -63,13 +64,13 @@ namespace IsabelDb
 
 			_typeModel = ProtobufTypeModel.Create(connection, supportedTypes, isReadOnly);
 			_serializer = new Serializer(_typeModel);
-			_collections = new System.Collections.Generic.HashSet<ICollection>();
-			_collectionsByName = new System.Collections.Generic.Dictionary<string, ICollection>();
+			_collections = new System.Collections.Generic.HashSet<IInternalCollection>();
+			_collectionsByName = new System.Collections.Generic.Dictionary<string, IInternalCollection>();
 
 			CreateCollections();
 		}
 
-		public IEnumerable<ICollection> Collections => _collectionsByName.Values;
+		public IEnumerable<IInternalCollection> Collections => _collectionsByName.Values;
 
 		public IIntervalCollection<TKey, TValue> GetIntervalCollection<TKey, TValue>(string name, Mode mode)
 			where TKey : IComparable<TKey>
@@ -346,7 +347,7 @@ namespace IsabelDb
 			}
 		}
 
-		private void AddCollection(string name, ICollection collection)
+		private void AddCollection(string name, IInternalCollection collection)
 		{
 			_collections.Add(collection);
 			_collectionsByName.Add(name, collection);
@@ -415,7 +416,7 @@ namespace IsabelDb
 					                                    expectedValueType));
 		}
 
-		private ICollection CreateIntervalCollection<T, TValue>(string name, string tableName)
+		private IInternalCollection CreateIntervalCollection<T, TValue>(string name, string tableName)
 			where T: IComparable<T>
 		{
 			var keySerializer = GetSerializer<T>();
@@ -428,7 +429,7 @@ namespace IsabelDb
 			                                         _isReadOnly);
 		}
 
-		private ICollection CreateDictionary<TKey, TValue>(string name, string tableName)
+		private IInternalCollection CreateDictionary<TKey, TValue>(string name, string tableName)
 		{
 			var keySerializer = GetSerializer<TKey>();
 			var valueSerializer = GetSerializer<TValue>();
@@ -440,7 +441,7 @@ namespace IsabelDb
 			                                                _isReadOnly);
 		}
 
-		private ICollection CreateMultiValueDictionary<TKey, TValue>(string name, string tableName)
+		private IInternalCollection CreateMultiValueDictionary<TKey, TValue>(string name, string tableName)
 		{
 			var keySerializer = GetSerializer<TKey>();
 			var valueSerializer = GetSerializer<TValue>();
@@ -452,7 +453,7 @@ namespace IsabelDb
 			                                              _isReadOnly);
 		}
 
-		private ICollection CreateOrderedCollection<TKey, TValue>(string name, string tableName) where TKey : IComparable<TKey>
+		private IInternalCollection CreateOrderedCollection<TKey, TValue>(string name, string tableName) where TKey : IComparable<TKey>
 		{
 			var keySerializer = GetSerializer<TKey>();
 			var valueSerializer = GetSerializer<TValue>();
@@ -464,7 +465,7 @@ namespace IsabelDb
 			                                           _isReadOnly);
 		}
 
-		private ICollection CreateBag<T>(string name, string tableName)
+		private IInternalCollection CreateBag<T>(string name, string tableName)
 		{
 			var serializer = GetSerializer<T>();
 			return new Bag<T>(_connection,
@@ -474,7 +475,7 @@ namespace IsabelDb
 			                  _isReadOnly);
 		}
 
-		private ICollection CreateHashSet<T>(string name, string tableName)
+		private IInternalCollection CreateHashSet<T>(string name, string tableName)
 		{
 			var serializer = GetSerializer<T>();
 			return new Collections.HashSet<T>(_connection,
@@ -484,7 +485,7 @@ namespace IsabelDb
 			                                  _isReadOnly);
 		}
 
-		private ICollection CreateQueue<T>(string name, string tableName)
+		private IInternalCollection CreateQueue<T>(string name, string tableName)
 		{
 			var serializer = GetSerializer<T>();
 			return new Collections.Queue<T>(_connection,
@@ -494,7 +495,7 @@ namespace IsabelDb
 			                                _isReadOnly);
 		}
 
-		private ICollection CreatePoint2DCollection<T>(string name, string tableName)
+		private IInternalCollection CreatePoint2DCollection<T>(string name, string tableName)
 		{
 			var serializer = GetSerializer<T>();
 			return new Point2DCollection<T>(_connection,
@@ -568,7 +569,7 @@ namespace IsabelDb
 			}
 		}
 
-		private ICollection CreateCollection(string name,
+		private IInternalCollection CreateCollection(string name,
 		                                     CollectionType collectionType,
 		                                     string tableName, int? keyTypeId, int valueTypeId)
 		{
@@ -613,76 +614,76 @@ namespace IsabelDb
 					return CreateOrderedCollection(name, tableName, keyType, valueType);
 
 				default:
-					return new UnknownTypeCollection(name, tableName, keyTypeId, keyType, valueTypeId, valueType);
+					return new UnknownTypeCollection(_connection, name, tableName, keyTypeId, keyType, valueTypeId, valueType);
 			}
 		}
 
-		private ICollection CreateBag(string name, string tableName, Type valueType)
+		private IInternalCollection CreateBag(string name, string tableName, Type valueType)
 		{
 			var collectionType = typeof(Bag<>).MakeGenericType(valueType);
 			var serializer = CreateSerializer(valueType);
 			var bag = Activator.CreateInstance(collectionType, _connection, name, tableName, serializer, _isReadOnly);
-			return (ICollection) bag;
+			return (IInternalCollection) bag;
 		}
 
-		private ICollection CreateHashSet(string name, string tableName, Type valueType)
+		private IInternalCollection CreateHashSet(string name, string tableName, Type valueType)
 		{
 			var collectionType = typeof(Collections.HashSet<>).MakeGenericType(valueType);
 			var serializer = CreateSerializer(valueType);
 			var hashSet = Activator.CreateInstance(collectionType, _connection, name, tableName, serializer, _isReadOnly);
-			return (ICollection) hashSet;
+			return (IInternalCollection) hashSet;
 		}
 
-		private ICollection CreateQueue(string name, string tableName, Type valueType)
+		private IInternalCollection CreateQueue(string name, string tableName, Type valueType)
 		{
 			var collectionType = typeof(Collections.Queue<>).MakeGenericType(valueType);
 			var serializer = CreateSerializer(valueType);
 			var queue = Activator.CreateInstance(collectionType, _connection, name, tableName, serializer, _isReadOnly);
-			return (ICollection) queue;
+			return (IInternalCollection) queue;
 		}
 
-		private ICollection CreateDictionary(string name, string tableName, Type keyType, Type valueType)
+		private IInternalCollection CreateDictionary(string name, string tableName, Type keyType, Type valueType)
 		{
 			var collectionType = typeof(Collections.Dictionary<,>).MakeGenericType(keyType, valueType);
 			var keySerializer = CreateSerializer(keyType);
 			var valueSerializer = CreateSerializer(valueType);
 			var bag = Activator.CreateInstance(collectionType, _connection, name, tableName, keySerializer, valueSerializer, _isReadOnly);
-			return (ICollection) bag;
+			return (IInternalCollection) bag;
 		}
 
-		private ICollection CreateIntervalCollection(string name, string tableName, Type keyType, Type valueType)
+		private IInternalCollection CreateIntervalCollection(string name, string tableName, Type keyType, Type valueType)
 		{
 			var collectionType = typeof(IntervalCollection<,>).MakeGenericType(keyType, valueType);
 			var keySerializer = CreateSerializer(keyType);
 			var valueSerializer = CreateSerializer(valueType);
 			var bag = Activator.CreateInstance(collectionType, _connection, name, tableName, keySerializer, valueSerializer, _isReadOnly);
-			return (ICollection) bag;
+			return (IInternalCollection) bag;
 		}
 
-		private ICollection CreateMultiValueDictionary(string name, string tableName, Type keyType, Type valueType)
+		private IInternalCollection CreateMultiValueDictionary(string name, string tableName, Type keyType, Type valueType)
 		{
 			var collectionType = typeof(MultiValueDictionary<,>).MakeGenericType(keyType, valueType);
 			var keySerializer = CreateSerializer(keyType);
 			var valueSerializer = CreateSerializer(valueType);
 			var bag = Activator.CreateInstance(collectionType, _connection, name, tableName, keySerializer, valueSerializer, _isReadOnly);
-			return (ICollection) bag;
+			return (IInternalCollection) bag;
 		}
 
-		private ICollection CreateOrderedCollection(string name, string tableName, Type keyType, Type valueType)
+		private IInternalCollection CreateOrderedCollection(string name, string tableName, Type keyType, Type valueType)
 		{
 			var collectionType = typeof(OrderedCollection<,>).MakeGenericType(keyType, valueType);
 			var keySerializer = CreateSerializer(keyType);
 			var valueSerializer = CreateSerializer(valueType);
 			var bag = Activator.CreateInstance(collectionType, _connection, name, tableName, keySerializer, valueSerializer, _isReadOnly);
-			return (ICollection) bag;
+			return (IInternalCollection) bag;
 		}
 
-		private ICollection CreatePoint2DCollection(string name, string tableName, Type valueType)
+		private IInternalCollection CreatePoint2DCollection(string name, string tableName, Type valueType)
 		{
 			var collectionType = typeof(Point2DCollection<>).MakeGenericType(valueType);
 			var valueSerializer = CreateSerializer(valueType);
 			var point2DCollection = Activator.CreateInstance(collectionType, _connection, name, tableName, valueSerializer, _isReadOnly);
-			return (ICollection) point2DCollection;
+			return (IInternalCollection) point2DCollection;
 		}
 
 		private ISQLiteSerializer CreateSerializer(Type type)
@@ -692,6 +693,54 @@ namespace IsabelDb
 
 			var serializerType = typeof(GenericSerializer<>).MakeGenericType(type);
 			return (ISQLiteSerializer) Activator.CreateInstance(serializerType, _serializer);
+		}
+
+		public void OnRollback(IReadOnlyList<IInternalCollection> collectionsBeforeTransaction)
+		{
+			// A transaction has been rolled back.
+			// This means that the list of collections may not be up-to-date anymore:
+			// It's possible that someone has added collections from within the transaction
+			// which are now no longer present in the database itself (which has honored the
+			// rollback), but are still part of the _collections cache.
+			AddPreviouslyRemovedCollections(collectionsBeforeTransaction);
+			RemoveNonExistantCollections();
+		}
+
+		private void AddPreviouslyRemovedCollections(IReadOnlyList<IInternalCollection> collectionsBeforeTransaction)
+		{
+			foreach (var collection in collectionsBeforeTransaction)
+			{
+				if (_collections.Add(collection))
+				{
+					_collectionsByName.Add(collection.Name, collection);
+					collection.UnnmarkAsDropped();
+				}
+			}
+		}
+
+		private void RemoveNonExistantCollections()
+		{
+			var toRemove = new List<IInternalCollection>();
+
+			using (var command = _connection.CreateCommand())
+			{
+				command.CommandText = "SELECT COUNT(*) FROM sqlite_master WHERE name = @name";
+				var nameParameter = command.Parameters.Add("@name", DbType.String);
+				foreach (var collection in _collectionsByName.Values)
+				{
+					nameParameter.Value = collection.TableName;
+					if (Convert.ToInt64(command.ExecuteScalar()) <= 0)
+					{
+						toRemove.Add(collection);
+					}
+				}
+			}
+
+			foreach (var collection in toRemove)
+			{
+				_collections.Remove(collection);
+				_collectionsByName.Remove(collection.Name);
+			}
 		}
 	}
 }

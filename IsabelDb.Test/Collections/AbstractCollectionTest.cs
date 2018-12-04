@@ -12,6 +12,8 @@ namespace IsabelDb.Test.Collections
 	{
 		protected static readonly Type[] NoCustomTypes = new Type[0];
 
+		#region Create collection
+
 		[Test]
 		public void TestCreateNewCollection()
 		{
@@ -75,6 +77,94 @@ namespace IsabelDb.Test.Collections
 				collection1.Should().NotBeSameAs(collection3);
 			}
 		}
+
+		#endregion
+
+		#region Transactions
+
+		[Test]
+		public void TestRollbackCollectionCreate()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				using (var transaction = db.BeginTransaction())
+				{
+					var collection = db.CreateBag<string>("Stuff");
+					db.Collections.Should().BeEquivalentTo(collection);
+
+					transaction.Rollback();
+				}
+
+				db.Collections.Should().BeEmpty("because we've rolled back the transaction and thus the collection may not have been created after all");
+			}
+		}
+
+		[Test]
+		public void TestRollbackCollectionCreateAndCreateNewAfterwards()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				using (var transaction = db.BeginTransaction())
+				{
+					var collection = db.CreateBag<string>("Stuff");
+					collection.Put("Peek-A-Boo");
+					db.Collections.Should().BeEquivalentTo(collection);
+
+					transaction.Rollback();
+				}
+
+				var bag = db.GetOrCreateBag<string>("Stuff");
+				bag.GetAllValues().Should().BeEmpty();
+			}
+		}
+
+		[Test]
+		public void TestRollbackCollectionRemoval()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				var collection = db.CreateBag<string>("Stuff");
+				collection.Put("Peek-A-Boo");
+				db.Collections.Should().BeEquivalentTo(collection);
+				using (var transaction = db.BeginTransaction())
+				{
+					db.Remove(collection);
+					db.Collections.Should().BeEmpty();
+
+					transaction.Rollback();
+				}
+
+				db.Collections.Should().BeEquivalentTo(new object[]{collection}, "because the collection removal should've been rolled back");
+				collection.GetAllValues().Should().BeEquivalentTo(new object[] {"Peek-A-Boo"},
+				                                                  "because the content from the collection should not have been affected");
+			}
+		}
+
+		[Test]
+		public void TestRollbackCollectionCreationAndRemoval()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				using (var transaction = db.BeginTransaction())
+				{
+					var collection = db.CreateBag<string>("Stuff");
+					collection.Put("Peek-A-Boo");
+					db.Collections.Should().BeEquivalentTo(collection);
+					collection.GetAllValues().Should().BeEquivalentTo(new object[] {"Peek-A-Boo"});
+
+					db.Remove(collection);
+					db.Collections.Should().BeEmpty();
+
+					transaction.Rollback();
+				}
+
+				db.Collections.Should().BeEmpty();
+				var bag = db.GetOrCreateBag<string>("Stuff");
+				bag.GetAllValues().Should().BeEmpty();
+			}
+		}
+
+		#endregion
 
 		[Test]
 		public void TestGetAllValuesAgain()

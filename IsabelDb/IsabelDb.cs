@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Linq;
+using IsabelDb.Collections;
 
 namespace IsabelDb
 {
@@ -40,7 +41,9 @@ namespace IsabelDb
 
 		public ITransaction BeginTransaction()
 		{
-			return new Transaction(_connection.BeginTransaction());
+			// We pass a COPY of the current list of collections to the transaction so that we may restore
+			// collections upon a rollback which have been removed from within the transaction.
+			return new Transaction(this, _connection.BeginTransaction(), _collections.Collections.ToList());
 		}
 
 		public IEnumerable<ICollection> Collections => _collections.Collections;
@@ -249,5 +252,10 @@ namespace IsabelDb
 		}
 
 		#endregion
+
+		public void OnRollback(IReadOnlyList<IInternalCollection> collectionsBeforeTransaction)
+		{
+			_collections.OnRollback(collectionsBeforeTransaction);
+		}
 	}
 }

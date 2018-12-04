@@ -80,6 +80,11 @@ namespace IsabelDb.Collections
 			_isDropped = true;
 		}
 
+		public void UnnmarkAsDropped()
+		{
+			_isDropped = false;
+		}
+
 		#endregion
 
 		protected void ThrowIfReadOnly()
