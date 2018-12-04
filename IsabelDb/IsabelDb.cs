@@ -11,7 +11,7 @@ namespace IsabelDb
 		private readonly SQLiteConnection _connection;
 		private readonly bool _disposeConnection;
 		private readonly string _fileName;
-		private readonly CollectionsTable _objectStores;
+		private readonly CollectionsTable _collections;
 		private readonly VariablesTable _variables;
 
 		internal IsabelDb(SQLiteConnection connection,
@@ -25,7 +25,7 @@ namespace IsabelDb
 			_disposeConnection = disposeConnection;
 
 			_variables = new VariablesTable(connection);
-			_objectStores = new CollectionsTable(connection, supportedTypes.ToList(), isReadOnly);
+			_collections = new CollectionsTable(connection, supportedTypes.ToList(), isReadOnly);
 		}
 
 		/// <inheritdoc />
@@ -43,18 +43,100 @@ namespace IsabelDb
 			return new Transaction(_connection.BeginTransaction());
 		}
 
-		public IEnumerable<ICollection> Collections => _objectStores.Collections;
+		public IEnumerable<ICollection> Collections => _collections.Collections;
 
 		IEnumerable<IReadOnlyCollection> IReadOnlyDatabase.Collections => Collections;
 
-		IReadOnlyBag<T> IReadOnlyDatabase.GetBag<T>(string name)
+		public IBag<T> CreateBag<T>(string name)
 		{
-			return GetBag<T>(name);
+			return _collections.GetBag<T>(name, Mode.Create);
+		}
+
+		public IBag<T> GetBag<T>(string name)
+		{
+			return _collections.GetBag<T>(name, Mode.Get);
 		}
 
 		public IHashSet<T> GetHashSet<T>(string name)
 		{
-			return _objectStores.GetHashSet<T>(name);
+			return _collections.GetHashSet<T>(name, Mode.Get);
+		}
+
+		public IHashSet<T> CreateHashSet<T>(string name)
+		{
+			return _collections.GetHashSet<T>(name, Mode.Create);
+		}
+
+		public IQueue<T> GetQueue<T>(string name)
+		{
+			return _collections.GetQueue<T>(name, Mode.Get);
+		}
+
+		public IQueue<T> CreateQueue<T>(string name)
+		{
+			return _collections.GetQueue<T>(name, Mode.Create);
+		}
+
+		public IDictionary<TKey, TValue> GetDictionary<TKey, TValue>(string name)
+		{
+			return _collections.GetDictionary<TKey, TValue>(name, Mode.Get);
+		}
+
+		public IDictionary<TKey, TValue> CreateDictionary<TKey, TValue>(string name)
+		{
+			return _collections.GetDictionary<TKey, TValue>(name, Mode.Create);
+		}
+
+		public IMultiValueDictionary<TKey, TValue> GetMultiValueDictionary<TKey, TValue>(string name)
+		{
+			return _collections.GetMultiValueDictionary<TKey, TValue>(name, Mode.Get);
+		}
+
+		public IMultiValueDictionary<TKey, TValue> CreateMultiValueDictionary<TKey, TValue>(string name)
+		{
+			return _collections.GetMultiValueDictionary<TKey, TValue>(name, Mode.Create);
+		}
+
+		public IIntervalCollection<TKey, TValue> GetIntervalCollection<TKey, TValue>(string name) where TKey : IComparable<TKey>
+		{
+			return _collections.GetIntervalCollection<TKey, TValue>(name, Mode.Get);
+		}
+
+		public IIntervalCollection<TKey, TValue> CreateIntervalCollection<TKey, TValue>(string name) where TKey : IComparable<TKey>
+		{
+			return _collections.GetIntervalCollection<TKey, TValue>(name, Mode.Create);
+		}
+
+		public IOrderedCollection<TKey, TValue> GetOrderedCollection<TKey, TValue>(string name) where TKey : IComparable<TKey>
+		{
+			return _collections.GetOrderedCollection<TKey, TValue>(name, Mode.Get);
+		}
+
+		public IOrderedCollection<TKey, TValue> CreateOrderedCollection<TKey, TValue>(string name) where TKey : IComparable<TKey>
+		{
+			return _collections.GetOrderedCollection<TKey, TValue>(name, Mode.Create);
+		}
+
+		public IPoint2DCollection<T> GetPoint2DCollection<T>(string name)
+		{
+			return _collections.GetPoint2DCollection<T>(name, Mode.Get);
+		}
+
+		public IPoint2DCollection<T> CreatePoint2DCollection<T>(string name)
+		{
+			return _collections.GetPoint2DCollection<T>(name, Mode.Create);
+		}
+
+		public IHashSet<T> GetOrCreateHashSet<T>(string name)
+		{
+			return _collections.GetHashSet<T>(name, Mode.Get | Mode.Create);
+		}
+
+		#region IReadOnlyDatabase
+
+		IReadOnlyBag<T> IReadOnlyDatabase.GetBag<T>(string name)
+		{
+			return GetBag<T>(name);
 		}
 
 		IReadOnlyHashSet<T> IReadOnlyDatabase.GetHashSet<T>(string name)
@@ -92,9 +174,11 @@ namespace IsabelDb
 			return GetPoint2DCollection<T>(name);
 		}
 
+		#endregion
+
 		public void Remove(ICollection collection)
 		{
-			_objectStores.Drop(collection);
+			_collections.Drop(collection);
 		}
 
 		public void Remove(string collectionName)
@@ -113,41 +197,41 @@ namespace IsabelDb
 		}
 
 		/// <inheritdoc />
-		public IDictionary<TKey, TValue> GetDictionary<TKey, TValue>(string name)
+		public IDictionary<TKey, TValue> GetOrCreateDictionary<TKey, TValue>(string name)
 		{
-			return _objectStores.GetDictionary<TKey, TValue>(name);
+			return _collections.GetDictionary<TKey, TValue>(name, Mode.Get | Mode.Create);
 		}
 
-		public IMultiValueDictionary<TKey, TValue> GetMultiValueDictionary<TKey, TValue>(string name)
+		public IMultiValueDictionary<TKey, TValue> GetOrCreateMultiValueDictionary<TKey, TValue>(string name)
 		{
-			return _objectStores.GetMultiValueDictionary<TKey, TValue>(name);
+			return _collections.GetMultiValueDictionary<TKey, TValue>(name, Mode.Get | Mode.Create);
 		}
 
-		public IPoint2DCollection<T> GetPoint2DCollection<T>(string name)
+		public IPoint2DCollection<T> GetOrCreatePoint2DCollection<T>(string name)
 		{
-			return _objectStores.GetPoint2DCollection<T>(name);
+			return _collections.GetPoint2DCollection<T>(name, Mode.Get | Mode.Create);
 		}
 
-		public IIntervalCollection<TKey, TValue> GetIntervalCollection<TKey, TValue>(string name)
+		public IIntervalCollection<TKey, TValue> GetOrCreateIntervalCollection<TKey, TValue>(string name)
 			where TKey : IComparable<TKey>
 		{
-			return _objectStores.GetIntervalCollection<TKey, TValue>(name);
+			return _collections.GetIntervalCollection<TKey, TValue>(name, Mode.Get | Mode.Create);
 		}
 
-		public IOrderedCollection<TKey, TValue> GetOrderedCollection<TKey, TValue>(string name)
+		public IOrderedCollection<TKey, TValue> GetOrCreateOrderedCollection<TKey, TValue>(string name)
 			where TKey : IComparable<TKey>
 		{
-			return _objectStores.GetOrderedCollection<TKey, TValue>(name);
+			return _collections.GetOrderedCollection<TKey, TValue>(name, Mode.Get | Mode.Create);
 		}
 
-		public IBag<T> GetBag<T>(string name)
+		public IBag<T> GetOrCreateBag<T>(string name)
 		{
-			return _objectStores.GetBag<T>(name);
+			return _collections.GetBag<T>(name, Mode.Get | Mode.Create);
 		}
 
-		public IQueue<T> GetQueue<T>(string name)
+		public IQueue<T> GetOrCreateQueue<T>(string name)
 		{
-			return _objectStores.GetQueue<T>(name);
+			return _collections.GetQueue<T>(name, Mode.Get | Mode.Create);
 		}
 
 		#region Overrides of Object
@@ -157,11 +241,11 @@ namespace IsabelDb
 			if (_fileName != null)
 				return string.Format("IsabelDb: File '{0}' ({1} collection(s))",
 				                     _fileName,
-				                     _objectStores.Collections.Count()
+				                     _collections.Collections.Count()
 				                    );
 
 			return string.Format("IsabelDb: In memory ({0} collection(s))",
-			                     _objectStores.Collections.Count());
+			                     _collections.Collections.Count());
 		}
 
 		#endregion

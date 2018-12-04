@@ -24,7 +24,7 @@ namespace IsabelDb.Test.Collections.OrderedCollection
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetOrderedCollection<int, string>("Stuff");
+				var values = database.GetOrCreateOrderedCollection<int, string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.GetValues(new Interval<int>()))
@@ -39,7 +39,7 @@ namespace IsabelDb.Test.Collections.OrderedCollection
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetOrderedCollection<int, string>("Stuff");
+				var values = database.GetOrCreateOrderedCollection<int, string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.Put(1, "2"))
@@ -54,7 +54,7 @@ namespace IsabelDb.Test.Collections.OrderedCollection
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetOrderedCollection<int, string>("Stuff");
+				var values = database.GetOrCreateOrderedCollection<int, string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.PutMany(new List<KeyValuePair<int, string>>()))
@@ -69,7 +69,7 @@ namespace IsabelDb.Test.Collections.OrderedCollection
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetOrderedCollection<int, string>("Stuff");
+				var values = database.GetOrCreateOrderedCollection<int, string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.RemoveRange(new Interval<int>()))
@@ -86,7 +86,7 @@ namespace IsabelDb.Test.Collections.OrderedCollection
 			{
 				using (var db = CreateDatabase(connection))
 				{
-					db.GetOrderedCollection<int, string>("Stuff").ToString().Should().Be("OrderedCollection<System.Int32, System.String>(\"Stuff\")");
+					db.GetOrCreateOrderedCollection<int, string>("Stuff").ToString().Should().Be("OrderedCollection<System.Int32, System.String>(\"Stuff\")");
 				}
 			}
 		}
@@ -96,8 +96,8 @@ namespace IsabelDb.Test.Collections.OrderedCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				db.GetOrderedCollection<int, string>("Names");
-				new Action(() => db.GetOrderedCollection<uint, string>("Names"))
+				db.GetOrCreateOrderedCollection<int, string>("Names");
+				new Action(() => db.GetOrCreateOrderedCollection<uint, string>("Names"))
 					.Should().Throw<TypeMismatchException>()
 					.WithMessage("The OrderedCollection 'Names' uses keys of type 'System.Int32' which does not match the requested key type 'System.UInt32': If your intent was to create a new OrderedCollection then you have to pick a new name!");
 			}
@@ -108,8 +108,8 @@ namespace IsabelDb.Test.Collections.OrderedCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				db.GetOrderedCollection<int, string>("Names");
-				new Action(() => db.GetOrderedCollection<int, int>("Names"))
+				db.GetOrCreateOrderedCollection<int, string>("Names");
+				new Action(() => db.GetOrCreateOrderedCollection<int, int>("Names"))
 					.Should().Throw<TypeMismatchException>()
 					.WithMessage("The OrderedCollection 'Names' uses values of type 'System.String' which does not match the requested value type 'System.Int32': If your intent was to create a new OrderedCollection then you have to pick a new name!");
 			}
@@ -120,7 +120,7 @@ namespace IsabelDb.Test.Collections.OrderedCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var collection = db.GetOrderedCollection<double, string>("Values");
+				var collection = db.GetOrCreateOrderedCollection<double, string>("Values");
 				collection.Put(Math.E, "E");
 				collection.Put(Math.PI, "PI");
 
@@ -137,7 +137,7 @@ namespace IsabelDb.Test.Collections.OrderedCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var collection = db.GetOrderedCollection<double, string>("Values");
+				var collection = db.GetOrCreateOrderedCollection<double, string>("Values");
 				collection.Put(Math.PI, "1");
 				collection.Put(Math.PI, "2");
 
@@ -151,7 +151,7 @@ namespace IsabelDb.Test.Collections.OrderedCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var collection = db.GetOrderedCollection<double, string>("Values");
+				var collection = db.GetOrCreateOrderedCollection<double, string>("Values");
 
 				var values = new List<KeyValuePair<double, string>>();
 				values.Add(new KeyValuePair<double, string>(Math.E, "E"));
@@ -169,7 +169,7 @@ namespace IsabelDb.Test.Collections.OrderedCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var collection = db.GetOrderedCollection<double, string>("Values");
+				var collection = db.GetOrCreateOrderedCollection<double, string>("Values");
 
 				collection.Put(Math.E, "E");
 				collection.Put(Math.PI, "PI");
@@ -186,7 +186,7 @@ namespace IsabelDb.Test.Collections.OrderedCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var collection = db.GetOrderedCollection<double, string>("Values");
+				var collection = db.GetOrCreateOrderedCollection<double, string>("Values");
 
 				collection.Put(Math.E, "E");
 				collection.Put(Math.PI, "PI");
@@ -201,7 +201,7 @@ namespace IsabelDb.Test.Collections.OrderedCollection
 		{
 			using (var db = Database.CreateInMemory(new[] { typeof(MySortableKey) }))
 			{
-				new Action(() => db.GetOrderedCollection<MySortableKey, string>("Values"))
+				new Action(() => db.GetOrCreateOrderedCollection<MySortableKey, string>("Values"))
 					.Should().Throw<NotSupportedException>("Custom types cannot be used as sortable keys")
 					.WithMessage("The type 'IsabelDb.Test.Entities.MySortableKey' may not be used as a key in an ordered collection! Only basic numeric types can be used for now.");
 			}
@@ -212,7 +212,7 @@ namespace IsabelDb.Test.Collections.OrderedCollection
 		{
 			using (var db = Database.CreateInMemory(new[] { typeof(MySortableKey) }))
 			{
-				new Action(() => db.GetOrderedCollection<string, string>("Values"))
+				new Action(() => db.GetOrCreateOrderedCollection<string, string>("Values"))
 					.Should().Throw<NotSupportedException>("Custom types cannot be used as sortable keys")
 					.WithMessage("The type 'System.String' may not be used as a key in an ordered collection! Only basic numeric types can be used for now.");
 			}
@@ -287,6 +287,16 @@ namespace IsabelDb.Test.Collections.OrderedCollection
 			return db.GetOrderedCollection<int, string>(name);
 		}
 
+		protected override IOrderedCollection<int, string> CreateCollection(IDatabase db, string name)
+		{
+			return db.CreateOrderedCollection<int, string>(name);
+		}
+
+		protected override IOrderedCollection<int, string> GetOrCreateCollection(IDatabase db, string name)
+		{
+			return db.GetOrCreateOrderedCollection<int, string>(name);
+		}
+
 		protected override void Put(IOrderedCollection<int, string> collection, string value)
 		{
 			collection.Put(Interlocked.Increment(ref _lastKey), value);
@@ -313,7 +323,7 @@ namespace IsabelDb.Test.Collections.OrderedCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var collection = db.GetOrderedCollection<TKey, string>("Values");
+				var collection = db.GetOrCreateOrderedCollection<TKey, string>("Values");
 				collection.Put(minimum, "Helo");
 				collection.Put(maximum, "Boomer");
 

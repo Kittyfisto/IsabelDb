@@ -18,7 +18,7 @@ namespace IsabelDb.Test.Collections.OrderedCollection
 
 		protected override ICollection<T> GetCollection<T>(IDatabase db, string name)
 		{
-			return db.GetOrderedCollection<int, T>(name);
+			return db.GetOrCreateOrderedCollection<int, T>(name);
 		}
 
 		protected override void Put<T>(ICollection<T> collection, T value)

@@ -30,7 +30,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 			{
 				using (var db = CreateDatabase(connection))
 				{
-					db.GetPoint2DCollection<string>("Stuff").ToString().Should().Be("Point2DCollection<IsabelDb.Point2D, System.String>(\"Stuff\")");
+					db.GetOrCreatePoint2DCollection<string>("Stuff").ToString().Should().Be("Point2DCollection<IsabelDb.Point2D, System.String>(\"Stuff\")");
 				}
 			}
 		}
@@ -40,7 +40,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetPoint2DCollection<string>("Stuff");
+				var values = database.GetOrCreatePoint2DCollection<string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.GetAll())
@@ -55,7 +55,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetPoint2DCollection<string>("Stuff");
+				var values = database.GetOrCreatePoint2DCollection<string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.GetAllKeys())
@@ -70,7 +70,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetPoint2DCollection<string>("Stuff");
+				var values = database.GetOrCreatePoint2DCollection<string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.GetValue(new RowId(1)))
@@ -85,7 +85,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetPoint2DCollection<string>("Stuff");
+				var values = database.GetOrCreatePoint2DCollection<string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.TryGetValue(new RowId(), out _))
@@ -100,7 +100,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetPoint2DCollection<string>("Stuff");
+				var values = database.GetOrCreatePoint2DCollection<string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.GetValues(new RowId[1]))
@@ -115,7 +115,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetPoint2DCollection<string>("Stuff");
+				var values = database.GetOrCreatePoint2DCollection<string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.GetValues(new Point2D(2, 2)))
@@ -130,7 +130,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetPoint2DCollection<string>("Stuff");
+				var values = database.GetOrCreatePoint2DCollection<string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.GetValues(new Point2D[0]))
@@ -145,7 +145,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetPoint2DCollection<string>("Stuff");
+				var values = database.GetOrCreatePoint2DCollection<string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.GetKeysWithin(new Rectangle2D()))
@@ -160,7 +160,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetPoint2DCollection<string>("Stuff");
+				var values = database.GetOrCreatePoint2DCollection<string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.GetValuesWithin(new Rectangle2D()))
@@ -175,7 +175,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetPoint2DCollection<string>("Stuff");
+				var values = database.GetOrCreatePoint2DCollection<string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.GetWithin(new Rectangle2D()))
@@ -190,7 +190,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetPoint2DCollection<string>("Stuff");
+				var values = database.GetOrCreatePoint2DCollection<string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.ContainsKey(new Point2D(1, 2)))
@@ -205,7 +205,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetPoint2DCollection<string>("Stuff");
+				var values = database.GetOrCreatePoint2DCollection<string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.ContainsRow(new RowId(1)))
@@ -220,7 +220,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetPoint2DCollection<string>("Cities");
+				var values = db.GetOrCreatePoint2DCollection<string>("Cities");
 				values.GetAllKeys().Should().BeEmpty();
 			}
 		}
@@ -230,7 +230,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetPoint2DCollection<string>("Cities");
+				var values = db.GetOrCreatePoint2DCollection<string>("Cities");
 				values.Put(new Point2D(0, 0), "A");
 				values.Put(new Point2D(1, 2), "B");
 				values.Put(new Point2D(1.1, 1), "C");
@@ -246,7 +246,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetPoint2DCollection<string>("Cities");
+				var values = db.GetOrCreatePoint2DCollection<string>("Cities");
 				values.ContainsKey(new Point2D(0, 0)).Should().BeFalse();
 				values.ContainsKey(new Point2D(-1, -2)).Should().BeFalse();
 			}
@@ -257,7 +257,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetPoint2DCollection<string>("Cities");
+				var values = db.GetOrCreatePoint2DCollection<string>("Cities");
 				values.Put(new Point2D(0, 0), "A");
 				values.Put(new Point2D(1, 2), "B");
 				values.Put(new Point2D(1.1, 1), "C");
@@ -272,7 +272,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetPoint2DCollection<string>("Cities");
+				var values = db.GetOrCreatePoint2DCollection<string>("Cities");
 
 				values.GetValues(new Point2D(1, 2)).Should().BeEmpty();
 			}
@@ -283,7 +283,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetPoint2DCollection<string>("Cities");
+				var values = db.GetOrCreatePoint2DCollection<string>("Cities");
 				values.Put(new Point2D(0, 0), "A");
 				values.Put(new Point2D(1, 2), "B");
 				values.Put(new Point2D(1, 2), "C");
@@ -298,7 +298,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetPoint2DCollection<string>("Cities");
+				var values = db.GetOrCreatePoint2DCollection<string>("Cities");
 
 				values.GetValues(new[]{new Point2D(1, 2), new Point2D(2, 3) }).Should().BeEmpty();
 			}
@@ -309,7 +309,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetPoint2DCollection<string>("Cities");
+				var values = db.GetOrCreatePoint2DCollection<string>("Cities");
 				values.Put(new Point2D(0, 0), "A");
 				values.Put(new Point2D(1, 2), "B");
 				values.Put(new Point2D(1, 2), "C");
@@ -324,7 +324,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetPoint2DCollection<string>("Cities");
+				var values = db.GetOrCreatePoint2DCollection<string>("Cities");
 				values.GetAll().Should().BeEmpty();
 			}
 		}
@@ -334,7 +334,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetPoint2DCollection<string>("Cities");
+				var values = db.GetOrCreatePoint2DCollection<string>("Cities");
 				values.Put(new Point2D(0, 0), "A");
 				values.Put(new Point2D(1, 2), "B");
 				values.Put(new Point2D(1, 2), "C");
@@ -356,7 +356,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetPoint2DCollection<string>("Cities");
+				var values = db.GetOrCreatePoint2DCollection<string>("Cities");
 				values.Put(new Point2D(0, 0), "A");
 				values.Put(new Point2D(1, 2), "B");
 				values.Put(new Point2D(1.1, 1), "C");
@@ -376,7 +376,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetPoint2DCollection<string>("Cities");
+				var values = db.GetOrCreatePoint2DCollection<string>("Cities");
 				values.Put(new Point2D(0, 0), "A");
 				values.Put(new Point2D(1, 2), "B");
 				values.Put(new Point2D(1.1, 1), "C");
@@ -396,7 +396,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetPoint2DCollection<string>("Cities");
+				var values = db.GetOrCreatePoint2DCollection<string>("Cities");
 				values.Put(new Point2D(0, 0), "A");
 				values.Put(new Point2D(1, 2), "B");
 				values.Put(new Point2D(1.1, 1), "C");
@@ -416,7 +416,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetPoint2DCollection<string>("Cities");
+				var values = db.GetOrCreatePoint2DCollection<string>("Cities");
 				values.Put(new Point2D(0, 0), "A");
 				values.Put(new Point2D(1, 2), "B");
 				values.Put(new Point2D(1.1, 1), "C");
@@ -436,7 +436,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetPoint2DCollection<string>("Cities");
+				var values = db.GetOrCreatePoint2DCollection<string>("Cities");
 				values.Put(new Point2D(0, 0), "A");
 				values.Put(new Point2D(1, 2), "B");
 				values.Put(new Point2D(1.1, 1), "C");
@@ -456,7 +456,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetPoint2DCollection<string>("Cities");
+				var values = db.GetOrCreatePoint2DCollection<string>("Cities");
 				values.Put(new Point2D(0, 0), "A");
 				values.Put(new Point2D(1, 2), "B");
 				values.Put(new Point2D(1.1, 1), "C");
@@ -476,7 +476,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetPoint2DCollection<string>("Cities");
+				var values = db.GetOrCreatePoint2DCollection<string>("Cities");
 				values.GetAll().Should().BeEmpty();
 				values.PutMany(new List<KeyValuePair<Point2D, IEnumerable<string>>>());
 				values.GetAll().Should().BeEmpty();
@@ -488,7 +488,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetPoint2DCollection<string>("Cities");
+				var values = db.GetOrCreatePoint2DCollection<string>("Cities");
 				values.PutMany(new List<KeyValuePair<Point2D, IEnumerable<string>>>
 				{
 					new KeyValuePair<Point2D, IEnumerable<string>>(new Point2D(1, 1), new[]{"A", "B"}),
@@ -511,7 +511,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetPoint2DCollection<string>("Cities");
+				var values = db.GetOrCreatePoint2DCollection<string>("Cities");
 				values.PutMany(new List<KeyValuePair<Point2D, string>>
 				{
 					new KeyValuePair<Point2D, string>(new Point2D(1, 1), "A"),
@@ -534,7 +534,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetPoint2DCollection<string>("Cities");
+				var values = db.GetOrCreatePoint2DCollection<string>("Cities");
 				values.PutMany(new Point2D(-1, -2), new []{"Homer", "Simpson"});
 
 				var allValues = values.GetAll().ToList();
@@ -549,7 +549,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetPoint2DCollection<string>("Cities");
+				var values = db.GetOrCreatePoint2DCollection<string>("Cities");
 				values.Put(new Point2D(2, 3), "A");
 				values.Put(new Point2D(2, 3), "B");
 				values.Put(new Point2D(3, 2), "C");
@@ -568,7 +568,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetPoint2DCollection<string>("Cities");
+				var values = db.GetOrCreatePoint2DCollection<string>("Cities");
 				values.Put(new Point2D(2, 3), "A");
 				values.Put(new Point2D(2, 3), "B");
 				values.Put(new Point2D(3, 2), "C");
@@ -595,7 +595,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var collection = db.GetPoint2DCollection<string>("Values");
+				var collection = db.GetOrCreatePoint2DCollection<string>("Values");
 				var row1Id = collection.Put(Point2D.Zero, "A");
 				var row2Id = collection.Put(Point2D.Zero, "B");
 
@@ -613,13 +613,13 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 
 				using (var db = CreateDatabase(connection))
 				{
-					var collection = db.GetPoint2DCollection<string>("Values");
+					var collection = db.GetOrCreatePoint2DCollection<string>("Values");
 					ids.Add(collection.Put(Point2D.Zero, "A"));
 					ids.Add(collection.Put(Point2D.Zero, "B"));
 				}
 				using (var db = CreateDatabase(connection))
 				{
-					var collection = db.GetPoint2DCollection<string>("Values");
+					var collection = db.GetOrCreatePoint2DCollection<string>("Values");
 					ids.Add(collection.Put(Point2D.Zero, "C"));
 					ids.Add(collection.Put(Point2D.Zero, "D"));
 				}
@@ -635,7 +635,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var collection = db.GetPoint2DCollection<string>("Values");
+				var collection = db.GetOrCreatePoint2DCollection<string>("Values");
 				var ids = collection.PutMany(Point2D.Zero, new[] {"a", "b"});
 				ids.Should().HaveCount(2, "because we inserted 2 values");
 				ids.ShouldBeUnique();
@@ -649,7 +649,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var collection = db.GetPoint2DCollection<string>("Values");
+				var collection = db.GetOrCreatePoint2DCollection<string>("Values");
 				var ids1 = collection.PutMany(Point2D.Zero, new[] {"a", "b"});
 				ids1.Should().HaveCount(2, "because we inserted 2 values");
 
@@ -669,7 +669,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var collection = db.GetPoint2DCollection<string>("Values");
+				var collection = db.GetOrCreatePoint2DCollection<string>("Values");
 				var values = new List<KeyValuePair<Point2D, string>>
 				{
 					new KeyValuePair<Point2D, string>(Point2D.Zero, "A"),
@@ -689,7 +689,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var collection = db.GetPoint2DCollection<string>("Values");
+				var collection = db.GetOrCreatePoint2DCollection<string>("Values");
 				var values = new List<KeyValuePair<Point2D, IEnumerable<string>>>
 				{
 					new KeyValuePair<Point2D, IEnumerable<string>>(Point2D.Zero, new[]{"A", "B"}),
@@ -709,7 +709,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var collection = db.GetPoint2DCollection<string>("Values");
+				var collection = db.GetOrCreatePoint2DCollection<string>("Values");
 				var p0 = new Point2D(1, 2);
 				var p1 = new Point2D(-1, -1);
 				var r0 = collection.Put(p0, "a");
@@ -736,7 +736,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var collection = db.GetPoint2DCollection<string>("Values");
+				var collection = db.GetOrCreatePoint2DCollection<string>("Values");
 				var p0 = new Point2D(1, 2);
 				var p1 = new Point2D(-1, -1);
 				var r0 = collection.Put(p0, "a");
@@ -760,7 +760,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var collection = db.GetPoint2DCollection<string>("Values");
+				var collection = db.GetOrCreatePoint2DCollection<string>("Values");
 				var p0 = new Point2D(1, 2);
 				var r0 = collection.Put(p0, "a");
 				var r1 = collection.Put(p0, "b");
@@ -777,7 +777,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var collection = db.GetPoint2DCollection<string>("Values");
+				var collection = db.GetOrCreatePoint2DCollection<string>("Values");
 				var p0 = new Point2D(1, 2);
 				var r0 = collection.Put(p0, "a");
 				var r1 = collection.Put(p0, "b");
@@ -799,7 +799,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var collection = db.GetPoint2DCollection<string>("Values");
+				var collection = db.GetOrCreatePoint2DCollection<string>("Values");
 				var p0 = new Point2D(1, 2);
 				var r0 = collection.Put(p0, "a");
 				var r1 = collection.Put(p0, "b");
@@ -815,7 +815,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var collection = db.GetPoint2DCollection<string>("Values");
+				var collection = db.GetOrCreatePoint2DCollection<string>("Values");
 				var p0 = new Point2D(1, 2);
 				var r0 = collection.Put(p0, "a");
 				var r1 = collection.Put(p0, "b");
@@ -833,6 +833,16 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 		protected override IPoint2DCollection<string> GetCollection(IDatabase db, string name)
 		{
 			return db.GetPoint2DCollection<string>(name);
+		}
+
+		protected override IPoint2DCollection<string> CreateCollection(IDatabase db, string name)
+		{
+			return db.CreatePoint2DCollection<string>(name);
+		}
+
+		protected override IPoint2DCollection<string> GetOrCreateCollection(IDatabase db, string name)
+		{
+			return db.GetOrCreatePoint2DCollection<string>(name);
 		}
 
 		protected override void Put(IPoint2DCollection<string> collection, string value)

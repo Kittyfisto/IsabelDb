@@ -74,6 +74,7 @@
     <Compile Include="Collections\IInternalCollection.cs" />
     <Compile Include="Collections\Queue.cs" />
     <Compile Include="Constants.cs" />
+    <Compile Include="Exceptions\CollectionNameAlreadyInUseException.cs" />
     <Compile Include="Exceptions\IncompatibleDatabaseSchemaException.cs" />
     <Compile Include="Exceptions\NoSuchCollectionException.cs" />
     <Compile Include="Exceptions\TypeNotRegisteredException.cs" />
@@ -86,6 +87,7 @@
     <Compile Include="Collections\OrderedCollection.cs" />
     <Compile Include="Collections\Point2DCollection.cs" />
     <Compile Include="IReadOnlyQueue.cs" />
+    <Compile Include="Mode.cs" />
     <Compile Include="VariablesTable.cs" />
     <Compile Include="ITransaction.cs" />
     <Compile Include="Point2D.cs" />

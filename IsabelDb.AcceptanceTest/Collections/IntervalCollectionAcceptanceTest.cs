@@ -16,7 +16,7 @@ namespace IsabelDb.AcceptanceTest.Collections
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetIntervalCollection<int, string>("Values");
+				var values = db.GetOrCreateIntervalCollection<int, string>("Values");
 				const int count = 10000;
 				const int spacing = 99;
 				const int overlap = 100;

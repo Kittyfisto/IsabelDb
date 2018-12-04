@@ -19,7 +19,7 @@ namespace IsabelDb.Test.Collections.Bag
 			};
 			using (var db = Database.CreateInMemory(new[] {typeof(Message)}))
 			{
-				var bag = db.GetBag<Message>("Messages");
+				var bag = db.GetOrCreateBag<Message>("Messages");
 				new Action(() => bag.Put(message))
 					.Should().Throw<Exception>("because protobuf doesn't support native types to inherit from anything");
 				bag.Count().Should().Be(0);
@@ -37,7 +37,7 @@ namespace IsabelDb.Test.Collections.Bag
 			};
 			using (var db = Database.CreateInMemory(new[] {typeof(Message)}))
 			{
-				var bag = db.GetBag<Message>("Messages");
+				var bag = db.GetOrCreateBag<Message>("Messages");
 				new Action(() => bag.Put(message))
 					.Should().Throw<Exception>("because protobuf doesn't support native types to inherit from anything");
 				bag.Count().Should().Be(0);
@@ -55,7 +55,7 @@ namespace IsabelDb.Test.Collections.Bag
 			};
 			using (var db = Database.CreateInMemory(new []{typeof(Message), typeof(CustomKey)}))
 			{
-				var bag = db.GetBag<Message>("Messages");
+				var bag = db.GetOrCreateBag<Message>("Messages");
 				bag.Put(message);
 				var actualValue = bag.GetAllValues().First();
 				actualValue.Should().NotBeNull();

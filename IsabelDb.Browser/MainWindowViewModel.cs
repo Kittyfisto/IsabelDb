@@ -56,7 +56,7 @@ namespace IsabelDb.Browser
 			var path = Path.GetTempFileName();
 			using (var database = global::IsabelDb.Database.OpenOrCreate(path, new[] {typeof(ProcessorArchitecture)}))
 			{
-				var bag = database.GetBag<object>("A");
+				var bag = database.GetOrCreateBag<object>("A");
 				bag.Put(1337);
 				bag.Put(9001);
 				bag.Put(DateTime.Now);
@@ -71,12 +71,12 @@ namespace IsabelDb.Browser
 				bag.Put(ProcessorArchitecture.Amd64);
 				bag.Put("Stuff");
 
-				var queue = database.GetQueue<int>("B");
+				var queue = database.GetOrCreateQueue<int>("B");
 				queue.Enqueue(42);
 				queue.Enqueue(9001);
 				queue.Enqueue(1337);
 
-				var dictionary = database.GetDictionary<int, string>("C");
+				var dictionary = database.GetOrCreateDictionary<int, string>("C");
 				dictionary.Put(42, "Answer to the Ultimate Question of Life, the Universe, and Everything");
 			}
 

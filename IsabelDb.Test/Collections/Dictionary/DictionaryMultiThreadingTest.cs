@@ -18,8 +18,8 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values1 = db.GetDictionary<int, string>("Values1");
-				var values2 = db.GetDictionary<int, string>("Values1");
+				var values1 = db.GetOrCreateDictionary<int, string>("Values1");
+				var values2 = db.GetOrCreateDictionary<int, string>("Values1");
 
 				const int count = 10000;
 				var task1 = PutValuesAsync(values1, count);
@@ -35,7 +35,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetDictionary<int, string>("Values");
+				var values = db.GetOrCreateDictionary<int, string>("Values");
 
 				const int count = 10000;
 				var task1 = PutValuesAsync(values, 0, count);
@@ -51,7 +51,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetDictionary<int, string>("Values");
+				var values = db.GetOrCreateDictionary<int, string>("Values");
 
 				const int count = 10000;
 				var values1 = GenerateValues(0, count);
@@ -73,7 +73,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var dictionary = db.GetDictionary<int, string>("Values");
+				var dictionary = db.GetOrCreateDictionary<int, string>("Values");
 
 				const int count = 10000;
 				var values1 = GenerateValues(count);

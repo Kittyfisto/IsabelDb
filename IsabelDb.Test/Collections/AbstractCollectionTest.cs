@@ -13,13 +13,63 @@ namespace IsabelDb.Test.Collections
 		protected static readonly Type[] NoCustomTypes = new Type[0];
 
 		[Test]
+		public void TestCreateNewCollection()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				var collection = CreateCollection(db, "Values");
+				collection.Should().NotBeNull();
+				db.Collections.Should().BeEquivalentTo(new object[] {collection});
+
+				GetCollection(db, "Values").Should().BeSameAs(collection);
+				GetOrCreateCollection(db, "Values").Should().BeSameAs(collection);
+			}
+		}
+
+		[Test]
+		public void TestGetOrCreateCollection()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				var collection = GetOrCreateCollection(db, "stuff");
+				collection.Should().NotBeNull();
+				db.Collections.Should().BeEquivalentTo(new object[] {collection});
+
+				GetCollection(db, "stuff").Should().BeSameAs(collection);
+				GetOrCreateCollection(db, "stuff").Should().BeSameAs(collection);
+			}
+		}
+
+		[Test]
+		public void TestGetCollection()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				new Action(() => GetCollection(db, "Values")).Should().Throw<NoSuchCollectionException>();
+				db.Collections.Should().BeEmpty();
+			}
+		}
+
+		[Test]
+		public void TestCreateExistingCollection()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				var collection = CreateCollection(db, "Values");
+				new Action(() => CreateCollection(db, "Values")).Should().Throw<CollectionNameAlreadyInUseException>();
+				db.Collections.Should().BeEquivalentTo(new object[] {collection},
+				                                       "because only one collection may have been created");
+			}
+		}
+
+		[Test]
 		public void TestGetSameCollectionTwice()
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var collection1 = GetCollection(db, "Values1");
-				var collection2 = GetCollection(db, "Values1");
-				var collection3 = GetCollection(db, "Values2");
+				var collection1 = GetOrCreateCollection(db, "Values1");
+				var collection2 = GetOrCreateCollection(db, "Values1");
+				var collection3 = GetOrCreateCollection(db, "Values2");
 
 				collection1.Should().BeSameAs(collection2);
 				collection1.Should().NotBeSameAs(collection3);
@@ -31,7 +81,7 @@ namespace IsabelDb.Test.Collections
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var collection = GetCollection(db, "SomeTable");
+				var collection = CreateCollection(db, "SomeTable");
 				PutMany(collection, "foo", "bar");
 
 				collection = GetCollection(db, "SomeTable");
@@ -45,8 +95,8 @@ namespace IsabelDb.Test.Collections
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var a = GetCollection(db, "A");
-				var b = GetCollection(db, "a");
+				var a = CreateCollection(db, "A");
+				var b = CreateCollection(db, "a");
 				a.Should().NotBe(b);
 
 				Put(a, "42");
@@ -63,7 +113,7 @@ namespace IsabelDb.Test.Collections
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var collection = GetCollection(db, "Values");
+				var collection = CreateCollection(db, "Values");
 				collection.Count().Should().Be(0);
 				collection.GetAllValues().Should().BeEmpty();
 
@@ -78,7 +128,7 @@ namespace IsabelDb.Test.Collections
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var collection = GetCollection(db, "Values");
+				var collection = CreateCollection(db, "Values");
 				Put(collection, "Foo");
 				collection.Count().Should().Be(1);
 				collection.GetAllValues().Should().HaveCount(1);
@@ -94,7 +144,7 @@ namespace IsabelDb.Test.Collections
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var collection = GetCollection(db, "Values");
+				var collection = CreateCollection(db, "Values");
 				Put(collection, "A");
 				Put(collection, "B");
 				Put(collection, "C");
@@ -112,7 +162,7 @@ namespace IsabelDb.Test.Collections
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var collection = GetCollection(db, "Values");
+				var collection = CreateCollection(db, "Values");
 				collection.Count().Should().Be(0);
 			}
 		}
@@ -122,7 +172,7 @@ namespace IsabelDb.Test.Collections
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var collection = GetCollection(db, "Values");
+				var collection = CreateCollection(db, "Values");
 				collection.GetAllValues().Should().BeEmpty();
 			}
 		}
@@ -132,7 +182,7 @@ namespace IsabelDb.Test.Collections
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var collection = GetCollection(db, "Values");
+				var collection = CreateCollection(db, "Values");
 				Put(collection, "Monty");
 				collection.GetAllValues().Should().Equal("Monty");
 			}
@@ -143,7 +193,7 @@ namespace IsabelDb.Test.Collections
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var collection = GetCollection(db, "Values");
+				var collection = CreateCollection(db, "Values");
 				Put(collection, "Monty");
 				Put(collection, "A");
 				Put(collection, "B");
@@ -156,7 +206,7 @@ namespace IsabelDb.Test.Collections
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var collection = GetCollection(db, "Values");
+				var collection = CreateCollection(db, "Values");
 				Put(collection, "Monty Python");
 			}
 		}
@@ -166,7 +216,7 @@ namespace IsabelDb.Test.Collections
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var collection = GetCollection(db, "Values");
+				var collection = CreateCollection(db, "Values");
 
 				const int count = 1000;
 				var values = new List<string>(count);
@@ -189,7 +239,7 @@ namespace IsabelDb.Test.Collections
 				using (var db = new IsabelDb(connection, null, NoCustomTypes, false, false))
 				{
 					db.Collections.Should().BeEmpty();
-					var collection = GetCollection(db, "Stuff");
+					var collection = CreateCollection(db, "Stuff");
 					db.Collections.Should().Equal(collection);
 				}
 			}
@@ -202,7 +252,7 @@ namespace IsabelDb.Test.Collections
 			{
 				using (var db = new IsabelDb(connection, null, NoCustomTypes, false, false))
 				{
-					var collection = GetCollection(db, "For The Fallen Dreams");
+					var collection = CreateCollection(db, "For The Fallen Dreams");
 					collection.Name.Should().Be("For The Fallen Dreams");
 					collection.Type.Should().Be(CollectionType);
 				}
@@ -219,7 +269,7 @@ namespace IsabelDb.Test.Collections
 			{
 				using (var db = CreateDatabase(connection))
 				{
-					var collection = GetCollection(db, "Values");
+					var collection = CreateCollection(db, "Values");
 					Put(collection, "Stuff");
 				}
 
@@ -240,7 +290,7 @@ namespace IsabelDb.Test.Collections
 			{
 				using (var db = CreateDatabase(connection))
 				{
-					var collection = GetCollection(db, "Values");
+					var collection = CreateCollection(db, "Values");
 					Put(collection, "Peter");
 				}
 
@@ -262,7 +312,7 @@ namespace IsabelDb.Test.Collections
 			{
 				using (var db = CreateDatabase(connection))
 				{
-					var collection = GetCollection(db, "Values");
+					var collection = CreateCollection(db, "Values");
 					Put(collection, "Peter");
 					collection.GetAllValues().Should().Equal("Peter");
 
@@ -297,9 +347,9 @@ namespace IsabelDb.Test.Collections
 		{
 			using (var connection = CreateConnection())
 			{
-				using (var db = new IsabelDb(connection, null, NoCustomTypes, false, false))
+				using (var db = new IsabelDb(connection, null, NoCustomTypes, false, isReadOnly: false))
 				{
-					var collection = GetCollection(db, "Stuff");
+					var collection = CreateCollection(db, "Stuff");
 					Put(collection, "One");
 				}
 
@@ -322,9 +372,9 @@ namespace IsabelDb.Test.Collections
 		{
 			using (var connection = CreateConnection())
 			{
-				using (var db = new IsabelDb(connection, null, NoCustomTypes, false, false))
+				using (var db = new IsabelDb(connection, null, NoCustomTypes, false, isReadOnly: false))
 				{
-					var collection = GetCollection(db, "Stuff");
+					var collection = CreateCollection(db, "Stuff");
 					Put(collection, "One");
 				}
 
@@ -349,7 +399,7 @@ namespace IsabelDb.Test.Collections
 			{
 				using (var db = new IsabelDb(connection, null, NoCustomTypes, false, false))
 				{
-					var collection = GetCollection(db, "Stuff");
+					var collection = CreateCollection(db, "Stuff");
 					Put(collection, "One");
 				}
 
@@ -374,7 +424,7 @@ namespace IsabelDb.Test.Collections
 			{
 				using (var db = new IsabelDb(connection, null, NoCustomTypes, false, false))
 				{
-					var collection = GetCollection(db, "Stuff");
+					var collection = CreateCollection(db, "Stuff");
 					Put(collection, "One");
 				}
 
@@ -400,7 +450,7 @@ namespace IsabelDb.Test.Collections
 				using (var db = new IsabelDb(connection, null, NoCustomTypes, false, false))
 				{
 					db.Collections.Should().BeEmpty();
-					var collection = GetCollection(db, "Stuff");
+					var collection = CreateCollection(db, "Stuff");
 					db.Collections.Should().Equal(collection);
 				}
 
@@ -421,7 +471,7 @@ namespace IsabelDb.Test.Collections
 			{
 				using (var db = CreateDatabase(connection))
 				{
-					GetCollection(db, "For The Fallen Dreams");
+					CreateCollection(db, "For The Fallen Dreams");
 				}
 
 				using (var db = CreateDatabase(connection))
@@ -445,7 +495,7 @@ namespace IsabelDb.Test.Collections
 			{
 				using (var db = CreateDatabase(connection))
 				{
-					var collection = GetCollection(db, "For The Fallen Dreams");
+					var collection = CreateCollection(db, "For The Fallen Dreams");
 					db.Collections.Should().Equal(collection);
 					db.Remove(collection);
 					db.Collections.Should().BeEmpty();
@@ -461,7 +511,7 @@ namespace IsabelDb.Test.Collections
 			{
 				using (var db = CreateDatabase(connection))
 				{
-					var collection = GetCollection(db, "For The Fallen Dreams");
+					var collection = CreateCollection(db, "For The Fallen Dreams");
 					db.Collections.Should().Equal(collection);
 					db.Remove(collection);
 					db.Collections.Should().BeEmpty();
@@ -481,7 +531,7 @@ namespace IsabelDb.Test.Collections
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var collection = GetCollection(db, "For The Fallen Dreams");
+				var collection = CreateCollection(db, "For The Fallen Dreams");
 				db.Remove(collection);
 				new Action(() => db.Remove(collection)).Should().NotThrow();
 			}
@@ -495,14 +545,14 @@ namespace IsabelDb.Test.Collections
 			{
 				using (var db = CreateDatabase(connection))
 				{
-					var collection = GetCollection(db, "Characters");
+					var collection = CreateCollection(db, "Characters");
 					Put(collection, "Harry Bosch");
 					db.Remove(collection);
 				}
 
 				using (var db = CreateDatabase(connection))
 				{
-					var collection = GetCollection(db, "Characters");
+					var collection = GetOrCreateCollection(db, "Characters");
 					collection.GetAllValues().Should().BeEmpty();
 				}
 			}
@@ -517,10 +567,10 @@ namespace IsabelDb.Test.Collections
 			using (var connection2 = CreateConnection())
 			using (var db2 = CreateDatabase(connection2))
 			{
-				var collection1 = GetCollection(db1, "Characters");
+				var collection1 = CreateCollection(db1, "Characters");
 				Put(collection1, "Harry Bosch");
 
-				var collection2 = GetCollection(db2, "Characters");
+				var collection2 = CreateCollection(db2, "Characters");
 				Put(collection2, "Jerry Edgar");
 
 				new Action(() => db1.Remove(collection2)).Should().NotThrow();
@@ -546,11 +596,11 @@ namespace IsabelDb.Test.Collections
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var collection1 = GetCollection(db, "Characters");
+				var collection1 = CreateCollection(db, "Characters");
 				Put(collection1, "Harry Bosch");
 				db.Remove(collection1);
 
-				var collection2 = GetCollection(db, "Characters");
+				var collection2 = GetOrCreateCollection(db, "Characters");
 				Put(collection2, "Jerry Edgar");
 
 				new Action(() => db.Remove(collection1)).Should().NotThrow();
@@ -565,7 +615,7 @@ namespace IsabelDb.Test.Collections
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var collection = GetCollection(db, "Characters");
+				var collection = CreateCollection(db, "Characters");
 				Put(collection, "Harry Bosch");
 				db.Remove(collection);
 
@@ -583,7 +633,7 @@ namespace IsabelDb.Test.Collections
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var collection = GetCollection(db, "Characters");
+				var collection = CreateCollection(db, "Characters");
 				Put(collection, "Harry Bosch");
 				db.Remove(collection);
 
@@ -601,7 +651,7 @@ namespace IsabelDb.Test.Collections
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var collection = GetCollection(db, "Characters");
+				var collection = CreateCollection(db, "Characters");
 				Put(collection, "Harry Bosch");
 				db.Remove(collection);
 
@@ -618,7 +668,7 @@ namespace IsabelDb.Test.Collections
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var collection = GetCollection(db, "Characters");
+				var collection = CreateCollection(db, "Characters");
 				Put(collection, "Harry Bosch");
 				db.Remove(collection);
 
@@ -635,7 +685,7 @@ namespace IsabelDb.Test.Collections
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var collection = GetCollection(db, "Characters");
+				var collection = CreateCollection(db, "Characters");
 				Put(collection, "Harry Bosch");
 				db.Remove(collection);
 
@@ -650,6 +700,8 @@ namespace IsabelDb.Test.Collections
 
 		protected abstract CollectionType CollectionType { get; }
 		protected abstract TCollection GetCollection(IDatabase db, string name);
+		protected abstract TCollection CreateCollection(IDatabase db, string name);
+		protected abstract TCollection GetOrCreateCollection(IDatabase db, string name);
 		protected abstract void Put(TCollection collection, string value);
 		protected abstract void PutMany(TCollection collection, params string[] values);
 		protected abstract void RemoveLastPutValue(TCollection collection);

@@ -26,7 +26,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetMultiValueDictionary<object, string>("Stuff");
+				var values = database.GetOrCreateMultiValueDictionary<object, string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.TryGetValue(new RowId(1), out var unused))
@@ -41,7 +41,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetMultiValueDictionary<object, string>("Stuff");
+				var values = database.GetOrCreateMultiValueDictionary<object, string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.GetAll())
@@ -56,7 +56,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetMultiValueDictionary<object, string>("Stuff");
+				var values = database.GetOrCreateMultiValueDictionary<object, string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.GetValue(new RowId()))
@@ -71,7 +71,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetMultiValueDictionary<object, string>("Stuff");
+				var values = database.GetOrCreateMultiValueDictionary<object, string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.GetValues("42"))
@@ -86,7 +86,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetMultiValueDictionary<object, string>("Stuff");
+				var values = database.GetOrCreateMultiValueDictionary<object, string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.GetValues(new object[]{"42"}))
@@ -101,7 +101,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetMultiValueDictionary<object, string>("Stuff");
+				var values = database.GetOrCreateMultiValueDictionary<object, string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.GetValues(new RowId[1]))
@@ -116,7 +116,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetMultiValueDictionary<object, string>("Stuff");
+				var values = database.GetOrCreateMultiValueDictionary<object, string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.GetAllKeys())
@@ -131,7 +131,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetMultiValueDictionary<object, string>("Stuff");
+				var values = database.GetOrCreateMultiValueDictionary<object, string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.ContainsRow(new RowId()))
@@ -146,7 +146,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetMultiValueDictionary<object, string>("Stuff");
+				var values = database.GetOrCreateMultiValueDictionary<object, string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.ContainsKey(new RowId()))
@@ -161,7 +161,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetMultiValueDictionary<object, string>("Stuff");
+				var values = database.GetOrCreateMultiValueDictionary<object, string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.Put(1, "2"))
@@ -176,7 +176,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetMultiValueDictionary<object, string>("Stuff");
+				var values = database.GetOrCreateMultiValueDictionary<object, string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.PutMany(1, new[]{"2"}))
@@ -191,7 +191,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetMultiValueDictionary<object, string>("Stuff");
+				var values = database.GetOrCreateMultiValueDictionary<object, string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.PutMany(new []{new KeyValuePair<object, IEnumerable<string>>()}))
@@ -206,7 +206,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetMultiValueDictionary<object, string>("Stuff");
+				var values = database.GetOrCreateMultiValueDictionary<object, string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.PutMany(new []{new KeyValuePair<object, string>()}))
@@ -221,7 +221,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetMultiValueDictionary<object, string>("Stuff");
+				var values = database.GetOrCreateMultiValueDictionary<object, string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.Remove(new RowId()))
@@ -236,7 +236,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetMultiValueDictionary<object, string>("Stuff");
+				var values = database.GetOrCreateMultiValueDictionary<object, string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.RemoveMany(new RowId[0]))
@@ -251,7 +251,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetMultiValueDictionary<object, string>("Stuff");
+				var values = database.GetOrCreateMultiValueDictionary<object, string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.RemoveMany(new object[0]))
@@ -266,7 +266,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetMultiValueDictionary<object, string>("Stuff");
+				var values = database.GetOrCreateMultiValueDictionary<object, string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.RemoveAll(new RowId[0]))
@@ -285,7 +285,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var db = Database.CreateInMemory(new Type[0]))
 			{
-				var values = db.GetMultiValueDictionary<object, string>("Stuff");
+				var values = db.GetOrCreateMultiValueDictionary<object, string>("Stuff");
 				new Action(() => values.Put(null, "a")).Should().Throw<ArgumentNullException>();
 			}
 		}
@@ -295,7 +295,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var db = Database.CreateInMemory(new Type[0]))
 			{
-				var values = db.GetMultiValueDictionary<object, string>("Stuff");
+				var values = db.GetOrCreateMultiValueDictionary<object, string>("Stuff");
 				new Action(() => values.PutMany(null, new string[0])).Should().Throw<ArgumentNullException>();
 			}
 		}
@@ -305,7 +305,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var db = Database.CreateInMemory(new Type[0]))
 			{
-				var values = db.GetMultiValueDictionary<object, string>("Stuff");
+				var values = db.GetOrCreateMultiValueDictionary<object, string>("Stuff");
 				new Action(() => values.PutMany(new[]
 				{
 					new KeyValuePair<object, string>(null, "42")
@@ -318,7 +318,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var db = Database.CreateInMemory(new Type[0]))
 			{
-				var values = db.GetMultiValueDictionary<object, string>("Stuff");
+				var values = db.GetOrCreateMultiValueDictionary<object, string>("Stuff");
 				new Action(() => values.PutMany(new[]
 				{
 					new KeyValuePair<object, IEnumerable<string>>(null, new string[0])
@@ -331,7 +331,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var db = Database.CreateInMemory(new Type[0]))
 			{
-				var values = db.GetMultiValueDictionary<object, string>("Stuff");
+				var values = db.GetOrCreateMultiValueDictionary<object, string>("Stuff");
 				new Action(() => values.PutMany(42, null)).Should().Throw<ArgumentException>();
 			}
 		}
@@ -341,7 +341,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var db = Database.CreateInMemory(new Type[0]))
 			{
-				var values = db.GetMultiValueDictionary<object, string>("Stuff");
+				var values = db.GetOrCreateMultiValueDictionary<object, string>("Stuff");
 				new Action(() => values.PutMany((IEnumerable<KeyValuePair<object, IEnumerable<string>>>) null)).Should().Throw<ArgumentException>();
 			}
 		}
@@ -351,7 +351,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var db = Database.CreateInMemory(new Type[0]))
 			{
-				var values = db.GetMultiValueDictionary<object, string>("Stuff");
+				var values = db.GetOrCreateMultiValueDictionary<object, string>("Stuff");
 				new Action(() => values.PutMany((IEnumerable<KeyValuePair<object, string>>) null)).Should().Throw<ArgumentException>();
 			}
 		}
@@ -361,7 +361,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var db = Database.CreateInMemory(new Type[0]))
 			{
-				var values = db.GetMultiValueDictionary<object, string>("Stuff");
+				var values = db.GetOrCreateMultiValueDictionary<object, string>("Stuff");
 				new Action(() => values.ContainsKey(null)).Should().Throw<ArgumentNullException>();
 			}
 		}
@@ -371,7 +371,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var db = Database.CreateInMemory(new Type[0]))
 			{
-				var values = db.GetMultiValueDictionary<object, string>("Stuff");
+				var values = db.GetOrCreateMultiValueDictionary<object, string>("Stuff");
 				new Action(() => values.GetValues((object)null)).Should().Throw<ArgumentNullException>();
 			}
 		}
@@ -381,7 +381,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var db = Database.CreateInMemory(new Type[0]))
 			{
-				var values = db.GetMultiValueDictionary<object, string>("Stuff");
+				var values = db.GetOrCreateMultiValueDictionary<object, string>("Stuff");
 				new Action(() => values.GetValues((IEnumerable<RowId>)null)).Should().Throw<ArgumentNullException>();
 			}
 		}
@@ -391,7 +391,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var db = Database.CreateInMemory(new Type[0]))
 			{
-				var values = db.GetMultiValueDictionary<object, string>("Stuff");
+				var values = db.GetOrCreateMultiValueDictionary<object, string>("Stuff");
 				new Action(() => values.GetValues((IEnumerable<object>)null)).Should().Throw<ArgumentNullException>();
 			}
 		}
@@ -401,7 +401,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var db = Database.CreateInMemory(new Type[0]))
 			{
-				var values = db.GetMultiValueDictionary<object, string>("Stuff");
+				var values = db.GetOrCreateMultiValueDictionary<object, string>("Stuff");
 				new Action(() => values.GetValues(new object[]{null}).ToList()).Should().Throw<ArgumentException>();
 			}
 		}
@@ -415,7 +415,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 			{
 				using (var db = CreateDatabase(connection))
 				{
-					db.GetMultiValueDictionary<int, string>("Stuff").ToString().Should().Be("MultiValueDictionary<System.Int32, System.String>(\"Stuff\")");
+					db.GetOrCreateMultiValueDictionary<int, string>("Stuff").ToString().Should().Be("MultiValueDictionary<System.Int32, System.String>(\"Stuff\")");
 				}
 			}
 		}
@@ -425,8 +425,8 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				db.GetMultiValueDictionary<int, string>("Names");
-				new Action(() => db.GetMultiValueDictionary<uint, string>("Names"))
+				db.GetOrCreateMultiValueDictionary<int, string>("Names");
+				new Action(() => db.GetOrCreateMultiValueDictionary<uint, string>("Names"))
 					.Should().Throw<TypeMismatchException>()
 					.WithMessage("The MultiValueDictionary 'Names' uses keys of type 'System.Int32' which does not match the requested key type 'System.UInt32': If your intent was to create a new MultiValueDictionary then you have to pick a new name!");
 			}
@@ -437,8 +437,8 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				db.GetMultiValueDictionary<int, string>("Names");
-				new Action(() => db.GetMultiValueDictionary<int, int>("Names"))
+				db.GetOrCreateMultiValueDictionary<int, string>("Names");
+				new Action(() => db.GetOrCreateMultiValueDictionary<int, int>("Names"))
 					.Should().Throw<TypeMismatchException>()
 					.WithMessage("The MultiValueDictionary 'Names' uses values of type 'System.String' which does not match the requested value type 'System.Int32': If your intent was to create a new MultiValueDictionary then you have to pick a new name!");
 			}
@@ -449,7 +449,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetMultiValueDictionary<int, string>("Values");
+				var values = db.GetOrCreateMultiValueDictionary<int, string>("Values");
 				values.Count().Should().Be(0);
 				values.GetAll().Should().BeEmpty();
 			}
@@ -460,7 +460,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetMultiValueDictionary<int, string>("Values");
+				var values = db.GetOrCreateMultiValueDictionary<int, string>("Values");
 				values.Put(1, "Foo");
 
 				values.RemoveAll(2);
@@ -473,7 +473,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetMultiValueDictionary<int, string>("Values");
+				var values = db.GetOrCreateMultiValueDictionary<int, string>("Values");
 				values.Put(1, "Foo");
 				values.Put(2, "Bar");
 
@@ -488,7 +488,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetMultiValueDictionary<int, string>("Values");
+				var values = db.GetOrCreateMultiValueDictionary<int, string>("Values");
 				values.Put(1, "Foo");
 				values.Put(1, "Bar");
 				values.Put(2, "Hello");
@@ -504,7 +504,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetMultiValueDictionary<int, string>("Values");
+				var values = db.GetOrCreateMultiValueDictionary<int, string>("Values");
 				values.GetValues(0).Should().BeEmpty();
 			}
 		}
@@ -514,7 +514,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetMultiValueDictionary<int, double>("Values");
+				var values = db.GetOrCreateMultiValueDictionary<int, double>("Values");
 				values.Put(1, Math.E);
 				values.Put(2, Math.PI);
 				values.Put(3, 1337);
@@ -530,7 +530,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetMultiValueDictionary<int, string>("Values");
+				var values = db.GetOrCreateMultiValueDictionary<int, string>("Values");
 				values.Put(1, "Foobar");
 			}
 		}
@@ -540,7 +540,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetMultiValueDictionary<int, string>("Values");
+				var values = db.GetOrCreateMultiValueDictionary<int, string>("Values");
 				values.Put(1, "Foo");
 				values.Put(1, "Bar");
 				values.Put(2, "Hello");
@@ -556,7 +556,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetMultiValueDictionary<int, string>("Values");
+				var values = db.GetOrCreateMultiValueDictionary<int, string>("Values");
 				values.Put(1, "a");
 				values.Put(1, "a");
 				values.Put(2, "a");
@@ -571,7 +571,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetMultiValueDictionary<int, string>("Values");
+				var values = db.GetOrCreateMultiValueDictionary<int, string>("Values");
 				values.PutMany(1, new[] {"a", "b"});
 				values.PutMany(1, new []{"c", "d"});
 
@@ -584,7 +584,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetMultiValueDictionary<int, string>("Values");
+				var values = db.GetOrCreateMultiValueDictionary<int, string>("Values");
 				values.PutMany(1, new []{"Foo", "Bar"});
 				values.PutMany(2, new []{"Hello"});
 
@@ -598,7 +598,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetMultiValueDictionary<int, string>("Values");
+				var values = db.GetOrCreateMultiValueDictionary<int, string>("Values");
 				values.PutMany(new []
 				{
 					new KeyValuePair<int, IEnumerable<string>>(1, new[]{"a", "b"}),
@@ -616,7 +616,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetMultiValueDictionary<int, string>("Values");
+				var values = db.GetOrCreateMultiValueDictionary<int, string>("Values");
 				const int count = 10000;
 
 				values.PutMany(1, Enumerable.Range(1, count).Select(x => x.ToString()));
@@ -629,7 +629,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetMultiValueDictionary<int, string>("Values");
+				var values = db.GetOrCreateMultiValueDictionary<int, string>("Values");
 				const int count = 10000;
 
 				values.PutMany(Enumerable.Range(1, count).Select(x => new KeyValuePair<int, string>(x, x.ToString())));
@@ -648,7 +648,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetMultiValueDictionary<int, string>("Values");
+				var values = db.GetOrCreateMultiValueDictionary<int, string>("Values");
 				values.GetAllKeys().Should().BeEmpty();
 			}
 		}
@@ -658,7 +658,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetMultiValueDictionary<int, string>("Values");
+				var values = db.GetOrCreateMultiValueDictionary<int, string>("Values");
 				values.Put(1, "a");
 				values.Put(2, "b");
 
@@ -721,14 +721,14 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 			{
 				using (var db = new IsabelDb(connection, null, NoCustomTypes, false, false))
 				{
-					var collection = db.GetMultiValueDictionary<int, string>("Stuff");
+					var collection = db.GetOrCreateMultiValueDictionary<int, string>("Stuff");
 					collection.Put(1, "One");
 					collection.Put(1, "Two");
 				}
 
 				using (var db = new IsabelDb(connection, null, NoCustomTypes, false, isReadOnly: true))
 				{
-					var collection = db.GetMultiValueDictionary<int, string>("Stuff");
+					var collection = db.GetOrCreateMultiValueDictionary<int, string>("Stuff");
 					collection.GetAllValues().Should().Equal("One", "Two");
 
 					new Action(() => collection.PutMany(1, new []{"Three"}))
@@ -747,14 +747,14 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 			{
 				using (var db = new IsabelDb(connection, null, NoCustomTypes, false, false))
 				{
-					var collection = db.GetMultiValueDictionary<int, string>("Stuff");
+					var collection = db.GetOrCreateMultiValueDictionary<int, string>("Stuff");
 					collection.Put(1, "One");
 					collection.Put(1, "Two");
 				}
 
 				using (var db = new IsabelDb(connection, null, NoCustomTypes, false, isReadOnly: true))
 				{
-					var collection = db.GetMultiValueDictionary<int, string>("Stuff");
+					var collection = db.GetOrCreateMultiValueDictionary<int, string>("Stuff");
 					collection.GetAllValues().Should().Equal("One", "Two");
 
 					new Action(() => collection.RemoveAll(1))
@@ -772,7 +772,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 			using (var connection = CreateConnection())
 			using (var db = new IsabelDb(connection, null, NoCustomTypes, false, false))
 			{
-				var collection = db.GetMultiValueDictionary<int, string>("Blessthefall");
+				var collection = db.GetOrCreateMultiValueDictionary<int, string>("Blessthefall");
 				collection.Put(1, "Wishful Sinking");
 				db.Remove(collection);
 				new Action(() => collection.PutMany(2, new[] {"Find Yourself", "Sakura Blues"}))
@@ -788,7 +788,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 			{
 				using (var db = CreateDatabase(connection))
 				{
-					var collection = db.GetMultiValueDictionary<int, string>("Blessthefall");
+					var collection = db.GetOrCreateMultiValueDictionary<int, string>("Blessthefall");
 					collection.Put(1, "a");
 					collection.Put(2, "b");
 					collection.Put(2, "c");
@@ -806,7 +806,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var collection = db.GetMultiValueDictionary<int, string>("Blessthefall");
+				var collection = db.GetOrCreateMultiValueDictionary<int, string>("Blessthefall");
 				collection.PutMany(1, new[]{"a", "b"});
 				collection.PutMany(2, new[]{"c", "d"});
 				collection.GetAllValues().Should().Equal("a", "b", "c", "d");
@@ -822,7 +822,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var collection = db.GetMultiValueDictionary<int, string>("Blessthefall");
+				var collection = db.GetOrCreateMultiValueDictionary<int, string>("Blessthefall");
 				collection.Put(1, "1");
 				collection.PutMany(2, new []{"2", "3"});
 
@@ -840,7 +840,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var collection = db.GetMultiValueDictionary<int, string>("Values");
+				var collection = db.GetOrCreateMultiValueDictionary<int, string>("Values");
 				var row1Id = collection.Put(42, "A");
 				var row2Id = collection.Put(42, "B");
 
@@ -858,13 +858,13 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 
 				using (var db = CreateDatabase(connection))
 				{
-					var collection = db.GetMultiValueDictionary<int, string>("Values");
+					var collection = db.GetOrCreateMultiValueDictionary<int, string>("Values");
 					ids.Add(collection.Put(42, "A"));
 					ids.Add(collection.Put(42, "B"));
 				}
 				using (var db = CreateDatabase(connection))
 				{
-					var collection = db.GetMultiValueDictionary<int, string>("Values");
+					var collection = db.GetOrCreateMultiValueDictionary<int, string>("Values");
 					ids.Add(collection.Put(42, "C"));
 					ids.Add(collection.Put(42, "D"));
 				}
@@ -880,7 +880,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var collection = db.GetMultiValueDictionary<int, string>("Values");
+				var collection = db.GetOrCreateMultiValueDictionary<int, string>("Values");
 				var ids = collection.PutMany(1, new[] {"a", "b"});
 				ids.Should().HaveCount(2, "because we inserted 2 values");
 				ids.ShouldBeUnique();
@@ -894,7 +894,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var collection = db.GetMultiValueDictionary<int, string>("Values");
+				var collection = db.GetOrCreateMultiValueDictionary<int, string>("Values");
 				var ids1 = collection.PutMany(1, new[] {"a", "b"});
 				ids1.Should().HaveCount(2, "because we inserted 2 values");
 
@@ -914,7 +914,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var collection = db.GetMultiValueDictionary<int, string>("Values");
+				var collection = db.GetOrCreateMultiValueDictionary<int, string>("Values");
 				var values = new List<KeyValuePair<int, string>>
 				{
 					new KeyValuePair<int, string>(0, "A"),
@@ -934,7 +934,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var collection = db.GetMultiValueDictionary<int, string>("Values");
+				var collection = db.GetOrCreateMultiValueDictionary<int, string>("Values");
 				var values = new List<KeyValuePair<int, IEnumerable<string>>>
 				{
 					new KeyValuePair<int, IEnumerable<string>>(0, new[]{"A", "B"}),
@@ -954,7 +954,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var collection = db.GetMultiValueDictionary<int, string>("Values");
+				var collection = db.GetOrCreateMultiValueDictionary<int, string>("Values");
 				var r0 = collection.Put(0, "a");
 				var r1 = collection.Put(0, "b");
 				var r2 = collection.Put(1, "c");
@@ -979,7 +979,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var collection = db.GetMultiValueDictionary<int, string>("Values");
+				var collection = db.GetOrCreateMultiValueDictionary<int, string>("Values");
 				var r0 = collection.Put(0, "a");
 				var r1 = collection.Put(0, "b");
 				var r2 = collection.Put(1, "c");
@@ -1001,7 +1001,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var collection = db.GetMultiValueDictionary<int, string>("Values");
+				var collection = db.GetOrCreateMultiValueDictionary<int, string>("Values");
 				var r0 = collection.Put(0, "a");
 				var r1 = collection.Put(0, "b");
 
@@ -1017,7 +1017,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var collection = db.GetMultiValueDictionary<int, string>("Values");
+				var collection = db.GetOrCreateMultiValueDictionary<int, string>("Values");
 				var r0 = collection.Put(0, "a");
 				var r1 = collection.Put(0, "b");
 
@@ -1038,7 +1038,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var collection = db.GetMultiValueDictionary<int, string>("Values");
+				var collection = db.GetOrCreateMultiValueDictionary<int, string>("Values");
 				var r0 = collection.Put(0, "a");
 				var r1 = collection.Put(0, "b");
 
@@ -1053,7 +1053,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var collection = db.GetMultiValueDictionary<int, string>("Values");
+				var collection = db.GetOrCreateMultiValueDictionary<int, string>("Values");
 				var r0 = collection.Put(0, "a");
 				var r1 = collection.Put(0, "b");
 
@@ -1069,7 +1069,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var collection = db.GetMultiValueDictionary<string, string>("Values");
+				var collection = db.GetOrCreateMultiValueDictionary<string, string>("Values");
 				var ids = collection.PutMany("Simpson", new []{"Homer", "Marge", "Maggie", "Lisa", "Bart"});
 				ids.ShouldBeUnique();
 
@@ -1086,6 +1086,16 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		protected override IMultiValueDictionary<int, string> GetCollection(IDatabase db, string name)
 		{
 			return db.GetMultiValueDictionary<int, string>(name);
+		}
+
+		protected override IMultiValueDictionary<int, string> CreateCollection(IDatabase db, string name)
+		{
+			return db.CreateMultiValueDictionary<int, string>(name);
+		}
+
+		protected override IMultiValueDictionary<int, string> GetOrCreateCollection(IDatabase db, string name)
+		{
+			return db.GetOrCreateMultiValueDictionary<int, string>(name);
 		}
 
 		protected override void Put(IMultiValueDictionary<int, string> collection, string value)
@@ -1112,7 +1122,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var collection = db.GetMultiValueDictionary<TKey, string>("Values");
+				var collection = db.GetOrCreateMultiValueDictionary<TKey, string>("Values");
 				collection.Put(minimum, "Helo");
 				collection.Put(maximum, "Boomer");
 

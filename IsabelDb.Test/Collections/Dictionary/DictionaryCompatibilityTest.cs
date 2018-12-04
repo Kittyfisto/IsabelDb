@@ -19,7 +19,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 
 		protected override ICollection<T> GetCollection<T>(IDatabase db, string name)
 		{
-			return db.GetDictionary<int, T>(name);
+			return db.GetOrCreateDictionary<int, T>(name);
 		}
 
 		protected override void Put<T>(ICollection<T> collection, T value)

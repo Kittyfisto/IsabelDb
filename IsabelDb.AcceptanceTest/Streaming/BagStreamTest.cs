@@ -33,7 +33,7 @@ namespace IsabelDb.AcceptanceTest.Streaming
 				TestContext.Progress.WriteLine("Writing a total of {0} records in {1} batches, {2} records each...",
 					recordCount, batchCount, recordsPerBatch);
 
-				var bag = db.GetBag<IRecord>("Records");
+				var bag = db.GetOrCreateBag<IRecord>("Records");
 				for (int i = 0; i < batchCount; ++i)
 				{
 					var records = CreateRecords(recordsPerBatch);

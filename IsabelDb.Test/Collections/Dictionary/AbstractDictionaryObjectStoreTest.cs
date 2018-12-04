@@ -29,7 +29,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(CustomTypes))
 			{
-				var values = db.GetDictionary<TKey, object>("Values");
+				var values = db.GetOrCreateDictionary<TKey, object>("Values");
 				values.PutIfNotExists(SomeKey, "Green").Should().BeTrue();
 				values.Count().Should().Be(1);
 				values.GetAllKeys().Should().BeEquivalentTo(new object[]{SomeKey});
@@ -42,7 +42,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(CustomTypes))
 			{
-				var values = db.GetDictionary<TKey, object>("Values");
+				var values = db.GetOrCreateDictionary<TKey, object>("Values");
 				values.PutIfNotExists(SomeKey, "Green").Should().BeTrue();
 				values.PutIfNotExists(DifferentKey, "Room").Should().BeTrue();
 				values.Count().Should().Be(2);
@@ -57,7 +57,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(CustomTypes))
 			{
-				var values = db.GetDictionary<TKey, object>("Values");
+				var values = db.GetOrCreateDictionary<TKey, object>("Values");
 				values.Put(SomeKey, "Noether's Theorem");
 				values.Put(DifferentKey, "The Symmetries of Reality");
 				values.Get(SomeKey).Should().Be("Noether's Theorem");
@@ -74,7 +74,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(CustomTypes))
 			{
-				var values = db.GetDictionary<TKey, object>("Values");
+				var values = db.GetOrCreateDictionary<TKey, object>("Values");
 				values.Put(SomeKey, "Hello");
 				values.Put(DifferentKey, "World");
 
@@ -92,7 +92,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(CustomTypes))
 			{
-				var values = db.GetDictionary<TKey, object>("Values");
+				var values = db.GetOrCreateDictionary<TKey, object>("Values");
 				values.TryGet(SomeKey, out var unused).Should().BeFalse();
 			}
 		}
@@ -102,7 +102,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(CustomTypes))
 			{
-				var values = db.GetDictionary<TKey, object>("Values");
+				var values = db.GetOrCreateDictionary<TKey, object>("Values");
 				values.Put(SomeKey, value: 42);
 				values.Get(SomeKey).Should().Be(42);
 				values.TryGet(SomeKey, out var value).Should().BeTrue();
@@ -120,7 +120,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(CustomTypes))
 			{
-				var values = db.GetDictionary<TKey, object>("Values");
+				var values = db.GetOrCreateDictionary<TKey, object>("Values");
 				values.Put(SomeKey, "A");
 				values.Get(SomeKey).Should().Be("A");
 
@@ -138,7 +138,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(CustomTypes))
 			{
-				var values = db.GetDictionary<TKey, object>("Values");
+				var values = db.GetOrCreateDictionary<TKey, object>("Values");
 				var i = 0;
 				foreach (var key in ManyKeys)
 				{
@@ -168,7 +168,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(CustomTypes))
 			{
-				var values = db.GetDictionary<TKey, object>("Values");
+				var values = db.GetOrCreateDictionary<TKey, object>("Values");
 				values.Put(SomeKey, null);
 				values.Count().Should().Be(1);
 				values.GetAllValues().Should().BeEquivalentTo(new object[] {null});
@@ -180,7 +180,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(CustomTypes))
 			{
-				var values = db.GetDictionary<TKey, object>("Values");
+				var values = db.GetOrCreateDictionary<TKey, object>("Values");
 				values.Put(SomeKey, "A");
 				values.Get(SomeKey).Should().Be("A");
 
@@ -196,7 +196,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(CustomTypes))
 			{
-				var values = db.GetDictionary<TKey, object>("Values");
+				var values = db.GetOrCreateDictionary<TKey, object>("Values");
 				values.Put(SomeKey, "A");
 				values.Get(SomeKey).Should().Be("A");
 
@@ -210,7 +210,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(CustomTypes))
 			{
-				var values = db.GetDictionary<TKey, object>("Values");
+				var values = db.GetOrCreateDictionary<TKey, object>("Values");
 				values.Put(SomeKey, "Hello");
 				values.Put(DifferentKey, "World");
 

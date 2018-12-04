@@ -25,7 +25,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(new Type[0]))
 			{
-				var dictionary = db.GetDictionary<object, string>("Stuff");
+				var dictionary = db.GetOrCreateDictionary<object, string>("Stuff");
 				db.Remove(dictionary);
 
 				new Action(() => dictionary.Get("Green"))
@@ -40,7 +40,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(new Type[0]))
 			{
-				var dictionary = db.GetDictionary<object, string>("Stuff");
+				var dictionary = db.GetOrCreateDictionary<object, string>("Stuff");
 				db.Remove(dictionary);
 
 				new Action(() => dictionary.TryGet("dawdawwad", out var unused))
@@ -55,7 +55,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(new Type[0]))
 			{
-				var dictionary = db.GetDictionary<object, string>("Stuff");
+				var dictionary = db.GetOrCreateDictionary<object, string>("Stuff");
 				db.Remove(dictionary);
 
 				new Action(() => dictionary.Move("a", "b"))
@@ -70,7 +70,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(new Type[0]))
 			{
-				var dictionary = db.GetDictionary<object, string>("Stuff");
+				var dictionary = db.GetOrCreateDictionary<object, string>("Stuff");
 				db.Remove(dictionary);
 
 				new Action(() => dictionary.Remove("a"))
@@ -85,7 +85,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(new Type[0]))
 			{
-				var dictionary = db.GetDictionary<object, string>("Stuff");
+				var dictionary = db.GetOrCreateDictionary<object, string>("Stuff");
 				db.Remove(dictionary);
 
 				new Action(() => dictionary.RemoveMany(new[]{"a", "b"}))
@@ -100,7 +100,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(new Type[0]))
 			{
-				var dictionary = db.GetDictionary<object, string>("Stuff");
+				var dictionary = db.GetOrCreateDictionary<object, string>("Stuff");
 				db.Remove(dictionary);
 
 				new Action(() => dictionary.GetMany(new object[] {"Green"}))
@@ -115,7 +115,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(new Type[0]))
 			{
-				var dictionary = db.GetDictionary<object, string>("Stuff");
+				var dictionary = db.GetOrCreateDictionary<object, string>("Stuff");
 				db.Remove(dictionary);
 
 				new Action(() => dictionary.GetManyValues(new object[] {"Green"}))
@@ -130,7 +130,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(new Type[0]))
 			{
-				var dictionary = db.GetDictionary<object, string>("Stuff");
+				var dictionary = db.GetOrCreateDictionary<object, string>("Stuff");
 				db.Remove(dictionary);
 
 				new Action(() => dictionary.GetManyValues(new object[] {"Green"}))
@@ -145,7 +145,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(new Type[0]))
 			{
-				var dictionary = db.GetDictionary<object, string>("Stuff");
+				var dictionary = db.GetOrCreateDictionary<object, string>("Stuff");
 				db.Remove(dictionary);
 
 				new Action(() => dictionary.ContainsKey("dawdawwad"))
@@ -160,7 +160,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(new Type[0]))
 			{
-				var dictionary = db.GetDictionary<object, string>("Stuff");
+				var dictionary = db.GetOrCreateDictionary<object, string>("Stuff");
 				db.Remove(dictionary);
 
 				new Action(() => dictionary.GetAll())
@@ -175,7 +175,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(new Type[0]))
 			{
-				var dictionary = db.GetDictionary<object, string>("Stuff");
+				var dictionary = db.GetOrCreateDictionary<object, string>("Stuff");
 				db.Remove(dictionary);
 
 				new Action(() => dictionary.Put("Green", "Room")).Should()
@@ -189,7 +189,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(new Type[0]))
 			{
-				var dictionary = db.GetDictionary<object, string>("Stuff");
+				var dictionary = db.GetOrCreateDictionary<object, string>("Stuff");
 				db.Remove(dictionary);
 
 				new Action(() => dictionary.PutIfNotExists("Green", "Room")).Should()
@@ -203,7 +203,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(new Type[0]))
 			{
-				var dictionary = db.GetDictionary<object, string>("Stuff");
+				var dictionary = db.GetOrCreateDictionary<object, string>("Stuff");
 				new Action(() => dictionary.ContainsKey(null)).Should().Throw<ArgumentNullException>();
 			}
 		}
@@ -213,7 +213,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(new Type[0]))
 			{
-				var dictionary = db.GetDictionary<object, string>("Stuff");
+				var dictionary = db.GetOrCreateDictionary<object, string>("Stuff");
 				new Action(() => dictionary.Get(null)).Should().Throw<ArgumentNullException>();
 			}
 		}
@@ -223,7 +223,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(new Type[0]))
 			{
-				var dictionary = db.GetDictionary<object, string>("Stuff");
+				var dictionary = db.GetOrCreateDictionary<object, string>("Stuff");
 				new Action(() => dictionary.TryGet(null, out var unused)).Should().Throw<ArgumentNullException>();
 			}
 		}
@@ -233,7 +233,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(new Type[0]))
 			{
-				var dictionary = db.GetDictionary<object, string>("Stuff");
+				var dictionary = db.GetOrCreateDictionary<object, string>("Stuff");
 				new Action(() => dictionary.Remove(null)).Should().Throw<ArgumentNullException>();
 			}
 		}
@@ -243,7 +243,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(new Type[0]))
 			{
-				var dictionary = db.GetDictionary<object, string>("Stuff");
+				var dictionary = db.GetOrCreateDictionary<object, string>("Stuff");
 				new Action(() => dictionary.RemoveMany(null)).Should().Throw<ArgumentNullException>();
 			}
 		}
@@ -253,7 +253,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(new Type[0]))
 			{
-				var dictionary = db.GetDictionary<object, string>("Stuff");
+				var dictionary = db.GetOrCreateDictionary<object, string>("Stuff");
 				new Action(() => dictionary.RemoveMany(new object[]{1, null, 2})).Should().Throw<ArgumentException>();
 			}
 		}
@@ -263,7 +263,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(new Type[0]))
 			{
-				var dictionary = db.GetDictionary<object, string>("Stuff");
+				var dictionary = db.GetOrCreateDictionary<object, string>("Stuff");
 				new Action(() => dictionary.PutIfNotExists(null, "Stuff")).Should().Throw<ArgumentNullException>();
 				dictionary.Count().Should().Be(0);
 				dictionary.GetAllValues().Should().BeEmpty();
@@ -275,7 +275,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(new Type[0]))
 			{
-				var dictionary = db.GetDictionary<object, string>("Stuff");
+				var dictionary = db.GetOrCreateDictionary<object, string>("Stuff");
 				new Action(() => dictionary.Put(null, "Stuff")).Should().Throw<ArgumentNullException>();
 				dictionary.Count().Should().Be(0);
 				dictionary.GetAllValues().Should().BeEmpty();
@@ -287,7 +287,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(new Type[0]))
 			{
-				var dictionary = db.GetDictionary<object, string>("Stuff");
+				var dictionary = db.GetOrCreateDictionary<object, string>("Stuff");
 				new Action(() => dictionary.PutMany(null)).Should().Throw<ArgumentNullException>();
 				dictionary.Count().Should().Be(0);
 				dictionary.GetAllValues().Should().BeEmpty();
@@ -299,7 +299,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(new Type[0]))
 			{
-				var dictionary = db.GetDictionary<object, string>("Stuff");
+				var dictionary = db.GetOrCreateDictionary<object, string>("Stuff");
 
 				var values = new[]
 				{
@@ -316,7 +316,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(new Type[0]))
 			{
-				var dictionary = db.GetDictionary<object, string>("Stuff");
+				var dictionary = db.GetOrCreateDictionary<object, string>("Stuff");
 				new Action(() => dictionary.Move(null, "42")).Should().Throw<ArgumentNullException>();
 			}
 		}
@@ -326,7 +326,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(new Type[0]))
 			{
-				var dictionary = db.GetDictionary<object, string>("Stuff");
+				var dictionary = db.GetOrCreateDictionary<object, string>("Stuff");
 				new Action(() => dictionary.Move("42", null)).Should().Throw<ArgumentNullException>();
 			}
 		}
@@ -336,7 +336,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(new Type[0]))
 			{
-				var dictionary = db.GetDictionary<object, string>("Stuff");
+				var dictionary = db.GetOrCreateDictionary<object, string>("Stuff");
 				new Action(() => dictionary.Move(null, null)).Should().Throw<ArgumentNullException>();
 			}
 		}
@@ -346,7 +346,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(new Type[0]))
 			{
-				db.GetDictionary<int, string>("Stuff").ToString().Should().Be("Dictionary<System.Int32, System.String>(\"Stuff\")");
+				db.GetOrCreateDictionary<int, string>("Stuff").ToString().Should().Be("Dictionary<System.Int32, System.String>(\"Stuff\")");
 			}
 		}
 
@@ -355,7 +355,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetDictionary<string, object>("Values");
+				var values = db.GetOrCreateDictionary<string, object>("Values");
 				values.Put("b", 42);
 				values.Move("a", "b");
 				values.Get("b").Should().Be(42);
@@ -367,7 +367,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetDictionary<string, object>("Values");
+				var values = db.GetOrCreateDictionary<string, object>("Values");
 				values.Put("a", 42);
 				values.Get("a").Should().Be(42);
 
@@ -382,7 +382,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetDictionary<string, object>("Values");
+				var values = db.GetOrCreateDictionary<string, object>("Values");
 				values.Put("a", 42);
 				values.Put("b", 9001);
 				values.Get("a").Should().Be(42);
@@ -399,7 +399,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetDictionary<int, object>("Values");
+				var values = db.GetOrCreateDictionary<int, object>("Values");
 				values.Put(1, "Parkway Drive");
 				values.Put(2, "Wishing Well");
 
@@ -414,9 +414,9 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				db.GetDictionary<string, object>("SomeTable").Put("foo", "bar");
-				db.GetDictionary<string, object>("SomeTable").Get("foo").Should().Be("bar");
-				db.GetDictionary<string, object>("SomeTable").TryGet("foo", out var value).Should().BeTrue();
+				db.GetOrCreateDictionary<string, object>("SomeTable").Put("foo", "bar");
+				db.GetOrCreateDictionary<string, object>("SomeTable").Get("foo").Should().Be("bar");
+				db.GetOrCreateDictionary<string, object>("SomeTable").TryGet("foo", out var value).Should().BeTrue();
 				value.Should().Be("bar");
 			}
 		}
@@ -426,7 +426,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var collection = db.GetDictionary<int, string>("Stuff");
+				var collection = db.GetOrCreateDictionary<int, string>("Stuff");
 				collection.Put(1, "A");
 				collection.Put(2, "B");
 				collection.Put(3, "C");
@@ -440,7 +440,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var collection = db.GetDictionary<int, string>("Stuff");
+				var collection = db.GetOrCreateDictionary<int, string>("Stuff");
 				collection.Put(1, "A");
 				collection.Put(2, "B");
 				collection.GetManyValues(new[] {0, 1}).Should().Equal("A");
@@ -453,7 +453,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var collection = db.GetDictionary<int, string>("Stuff");
+				var collection = db.GetOrCreateDictionary<int, string>("Stuff");
 				collection.Put(1, "A");
 				collection.Put(2, "B");
 				collection.GetManyValues(new[] {0, 3, 5}).Should().BeEmpty();
@@ -465,8 +465,8 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				db.GetDictionary<string, string>("Names");
-				new Action(() => db.GetDictionary<int, string>("Names"))
+				db.GetOrCreateDictionary<string, string>("Names");
+				new Action(() => db.GetOrCreateDictionary<int, string>("Names"))
 					.Should().Throw<TypeMismatchException>()
 					.WithMessage("The Dictionary 'Names' uses keys of type 'System.String' which does not match the requested key type 'System.Int32': If your intent was to create a new Dictionary then you have to pick a new name!");
 			}
@@ -477,8 +477,8 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				db.GetDictionary<string, string>("Names");
-				new Action(() => db.GetDictionary<string, int>("Names"))
+				db.GetOrCreateDictionary<string, string>("Names");
+				new Action(() => db.GetOrCreateDictionary<string, int>("Names"))
 					.Should().Throw<TypeMismatchException>()
 					.WithMessage("The Dictionary 'Names' uses values of type 'System.String' which does not match the requested value type 'System.Int32': If your intent was to create a new Dictionary then you have to pick a new name!");
 			}
@@ -489,8 +489,8 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				db.GetDictionary<string, object>("SomeTable").TryGet("foo", out var unused).Should().BeFalse();
-				db.GetDictionary<string, object>("SomeTable").GetMany(new []{"foo", "bar"}).Should().BeEmpty();
+				db.GetOrCreateDictionary<string, object>("SomeTable").TryGet("foo", out var unused).Should().BeFalse();
+				db.GetOrCreateDictionary<string, object>("SomeTable").GetMany(new []{"foo", "bar"}).Should().BeEmpty();
 			}
 		}
 
@@ -503,7 +503,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 			{
 				using (var db = CreateDatabase(connection, typeof(CustomKey)))
 				{
-					var values = db.GetDictionary<int, object>("Foo");
+					var values = db.GetOrCreateDictionary<int, object>("Foo");
 					values.Put(key: 0, value: 42);
 					values.Put(key: 1, value: new CustomKey {A = 42});
 					values.Put(key: 2, value: "Hello, World!");
@@ -511,14 +511,14 @@ namespace IsabelDb.Test.Collections.Dictionary
 
 				using (var db = CreateDatabase(connection, typeof(CustomKey)))
 				{
-					var values = db.GetDictionary<int, object>("Foo");
+					var values = db.GetOrCreateDictionary<int, object>("Foo");
 					var allValues = values.GetAll();
 					allValues.Count().Should().Be(3, because: "because we're still able to resolve all types");
 				}
 
 				using (var db = CreateDatabase(connection, NoCustomTypes))
 				{
-					var values = db.GetDictionary<int, object>("Foo");
+					var values = db.GetOrCreateDictionary<int, object>("Foo");
 					var allValues = values.GetAll();
 					allValues.Count().Should().Be(2, because: "because we're no longer able to resolve CustomKey");
 					allValues.ElementAt(index: 0).Key.Should().Be(0);
@@ -538,12 +538,12 @@ namespace IsabelDb.Test.Collections.Dictionary
 			{
 				using (var db = CreateDatabase(connection, typeof(CustomKey)))
 				{
-					db.GetDictionary<CustomKey, string>("Pies");
+					db.GetOrCreateDictionary<CustomKey, string>("Pies");
 				}
 
 				using (var db = CreateDatabase(connection, NoCustomTypes))
 				{
-					new Action(() => db.GetDictionary<CustomKey, string>("Pies"))
+					new Action(() => db.GetOrCreateDictionary<CustomKey, string>("Pies"))
 						.Should().Throw<TypeCouldNotBeResolvedException>()
 						.WithMessage("A Dictionary named 'Pies' already exists but it's key type could not be resolved: If your intent is to re-use this existing collection, then you need to add 'IsabelDb.Test.Entities.CustomKey' to the list of supported types upon creating the database. If your intent is to create a new collection, then you need to pick a different name!");
 
@@ -566,20 +566,20 @@ namespace IsabelDb.Test.Collections.Dictionary
 			{
 				using (var db = CreateDatabase(connection, typeof(CustomKey)))
 				{
-					var dictionary = db.GetDictionary<int, CustomKey>("MoreKeys");
+					var dictionary = db.GetOrCreateDictionary<int, CustomKey>("MoreKeys");
 					dictionary.Put(key: 1, value: new CustomKey {C = 2});
 					dictionary.Put(key: 2, value: new CustomKey {D = -2});
 				}
 
 				using (var db = CreateDatabase(connection, typeof(CustomKey)))
 				{
-					var dictionary = db.GetDictionary<int, CustomKey>("MoreKeys");
+					var dictionary = db.GetOrCreateDictionary<int, CustomKey>("MoreKeys");
 					dictionary.GetAll().Count().Should().Be(2);
 				}
 
 				using (var db = CreateDatabase(connection, NoCustomTypes))
 				{
-					new Action(() => db.GetDictionary<int, CustomKey>("MoreKeys"))
+					new Action(() => db.GetOrCreateDictionary<int, CustomKey>("MoreKeys"))
 						.Should().Throw<TypeCouldNotBeResolvedException>()
 						.WithMessage("A Dictionary named 'MoreKeys' already exists but it's value type could not be resolved: If your intent is to re-use this existing collection, then you need to add 'IsabelDb.Test.Entities.CustomKey' to the list of supported types upon creating the database. If your intent is to create a new collection, then you need to pick a different name!");
 
@@ -600,7 +600,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 			{
 				using (var db = CreateDatabase(connection))
 				{
-					var collection = db.GetDictionary<int, string>("Stuff");
+					var collection = db.GetOrCreateDictionary<int, string>("Stuff");
 					collection.Put(1, "1");
 					collection.Put(2, "2");
 					collection.GetAllValues().Should().Equal("1", "2");
@@ -617,7 +617,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var collection = db.GetDictionary<int, string>("Stuff");
+				var collection = db.GetOrCreateDictionary<int, string>("Stuff");
 				collection.Put(1, "1");
 				collection.Put(2, "2");
 				collection.GetAllValues().Should().Equal("1", "2");
@@ -633,7 +633,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var collection = db.GetDictionary<int, string>("Stuff");
+				var collection = db.GetOrCreateDictionary<int, string>("Stuff");
 				collection.Put(1, "1");
 				collection.Put(2, "2");
 
@@ -649,7 +649,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var collection = db.GetDictionary<int, string>("Stuff");
+				var collection = db.GetOrCreateDictionary<int, string>("Stuff");
 				collection.GetAllKeys().Should().BeEmpty();
 			}
 		}
@@ -659,7 +659,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var collection = db.GetDictionary<int, string>("Stuff");
+				var collection = db.GetOrCreateDictionary<int, string>("Stuff");
 				collection.Put(1, "a");
 				collection.Put(2, "b");
 
@@ -672,6 +672,16 @@ namespace IsabelDb.Test.Collections.Dictionary
 		protected override IDictionary<int, string> GetCollection(IDatabase db, string name)
 		{
 			return db.GetDictionary<int, string>(name);
+		}
+
+		protected override IDictionary<int, string> CreateCollection(IDatabase db, string name)
+		{
+			return db.CreateDictionary<int, string>(name);
+		}
+
+		protected override IDictionary<int, string> GetOrCreateCollection(IDatabase db, string name)
+		{
+			return db.GetOrCreateDictionary<int, string>(name);
 		}
 
 		protected override void Put(IDictionary<int, string> collection, string value)

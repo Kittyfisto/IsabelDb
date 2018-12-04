@@ -19,7 +19,7 @@ namespace IsabelDb
 		IEnumerable<IReadOnlyCollection> Collections { get; }
 
 		/// <summary>
-		///      Returns a readonly bag which has previously been created with <see cref="IDatabase.GetBag{T}"/>.
+		///      Returns a readonly bag which has previously been created with <see cref="IDatabase.GetOrCreateBag{T}"/> or <see cref="IDatabase.CreateBag{T}"/>.
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
@@ -39,7 +39,7 @@ namespace IsabelDb
 		IReadOnlyHashSet<T> GetHashSet<T>(string name);
 
 		/// <summary>
-		///     Returns a readonly queue which has previously been created with <see cref="IDatabase.GetQueue{T}"/>.
+		///     Returns a readonly queue which has previously been created with <see cref="IDatabase.GetOrCreateQueue{T}"/> or <see cref="IDatabase.CreateQueue{T}"/>.
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <param name="name"></param>
@@ -52,7 +52,7 @@ namespace IsabelDb
 		IReadOnlyQueue<T> GetQueue<T>(string name);
 
 		/// <summary>
-		///     Returns a readonly dictionary which has previously been created with <see cref="IDatabase.GetDictionary{TKey,TValue}"/>.
+		///     Returns a readonly dictionary which has previously been created with <see cref="IDatabase.GetOrCreateDictionary{TKey,TValue}"/> or <see cref="IDatabase.CreateDictionary{TKey,TValue}"/>.
 		/// </summary>
 		/// <param name="name"></param>
 		/// <returns></returns>
@@ -64,7 +64,7 @@ namespace IsabelDb
 		IReadOnlyDictionary<TKey, TValue> GetDictionary<TKey, TValue>(string name);
 
 		/// <summary>
-		///     Returns a readonly multi value dictionary which has previously been created with <see cref="IDatabase.GetMultiValueDictionary{TKey,TValue}"/>.
+		///     Returns a readonly multi value dictionary which has previously been created with <see cref="IDatabase.GetOrCreateMultiValueDictionary{TKey,TValue}"/> or <see cref="IDatabase.CreateMultiValueDictionary{TKey,TValue}"/>.
 		/// </summary>
 		/// <typeparam name="TKey"></typeparam>
 		/// <typeparam name="TValue"></typeparam>
@@ -78,7 +78,7 @@ namespace IsabelDb
 		IReadOnlyMultiValueDictionary<TKey, TValue> GetMultiValueDictionary<TKey, TValue>(string name);
 
 		/// <summary>
-		///     Returns a readonly interval collection which has previously been created with <see cref="IDatabase.GetIntervalCollection{TKey,TValue}"/>.
+		///     Returns a readonly interval collection which has previously been created with <see cref="IDatabase.GetOrCreateIntervalCollection{TKey,TValue}"/> or <see cref="IDatabase.CreateIntervalCollection{TKey,TValue}"/>.
 		/// </summary>
 		/// <typeparam name="TKey"></typeparam>
 		/// <typeparam name="TValue"></typeparam>
@@ -93,7 +93,7 @@ namespace IsabelDb
 			where TKey : IComparable<TKey>;
 
 		/// <summary>
-		///     Returns a readonly interval collection which has previously been created with <see cref="IDatabase.GetOrderedCollection{TKey,TValue}"/>.
+		///     Returns a readonly ordered collection which has previously been created with <see cref="IDatabase.GetOrCreateOrderedCollection{TKey,TValue}"/> or <see cref="IDatabase.CreateOrderedCollection{TKey,TValue}"/>.
 		/// </summary>
 		/// <typeparam name="TKey"></typeparam>
 		/// <typeparam name="TValue"></typeparam>
@@ -108,7 +108,7 @@ namespace IsabelDb
 			where TKey : IComparable<TKey>;
 
 		/// <summary>
-		///     Returns a readonly 2d point collection which has previously been created with <see cref="IDatabase.GetPoint2DCollection{T}"/>.
+		///     Returns a readonly 2d point collection which has previously been created with <see cref="IDatabase.GetOrCreatePoint2DCollection{T}"/> or <see cref="IDatabase.CreatePoint2DCollection{T}"/>.
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <param name="name"></param>

@@ -19,7 +19,7 @@ namespace IsabelDb.Test.Collections.IntervalCollection
 		
 		protected override ICollection<T> GetCollection<T>(IDatabase db, string name)
 		{
-			return db.GetIntervalCollection<int, T>(name);
+			return db.GetOrCreateIntervalCollection<int, T>(name);
 		}
 
 		protected override void Put<T>(ICollection<T> collection, T value)

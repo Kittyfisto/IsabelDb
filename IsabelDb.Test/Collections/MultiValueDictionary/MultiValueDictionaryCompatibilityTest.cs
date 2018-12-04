@@ -19,7 +19,7 @@ namespace IsabelDb.Test.Collections.MultiValueDictionary
 
 		protected override ICollection<T> GetCollection<T>(IDatabase db, string name)
 		{
-			return db.GetMultiValueDictionary<int, T>(name);
+			return db.GetOrCreateMultiValueDictionary<int, T>(name);
 		}
 
 		protected override void Put<T>(ICollection<T> collection, T value)

@@ -12,7 +12,7 @@ namespace IsabelDb.Test.Collections.HashSet
 		{
 			using (var db = Database.CreateInMemory(new[] {typeof(Version)}))
 			{
-				var hashSet = db.GetHashSet<Version>("dwadw");
+				var hashSet = db.GetOrCreateHashSet<Version>("dwadw");
 				hashSet.Add(new Version(1, 2, 3, 4)).Should().BeTrue();
 				hashSet.Add(new Version(1, 2, 3, 4)).Should().BeFalse();
 
@@ -25,7 +25,7 @@ namespace IsabelDb.Test.Collections.HashSet
 		{
 			using (var db = Database.CreateInMemory(new[] {typeof(Version)}))
 			{
-				var hashSet = db.GetHashSet<Version>("dwadw");
+				var hashSet = db.GetOrCreateHashSet<Version>("dwadw");
 				hashSet.Add(new Version(45, 0)).Should().BeTrue();
 				hashSet.Add(new Version(45, 33)).Should().BeTrue();
 

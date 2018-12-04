@@ -71,12 +71,12 @@ namespace IsabelDb
 
 		public IEnumerable<ICollection> Collections => _collectionsByName.Values;
 
-		public IIntervalCollection<TKey, TValue> GetIntervalCollection<TKey, TValue>(string name)
+		public IIntervalCollection<TKey, TValue> GetIntervalCollection<TKey, TValue>(string name, Mode mode)
 			where TKey : IComparable<TKey>
 		{
 			if (!_collectionsByName.TryGetValue(name, out var collection))
 			{
-				ThrowIfReadOnly(name);
+				ThrowIfCannotCreate(name, mode);
 				ThrowIfNotRegistered<TKey>();
 				ThrowIfNotRegistered<TValue>();
 
@@ -84,6 +84,10 @@ namespace IsabelDb
 				var tableName = AddTable(name, CollectionType.IntervalCollection, typeof(TKey), typeof(TValue));
 				collection = CreateIntervalCollection<TKey, TValue>(name, tableName);
 				AddCollection(name, collection);
+			}
+			else
+			{
+				ThrowIfMustCreate(mode);
 			}
 
 			EnsureTypeSafety(collection, CollectionType.IntervalCollection, typeof(TKey), typeof(TValue));
@@ -97,17 +101,21 @@ namespace IsabelDb
 			return target;
 		}
 
-		public IDictionary<TKey, TValue> GetDictionary<TKey, TValue>(string name)
+		public IDictionary<TKey, TValue> GetDictionary<TKey, TValue>(string name, Mode mode)
 		{
 			if (!_collectionsByName.TryGetValue(name, out var collection))
 			{
-				ThrowIfReadOnly(name);
+				ThrowIfCannotCreate(name, mode);
 				ThrowIfNotRegistered<TKey>();
 				ThrowIfNotRegistered<TValue>();
 
 				var tableName = AddTable(name, CollectionType.Dictionary, typeof(TKey), typeof(TValue));
 				collection = CreateDictionary<TKey, TValue>(name, tableName);
 				AddCollection(name, collection);
+			}
+			else
+			{
+				ThrowIfMustCreate(mode);
 			}
 
 			EnsureTypeSafety(collection, CollectionType.Dictionary, typeof(TKey), typeof(TValue));
@@ -121,17 +129,21 @@ namespace IsabelDb
 			return target;
 		}
 
-		public IMultiValueDictionary<TKey, TValue> GetMultiValueDictionary<TKey, TValue>(string name)
+		public IMultiValueDictionary<TKey, TValue> GetMultiValueDictionary<TKey, TValue>(string name, Mode mode)
 		{
 			if (!_collectionsByName.TryGetValue(name, out var collection))
 			{
-				ThrowIfReadOnly(name);
+				ThrowIfCannotCreate(name, mode);
 				ThrowIfNotRegistered<TKey>();
 				ThrowIfNotRegistered<TValue>();
 
 				var tableName = AddTable(name, CollectionType.MultiValueDictionary, typeof(TKey), typeof(TValue));
 				collection = CreateMultiValueDictionary<TKey, TValue>(name, tableName);
 				AddCollection(name, collection);
+			}
+			else
+			{
+				ThrowIfMustCreate(mode);
 			}
 
 			EnsureTypeSafety(collection, CollectionType.MultiValueDictionary, typeof(TKey), typeof(TValue));
@@ -145,11 +157,11 @@ namespace IsabelDb
 			return target;
 		}
 
-		public IOrderedCollection<TKey, TValue> GetOrderedCollection<TKey, TValue>(string name) where TKey : IComparable<TKey>
+		public IOrderedCollection<TKey, TValue> GetOrderedCollection<TKey, TValue>(string name, Mode mode) where TKey : IComparable<TKey>
 		{
 			if (!_collectionsByName.TryGetValue(name, out var collection))
 			{
-				ThrowIfReadOnly(name);
+				ThrowIfCannotCreate(name, mode);
 				ThrowIfNotRegistered<TKey>();
 				ThrowIfNotRegistered<TValue>();
 
@@ -158,6 +170,10 @@ namespace IsabelDb
 				var tableName = AddTable(name, CollectionType.OrderedCollection, typeof(TKey), typeof(TValue));
 				collection = CreateOrderedCollection<TKey, TValue>(name, tableName);
 				AddCollection(name, collection);
+			}
+			else
+			{
+				ThrowIfMustCreate(mode);
 			}
 
 			EnsureTypeSafety(collection, CollectionType.OrderedCollection, typeof(TKey), typeof(TValue));
@@ -171,16 +187,20 @@ namespace IsabelDb
 			return target;
 		}
 
-		public IBag<T> GetBag<T>(string name)
+		public IBag<T> GetBag<T>(string name, Mode mode)
 		{
 			if (!_collectionsByName.TryGetValue(name, out var collection))
 			{
-				ThrowIfReadOnly(name);
+				ThrowIfCannotCreate(name, mode);
 				ThrowIfNotRegistered<T>();
 
 				var tableName = AddTable(name, CollectionType.Bag, keyType: null, valueType: typeof(T));
 				collection = CreateBag<T>(name, tableName);
 				AddCollection(name, collection);
+			}
+			else
+			{
+				ThrowIfMustCreate(mode);
 			}
 
 			EnsureTypeSafety(collection, CollectionType.Bag, null, typeof(T));
@@ -194,16 +214,20 @@ namespace IsabelDb
 			return target;
 		}
 
-		public IHashSet<T> GetHashSet<T>(string name)
+		public IHashSet<T> GetHashSet<T>(string name, Mode mode)
 		{
 			if (!_collectionsByName.TryGetValue(name, out var collection))
 			{
-				ThrowIfReadOnly(name);
+				ThrowIfCannotCreate(name, mode);
 				ThrowIfNotRegistered<T>();
 
 				var tableName = AddTable(name, CollectionType.HashSet, keyType: null, valueType: typeof(T));
 				collection = CreateHashSet<T>(name, tableName);
 				AddCollection(name, collection);
+			}
+			else
+			{
+				ThrowIfMustCreate(mode);
 			}
 
 			EnsureTypeSafety(collection, CollectionType.HashSet, null, typeof(T));
@@ -217,16 +241,20 @@ namespace IsabelDb
 			return target;
 		}
 
-		public IQueue<T> GetQueue<T>(string name)
+		public IQueue<T> GetQueue<T>(string name, Mode mode)
 		{
 			if (!_collectionsByName.TryGetValue(name, out var collection))
 			{
-				ThrowIfReadOnly(name);
+				ThrowIfCannotCreate(name, mode);
 				ThrowIfNotRegistered<T>();
 
 				var tableName = AddTable(name, CollectionType.Queue, keyType: null, valueType: typeof(T));
 				collection = CreateQueue<T>(name, tableName);
 				AddCollection(name, collection);
+			}
+			else
+			{
+				ThrowIfMustCreate(mode);
 			}
 
 			EnsureTypeSafety(collection, CollectionType.Queue, null, typeof(T));
@@ -240,16 +268,20 @@ namespace IsabelDb
 			return target;
 		}
 
-		public IPoint2DCollection<T> GetPoint2DCollection<T>(string name)
+		public IPoint2DCollection<T> GetPoint2DCollection<T>(string name, Mode mode)
 		{
 			if (!_collectionsByName.TryGetValue(name, out var collection))
 			{
-				ThrowIfReadOnly(name);
+				ThrowIfCannotCreate(name, mode);
 				ThrowIfNotRegistered<T>();
 
 				var tableName = AddTable(name, CollectionType.Point2DCollection, null, typeof(T));
 				collection = CreatePoint2DCollection<T>(name, tableName);
 				AddCollection(name, collection);
+			}
+			else
+			{
+				ThrowIfMustCreate(mode);
 			}
 
 			EnsureTypeSafety(collection, CollectionType.Point2DCollection, null, typeof(T));
@@ -320,10 +352,16 @@ namespace IsabelDb
 			_collectionsByName.Add(name, collection);
 		}
 
-		private void ThrowIfReadOnly(string name)
+		private void ThrowIfCannotCreate(string name, Mode mode)
 		{
-			if (_isReadOnly)
+			if (_isReadOnly || !mode.HasFlag(Mode.Create))
 				throw new NoSuchCollectionException(string.Format("Unable to find a collection named '{0}'", name));
+		}
+
+		private void ThrowIfMustCreate(Mode mode)
+		{
+			if (mode.HasFlag(Mode.Create) && !mode.HasFlag(Mode.Get))
+				throw new CollectionNameAlreadyInUseException();
 		}
 
 		private void ThrowIfNotRegistered<T>()

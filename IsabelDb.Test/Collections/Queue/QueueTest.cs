@@ -17,7 +17,7 @@ namespace IsabelDb.Test.Collections.Queue
 			{
 				using (var db = CreateDatabase(connection))
 				{
-					db.GetQueue<string>("Stuff").ToString().Should().Be("Queue<System.String>(\"Stuff\")");
+					db.GetOrCreateQueue<string>("Stuff").ToString().Should().Be("Queue<System.String>(\"Stuff\")");
 				}
 			}
 		}
@@ -27,7 +27,7 @@ namespace IsabelDb.Test.Collections.Queue
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var bag = database.GetQueue<string>("Stuff");
+				var bag = database.GetOrCreateQueue<string>("Stuff");
 				database.Remove(bag);
 
 				new Action(() => bag.Enqueue("dwadwad"))
@@ -42,7 +42,7 @@ namespace IsabelDb.Test.Collections.Queue
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var bag = database.GetQueue<string>("Stuff");
+				var bag = database.GetOrCreateQueue<string>("Stuff");
 				database.Remove(bag);
 
 				new Action(() => bag.EnqueueMany(new[]{"a", "b"}))
@@ -57,7 +57,7 @@ namespace IsabelDb.Test.Collections.Queue
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var bag = database.GetQueue<string>("Stuff");
+				var bag = database.GetOrCreateQueue<string>("Stuff");
 				database.Remove(bag);
 
 				new Action(() => bag.TryDequeue(out var unused))
@@ -72,7 +72,7 @@ namespace IsabelDb.Test.Collections.Queue
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var bag = database.GetQueue<string>("Stuff");
+				var bag = database.GetOrCreateQueue<string>("Stuff");
 				database.Remove(bag);
 
 				new Action(() => bag.TryPeek(out var unused))
@@ -88,7 +88,7 @@ namespace IsabelDb.Test.Collections.Queue
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection, typeof(SomeStruct)))
 			{
-				var collection = db.GetQueue<SomeStruct>("Messages");
+				var collection = db.GetOrCreateQueue<SomeStruct>("Messages");
 				collection.Enqueue(new SomeStruct {Value = "Hello"});
 				collection.Count().Should().Be(1);
 
@@ -114,7 +114,7 @@ namespace IsabelDb.Test.Collections.Queue
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection, typeof(SomeStruct)))
 			{
-				var collection = db.GetQueue<SomeStruct>("Messages");
+				var collection = db.GetOrCreateQueue<SomeStruct>("Messages");
 				collection.Enqueue(new SomeStruct {Value = "Hello"});
 				collection.Enqueue(new SomeStruct {Value = "World"});
 
@@ -134,7 +134,7 @@ namespace IsabelDb.Test.Collections.Queue
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection, typeof(SomeStruct)))
 			{
-				var collection = db.GetQueue<SomeStruct>("Messages");
+				var collection = db.GetOrCreateQueue<SomeStruct>("Messages");
 				collection.Enqueue(new SomeStruct {Value = "Hello"});
 				collection.Enqueue(new SomeStruct {Value = "World"});
 
@@ -157,7 +157,7 @@ namespace IsabelDb.Test.Collections.Queue
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection, typeof(Message)))
 			{
-				var collection = db.GetQueue<Message>("Messages");
+				var collection = db.GetOrCreateQueue<Message>("Messages");
 				collection.TryPeek(out var message).Should().BeFalse();
 				message.Should().BeNull();
 
@@ -172,7 +172,7 @@ namespace IsabelDb.Test.Collections.Queue
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection, typeof(Dog)))
 			{
-				var collection = db.GetQueue<Dog>("Dogs");
+				var collection = db.GetOrCreateQueue<Dog>("Dogs");
 				const int count = 4096;
 
 				var dogs = new Queue<Dog>();
@@ -206,6 +206,16 @@ namespace IsabelDb.Test.Collections.Queue
 		protected override IQueue<string> GetCollection(IDatabase db, string name)
 		{
 			return db.GetQueue<string>(name);
+		}
+
+		protected override IQueue<string> CreateCollection(IDatabase db, string name)
+		{
+			return db.CreateQueue<string>(name);
+		}
+
+		protected override IQueue<string> GetOrCreateCollection(IDatabase db, string name)
+		{
+			return db.GetOrCreateQueue<string>(name);
 		}
 
 		protected override void Put(IQueue<string> collection, string value)

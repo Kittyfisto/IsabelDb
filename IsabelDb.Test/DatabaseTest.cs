@@ -136,8 +136,8 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				db.GetDictionary<int, int>("Stuff");
-				new Action(() => db.GetBag<int>("Stuff"))
+				db.GetOrCreateDictionary<int, int>("Stuff");
+				new Action(() => db.GetOrCreateBag<int>("Stuff"))
 					.Should().Throw<WrongCollectionTypeException>()
 					.WithMessage("The collection 'Stuff' is a Dictionary and cannot be treated as a Bag");
 			}
@@ -148,8 +148,8 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				db.GetDictionary<int, int>("Stuff");
-				new Action(() => db.GetQueue<int>("Stuff"))
+				db.GetOrCreateDictionary<int, int>("Stuff");
+				new Action(() => db.GetOrCreateQueue<int>("Stuff"))
 					.Should().Throw<WrongCollectionTypeException>()
 					.WithMessage("The collection 'Stuff' is a Dictionary and cannot be treated as a Queue");
 			}
@@ -160,8 +160,8 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				db.GetBag<int>("Stuff");
-				new Action(() => db.GetDictionary<int, int>("Stuff"))
+				db.GetOrCreateBag<int>("Stuff");
+				new Action(() => db.GetOrCreateDictionary<int, int>("Stuff"))
 					.Should().Throw<WrongCollectionTypeException>()
 					.WithMessage("The collection 'Stuff' is a Bag and cannot be treated as a Dictionary");
 			}
@@ -172,8 +172,8 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				db.GetDictionary<int, int>("Stuff");
-				new Action(() => db.GetMultiValueDictionary<int, int>("Stuff"))
+				db.GetOrCreateDictionary<int, int>("Stuff");
+				new Action(() => db.GetOrCreateMultiValueDictionary<int, int>("Stuff"))
 					.Should().Throw<WrongCollectionTypeException>()
 					.WithMessage("The collection 'Stuff' is a Dictionary and cannot be treated as a MultiValueDictionary");
 			}
@@ -184,8 +184,8 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				db.GetDictionary<int, int>("Stuff");
-				new Action(() => db.GetOrderedCollection<int, int>("Stuff"))
+				db.GetOrCreateDictionary<int, int>("Stuff");
+				new Action(() => db.GetOrCreateOrderedCollection<int, int>("Stuff"))
 					.Should().Throw<WrongCollectionTypeException>()
 					.WithMessage("The collection 'Stuff' is a Dictionary and cannot be treated as a OrderedCollection");
 			}
@@ -196,8 +196,8 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				db.GetDictionary<int, int>("Stuff");
-				new Action(() => db.GetIntervalCollection<int, int>("Stuff"))
+				db.GetOrCreateDictionary<int, int>("Stuff");
+				new Action(() => db.GetOrCreateIntervalCollection<int, int>("Stuff"))
 					.Should().Throw<WrongCollectionTypeException>()
 					.WithMessage("The collection 'Stuff' is a Dictionary and cannot be treated as a IntervalCollection");
 			}
@@ -208,8 +208,8 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				db.GetDictionary<int, int>("Stuff");
-				new Action(() => db.GetPoint2DCollection<int>("Stuff"))
+				db.GetOrCreateDictionary<int, int>("Stuff");
+				new Action(() => db.GetOrCreatePoint2DCollection<int>("Stuff"))
 					.Should().Throw<WrongCollectionTypeException>()
 					.WithMessage("The collection 'Stuff' is a Dictionary and cannot be treated as a Point2DCollection");
 			}
@@ -221,7 +221,7 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				new Action(() => db.GetBag<CustomKey>("SomeTable"))
+				new Action(() => db.GetOrCreateBag<CustomKey>("SomeTable"))
 					.Should().Throw<TypeNotRegisteredException>()
 					.WithMessage("The type 'IsabelDb.Test.Entities.CustomKey' has not been registered when the database was created and thus may not be used as the value type in a collection");
 			}
@@ -233,7 +233,7 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				new Action(() => db.GetQueue<CustomKey>("SomeTable"))
+				new Action(() => db.GetOrCreateQueue<CustomKey>("SomeTable"))
 					.Should().Throw<TypeNotRegisteredException>()
 					.WithMessage("The type 'IsabelDb.Test.Entities.CustomKey' has not been registered when the database was created and thus may not be used as the value type in a collection");
 			}
@@ -245,7 +245,7 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				new Action(() => db.GetPoint2DCollection<Message>("SomeTable"))
+				new Action(() => db.GetOrCreatePoint2DCollection<Message>("SomeTable"))
 					.Should().Throw<TypeNotRegisteredException>()
 					.WithMessage("The type 'IsabelDb.Test.Entities.Message' has not been registered when the database was created and thus may not be used as the value type in a collection");
 			}
@@ -257,11 +257,11 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				new Action(() => db.GetDictionary<CustomKey, string>("SomeTable"))
+				new Action(() => db.GetOrCreateDictionary<CustomKey, string>("SomeTable"))
 					.Should().Throw<TypeNotRegisteredException>()
 					.WithMessage("The type 'IsabelDb.Test.Entities.CustomKey' has not been registered when the database was created and thus may not be used as the value type in a collection");
 
-				new Action(() => db.GetDictionary<string, Point>("SomeTable"))
+				new Action(() => db.GetOrCreateDictionary<string, Point>("SomeTable"))
 					.Should().Throw<TypeNotRegisteredException>()
 					.WithMessage("The type 'IsabelDb.Test.Entities.Point' has not been registered when the database was created and thus may not be used as the value type in a collection");
 			}
@@ -273,11 +273,11 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				new Action(() => db.GetMultiValueDictionary<CustomKey, string>("SomeTable"))
+				new Action(() => db.GetOrCreateMultiValueDictionary<CustomKey, string>("SomeTable"))
 					.Should().Throw<TypeNotRegisteredException>()
 					.WithMessage("The type 'IsabelDb.Test.Entities.CustomKey' has not been registered when the database was created and thus may not be used as the value type in a collection");
 
-				new Action(() => db.GetMultiValueDictionary<string, Point>("SomeTable"))
+				new Action(() => db.GetOrCreateMultiValueDictionary<string, Point>("SomeTable"))
 					.Should().Throw<TypeNotRegisteredException>()
 					.WithMessage("The type 'IsabelDb.Test.Entities.Point' has not been registered when the database was created and thus may not be used as the value type in a collection");
 			}
@@ -289,11 +289,11 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				new Action(() => db.GetOrderedCollection<MySortableKey, string>("SomeTable"))
+				new Action(() => db.GetOrCreateOrderedCollection<MySortableKey, string>("SomeTable"))
 					.Should().Throw<TypeNotRegisteredException>()
 					.WithMessage("The type 'IsabelDb.Test.Entities.MySortableKey' has not been registered when the database was created and thus may not be used as the value type in a collection");
 
-				new Action(() => db.GetDictionary<string, Point>("SomeTable"))
+				new Action(() => db.GetOrCreateDictionary<string, Point>("SomeTable"))
 					.Should().Throw<TypeNotRegisteredException>()
 					.WithMessage("The type 'IsabelDb.Test.Entities.Point' has not been registered when the database was created and thus may not be used as the value type in a collection");
 			}
@@ -305,11 +305,11 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				new Action(() => db.GetIntervalCollection<MySortableKey, string>("SomeTable"))
+				new Action(() => db.GetOrCreateIntervalCollection<MySortableKey, string>("SomeTable"))
 					.Should().Throw<TypeNotRegisteredException>()
 					.WithMessage("The type 'IsabelDb.Test.Entities.MySortableKey' has not been registered when the database was created and thus may not be used as the value type in a collection");
 
-				new Action(() => db.GetIntervalCollection<string, Point>("SomeTable"))
+				new Action(() => db.GetOrCreateIntervalCollection<string, Point>("SomeTable"))
 					.Should().Throw<TypeNotRegisteredException>()
 					.WithMessage("The type 'IsabelDb.Test.Entities.Point' has not been registered when the database was created and thus may not be used as the value type in a collection");
 			}
@@ -321,7 +321,7 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetDictionary<string, object>("SomeTable");
+				var values = db.GetOrCreateDictionary<string, object>("SomeTable");
 				new Action(() => values.Put("Foo", new CustomKey()))
 					.Should().Throw<ArgumentException>();
 			}
@@ -333,7 +333,7 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetDictionary<object, string>("SomeTable");
+				var values = db.GetOrCreateDictionary<object, string>("SomeTable");
 				new Action(() => values.Put(new CustomKey(), "Foo"))
 					.Should().Throw<ArgumentException>();
 			}
@@ -345,7 +345,7 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetBag<object>("SomeTable");
+				var values = db.GetOrCreateBag<object>("SomeTable");
 				new Action(() => values.Put(new CustomKey()))
 					.Should().Throw<ArgumentException>();
 			}
@@ -356,7 +356,7 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var store = db.GetDictionary<string, object>("SomeTable");
+				var store = db.GetOrCreateDictionary<string, object>("SomeTable");
 				store.GetAll().Should().BeEmpty();
 			}
 		}
@@ -476,7 +476,7 @@ namespace IsabelDb.Test
 			{
 				var value1 = new byte[]{0};
 				var value2 = new byte[]{0, 255, 128, 42, 1};
-				var store = db.GetDictionary<string, object>("ObjectTable");
+				var store = db.GetOrCreateDictionary<string, object>("ObjectTable");
 
 				store.Put("foo", value1);
 				store.Put("bar", value2);
@@ -500,7 +500,7 @@ namespace IsabelDb.Test
 			{
 				var value1 = new byte[]{0};
 				var value2 = new byte[]{0, 255, 128, 42, 1};
-				var store = db.GetDictionary<string, byte[]>("ObjectTable");
+				var store = db.GetOrCreateDictionary<string, byte[]>("ObjectTable");
 
 				store.Put("foo", value1);
 				store.Put("bar", value2);
@@ -546,7 +546,7 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.CreateInMemory(new []{typeof(Point)}))
 			{
-				var store = db.GetDictionary<int, Point>("Points");
+				var store = db.GetOrCreateDictionary<int, Point>("Points");
 				var p0 = new Point {X = 0, Y = 0};
 				var p1 = new Point {X = 1, Y = 1};
 				var p2 = new Point {X = -3600, Y = 9000};
@@ -569,7 +569,7 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.CreateInMemory(new[] {typeof(SomeStruct)}))
 			{
-				var values = db.GetDictionary<int, SomeStruct>("Values");
+				var values = db.GetOrCreateDictionary<int, SomeStruct>("Values");
 				values.Put(42, new SomeStruct{Value = "Answer to the Ultimate Question of Life, the Universe, and Everything"});
 				values.Get(42).Value.Should()
 				      .Be("Answer to the Ultimate Question of Life, the Universe, and Everything");
@@ -582,7 +582,7 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.CreateInMemory(new[] {typeof(Address), typeof(Person)}))
 			{
-				var values = db.GetDictionary<int, string>("Values");
+				var values = db.GetOrCreateDictionary<int, string>("Values");
 				using (var transaction = db.BeginTransaction())
 				{
 					values.Put(1, "stuff");
@@ -599,7 +599,7 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.CreateInMemory(new[] {typeof(Address), typeof(Person)}))
 			{
-				var values = db.GetDictionary<int, string>("Values");
+				var values = db.GetOrCreateDictionary<int, string>("Values");
 				using (var transaction = db.BeginTransaction())
 				{
 					values.Put(1, "a");
@@ -631,7 +631,7 @@ namespace IsabelDb.Test
 					Name = "Steven"
 				};
 
-				var table = db.GetDictionary<string, object>("Stuff");
+				var table = db.GetOrCreateDictionary<string, object>("Stuff");
 				table.PutMany(new[]
 				{
 					new KeyValuePair<string, object>("foo", address),
@@ -651,10 +651,10 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var customers = db.GetDictionary<string, object>("Customers");
+				var customers = db.GetOrCreateDictionary<string, object>("Customers");
 				customers.Put("1", "Simon");
 
-				var people = db.GetDictionary<string, object>("People");
+				var people = db.GetOrCreateDictionary<string, object>("People");
 				people.Put("1", "Kitty");
 
 				customers.Get("1").Should().Be("Simon");
@@ -667,7 +667,7 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetDictionary<string, object>("Foo");
+				var values = db.GetOrCreateDictionary<string, object>("Foo");
 				new Action(() => values.Put(key: null, value: 42)).Should().Throw<ArgumentNullException>();
 			}
 		}
@@ -678,10 +678,10 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var customers = db.GetDictionary<string, object>("Customers");
+				var customers = db.GetOrCreateDictionary<string, object>("Customers");
 				customers.Put("1", "Simon");
 
-				var people = db.GetDictionary<string, object>("People");
+				var people = db.GetOrCreateDictionary<string, object>("People");
 				people.Put("1", "Kitty");
 
 				customers.Remove("1");
@@ -694,7 +694,7 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				db.GetDictionary<string, object>("Customers");
+				db.GetOrCreateDictionary<string, object>("Customers");
 				db.Collections.Should().HaveCount(1);
 
 				db.Remove("Customers");
@@ -707,7 +707,7 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var collection = db.GetDictionary<string, object>("Customers");
+				var collection = db.GetOrCreateDictionary<string, object>("Customers");
 				db.Collections.Should().Equal(collection);
 
 				db.Remove("Some other collection");
@@ -720,7 +720,7 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var collection = db.GetDictionary<string, object>("Customers");
+				var collection = db.GetOrCreateDictionary<string, object>("Customers");
 				db.Collections.Should().Equal(collection);
 
 				db.Remove((string)null);
@@ -733,7 +733,7 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var store = db.GetDictionary<string, object>("SomeTable");
+				var store = db.GetOrCreateDictionary<string, object>("SomeTable");
 				store.Put("42", "Green Room");
 
 				store.Remove("43").Should().BeFalse();
@@ -747,7 +747,7 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetDictionary<string, object>("Foo");
+				var values = db.GetOrCreateDictionary<string, object>("Foo");
 				new Action(() => values.Remove(key: null)).Should().Throw<ArgumentNullException>();
 			}
 		}
@@ -758,7 +758,7 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var store = db.GetDictionary<string, object>("SomeTable");
+				var store = db.GetOrCreateDictionary<string, object>("SomeTable");
 				store.Put("a", value: 1);
 				store.Put("b", value: 2);
 				store.Remove("a").Should().BeTrue();
@@ -773,7 +773,7 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var store = db.GetDictionary<string, object>("SomeTable");
+				var store = db.GetOrCreateDictionary<string, object>("SomeTable");
 				store.Put("foo", value: 42);
 				store.Get("foo").Should().Be(42);
 
@@ -793,7 +793,7 @@ namespace IsabelDb.Test
 			};
 			using (var db = Database.CreateInMemory(types))
 			{
-				var messages = db.GetDictionary<int, Message>("Messages");
+				var messages = db.GetOrCreateDictionary<int, Message>("Messages");
 				messages.Put(1, new Message
 				{
 					Value = new Dog
@@ -810,7 +810,7 @@ namespace IsabelDb.Test
 
 		private static void PutAndGetObjectTable<T>(IDatabase db, T value1, T value2)
 		{
-			var store = db.GetDictionary<string, object>("ObjectTable");
+			var store = db.GetOrCreateDictionary<string, object>("ObjectTable");
 
 			store.Put("foo", value1);
 			store.Put("bar", value2);
@@ -828,7 +828,7 @@ namespace IsabelDb.Test
 
 		private static void PutAndGetValueTable<T>(IDatabase db, T value1, T value2)
 		{
-			var store = db.GetDictionary<string, T>("ValueTable");
+			var store = db.GetOrCreateDictionary<string, T>("ValueTable");
 
 			store.Put("foo", value1);
 			store.Put("bar", value2);

@@ -21,6 +21,16 @@ namespace IsabelDb.Test.Collections.IntervalCollection
 			return db.GetIntervalCollection<int, string>(name);
 		}
 
+		protected override IIntervalCollection<int, string> CreateCollection(IDatabase db, string name)
+		{
+			return db.CreateIntervalCollection<int, string>(name);
+		}
+
+		protected override IIntervalCollection<int, string> GetOrCreateCollection(IDatabase db, string name)
+		{
+			return db.GetOrCreateIntervalCollection<int, string>(name);
+		}
+
 		protected override void Put(IIntervalCollection<int, string> collection, string value)
 		{
 			collection.Put(Interval.Create(Interlocked.Increment(ref _lastId)), value);
@@ -49,7 +59,7 @@ namespace IsabelDb.Test.Collections.IntervalCollection
 			{
 				using (var db = CreateDatabase(connection))
 				{
-					db.GetIntervalCollection<int, string>("Stuff").ToString().Should().Be("IntervalCollection<System.Int32, System.String>(\"Stuff\")");
+					db.GetOrCreateIntervalCollection<int, string>("Stuff").ToString().Should().Be("IntervalCollection<System.Int32, System.String>(\"Stuff\")");
 				}
 			}
 		}
@@ -59,7 +69,7 @@ namespace IsabelDb.Test.Collections.IntervalCollection
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetIntervalCollection<int, string>("Stuff");
+				var values = database.GetOrCreateIntervalCollection<int, string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.Put(new Interval<int>(1, 2), "stuff"))
@@ -74,7 +84,7 @@ namespace IsabelDb.Test.Collections.IntervalCollection
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetIntervalCollection<int, string>("Stuff");
+				var values = database.GetOrCreateIntervalCollection<int, string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.PutMany(new KeyValuePair<Interval<int>, string>[1]))
@@ -89,7 +99,7 @@ namespace IsabelDb.Test.Collections.IntervalCollection
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetIntervalCollection<int, string>("Stuff");
+				var values = database.GetOrCreateIntervalCollection<int, string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.Remove(42))
@@ -104,7 +114,7 @@ namespace IsabelDb.Test.Collections.IntervalCollection
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetIntervalCollection<int, string>("Stuff");
+				var values = database.GetOrCreateIntervalCollection<int, string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.Remove(new Interval<int>(1, 2)))
@@ -119,7 +129,7 @@ namespace IsabelDb.Test.Collections.IntervalCollection
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetIntervalCollection<int, string>("Stuff");
+				var values = database.GetOrCreateIntervalCollection<int, string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.GetAll())
@@ -134,7 +144,7 @@ namespace IsabelDb.Test.Collections.IntervalCollection
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetIntervalCollection<int, string>("Stuff");
+				var values = database.GetOrCreateIntervalCollection<int, string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.GetValues(1))
@@ -149,7 +159,7 @@ namespace IsabelDb.Test.Collections.IntervalCollection
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetIntervalCollection<int, string>("Stuff");
+				var values = database.GetOrCreateIntervalCollection<int, string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.GetValues(1, 42))
@@ -164,7 +174,7 @@ namespace IsabelDb.Test.Collections.IntervalCollection
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var values = database.GetIntervalCollection<int, string>("Stuff");
+				var values = database.GetOrCreateIntervalCollection<int, string>("Stuff");
 				database.Remove(values);
 
 				new Action(() => values.GetManyIntervals(new RowId[0]))
@@ -239,8 +249,8 @@ namespace IsabelDb.Test.Collections.IntervalCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				db.GetIntervalCollection<int, string>("Names");
-				new Action(() => db.GetIntervalCollection<uint, string>("Names"))
+				db.GetOrCreateIntervalCollection<int, string>("Names");
+				new Action(() => db.GetOrCreateIntervalCollection<uint, string>("Names"))
 					.Should().Throw<TypeMismatchException>()
 					.WithMessage("The IntervalCollection 'Names' uses keys of type 'System.Int32' which does not match the requested key type 'System.UInt32': If your intent was to create a new IntervalCollection then you have to pick a new name!");
 			}
@@ -251,8 +261,8 @@ namespace IsabelDb.Test.Collections.IntervalCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				db.GetIntervalCollection<int, string>("Names");
-				new Action(() => db.GetIntervalCollection<int, int>("Names"))
+				db.GetOrCreateIntervalCollection<int, string>("Names");
+				new Action(() => db.GetOrCreateIntervalCollection<int, int>("Names"))
 					.Should().Throw<TypeMismatchException>()
 					.WithMessage("The IntervalCollection 'Names' uses values of type 'System.String' which does not match the requested value type 'System.Int32': If your intent was to create a new IntervalCollection then you have to pick a new name!");
 			}
@@ -263,7 +273,7 @@ namespace IsabelDb.Test.Collections.IntervalCollection
 		{
 			using (var db = Database.CreateInMemory(new []{typeof(MySortableKey) }))
 			{
-				new Action(() => db.GetIntervalCollection<MySortableKey, string>("Values"))
+				new Action(() => db.GetOrCreateIntervalCollection<MySortableKey, string>("Values"))
 					.Should().Throw<NotSupportedException>("Custom types cannot be used as sortable keys")
 					.WithMessage("The type 'IsabelDb.Test.Entities.MySortableKey' may not be used as a key in an interval collection! Only basic numeric types can be used for now.");
 			}
@@ -274,7 +284,7 @@ namespace IsabelDb.Test.Collections.IntervalCollection
 		{
 			using (var db = Database.CreateInMemory(new []{typeof(MySortableKey) }))
 			{
-				new Action(() => db.GetIntervalCollection<string, string>("Values"))
+				new Action(() => db.GetOrCreateIntervalCollection<string, string>("Values"))
 					.Should().Throw<NotSupportedException>("Custom types cannot be used as sortable keys")
 					.WithMessage("The type 'System.String' may not be used as a key in an interval collection! Only basic numeric types can be used for now.");
 			}
@@ -285,7 +295,7 @@ namespace IsabelDb.Test.Collections.IntervalCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetIntervalCollection<int, string>("Values");
+				var values = db.GetOrCreateIntervalCollection<int, string>("Values");
 				values.GetAll().Should().BeEmpty();
 			}
 		}
@@ -295,7 +305,7 @@ namespace IsabelDb.Test.Collections.IntervalCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetIntervalCollection<int, string>("Values");
+				var values = db.GetOrCreateIntervalCollection<int, string>("Values");
 				values.Put(Interval.Create(minimum: 10, maximum: 20), "Foo");
 				var all = values.GetAll().ToList();
 				all.Should().HaveCount(expected: 1);
@@ -309,7 +319,7 @@ namespace IsabelDb.Test.Collections.IntervalCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetIntervalCollection<int, string>("Values");
+				var values = db.GetOrCreateIntervalCollection<int, string>("Values");
 				values.Put(Interval.Create(minimum: 1, maximum: 10), "Hello");
 
 				for (var i = 1; i <= 10; ++i) values.GetValues(i).Should().Equal("Hello");
@@ -324,7 +334,7 @@ namespace IsabelDb.Test.Collections.IntervalCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetIntervalCollection<int, string>("Values");
+				var values = db.GetOrCreateIntervalCollection<int, string>("Values");
 				values.Put(new Interval<int>(minimum: 1, maximum: 10), "Hello");
 
 				values.GetValues(minimum: 0, maximum: 11).Should().Equal("Hello");
@@ -339,7 +349,7 @@ namespace IsabelDb.Test.Collections.IntervalCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetIntervalCollection<int, string>("Values");
+				var values = db.GetOrCreateIntervalCollection<int, string>("Values");
 				values.Put(new Interval<int>(minimum: 1, maximum: 10), "A");
 				values.Put(new Interval<int>(minimum: 2, maximum: 11), "B");
 				values.Put(new Interval<int>(minimum: 3, maximum: 12), "C");
@@ -355,7 +365,7 @@ namespace IsabelDb.Test.Collections.IntervalCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetIntervalCollection<int, string>("Values");
+				var values = db.GetOrCreateIntervalCollection<int, string>("Values");
 				values.Put(new Interval<int>(minimum: 1, maximum: 10), "A");
 				values.Put(new Interval<int>(minimum: 2, maximum: 11), "B");
 				values.Put(new Interval<int>(minimum: 3, maximum: 12), "C");
@@ -371,7 +381,7 @@ namespace IsabelDb.Test.Collections.IntervalCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetIntervalCollection<int, string>("Values");
+				var values = db.GetOrCreateIntervalCollection<int, string>("Values");
 				values.Put(new Interval<int>(minimum: 1, maximum: 10), "A");
 				values.Put(new Interval<int>(minimum: 2, maximum: 11), "B");
 				values.Put(new Interval<int>(minimum: 3, maximum: 12), "C");
@@ -387,7 +397,7 @@ namespace IsabelDb.Test.Collections.IntervalCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var values = db.GetIntervalCollection<int, string>("Values");
+				var values = db.GetOrCreateIntervalCollection<int, string>("Values");
 				values.Put(new Interval<int>(minimum: 1, maximum: 10), "A");
 				values.Put(new Interval<int>(minimum: 2, maximum: 11), "B");
 				values.Put(new Interval<int>(minimum: 3, maximum: 12), "C");
@@ -405,13 +415,13 @@ namespace IsabelDb.Test.Collections.IntervalCollection
 			{
 				using (var db = new IsabelDb(connection, null, NoCustomTypes, false, false))
 				{
-					var collection = db.GetIntervalCollection<int, string>("Stuff");
+					var collection = db.GetOrCreateIntervalCollection<int, string>("Stuff");
 					collection.Put(Interval.Create(1), "One");
 				}
 
 				using (var db = new IsabelDb(connection, null, NoCustomTypes, false, isReadOnly: true))
 				{
-					var collection = db.GetIntervalCollection<int, string>("Stuff");
+					var collection = db.GetOrCreateIntervalCollection<int, string>("Stuff");
 					collection.GetAllValues().Should().Equal("One");
 
 					new Action(() => collection.Remove(Interval.Create(1)))
@@ -427,7 +437,7 @@ namespace IsabelDb.Test.Collections.IntervalCollection
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var collection = db.GetIntervalCollection<TKey, string>("Values");
+				var collection = db.GetOrCreateIntervalCollection<TKey, string>("Values");
 				collection.Put(Interval.Create(minimum), "Helo");
 				collection.Put(Interval.Create(maximum), "Boomer");
 

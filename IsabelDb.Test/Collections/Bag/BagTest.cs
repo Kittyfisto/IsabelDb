@@ -20,6 +20,16 @@ namespace IsabelDb.Test.Collections.Bag
 			return db.GetBag<string>(name);
 		}
 
+		protected override IBag<string> CreateCollection(IDatabase db, string name)
+		{
+			return db.CreateBag<string>(name);
+		}
+
+		protected override IBag<string> GetOrCreateCollection(IDatabase db, string name)
+		{
+			return db.GetOrCreateBag<string>(name);
+		}
+
 		protected override void Put(IBag<string> collection, string value)
 		{
 			_lastRowId = collection.Put(value);
@@ -42,7 +52,7 @@ namespace IsabelDb.Test.Collections.Bag
 			{
 				using (var db = CreateDatabase(connection))
 				{
-					db.GetBag<string>("Stuff").ToString().Should().Be("Bag<System.String>(\"Stuff\")");
+					db.GetOrCreateBag<string>("Stuff").ToString().Should().Be("Bag<System.String>(\"Stuff\")");
 				}
 			}
 		}
@@ -52,7 +62,7 @@ namespace IsabelDb.Test.Collections.Bag
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var bag = database.GetBag<string>("Stuff");
+				var bag = database.GetOrCreateBag<string>("Stuff");
 				database.Remove(bag);
 
 				new Action(() => bag.GetValue(new RowId(1)))
@@ -67,7 +77,7 @@ namespace IsabelDb.Test.Collections.Bag
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var bag = database.GetBag<string>("Stuff");
+				var bag = database.GetOrCreateBag<string>("Stuff");
 				database.Remove(bag);
 
 				new Action(() => bag.GetAll())
@@ -82,7 +92,7 @@ namespace IsabelDb.Test.Collections.Bag
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var bag = database.GetBag<string>("Stuff");
+				var bag = database.GetOrCreateBag<string>("Stuff");
 				database.Remove(bag);
 
 				new Action(() => bag.TryGetValue(new RowId(), out var unused))
@@ -97,7 +107,7 @@ namespace IsabelDb.Test.Collections.Bag
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var bag = database.GetBag<string>("Stuff");
+				var bag = database.GetOrCreateBag<string>("Stuff");
 				database.Remove(bag);
 
 				new Action(() => bag.GetValues(new Interval<RowId>()))
@@ -112,7 +122,7 @@ namespace IsabelDb.Test.Collections.Bag
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var bag = database.GetBag<string>("Stuff");
+				var bag = database.GetOrCreateBag<string>("Stuff");
 				database.Remove(bag);
 
 				new Action(() => bag.GetManyValues(new[]{new RowId(3)}))
@@ -127,7 +137,7 @@ namespace IsabelDb.Test.Collections.Bag
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var bag = database.GetBag<string>("Stuff");
+				var bag = database.GetOrCreateBag<string>("Stuff");
 				database.Remove(bag);
 
 				new Action(() => bag.Put("Persecution of the masses"))
@@ -142,7 +152,7 @@ namespace IsabelDb.Test.Collections.Bag
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var bag = database.GetBag<string>("Stuff");
+				var bag = database.GetOrCreateBag<string>("Stuff");
 				database.Remove(bag);
 
 				new Action(() => bag.PutMany(new[]{"Persecution of the masses", "Who will know (tragedy)"}))
@@ -157,7 +167,7 @@ namespace IsabelDb.Test.Collections.Bag
 		{
 			using (var database = Database.CreateInMemory(new Type[0]))
 			{
-				var bag = database.GetBag<string>("Stuff");
+				var bag = database.GetOrCreateBag<string>("Stuff");
 				database.Remove(bag);
 
 				new Action(() => bag.Remove(new RowId(2)))
@@ -175,14 +185,14 @@ namespace IsabelDb.Test.Collections.Bag
 			{
 				using (var db = CreateDatabase(connection, typeof(CustomKey)))
 				{
-					var bag = db.GetBag<CustomKey>("Keys");
+					var bag = db.GetOrCreateBag<CustomKey>("Keys");
 					bag.Put(new CustomKey {A = 1});
 					bag.Put(new CustomKey {B = 2});
 				}
 
 				using (var db = CreateDatabase(connection))
 				{
-					new Action(() => db.GetBag<CustomKey>("Keys"))
+					new Action(() => db.GetOrCreateBag<CustomKey>("Keys"))
 						.Should().Throw<TypeCouldNotBeResolvedException>()
 						.WithMessage("A Bag named 'Keys' already exists but it's value type could not be resolved: If your intent is to re-use this existing collection, then you need to add 'IsabelDb.Test.Entities.CustomKey' to the list of supported types upon creating the database. If your intent is to create a new collection, then you need to pick a different name!");
 
@@ -200,8 +210,8 @@ namespace IsabelDb.Test.Collections.Bag
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				db.GetBag<string>("Names");
-				new Action(() => db.GetBag<int>("Names"))
+				db.GetOrCreateBag<string>("Names");
+				new Action(() => db.GetOrCreateBag<int>("Names"))
 					.Should().Throw<TypeMismatchException>()
 					.WithMessage("The Bag 'Names' uses values of type 'System.String' which does not match the requested value type 'System.Int32': If your intent was to create a new Bag then you have to pick a new name!");
 			}
@@ -212,7 +222,7 @@ namespace IsabelDb.Test.Collections.Bag
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var bag = db.GetBag<string>("foo");
+				var bag = db.GetOrCreateBag<string>("foo");
 				bag.Put("Hello, World!");
 				bag.Count().Should().Be(1);
 
@@ -227,7 +237,7 @@ namespace IsabelDb.Test.Collections.Bag
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var bag = db.GetBag<int>("foo");
+				var bag = db.GetOrCreateBag<int>("foo");
 				bag.PutMany(Enumerable.Range(0, 1000));
 				bag.Count().Should().Be(1000);
 
@@ -242,7 +252,7 @@ namespace IsabelDb.Test.Collections.Bag
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var bag = db.GetBag<int>("my favourite numbers");
+				var bag = db.GetOrCreateBag<int>("my favourite numbers");
 				bag.Put(42);
 				bag.Put(100);
 				bag.Put(42);
@@ -256,7 +266,7 @@ namespace IsabelDb.Test.Collections.Bag
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var bag = db.GetBag<int>("foo");
+				var bag = db.GetOrCreateBag<int>("foo");
 				bag.PutMany(new[]{1, 2, 3, 4});
 				bag.Count().Should().Be(4);
 				bag.GetAllValues().Should().BeEquivalentTo(1, 2, 3, 4);
@@ -273,14 +283,14 @@ namespace IsabelDb.Test.Collections.Bag
 
 				using (var db = CreateDatabase(connection))
 				{
-					var collection = db.GetBag<string>("Values");
+					var collection = db.GetOrCreateBag<string>("Values");
 					ids.Add(collection.Put("A"));
 					ids.Add(collection.Put("B"));
 				}
 
 				using (var db = CreateDatabase(connection))
 				{
-					var collection = db.GetBag<string>("Values");
+					var collection = db.GetOrCreateBag<string>("Values");
 					ids.Add(collection.Put("C"));
 					ids.Add(collection.Put("D"));
 				}
@@ -299,14 +309,14 @@ namespace IsabelDb.Test.Collections.Bag
 
 				using (var db = CreateDatabase(connection))
 				{
-					var collection = db.GetBag<string>("Values");
+					var collection = db.GetOrCreateBag<string>("Values");
 					ids.AddRange(collection.PutMany(new[]{"A", "B"}));
 					ids.Add(collection.Put("C"));
 				}
 
 				using (var db = CreateDatabase(connection))
 				{
-					var collection = db.GetBag<string>("Values");
+					var collection = db.GetOrCreateBag<string>("Values");
 					ids.AddRange(collection.PutMany(new []{"D", "E"}));
 					ids.Add(collection.Put("F"));
 				}
@@ -320,7 +330,7 @@ namespace IsabelDb.Test.Collections.Bag
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var bag = db.GetBag<string>("foo");
+				var bag = db.GetOrCreateBag<string>("foo");
 				bag.Put("A");
 				bag.Put("B");
 				bag.Put("C");
@@ -338,7 +348,7 @@ namespace IsabelDb.Test.Collections.Bag
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var bag = db.GetBag<string>("foo");
+				var bag = db.GetOrCreateBag<string>("foo");
 				bag.Put("A");
 				var min = bag.Put("B");
 				bag.Put("C");
@@ -354,7 +364,7 @@ namespace IsabelDb.Test.Collections.Bag
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var bag = db.GetBag<int>("foo");
+				var bag = db.GetOrCreateBag<int>("foo");
 				const int count = 10000;
 				var values = Enumerable.Range(0, count).ToList();
 				bag.PutMany(values);
@@ -369,7 +379,7 @@ namespace IsabelDb.Test.Collections.Bag
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var bag = db.GetBag<double>("Values");
+				var bag = db.GetOrCreateBag<double>("Values");
 				var e = bag.Put(Math.E);
 				var pi = bag.Put(Math.PI);
 
@@ -383,7 +393,7 @@ namespace IsabelDb.Test.Collections.Bag
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var bag = db.GetBag<double>("Values");
+				var bag = db.GetOrCreateBag<double>("Values");
 				var e = bag.Put(Math.E);
 				var pi = bag.Put(Math.PI);
 
@@ -396,7 +406,7 @@ namespace IsabelDb.Test.Collections.Bag
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var bag = db.GetBag<double>("Values");
+				var bag = db.GetOrCreateBag<double>("Values");
 				var e = bag.Put(Math.E);
 				var pi = bag.Put(Math.PI);
 
@@ -412,7 +422,7 @@ namespace IsabelDb.Test.Collections.Bag
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var bag = db.GetBag<double>("Values");
+				var bag = db.GetOrCreateBag<double>("Values");
 				bag.Put(Math.E);
 				new Action(() => bag.GetValue(new RowId(41421321)))
 					.Should().Throw<KeyNotFoundException>();
@@ -424,7 +434,7 @@ namespace IsabelDb.Test.Collections.Bag
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var bag = db.GetBag<int>("foo");
+				var bag = db.GetOrCreateBag<int>("foo");
 				bag.Put(4);
 				bag.Put(42);
 				var id1 = bag.Put(1337);
@@ -447,7 +457,7 @@ namespace IsabelDb.Test.Collections.Bag
 			{
 				using (var db = CreateDatabase(connection, NoCustomTypes))
 				{
-					var collection = db.GetBag<object>("Stuff");
+					var collection = db.GetOrCreateBag<object>("Stuff");
 					collection.Put(Math.E);
 					collection.Put("Hello, World!");
 					collection.Put("Architects");
@@ -471,7 +481,7 @@ namespace IsabelDb.Test.Collections.Bag
 
 				using (var db = CreateDatabase(connection, NoCustomTypes))
 				{
-					var collection = db.GetBag<object>("Stuff");
+					var collection = db.GetOrCreateBag<object>("Stuff");
 					id1 = collection.Put(Math.E);
 					id2 = collection.Put("Hello, World!");
 					id3 = collection.Put("Architects");

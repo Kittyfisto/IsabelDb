@@ -57,7 +57,7 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.OpenOrCreate(_databaseName, NoCustomTypes))
 			{
-				var bag = db.GetBag<object>("Stuff");
+				var bag = db.GetOrCreateBag<object>("Stuff");
 				bag.PutMany(Enumerable.Range(0, 10000).Cast<object>());
 
 				var fileSize = new FileInfo(_databaseName).Length;
@@ -76,15 +76,15 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.OpenOrCreate(_databaseName, NoCustomTypes))
 			{
-				db.GetDictionary<string, object>("A").Put("Meaning", value: 9001);
+				db.GetOrCreateDictionary<string, object>("A").Put("Meaning", value: 9001);
 			}
 
 			using (var db = Database.OpenOrCreate(_databaseName, NoCustomTypes))
 			{
-				db.GetDictionary<string, object>("a").Put("Meaning", value: 42);
+				db.GetOrCreateDictionary<string, object>("a").Put("Meaning", value: 42);
 
-				db.GetDictionary<string, object>("A").Get("Meaning").Should().Be(9001);
-				db.GetDictionary<string, object>("a").Get("Meaning").Should().Be(42);
+				db.GetOrCreateDictionary<string, object>("A").Get("Meaning").Should().Be(9001);
+				db.GetOrCreateDictionary<string, object>("a").Get("Meaning").Should().Be(42);
 			}
 		}
 
@@ -101,12 +101,12 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.OpenOrCreate(_databaseName, NoCustomTypes))
 			{
-				db.GetDictionary<string, object>("SomeTable").Put("a", "b");
+				db.GetOrCreateDictionary<string, object>("SomeTable").Put("a", "b");
 			}
 
 			using (var db = Database.OpenOrCreate(_databaseName, NoCustomTypes))
 			{
-				db.GetDictionary<string, object>("SomeTable").Get("a").Should().Be("b");
+				db.GetOrCreateDictionary<string, object>("SomeTable").Get("a").Should().Be("b");
 			}
 		}
 
@@ -115,7 +115,7 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.OpenOrCreate(_databaseName, NoCustomTypes))
 			{
-				var charts = db.GetDictionary<string, object>("Charts");
+				var charts = db.GetOrCreateDictionary<string, object>("Charts");
 				charts.Put("Bar", value: 2);
 				charts.Get("Bar").Should().Be(2);
 				charts.Put("Bar", value: 2.2);
@@ -124,7 +124,7 @@ namespace IsabelDb.Test
 
 			using (var db = Database.OpenOrCreate(_databaseName, NoCustomTypes))
 			{
-				var charts = db.GetDictionary<string, object>("Charts");
+				var charts = db.GetOrCreateDictionary<string, object>("Charts");
 				charts.Get("Bar").Should().Be(2.2);
 			}
 		}
@@ -137,9 +137,9 @@ namespace IsabelDb.Test
 
 			using (var db = Database.OpenOrCreate(_databaseName, new[] {typeof(Person), typeof(Address)}))
 			{
-				db.GetDictionary<string, object>("SomeTable").Put("foo", strelok);
-				db.GetDictionary<string, object>("SomeTable").Put("bar", markedOne);
-				db.GetDictionary<string, object>("SomeTable").Put("home", new Address
+				db.GetOrCreateDictionary<string, object>("SomeTable").Put("foo", strelok);
+				db.GetOrCreateDictionary<string, object>("SomeTable").Put("bar", markedOne);
+				db.GetOrCreateDictionary<string, object>("SomeTable").Put("home", new Address
 				{
 					Country = "A",
 					City = "B",
@@ -150,7 +150,7 @@ namespace IsabelDb.Test
 
 			using (var db = Database.Open(_databaseName, new[] {typeof(Person), typeof(Address)}))
 			{
-				var persons = db.GetDictionary<string, object>("SomeTable")
+				var persons = db.GetOrCreateDictionary<string, object>("SomeTable")
 				                .GetMany(new string[]{"foo", "bar"});
 
 				persons.Should().HaveCount(2);
@@ -171,7 +171,7 @@ namespace IsabelDb.Test
 			{
 				const int count = 100000;
 				var values = new List<KeyValuePair<string, Person>>();
-				var table = db.GetDictionary<string, Person>("Piggies");
+				var table = db.GetOrCreateDictionary<string, Person>("Piggies");
 				for (var i = 0; i < count; ++i)
 				{
 					var person = new Person
@@ -211,7 +211,7 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.OpenOrCreate(_databaseName, NoCustomTypes))
 			{
-				var charts = db.GetDictionary<string, object>("Charts");
+				var charts = db.GetOrCreateDictionary<string, object>("Charts");
 				charts.Put("Pie", value: 1.5);
 				charts.Get("Pie").Should().Be(1.5);
 				charts.Remove("Pie");
@@ -220,7 +220,7 @@ namespace IsabelDb.Test
 
 			using (var db = Database.OpenOrCreate(_databaseName, NoCustomTypes))
 			{
-				var charts = db.GetDictionary<string, object>("Charts");
+				var charts = db.GetOrCreateDictionary<string, object>("Charts");
 				charts.TryGet("Pie", out var unused).Should().BeFalse();
 			}
 		}
@@ -231,7 +231,7 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.OpenOrCreate(_databaseName, NoCustomTypes))
 			{
-				var charts = db.GetMultiValueDictionary<string, object>("Charts");
+				var charts = db.GetOrCreateMultiValueDictionary<string, object>("Charts");
 				charts.Put("Pie", "Hello!");
 				charts.GetValues("Pie").Should().Equal("Hello!");
 				charts.RemoveAll("Pie");
@@ -240,7 +240,7 @@ namespace IsabelDb.Test
 
 			using (var db = Database.OpenOrCreate(_databaseName, NoCustomTypes))
 			{
-				var charts = db.GetMultiValueDictionary<string, object>("Charts");
+				var charts = db.GetOrCreateMultiValueDictionary<string, object>("Charts");
 				charts.GetValues("Pie").Should().BeEmpty();
 			}
 		}
@@ -251,7 +251,7 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.OpenOrCreate(_databaseName, NoCustomTypes))
 			{
-				var charts = db.GetBag<object>("Charts");
+				var charts = db.GetOrCreateBag<object>("Charts");
 				charts.Put("Hello!");
 				charts.GetAllValues().Should().Equal("Hello!");
 				charts.Clear();
@@ -260,7 +260,7 @@ namespace IsabelDb.Test
 
 			using (var db = Database.OpenOrCreate(_databaseName, NoCustomTypes))
 			{
-				var charts = db.GetBag<object>("Charts");
+				var charts = db.GetOrCreateBag<object>("Charts");
 				charts.GetAllValues().Should().BeEmpty();
 			}
 		}
@@ -270,14 +270,14 @@ namespace IsabelDb.Test
 		{
 			using (var db = Database.OpenOrCreate(_databaseName, NoCustomTypes))
 			{
-				var values = db.GetMultiValueDictionary<int, string>("Values");
+				var values = db.GetOrCreateMultiValueDictionary<int, string>("Values");
 				values.Put(1, "a");
 				values.Put(1, "b");
 			}
 
 			using (var db = Database.OpenOrCreate(_databaseName, NoCustomTypes))
 			{
-				var values = db.GetMultiValueDictionary<int, string>("Values");
+				var values = db.GetOrCreateMultiValueDictionary<int, string>("Values");
 				values.Put(1, "c");
 				values.GetValues(1).Should().Equal("a", "b", "c");
 			}
@@ -304,7 +304,7 @@ namespace IsabelDb.Test
 
 			using (var db = Database.OpenOrCreate(filename, NoCustomTypes))
 			{
-				var collection = db.GetBag<string>("Values");
+				var collection = db.GetOrCreateBag<string>("Values");
 				collection.PutMany(new []{"a", "b", "c"});
 			}
 

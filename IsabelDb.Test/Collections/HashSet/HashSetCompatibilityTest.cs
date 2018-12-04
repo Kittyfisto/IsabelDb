@@ -10,7 +10,7 @@ namespace IsabelDb.Test.Collections.HashSet
 
 		protected override ICollection<T> GetCollection<T>(IDatabase db, string name)
 		{
-			return db.GetHashSet<T>(name);
+			return db.GetOrCreateHashSet<T>(name);
 		}
 
 		protected override void Put<T>(ICollection<T> collection, T value)

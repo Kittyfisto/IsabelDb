@@ -10,7 +10,7 @@ namespace IsabelDb.Test.Collections.Bag
 		
 		protected override ICollection<T> GetCollection<T>(IDatabase db, string name)
 		{
-			return db.GetBag<T>(name);
+			return db.GetOrCreateBag<T>(name);
 		}
 
 		protected override void Put<T>(ICollection<T> collection, T value)

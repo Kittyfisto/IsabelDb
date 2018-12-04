@@ -32,7 +32,7 @@ namespace IsabelDb.Test
 		{
 			using (var database = CreateDatabase(typeof(Entities.V1.Comic)))
 			{
-				var comics = database.GetDictionary<int, Entities.V1.Comic>("Comcis");
+				var comics = database.GetOrCreateDictionary<int, Entities.V1.Comic>("Comcis");
 				comics.Put(1, new Entities.V1.Comic
 				{
 					Name = "Watchmen",
@@ -42,7 +42,7 @@ namespace IsabelDb.Test
 
 			using (var database = CreateDatabase(typeof(Entities.V2.Comic)))
 			{
-				var comics = database.GetDictionary<int, Entities.V2.Comic>("Comcis");
+				var comics = database.GetOrCreateDictionary<int, Entities.V2.Comic>("Comcis");
 				var comic = comics.Get(1);
 				comic.Name.Should().Be("Watchmen");
 				comic.Writer.Should().Be("Alan Moore");
@@ -56,7 +56,7 @@ namespace IsabelDb.Test
 		{
 			using (var database = CreateDatabase(typeof(Entities.V1.Comic)))
 			{
-				var comics = database.GetDictionary<int, Entities.V1.Comic>("Comcis");
+				var comics = database.GetOrCreateDictionary<int, Entities.V1.Comic>("Comcis");
 				comics.Put(1, new Entities.V1.Comic
 				{
 					Name = "Watchmen",
@@ -66,7 +66,7 @@ namespace IsabelDb.Test
 
 			using (var database = CreateDatabase(typeof(Entities.V2.Comic)))
 			{
-				var comics = database.GetDictionary<int, Entities.V2.Comic>("Comcis");
+				var comics = database.GetOrCreateDictionary<int, Entities.V2.Comic>("Comcis");
 				comics.Put(2, new Entities.V2.Comic
 				{
 					Name = "Rise of Atriox",
@@ -77,7 +77,7 @@ namespace IsabelDb.Test
 
 			using (var database = CreateDatabase(typeof(Entities.V2.Comic)))
 			{
-				var comics = database.GetDictionary<int, Entities.V2.Comic>("Comcis");
+				var comics = database.GetOrCreateDictionary<int, Entities.V2.Comic>("Comcis");
 				var comic = comics.Get(1);
 				comic.Name.Should().Be("Watchmen");
 				comic.Writer.Should().Be("Alan Moore");
@@ -96,7 +96,7 @@ namespace IsabelDb.Test
 		{
 			using (var database = CreateDatabase(typeof(Entities.V2.Comic)))
 			{
-				var comics = database.GetDictionary<int, Entities.V2.Comic>("Comcis");
+				var comics = database.GetOrCreateDictionary<int, Entities.V2.Comic>("Comcis");
 				comics.Put(1, new Entities.V2.Comic
 				{
 					Name = "Watchmen",
@@ -107,7 +107,7 @@ namespace IsabelDb.Test
 
 			using (var database = CreateDatabase(typeof(Entities.V1.Comic)))
 			{
-				var comics = database.GetDictionary<int, Entities.V1.Comic>("Comcis");
+				var comics = database.GetOrCreateDictionary<int, Entities.V1.Comic>("Comcis");
 				var comic = comics.Get(1);
 				comic.Name.Should().Be("Watchmen");
 				comic.Writer.Should().Be("Alan Moore");
@@ -119,7 +119,7 @@ namespace IsabelDb.Test
 		{
 			using (var database = CreateDatabase(typeof(Entities.V1.Motherboard)))
 			{
-				var comics = database.GetDictionary<int, Entities.V1.Motherboard>("Motherboards");
+				var comics = database.GetOrCreateDictionary<int, Entities.V1.Motherboard>("Motherboards");
 				comics.Put(1, new Entities.V1.Motherboard
 				{
 					Cpus = new List<Cpu>
@@ -132,7 +132,7 @@ namespace IsabelDb.Test
 
 			using (var database = CreateDatabase(typeof(Entities.V2.Motherboard)))
 			{
-				var comics = database.GetDictionary<int, Entities.V2.Motherboard>("Motherboards");
+				var comics = database.GetOrCreateDictionary<int, Entities.V2.Motherboard>("Motherboards");
 				var motherboard = comics.Get(1);
 				motherboard.Cpus.Should().HaveCount(2);
 				motherboard.Cpus[0].Model.Should().Be("i7");

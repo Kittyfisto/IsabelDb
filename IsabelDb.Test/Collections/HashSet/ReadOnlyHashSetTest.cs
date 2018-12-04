@@ -14,7 +14,7 @@ namespace IsabelDb.Test.Collections.HashSet
 			{
 				using (var db = CreateDatabase(connection))
 				{
-					var hashSet = db.GetHashSet<string>("Stuff");
+					var hashSet = db.GetOrCreateHashSet<string>("Stuff");
 					hashSet.Add("Hello");
 					hashSet.Add("Erased");
 				}

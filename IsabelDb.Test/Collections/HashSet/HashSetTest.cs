@@ -18,7 +18,7 @@ namespace IsabelDb.Test.Collections.HashSet
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var hashSet = db.GetHashSet<int>("Stuff");
+				var hashSet = db.GetOrCreateHashSet<int>("Stuff");
 				db.Remove(hashSet);
 
 				new Action(() => hashSet.Add(42))
@@ -34,7 +34,7 @@ namespace IsabelDb.Test.Collections.HashSet
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var hashSet = db.GetHashSet<int>("Stuff");
+				var hashSet = db.GetOrCreateHashSet<int>("Stuff");
 				db.Remove(hashSet);
 
 				new Action(() => hashSet.AddMany(new []{42}))
@@ -50,7 +50,7 @@ namespace IsabelDb.Test.Collections.HashSet
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var hashSet = db.GetHashSet<int>("Stuff");
+				var hashSet = db.GetOrCreateHashSet<int>("Stuff");
 				db.Remove(hashSet);
 
 				new Action(() => hashSet.Remove(42))
@@ -66,7 +66,7 @@ namespace IsabelDb.Test.Collections.HashSet
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var hashSet = db.GetHashSet<int>("Stuff");
+				var hashSet = db.GetOrCreateHashSet<int>("Stuff");
 				db.Remove(hashSet);
 
 				new Action(() => hashSet.Contains(42))
@@ -82,7 +82,7 @@ namespace IsabelDb.Test.Collections.HashSet
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var hashSet = db.GetHashSet<int>("Stuff");
+				var hashSet = db.GetOrCreateHashSet<int>("Stuff");
 				hashSet.Add(int.MinValue).Should().BeTrue();
 				hashSet.Count().Should().Be(1);
 				hashSet.GetAllValues().Should().BeEquivalentTo(int.MinValue);
@@ -103,7 +103,7 @@ namespace IsabelDb.Test.Collections.HashSet
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection, typeof(ProcessorArchitecture)))
 			{
-				var hashSet = db.GetHashSet<object>("Stuff");
+				var hashSet = db.GetOrCreateHashSet<object>("Stuff");
 				hashSet.Add(42);
 				hashSet.Add("Erased");
 				hashSet.Add(new Version(8, 9, 42, 2));
@@ -124,7 +124,7 @@ namespace IsabelDb.Test.Collections.HashSet
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				db.GetHashSet<string>("Stuff").ToString().Should().Be("HashSet<System.String>(\"Stuff\")");
+				db.GetOrCreateHashSet<string>("Stuff").ToString().Should().Be("HashSet<System.String>(\"Stuff\")");
 			}
 		}
 
@@ -134,7 +134,7 @@ namespace IsabelDb.Test.Collections.HashSet
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var hashSet = db.GetHashSet<object>("Stuff");
+				var hashSet = db.GetOrCreateHashSet<object>("Stuff");
 				new Action(() => hashSet.Add(null)).Should().Throw<ArgumentNullException>();
 				hashSet.Count().Should().Be(0);
 				hashSet.GetAllValues().Should().BeEquivalentTo();
@@ -147,7 +147,7 @@ namespace IsabelDb.Test.Collections.HashSet
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var hashSet = db.GetHashSet<object>("Stuff");
+				var hashSet = db.GetOrCreateHashSet<object>("Stuff");
 				new Action(() => hashSet.AddMany(null)).Should().Throw<ArgumentNullException>();
 				hashSet.Count().Should().Be(0);
 				hashSet.GetAllValues().Should().BeEquivalentTo();
@@ -160,7 +160,7 @@ namespace IsabelDb.Test.Collections.HashSet
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var hashSet = db.GetHashSet<object>("Stuff");
+				var hashSet = db.GetOrCreateHashSet<object>("Stuff");
 				new Action(() => hashSet.AddMany(new object[]{1, null, 2})).Should().Throw<ArgumentException>();
 				hashSet.Count().Should().Be(0);
 				hashSet.GetAllValues().Should().BeEquivalentTo();
@@ -173,7 +173,7 @@ namespace IsabelDb.Test.Collections.HashSet
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var hashSet = db.GetHashSet<object>("Stuff");
+				var hashSet = db.GetOrCreateHashSet<object>("Stuff");
 				new Action(() => hashSet.Contains(null)).Should().Throw<ArgumentNullException>();
 
 				hashSet.Count().Should().Be(0);
@@ -187,7 +187,7 @@ namespace IsabelDb.Test.Collections.HashSet
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var hashSet = db.GetHashSet<object>("Stuff");
+				var hashSet = db.GetOrCreateHashSet<object>("Stuff");
 				new Action(() => hashSet.Remove(null)).Should().Throw<ArgumentNullException>();
 
 				hashSet.Count().Should().Be(0);
@@ -201,7 +201,7 @@ namespace IsabelDb.Test.Collections.HashSet
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var hashSet = db.GetHashSet<string>("Stuff");
+				var hashSet = db.GetOrCreateHashSet<string>("Stuff");
 				hashSet.Add("Hello, World!");
 				hashSet.Count().Should().Be(1);
 				hashSet.GetAllValues().Should().BeEquivalentTo(new object[]{"Hello, World!"});
@@ -218,7 +218,7 @@ namespace IsabelDb.Test.Collections.HashSet
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var hashSet = db.GetHashSet<string>("Stuff");
+				var hashSet = db.GetOrCreateHashSet<string>("Stuff");
 				hashSet.Remove("Stuff").Should().BeFalse();
 			}
 		}
@@ -229,7 +229,7 @@ namespace IsabelDb.Test.Collections.HashSet
 			using (var connection = CreateConnection())
 			using (var db = CreateDatabase(connection))
 			{
-				var hashSet = db.GetHashSet<string>("Stuff");
+				var hashSet = db.GetOrCreateHashSet<string>("Stuff");
 				hashSet.Add("Add");
 
 				hashSet.Remove("Stuff").Should().BeFalse();
@@ -245,6 +245,16 @@ namespace IsabelDb.Test.Collections.HashSet
 		protected override IHashSet<string> GetCollection(IDatabase db, string name)
 		{
 			return db.GetHashSet<string>(name);
+		}
+
+		protected override IHashSet<string> CreateCollection(IDatabase db, string name)
+		{
+			return db.CreateHashSet<string>(name);
+		}
+
+		protected override IHashSet<string> GetOrCreateCollection(IDatabase db, string name)
+		{
+			return db.GetOrCreateHashSet<string>(name);
 		}
 
 		protected override void Put(IHashSet<string> collection, string value)

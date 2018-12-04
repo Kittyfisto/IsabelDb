@@ -156,6 +156,7 @@
     <Compile Include="Entities\V3\CpuModel.cs" />
     <Compile Include="Exceptions\AbstractExceptionTest.cs" />
     <Compile Include="Exceptions\BreakingChangeExceptionTest.cs" />
+    <Compile Include="Exceptions\CollectionNameAlreadyInUseExceptionTest.cs" />
     <Compile Include="Exceptions\IncompatibleDatabaseSchemaExceptionTest.cs" />
     <Compile Include="Exceptions\NoSuchCollectionExceptionTest.cs" />
     <Compile Include="Exceptions\TypeCouldNotBeResolvedExceptionTest.cs" />

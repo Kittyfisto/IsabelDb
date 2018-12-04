@@ -14,8 +14,8 @@ namespace IsabelDb.AcceptanceTest.History
 		public DocumentDatabase(IDatabase database)
 		{
 			_database = database;
-			_documents = database.GetBag<DocumentEntity>("Documents");
-			_documentIdsByName = database.GetMultiValueDictionary<string, RowId>("DocumentIdsByName");
+			_documents = database.GetOrCreateBag<DocumentEntity>("Documents");
+			_documentIdsByName = database.GetOrCreateMultiValueDictionary<string, RowId>("DocumentIdsByName");
 		}
 
 		public IEnumerable<Document> Get(string fileName)

@@ -25,7 +25,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 		{
 			using (var db = Database.CreateInMemory(new []{typeof(Version)}))
 			{
-				var dictionary = db.GetDictionary<object, string>("Description");
+				var dictionary = db.GetOrCreateDictionary<object, string>("Description");
 				dictionary.Put(new Version(1, 0, 0, 0), "Fresh off the shelf");
 				dictionary.Put(new Version(1, 0, 0, 1), "Some bugs were to be expected");
 				dictionary.Put(new Version(1, 0, 0, 20), "Next time we'll write tests first");
