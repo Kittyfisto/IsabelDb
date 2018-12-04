@@ -31,7 +31,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 				new Action(() => dictionary.Get("Green"))
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -46,7 +46,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 				new Action(() => dictionary.TryGet("dawdawwad", out var unused))
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -61,7 +61,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 				new Action(() => dictionary.Move("a", "b"))
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -76,7 +76,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 				new Action(() => dictionary.Remove("a"))
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -91,7 +91,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 				new Action(() => dictionary.RemoveMany(new[]{"a", "b"}))
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -106,7 +106,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 				new Action(() => dictionary.GetMany(new object[] {"Green"}))
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -121,7 +121,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 				new Action(() => dictionary.GetManyValues(new object[] {"Green"}))
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -136,7 +136,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 				new Action(() => dictionary.GetManyValues(new object[] {"Green"}))
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -151,7 +151,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 				new Action(() => dictionary.ContainsKey("dawdawwad"))
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -166,7 +166,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 				new Action(() => dictionary.GetAll())
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -180,7 +180,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 
 				new Action(() => dictionary.Put("Green", "Room")).Should()
 				                                                 .Throw<InvalidOperationException>()
-				                                                 .WithMessage("This collection has been removed from the database and may no longer be used");
+				                                                 .WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -194,7 +194,7 @@ namespace IsabelDb.Test.Collections.Dictionary
 
 				new Action(() => dictionary.PutIfNotExists("Green", "Room")).Should()
 				                                                 .Throw<InvalidOperationException>()
-				                                                 .WithMessage("This collection has been removed from the database and may no longer be used");
+				                                                 .WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 

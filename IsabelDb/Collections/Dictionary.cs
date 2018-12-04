@@ -257,15 +257,6 @@ namespace IsabelDb.Collections
 
 		public override string KeyTypeName => null;
 
-		#region Overrides of Object
-
-		public override string ToString()
-		{
-			return string.Format("Dictionary<{0}, {1}>(\"{2}\")", KeyType.FullName, ValueType.FullName, Name);
-		}
-
-		#endregion
-
 		private IEnumerable<KeyValuePair<TKey, TValue>> GetAllInternal()
 		{
 			using (var command = _connection.CreateCommand())

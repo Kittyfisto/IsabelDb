@@ -189,6 +189,9 @@ namespace IsabelDb.Collections
 
 		public override string ToString()
 		{
+			if (IsDropped)
+				return string.Format("This collection (\"{0}\") has been removed from the database and may no longer be used", Name);
+
 			return string.Format("Point2DCollection<{0}, {1}>(\"{2}\")", typeof(Point2D).FullName, ValueType.FullName, Name);
 		}
 

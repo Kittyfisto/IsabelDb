@@ -622,7 +622,7 @@ namespace IsabelDb.Test.Collections
 				new Action(() => collection.Count())
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Characters\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -640,7 +640,7 @@ namespace IsabelDb.Test.Collections
 				new Action(() => collection.GetAllValues())
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Characters\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -657,7 +657,7 @@ namespace IsabelDb.Test.Collections
 
 				new Action(() => Put(collection, "Madeline Bosch"))
 					.Should().Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Characters\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -674,7 +674,7 @@ namespace IsabelDb.Test.Collections
 
 				new Action(() => PutMany(collection, "Eleanor Wish", "Maddeline Bosch"))
 					.Should().Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Characters\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -692,7 +692,21 @@ namespace IsabelDb.Test.Collections
 				new Action(() => collection.Clear())
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Characters\") has been removed from the database and may no longer be used");
+			}
+		}
+
+		[Test]
+		[Description("Verifies that ICollection.ToString() changes once a collection has been removed")]
+		public void TestRemove12()
+		{
+			using (var connection = CreateConnection())
+			using (var db = CreateDatabase(connection))
+			{
+				var collection = CreateCollection(db, "Characters");
+				db.Remove(collection);
+
+				collection.ToString().Should().Be("This collection (\"Characters\") has been removed from the database and may no longer be used");
 			}
 		}
 

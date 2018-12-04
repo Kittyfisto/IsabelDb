@@ -24,7 +24,7 @@ namespace IsabelDb.Test.Collections.HashSet
 				new Action(() => hashSet.Add(42))
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -40,7 +40,7 @@ namespace IsabelDb.Test.Collections.HashSet
 				new Action(() => hashSet.AddMany(new []{42}))
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -56,7 +56,7 @@ namespace IsabelDb.Test.Collections.HashSet
 				new Action(() => hashSet.Remove(42))
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -72,7 +72,7 @@ namespace IsabelDb.Test.Collections.HashSet
 				new Action(() => hashSet.Contains(42))
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 

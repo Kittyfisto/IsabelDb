@@ -46,7 +46,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 				new Action(() => values.GetAll())
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -61,7 +61,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 				new Action(() => values.GetAllKeys())
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -76,7 +76,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 				new Action(() => values.GetValue(new RowId(1)))
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -91,7 +91,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 				new Action(() => values.TryGetValue(new RowId(), out _))
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -106,7 +106,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 				new Action(() => values.GetValues(new RowId[1]))
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -121,7 +121,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 				new Action(() => values.GetValues(new Point2D(2, 2)))
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -136,7 +136,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 				new Action(() => values.GetValues(new Point2D[0]))
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -151,7 +151,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 				new Action(() => values.GetKeysWithin(new Rectangle2D()))
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -166,7 +166,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 				new Action(() => values.GetValuesWithin(new Rectangle2D()))
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -181,7 +181,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 				new Action(() => values.GetWithin(new Rectangle2D()))
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -196,7 +196,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 				new Action(() => values.ContainsKey(new Point2D(1, 2)))
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -211,7 +211,7 @@ namespace IsabelDb.Test.Collections.Point2DCollection
 				new Action(() => values.ContainsRow(new RowId(1)))
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 

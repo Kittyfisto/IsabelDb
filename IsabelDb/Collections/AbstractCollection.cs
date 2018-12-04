@@ -91,7 +91,8 @@ namespace IsabelDb.Collections
 		protected void ThrowIfDropped()
 		{
 			if (_isDropped)
-				throw new InvalidOperationException("This collection has been removed from the database and may no longer be used");
+				throw new InvalidOperationException(string.Format("This collection (\"{0}\") has been removed from the database and may no longer be used",
+				                                                  Name));
 		}
 
 		protected bool IsDropped => _isDropped;
@@ -121,6 +122,9 @@ namespace IsabelDb.Collections
 
 		public override string ToString()
 		{
+			if (IsDropped)
+				return string.Format("This collection (\"{0}\") has been removed from the database and may no longer be used", Name);
+
 			var keyType = KeyType;
 			if (keyType == null)
 				return string.Format("{0}<{1}>(\"{2}\")", Type, ValueType.FullName, Name);

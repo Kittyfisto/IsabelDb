@@ -30,7 +30,7 @@ namespace IsabelDb.Test.Collections.OrderedCollection
 				new Action(() => values.GetValues(new Interval<int>()))
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -45,7 +45,7 @@ namespace IsabelDb.Test.Collections.OrderedCollection
 				new Action(() => values.Put(1, "2"))
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -60,7 +60,7 @@ namespace IsabelDb.Test.Collections.OrderedCollection
 				new Action(() => values.PutMany(new List<KeyValuePair<int, string>>()))
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -75,7 +75,7 @@ namespace IsabelDb.Test.Collections.OrderedCollection
 				new Action(() => values.RemoveRange(new Interval<int>()))
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 

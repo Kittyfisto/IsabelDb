@@ -68,7 +68,7 @@ namespace IsabelDb.Test.Collections.Bag
 				new Action(() => bag.GetValue(new RowId(1)))
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -83,7 +83,7 @@ namespace IsabelDb.Test.Collections.Bag
 				new Action(() => bag.GetAll())
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -98,7 +98,7 @@ namespace IsabelDb.Test.Collections.Bag
 				new Action(() => bag.TryGetValue(new RowId(), out var unused))
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -113,7 +113,7 @@ namespace IsabelDb.Test.Collections.Bag
 				new Action(() => bag.GetValues(new Interval<RowId>()))
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -128,7 +128,7 @@ namespace IsabelDb.Test.Collections.Bag
 				new Action(() => bag.GetManyValues(new[]{new RowId(3)}))
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -143,7 +143,7 @@ namespace IsabelDb.Test.Collections.Bag
 				new Action(() => bag.Put("Persecution of the masses"))
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -158,7 +158,7 @@ namespace IsabelDb.Test.Collections.Bag
 				new Action(() => bag.PutMany(new[]{"Persecution of the masses", "Who will know (tragedy)"}))
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -173,7 +173,7 @@ namespace IsabelDb.Test.Collections.Bag
 				new Action(() => bag.Remove(new RowId(2)))
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 

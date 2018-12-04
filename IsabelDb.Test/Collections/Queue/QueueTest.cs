@@ -33,7 +33,7 @@ namespace IsabelDb.Test.Collections.Queue
 				new Action(() => bag.Enqueue("dwadwad"))
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -48,7 +48,7 @@ namespace IsabelDb.Test.Collections.Queue
 				new Action(() => bag.EnqueueMany(new[]{"a", "b"}))
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -63,7 +63,7 @@ namespace IsabelDb.Test.Collections.Queue
 				new Action(() => bag.TryDequeue(out var unused))
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 
@@ -78,7 +78,7 @@ namespace IsabelDb.Test.Collections.Queue
 				new Action(() => bag.TryPeek(out var unused))
 					.Should()
 					.Throw<InvalidOperationException>()
-					.WithMessage("This collection has been removed from the database and may no longer be used");
+					.WithMessage("This collection (\"Stuff\") has been removed from the database and may no longer be used");
 			}
 		}
 
