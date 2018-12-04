@@ -106,15 +106,15 @@ namespace IsabelDb.Test.Collections
 			{
 				using (var transaction = db.BeginTransaction())
 				{
-					var collection = db.CreateBag<string>("Stuff");
-					collection.Put("Peek-A-Boo");
+					var collection = CreateCollection(db, "Phrases");
+					Put(collection, "Peek-A-Boo");
 					db.Collections.Should().BeEquivalentTo(collection);
 
 					transaction.Rollback();
 				}
 
-				var bag = db.GetOrCreateBag<string>("Stuff");
-				bag.GetAllValues().Should().BeEmpty();
+				var otherCollection = GetOrCreateCollection(db, "Phrases");
+				otherCollection.GetAllValues().Should().BeEmpty();
 			}
 		}
 
@@ -123,8 +123,8 @@ namespace IsabelDb.Test.Collections
 		{
 			using (var db = Database.CreateInMemory(NoCustomTypes))
 			{
-				var collection = db.CreateBag<string>("Stuff");
-				collection.Put("Peek-A-Boo");
+				var collection = CreateCollection(db, "Values");
+				Put(collection, "Peek-A-Boo");
 				db.Collections.Should().BeEquivalentTo(collection);
 				using (var transaction = db.BeginTransaction())
 				{
@@ -147,8 +147,8 @@ namespace IsabelDb.Test.Collections
 			{
 				using (var transaction = db.BeginTransaction())
 				{
-					var collection = db.CreateBag<string>("Stuff");
-					collection.Put("Peek-A-Boo");
+					var collection = CreateCollection(db, "Stuff");
+					Put(collection, "Peek-A-Boo");
 					db.Collections.Should().BeEquivalentTo(collection);
 					collection.GetAllValues().Should().BeEquivalentTo(new object[] {"Peek-A-Boo"});
 
@@ -159,8 +159,50 @@ namespace IsabelDb.Test.Collections
 				}
 
 				db.Collections.Should().BeEmpty();
-				var bag = db.GetOrCreateBag<string>("Stuff");
-				bag.GetAllValues().Should().BeEmpty();
+				var otherCollection = GetOrCreateCollection(db, "Stuff");
+				otherCollection.GetAllValues().Should().BeEmpty();
+			}
+		}
+
+		[Test]
+		public void TestCommitSeveralAddMany()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				var collection = CreateCollection(db, "Values");
+
+				using (var transaction = db.BeginTransaction())
+				{
+					PutMany(collection, "a", "b", "c");
+					PutMany(collection, "d", "e", "f");
+
+					transaction.Commit();
+				}
+
+				collection.GetAllValues().Should().BeEquivalentTo(new object[]
+				{
+					"a", "b", "c",
+					"d", "e", "f"
+				});
+			}
+		}
+
+		[Test]
+		public void TestRollbackSeveralAddMany()
+		{
+			using (var db = Database.CreateInMemory(NoCustomTypes))
+			{
+				var collection = CreateCollection(db, "Values");
+
+				using (var transaction = db.BeginTransaction())
+				{
+					PutMany(collection, "a", "b", "c");
+					PutMany(collection, "d", "e", "f");
+
+					transaction.Rollback();
+				}
+
+				collection.GetAllValues().Should().BeEmpty();
 			}
 		}
 

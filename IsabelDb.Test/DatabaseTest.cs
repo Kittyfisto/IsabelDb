@@ -576,9 +576,28 @@ namespace IsabelDb.Test
 			}
 		}
 
+		#region Transactions
+
 		[Test]
 		[Description("Verifies that an automatic rollback is performed if the transaction is not specifically committed")]
-		public void TestRollbackTransaction()
+		public void TestRollbackAutomatically()
+		{
+			using (var db = Database.CreateInMemory(new[] {typeof(Address), typeof(Person)}))
+			{
+				var values = db.GetOrCreateDictionary<int, string>("Values");
+				using (db.BeginTransaction())
+				{
+					values.Put(1, "stuff");
+					values.Get(1).Should().Be("stuff");
+				}
+
+				values.TryGet(1, out var value).Should().BeFalse();
+				value.Should().BeNull();
+			}
+		}
+
+		[Test]
+		public void TestRollback()
 		{
 			using (var db = Database.CreateInMemory(new[] {typeof(Address), typeof(Person)}))
 			{
@@ -587,6 +606,8 @@ namespace IsabelDb.Test
 				{
 					values.Put(1, "stuff");
 					values.Get(1).Should().Be("stuff");
+
+					transaction.Rollback();
 				}
 
 				values.TryGet(1, out var value).Should().BeFalse();
@@ -612,6 +633,8 @@ namespace IsabelDb.Test
 				values.Get(2).Should().Be("b");
 			}
 		}
+
+		#endregion
 
 		[Test]
 		public void TestPutMany1()
