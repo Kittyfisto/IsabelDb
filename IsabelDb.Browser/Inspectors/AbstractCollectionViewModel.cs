@@ -51,9 +51,10 @@ namespace IsabelDb.Browser.Inspectors
 				_selectedRow = value;
 				EmitPropertyChanged();
 
-				SelectedRowInspector = value != null
-					? new ObjectInspectorViewModel(value)
-					: null;
+				if (value != null)
+				{
+					SelectedRowInspector = new ObjectInspectorViewModel(value);
+				}
 			}
 		}
 
