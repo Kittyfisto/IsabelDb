@@ -285,9 +285,13 @@ namespace IsabelDb.TypeModels
 
 			var otherBaseType = otherDescription.BaseType;
 			if (BaseType == null && otherBaseType != null)
-				throw new BreakingChangeException();
+				throw new BreakingChangeException(string.Format("The base class of the type '{0}' has been changed from 'null' to '{1}': This is a breaking change!",
+				                                                FullTypeName,
+				                                                otherBaseType.FullTypeName));
 			if (BaseType != null && otherBaseType == null)
-				throw new BreakingChangeException();
+				throw new BreakingChangeException(string.Format("The base class of the type '{0}' has been changed from '{1}' to '{0}': This is a breaking change!",
+				                                                FullTypeName,
+				                                                BaseType.FullTypeName));
 
 			if (BaseType != null && otherBaseType != null)
 			{
