@@ -55,7 +55,7 @@ namespace IsabelDb.Browser
 		private IReadOnlyList<Type> CompileCustomTypes(TypeModel typeModel, TypeResolver typeResolver)
 		{
 			var assemblyName = new AssemblyName("IsabelDb.Browser.GeneratedCode");
-			var assembly = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.RunAndSave);
+			var assembly = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
 			var moduleName = assemblyName.Name + ".dll";
 			var moduleBuilder = assembly.DefineDynamicModule(moduleName);
 
@@ -108,7 +108,7 @@ namespace IsabelDb.Browser
 				fieldBuilder.SetCustomAttribute(new CustomAttributeBuilder(typeof(EnumMemberAttribute).GetConstructor(new Type[0]), new object[0]));
 			}
 
-			return typeBuilder.CreateType();
+			return typeBuilder.CreateTypeInfo();
 		}
 
 		private static Type CreateCustomClass(ModuleBuilder moduleBuilder, TypeDescription typeDescription, Type baseType)

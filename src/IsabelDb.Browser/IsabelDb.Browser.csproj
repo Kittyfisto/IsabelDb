@@ -21,6 +21,7 @@
     <OutputPath>..\..\bin\Debug\</OutputPath>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Metrolib" Version="0.3.1" />
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
