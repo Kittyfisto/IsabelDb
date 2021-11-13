@@ -13,10 +13,9 @@ namespace IsabelDb.Test
 		{
 			get
 			{
-				var codeBase = Assembly.GetExecutingAssembly().CodeBase;
-				var uri = new UriBuilder(codeBase);
-				var path = Uri.UnescapeDataString(uri.Path);
-				return Path.GetDirectoryName(path);
+				var location = Assembly.GetExecutingAssembly().Location;
+				var folder = Path.GetDirectoryName(location);
+                return folder;
 			}
 		}
 

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net472;net5</TargetFrameworks>
+    <TargetFrameworks>net5-windows</TargetFrameworks>
     <AssemblyName>IsabelDb.Browser.Test</AssemblyName>
     <RootNamespace>IsabelDb.Browser.Test</RootNamespace>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
@@ -25,6 +25,7 @@
     <PackageReference Include="System.Data.SQLite" Version="1.0.115.5" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\IsabelDb.Browser\IsabelDb.Browser.csproj" />
     <ProjectReference Include="..\IsabelDb\IsabelDb.csproj" />
   </ItemGroup>
 </Project>
