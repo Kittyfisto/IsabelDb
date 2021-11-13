@@ -11,6 +11,7 @@
 		<UseWPF>true</UseWPF>
 		<StartupObject>IsabelDb.Browser.Bootstrapper</StartupObject>
 		<Copyright>Copyright © Simon Mießler 2021</Copyright>
+		<IsPackable>false</IsPackable>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
