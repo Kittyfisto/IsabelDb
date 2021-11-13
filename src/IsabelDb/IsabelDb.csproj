@@ -1,31 +1,31 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFrameworks>net45;netstandard2.0</TargetFrameworks>
-    <AssemblyName>IsabelDb</AssemblyName>
-    <RootNamespace>IsabelDb</RootNamespace>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-	<GenerateDocumentationFile>true</GenerateDocumentationFile>
-	
-	<Authors>Simon Mießler</Authors>
-	<PackageLicenseExpression>MIT</PackageLicenseExpression>
-	<PackageProjectUrl>https://github.com/Kittyfisto/IsabelDb</PackageProjectUrl>
-	<PackageTags>.NET KeyValue Store Object Database</PackageTags>
-	<Description>A .NET key value database to persist objects on disk.</Description>
-	<Version>0.6.0.0</Version>
-	<AssemblyVersion>0.6.0.0</AssemblyVersion>
-    <FileVersion>0.6.0.0</FileVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <OutputPath>..\..\bin\Release\</OutputPath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <OutputPath>..\..\bin\Debug\</OutputPath>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="log4net" Version="2.0.13" />
-    <PackageReference Include="protobuf-net" Version="2.4.0" />
-    <PackageReference Include="System.Data.SQLite" Version="1.0.115.5" />
-  </ItemGroup>
+	<PropertyGroup>
+		<TargetFrameworks>net45;netstandard2.0</TargetFrameworks>
+		<AssemblyName>IsabelDb</AssemblyName>
+		<RootNamespace>IsabelDb</RootNamespace>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+		<Authors>Simon Mießler</Authors>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/Kittyfisto/IsabelDb</PackageProjectUrl>
+		<PackageTags>.NET KeyValue Store Object Database</PackageTags>
+		<Description>A .NET key value database to persist objects on disk.</Description>
+		<Version>0.6.0.0</Version>
+		<AssemblyVersion>0.6.0.0</AssemblyVersion>
+		<FileVersion>0.6.0.0</FileVersion>
+		<Copyright>Copyright © Simon Mießler 2021</Copyright>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<OutputPath>..\..\bin\Release\</OutputPath>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<OutputPath>..\..\bin\Debug\</OutputPath>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="log4net" Version="2.0.13" />
+		<PackageReference Include="protobuf-net" Version="2.4.0" />
+		<PackageReference Include="System.Data.SQLite" Version="1.0.115.5" />
+	</ItemGroup>
 </Project>
