@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26730.16
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsabelDb", "IsabelDb\IsabelDb.csproj", "{B413AD3C-5410-4B84-9218-7DB81FC95213}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsabelDb", "src\IsabelDb\IsabelDb.csproj", "{B413AD3C-5410-4B84-9218-7DB81FC95213}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsabelDb.Test", "IsabelDb.Test\IsabelDb.Test.csproj", "{F8083C11-96DE-481C-8255-22652642FF13}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsabelDb.Test", "src\IsabelDb.Test\IsabelDb.Test.csproj", "{F8083C11-96DE-481C-8255-22652642FF13}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1F650CC7-24EF-47F2-83F1-A01AB9EE3158}"
 	ProjectSection(SolutionItems) = preProject
@@ -19,17 +19,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Benchmarks", "Benchmarks", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{0097BD80-9714-46AD-B1BC-86F6FDB56642}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsabelDb.Benchmark", "Benchmarks\IsabelDb.Benchmark\IsabelDb.Benchmark.csproj", "{21393821-D777-49C3-9AFC-57D1E0344446}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsabelDb.Benchmark", "src\Benchmarks\IsabelDb.Benchmark\IsabelDb.Benchmark.csproj", "{21393821-D777-49C3-9AFC-57D1E0344446}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsabelDb.Benchmarks.GetByKey", "Benchmarks\IsabelDb.Benchmarks.GetByKey\IsabelDb.Benchmarks.GetByKey.csproj", "{804D2442-D8BE-4C06-ADE6-6005A968EC06}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsabelDb.Benchmarks.GetByKey", "src\Benchmarks\IsabelDb.Benchmarks.GetByKey\IsabelDb.Benchmarks.GetByKey.csproj", "{804D2442-D8BE-4C06-ADE6-6005A968EC06}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsabelDb.Benchmarks.Serializer", "Benchmarks\IsabelDb.Benchmarks.Serializer\IsabelDb.Benchmarks.Serializer.csproj", "{8F6C8A44-9725-4FC3-BF29-0B456E68E8CA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsabelDb.Benchmarks.Serializer", "src\Benchmarks\IsabelDb.Benchmarks.Serializer\IsabelDb.Benchmarks.Serializer.csproj", "{8F6C8A44-9725-4FC3-BF29-0B456E68E8CA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsabelDb.AcceptanceTest", "IsabelDb.AcceptanceTest\IsabelDb.AcceptanceTest.csproj", "{46B11958-19D7-4BC8-98EE-308618FFB124}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsabelDb.AcceptanceTest", "src\IsabelDb.AcceptanceTest\IsabelDb.AcceptanceTest.csproj", "{46B11958-19D7-4BC8-98EE-308618FFB124}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsabelDb.Browser", "IsabelDb.Browser\IsabelDb.Browser.csproj", "{5DFA6087-EA8A-480C-A50E-24D052EA0661}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsabelDb.Browser", "src\IsabelDb.Browser\IsabelDb.Browser.csproj", "{5DFA6087-EA8A-480C-A50E-24D052EA0661}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsabelDb.Browser.Test", "IsabelDb.Browser.Test\IsabelDb.Browser.Test.csproj", "{C35FEC26-0FF9-48DF-81A3-0335DAEC5CF0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsabelDb.Browser.Test", "src\IsabelDb.Browser.Test\IsabelDb.Browser.Test.csproj", "{C35FEC26-0FF9-48DF-81A3-0335DAEC5CF0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
