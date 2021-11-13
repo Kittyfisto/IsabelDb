@@ -107,13 +107,11 @@ namespace IsabelDb.Test.Collections.HashSet
 				hashSet.Add(42);
 				hashSet.Add("Erased");
 				hashSet.Add(new Version(8, 9, 42, 2));
-				hashSet.Add(ProcessorArchitecture.Amd64);
 
-				hashSet.Count().Should().Be(4);
-				hashSet.GetAllValues().Should().BeEquivalentTo(new object[]
+				hashSet.Count().Should().Be(3);
+                hashSet.GetAllValues().Should().BeEquivalentTo(new object[]
 				{
-					42, "Erased", new Version(8, 9, 42, 2),
-					ProcessorArchitecture.Amd64
+					42, "Erased", new Version(8, 9, 42, 2)
 				});
 			}
 		}
